@@ -13,6 +13,11 @@ Enable GodotPrompter skills in Codex via native skill discovery. Just clone and 
    git clone https://github.com/jame581/GodotPrompter.git ~/.codex/godot-prompter
    ```
 
+   **Windows (PowerShell):**
+   ```powershell
+   git clone https://github.com/jame581/GodotPrompter.git "$env:USERPROFILE\.codex\godot-prompter"
+   ```
+
 2. **Create the skills symlink:**
    ```bash
    mkdir -p ~/.agents/skills
