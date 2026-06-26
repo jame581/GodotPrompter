@@ -4,6 +4,15 @@ All notable changes to GodotPrompter will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
+## [1.10.1] - 2026-06-27
+
+### Fixed
+
+- **Codex install on Windows (#10):** added a Windows (PowerShell) variant for the `git clone` step in `.codex/INSTALL.md`. The previous bash-only command used `~/.codex/godot-prompter`, which on Windows clones into a folder literally named `~`; the new variant uses `"$env:USERPROFILE\.codex\godot-prompter"`, matching the PowerShell blocks already present for the later symlink steps.
+- **Stale deprecated-API comment (#9):** corrected a comment in `skills/godot-debugging/references/performance-debugging.md` that still referenced the removed-in-4.0 `VisibilityNotifier3D`, though the code already used the correct `VisibleOnScreenNotifier3D`. Re-audited the report's full list: no remaining `VisibilityNotifier` usages, and all `TileMap` references are either `TileMapLayer` (4.3+), feature-area names, or explicit deprecation notices — no deprecated code.
+
+> **Release notes:** Documentation-only patch. No skill content or API changes. 51 skills, every `SKILL.md` ≤ 16 KB. Repo-wide minimum stays at Godot 4.3+.
+
 ## [1.10.0] - 2026-06-17
 
 ### Added
