@@ -1,10 +1,34 @@
 # Raycasting Recipes
 
-Reference for `skills/physics-system/SKILL.md` — 3D mouse picking with Camera3D.project_ray_origin / project_ray_normal.
+Reference for `skills/physics-system/SKILL.md` — RayCast node usage, code-based raycasting, and 3D mouse picking with Camera3D.project_ray_origin / project_ray_normal.
 
 > ← Back to [SKILL.md](../SKILL.md)
 
 ---
+
+## RayCast2D/3D Nodes (Simple Per-Frame Rays)
+
+```gdscript
+@onready var ray: RayCast2D = $RayCast2D
+
+func _physics_process(_delta: float) -> void:
+    if ray.is_colliding():
+        var collider := ray.get_collider()
+        var point := ray.get_collision_point()
+```
+
+```csharp
+private RayCast2D _ray;
+public override void _Ready() => _ray = GetNode<RayCast2D>("RayCast2D");
+public override void _PhysicsProcess(double delta)
+{
+    if (_ray.IsColliding())
+    {
+        var collider = _ray.GetCollider();
+        var point = _ray.GetCollisionPoint();
+    }
+}
+```
 ### 3D Mouse Picking (Ray from Screen)
 
 ```gdscript
