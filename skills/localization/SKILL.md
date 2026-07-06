@@ -106,6 +106,41 @@ var translation = GD.Load<Translation>("res://translations/cs.po");
 TranslationServer.AddTranslation(translation);
 ```
 
+> ⚠️ **Changed in Godot 4.7:** `OptimizedTranslation.generate()` now returns `bool` (was `void`) to report success. GDScript-compatible and C# source-compatible, but binary-incompatible for C# — recompile precompiled plugins that call it. See the [4.7 migration guide](https://docs.godotengine.org/en/latest/tutorials/migrating/upgrading_to_godot_4.7.html).
+
+### POT Generation Hooks (Godot 4.7+)
+
+A custom `EditorTranslationParserPlugin` can override the `_customize_strings()` virtual — called once after all files are parsed during POT generation — to add or remove entries from the final list of extracted strings:
+
+```gdscript
+@tool
+extends EditorTranslationParserPlugin
+
+func _customize_strings(strings: Array[PackedStringArray]) -> Array[PackedStringArray]:
+    strings.append(PackedStringArray(["Test 1", "context", "test 1 plurals", "test 1 comment"]))
+    # Drop internal strings that begin with "$".
+    return strings.filter(func(s): return not s[0].begins_with("$"))
+```
+
+```csharp
+#if TOOLS
+using System.Linq;
+using Godot;
+
+public partial class CommentAwareParser : EditorTranslationParserPlugin
+{
+    public override Godot.Collections.Array<string[]> _CustomizeStrings(Godot.Collections.Array<string[]> strings)
+    {
+        strings.Add(["Test 1", "context", "test 1 plurals", "test 1 comment"]);
+        // Drop internal strings that begin with "$".
+        return new(strings.Where(s => !s[0].StartsWith("$")));
+    }
+}
+#endif
+```
+
+> **Godot 4.7+:** The POT generator also extracts `Control.accessibility_name` and `accessibility_description`, so accessibility strings become translatable without listing them manually. ([GH-117134](https://github.com/godotengine/godot/pull/117134))
+
 ---
 
 ## 3. Using tr() in Code
@@ -149,6 +184,8 @@ Button.text = "MENU_START"   → displays "Start Game" (en) or "Začít hru" (cs
 ```
 
 > **Tip:** If you don't want automatic translation on a specific Control, set its `auto_translate_mode` to `DISABLED`.
+
+> **Godot 4.7+:** `Control.translation_context: StringName` sets a per-control translation context, used when translating the control's displayed text and when generating translation templates — the property equivalent of `tr()`'s context argument (C#: `TranslationContext`). ([GH-115340](https://github.com/godotengine/godot/pull/115340))
 
 ---
 
@@ -408,59 +445,9 @@ Godot 4.5 adds a live locale preview to the editor. You can see how your UI look
 
 ## 10. CSV Plural and Context Support (Godot 4.6+)
 
-Godot 4.6 extends the CSV translation format with three optional header columns that enable features previously only available in PO files.
+Godot 4.6 extends the CSV translation format with three optional header columns — `?context`, `?plural`, and `?pluralrule` — bringing context disambiguation and simple one/other plurals (previously PO-only) to CSV. For languages with three or more plural forms (Russian, Polish, Arabic), keep using PO format with full `msgstr[n]` plural arrays.
 
-> **Note:** Godot 4.6 is in beta; verify behavior on stable release.
-
-### New CSV Columns
-
-| Column header | Purpose |
-|---------------|---------|
-| `?context` | Disambiguates keys with the same string but different meanings (e.g. "file" as a noun vs. "to file" as a verb) |
-| `?plural` | Provides the plural form of the string (for the source locale) |
-| `?pluralrule` | CLDR plural rule index for the source locale (0 = one, 1 = other, etc.) |
-
-### Example CSV with Context and Plural
-
-```csv
-keys,?context,?plural,en,cs,de
-ITEM_FILE,noun,,File,Soubor,Datei
-ITEM_FILE,verb,,File,Uložit,Ablegen
-ENEMY_COUNT,,{n} enemies,{n} enemy / {n} enemies,{n} nepřítel / {n} nepřátelé,{n} Feind / {n} Feinde
-```
-
-### Using Context in Code
-
-```gdscript
-# Translate with context to disambiguate identical keys
-var file_noun: String = tr("ITEM_FILE", "noun")    # "File" (object)
-var file_verb: String = tr("ITEM_FILE", "verb")    # "File" (action)
-
-# Without context — returns the first match for the key
-var file_default: String = tr("ITEM_FILE")
-```
-
-```csharp
-// Translate with context
-string fileNoun = Tr("ITEM_FILE", "noun");
-string fileVerb = Tr("ITEM_FILE", "verb");
-```
-
-### Using Plural in Code
-
-```gdscript
-# Pluralize with tr_n() — works with CSV plural columns in 4.6+
-var enemy_count := 3
-var msg: String = tr_n("ENEMY_COUNT", "ENEMY_COUNT", enemy_count)
-# Godot substitutes the correct plural form based on the current locale's rules
-```
-
-```csharp
-int enemyCount = 3;
-string msg = TrN("ENEMY_COUNT", "ENEMY_COUNT", enemyCount);
-```
-
-> **When to use PO vs CSV:** If you only need context and simple one/other plural rules, the new CSV columns cover most cases. For languages with three or more plural forms (Russian, Polish, Arabic), continue using PO format with full `msgstr[n]` plural arrays.
+Column reference, example CSV, and `tr()` / `tr_n()` usage (GDScript + C#): [references/csv-plural-context.md](references/csv-plural-context.md).
 
 ---
 

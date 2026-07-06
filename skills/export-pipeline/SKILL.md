@@ -85,6 +85,10 @@ ssh_remote_deploy/cleanup_script="#!/usr/bin/env bash\nkill $(pgrep -x -f \"{tem
 
 > Godot regenerates `export_presets.cfg` on every editor save. Do not hand-edit it while the editor is open.
 
+> ⚠️ **Changed in Godot 4.7:** The "runnable" flag moved out of export presets — `runnable=` (shown in the example above for 4.3–4.6) is no longer a per-preset property in `export_presets.cfg`; the editor now tracks which preset is runnable separately. Don't be surprised when the line disappears from the file after saving in a 4.7 editor. See [GH-114930](https://github.com/godotengine/godot/pull/114930).
+
+> **Godot 4.7+:** Sparse PCK exports (patch packs) support encrypting the file index, complementing the existing `encrypt_pck` / `encrypt_directory` preset options. ([GH-113920](https://github.com/godotengine/godot/pull/113920))
+
 ---
 
 ## 2. Platform-Specific Settings
@@ -122,6 +126,28 @@ Use `--export-pack` when you only want to ship updated game data alongside a fix
 
 ```bash
 godot --headless --export-pack "Windows Desktop" build/windows/MyGame.pck
+```
+
+> **Godot 4.7+:** When exporting patch PCKs for Android, an APK or AAB can be provided as the base pack, extending PCK-patching workflows to Android builds. ([GH-116553](https://github.com/godotengine/godot/pull/116553))
+
+### Packing In-Memory Data (Godot 4.7+)
+
+`PCKPacker.add_file_from_buffer(target_path, data, encrypt = false)` packs a `PackedByteArray` straight into a PCK — no temp file on disk — which is handy when generating patch content from a build script:
+
+```gdscript
+var build_info: String = "v" + ProjectSettings.get_setting("application/config/version", "dev")
+var packer := PCKPacker.new()
+packer.pck_start("user://patch_1.pck")
+packer.add_file_from_buffer("res://data/build_info.txt", build_info.to_utf8_buffer())
+packer.flush()
+```
+
+```csharp
+string buildInfo = "v" + ProjectSettings.GetSetting("application/config/version", "dev").AsString();
+var packer = new PckPacker();
+packer.PckStart("user://patch_1.pck");
+packer.AddFileFromBuffer("res://data/build_info.txt", buildInfo.ToUtf8Buffer());
+packer.Flush();
 ```
 
 ### Key CLI flags

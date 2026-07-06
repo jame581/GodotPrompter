@@ -93,6 +93,8 @@ Mipmaps prevent shimmering on textures viewed at an angle or from a distance. Re
 - **2D sprites:** Usually off (unless you use Camera2D zoom)
 - **UI textures:** Off (rendered at fixed scale)
 
+> **Godot 4.7+:** DDS import supports the R8 and R8G8 texture formats. ([GH-116307](https://github.com/godotengine/godot/pull/116307))
+
 ---
 
 ## 3. 3D Scene Import
@@ -141,30 +143,32 @@ Select the imported `.glb`/`.gltf` in FileSystem, then in the Import dock:
 | **Animation > Import**     | Enable/disable animation import                 |
 | **Animation > FPS**        | Bake animation at this framerate                 |
 
+> **Godot 4.7+:** The Import dock's import-type option can also import a 3D scene file as a single `Mesh` resource or as a `MeshLibrary` (for GridMap), instead of a full scene — no separate export step in the 3D authoring tool needed. ([GH-107856](https://github.com/godotengine/godot/pull/107856))
+
+> ⚠️ **Changed in Godot 4.7:** `EditorSceneFormatImporter`'s `IMPORT_SCENE`, `IMPORT_ANIMATION`, `IMPORT_FAIL_ON_MISSING_DEPENDENCIES`, `IMPORT_GENERATE_TANGENT_ARRAYS`, `IMPORT_USE_NAMED_SKIN_BINDS`, `IMPORT_DISCARD_MESHES_AND_MATERIALS`, and `IMPORT_FORCE_DISABLE_MESH_COMPRESSION` constants moved into a new `ImportFlags` enum (bitfield). GDScript-compatible; C# importer plugins referencing the old class-level constants must switch to the enum members. See the [4.7 migration guide](https://docs.godotengine.org/en/latest/tutorials/migrating/upgrading_to_godot_4.7.html).
+
 ### Runtime Scene Loading
 
-```gdscript
-# Preload at compile time (known path)
-const ENEMY_SCENE: PackedScene = preload("res://models/enemy.glb")
+Use `preload()` for paths known at compile time and `load()` for data-driven paths. GDScript + C# snippets: [references/runtime-resource-loading.md](references/runtime-resource-loading.md).
 
-# Load at runtime (path from data)
-func spawn_model(path: String) -> Node3D:
-    var scene: PackedScene = load(path)
-    var instance: Node3D = scene.instantiate()
-    add_child(instance)
-    return instance
+### Runtime glTF Import Flags (Godot 4.7+)
+
+`GLTFDocument` exposes an `ImportFlags` bitfield — `IMPORT_FLAG_GENERATE_TANGENT_ARRAYS` (8), `IMPORT_FLAG_USE_NAMED_SKIN_BINDS` (16), `IMPORT_FLAG_DISCARD_MESHES_AND_MATERIALS` (32), `IMPORT_FLAG_FORCE_DISABLE_MESH_COMPRESSION` (64) — accepted by the `flags: int = 0` parameter of `append_from_file()`, `append_from_buffer()`, and `append_from_scene()`:
+
+```gdscript
+var doc := GLTFDocument.new()
+var state := GLTFState.new()
+doc.append_from_file("user://mods/enemy.glb", state,
+        GLTFDocument.IMPORT_FLAG_GENERATE_TANGENT_ARRAYS | GLTFDocument.IMPORT_FLAG_USE_NAMED_SKIN_BINDS)
+add_child(doc.generate_scene(state))
 ```
 
 ```csharp
-private static readonly PackedScene EnemyScene = GD.Load<PackedScene>("res://models/enemy.glb");
-
-public Node3D SpawnModel(string path)
-{
-    var scene = GD.Load<PackedScene>(path);
-    var instance = scene.Instantiate<Node3D>();
-    AddChild(instance);
-    return instance;
-}
+var doc = new GltfDocument();
+var state = new GltfState();
+doc.AppendFromFile("user://mods/enemy.glb", state,
+    (uint)(GltfDocument.ImportFlags.GenerateTangentArrays | GltfDocument.ImportFlags.UseNamedSkinBinds));
+AddChild(doc.GenerateScene(state));
 ```
 
 ---
@@ -262,51 +266,7 @@ var resource = GD.Load<Resource>("res://data/item.tres");
 
 ### Threaded Resource Loading
 
-Load large resources without freezing the game:
-
-```gdscript
-func load_level_async(path: String) -> void:
-    ResourceLoader.load_threaded_request(path)
-
-func _process(delta: float) -> void:
-    var status := ResourceLoader.load_threaded_get_status(_loading_path)
-    match status:
-        ResourceLoader.THREAD_LOAD_IN_PROGRESS:
-            var progress: Array = []
-            ResourceLoader.load_threaded_get_status(_loading_path, progress)
-            loading_bar.value = progress[0] * 100.0
-        ResourceLoader.THREAD_LOAD_LOADED:
-            var scene: PackedScene = ResourceLoader.load_threaded_get(_loading_path)
-            get_tree().change_scene_to_packed(scene)
-        ResourceLoader.THREAD_LOAD_FAILED:
-            push_error("Failed to load: %s" % _loading_path)
-```
-
-```csharp
-public void LoadLevelAsync(string path)
-{
-    ResourceLoader.LoadThreadedRequest(path);
-}
-
-public override void _Process(double delta)
-{
-    var progress = new Godot.Collections.Array();
-    var status = ResourceLoader.LoadThreadedGetStatus(_loadingPath, progress);
-    switch (status)
-    {
-        case ResourceLoader.ThreadLoadStatus.InProgress:
-            loadingBar.Value = (float)progress[0] * 100.0f;
-            break;
-        case ResourceLoader.ThreadLoadStatus.Loaded:
-            var scene = ResourceLoader.LoadThreadedGet(_loadingPath) as PackedScene;
-            GetTree().ChangeSceneToPacked(scene);
-            break;
-        case ResourceLoader.ThreadLoadStatus.Failed:
-            GD.PushError($"Failed to load: {_loadingPath}");
-            break;
-    }
-}
-```
+Load large resources without freezing the game with the `ResourceLoader.load_threaded_request()` / `load_threaded_get_status()` / `load_threaded_get()` pattern. Full loading-screen recipe (GDScript + C#): [references/runtime-resource-loading.md](references/runtime-resource-loading.md).
 
 ---
 
@@ -324,6 +284,8 @@ public override void _Process(double delta)
 | Scene file is enormous                | Using binary `.scn` instead of `.tscn`       | Save scenes as `.tscn` (text) for VCS; use `.scn` only if needed  |
 | Import settings lost after reclone    | `.import` files not committed to VCS         | Always commit `.import` files; only `.godot/` goes in .gitignore  |
 | Threaded load freezes game            | Checking status every frame with `load()`    | Use `ResourceLoader.load_threaded_request/get_status` pattern      |
+
+> ⚠️ **Changed in Godot 4.7:** The font import `hinting` default changed from `1` (Light) to `3` (Light (Except Pixel Fonts)) — pixel-style fonts now auto-disable hinting on import, so their rendering can change after upgrading. Set `hinting` back to `1` (Light) in the Import dock per font to keep the 4.6 look. See the [4.7 migration guide](https://docs.godotengine.org/en/latest/tutorials/migrating/upgrading_to_godot_4.7.html).
 
 ---
 
