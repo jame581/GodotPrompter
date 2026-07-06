@@ -110,6 +110,34 @@ var playback = GetNode<AudioStreamPlayer>("MusicPlayer").GetStreamPlayback() as 
 playback.SwitchToClip(2);
 ```
 
+#### Resume-Position Transitions (Godot 4.7+)
+
+`add_transition()`'s `to_time` parameter takes a `TransitionToTime` value. Godot 4.7 exposes `TRANSITION_TO_TIME_PREVIOUS_POSITION` (`2`) to scripts: the destination clip resumes from the last position a previous transition left it at, or plays from its start if it never played. Classic use — exploration ↔ combat music that picks up where it left off:
+
+```gdscript
+# Clip 0 = exploration, clip 1 = combat.
+# Combat → exploration: resume exploration where it left off.
+interactive.add_transition(
+    1, 0,
+    AudioStreamInteractive.TRANSITION_FROM_TIME_NEXT_BEAT,
+    AudioStreamInteractive.TRANSITION_TO_TIME_PREVIOUS_POSITION,
+    AudioStreamInteractive.FADE_CROSS,
+    4.0  # fade over 4 beats
+)
+```
+
+```csharp
+interactive.AddTransition(
+    1, 0,
+    AudioStreamInteractive.TransitionFromTime.NextBeat,
+    AudioStreamInteractive.TransitionToTime.PreviousPosition,
+    AudioStreamInteractive.FadeMode.Cross,
+    4.0f
+);
+```
+
+The same option is available in the Inspector's transition editor.
+
 ### When to Use Which
 
 | Stream Type | Use For |
