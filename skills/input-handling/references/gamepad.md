@@ -103,7 +103,7 @@ if Input.has_joy_vibration(0):
 
 var strength := Input.get_joy_vibration_strength(0)  # Vector2(weak, strong)
 var duration := Input.get_joy_vibration_duration(0)  # as passed to start_joy_vibration
-var remaining := Input.get_joy_vibration_remaining_duration(0)
+var remaining := Input.get_joy_vibration_remaining_duration(0)  # experimental in 4.7 — may change in future versions
 ```
 
 ```csharp
@@ -112,7 +112,7 @@ if (Input.HasJoyVibration(0))
 
 Vector2 strength = Input.GetJoyVibrationStrength(0);  // (weak, strong)
 float duration = Input.GetJoyVibrationDuration(0);
-float remaining = Input.GetJoyVibrationRemainingDuration(0);
+float remaining = Input.GetJoyVibrationRemainingDuration(0);  // experimental in 4.7 — may change in future versions
 ```
 
 ### Joypad Motion Sensors (Godot 4.7+)

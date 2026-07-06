@@ -424,7 +424,7 @@ The recurring small patterns: ternary expressions (`value if cond else other`), 
 | Parent `_ready()` logic doesn't run in child | Missing `super()` call in child's `_ready()` | Add `super()` as first line; see Section 7 |
 | `type_exists()` flagged as deprecated | Deprecated in Godot 4.7                      | Use `ClassDB.class_exists()` instead                             |
 
-> ⚠️ **Changed in Godot 4.7:** The global `type_exists()` function is deprecated — replace `type_exists("Sprite2D")` with `ClassDB.class_exists("Sprite2D")`. See the [4.7 migration guide](https://docs.godotengine.org/en/latest/tutorials/migrating/upgrading_to_godot_4.7.html).
+> ⚠️ **Changed in Godot 4.7:** The global `type_exists()` function is deprecated — replace `type_exists("Sprite2D")` with `ClassDB.class_exists("Sprite2D")`. See [GH-116899](https://github.com/godotengine/godot/pull/116899).
 
 ---
 
