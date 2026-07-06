@@ -8,7 +8,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ### Changed
 
-- **Godot 4.7 alignment pass** across the skill library, replaying the v1.5.0 method: verified per-skill delta inventory (`docs/superpowers/notes/2026-07-05-godot-4.7-deltas.md`) applied as annotated additive sections and behavior-change warnings — ~75 applied rows across 26 skills. Per-skill highlights:
+- **Godot 4.7 alignment pass** across the skill library, replaying the v1.5.0 method: verified per-skill delta inventory (`docs/superpowers/notes/2026-07-05-godot-4.7-deltas.md`) applied as annotated additive sections and behavior-change warnings — 90 applied rows across 26 skills. Per-skill highlights:
   - `physics-system` — one-way collision direction (`CollisionShape2D.one_way_collision_direction`, `PhysicsServer2D` param); Jolt behavior-change warnings (SoftBody3D mass/stiffness reinterpretation, WorldBoundaryShape3D plane sign flip, Area3D↔SoftBody3D overlaps)
   - `animation-system` — BlendSpace `sync_mode` enum migration warning, named blend points, ping-pong sprite playback (`SpriteFrames.LoopMode`), `LookAtModifier3D.relative` default-flip warning
   - `tween-animation` — `Tween.has_tweeners()` guard for lazily built tweens
