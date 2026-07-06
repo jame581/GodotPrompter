@@ -198,6 +198,10 @@ Visual shaders provide a node-based graph editor — no code required.
 
 > Visual shaders compile to the same GPU code as written shaders. There is no performance difference.
 
+> **Godot 4.7+:** Two new spatial `Input` nodes — `in_shadow_pass` (vertex/fragment; maps to the `IN_SHADOW_PASS` built-in, `true` when the shader is being rendered in a shadow mapping pass — render objects differently in shadow maps than in the regular pass) and `specular_amount` (`light()`; maps to `SPECULAR_AMOUNT` — `2.0` × `light_specular` for OmniLight3D/SpotLight3D, `1.0` for DirectionalLight3D).
+
+> ⚠️ **Changed in Godot 4.7:** The `LinearToSRGB` visual shader node no longer clamps its output to `[0.0, 1.0]` when using the Forward+ or Mobile renderer — HDR values above `1.0` now pass through. Graphs that relied on the implicit clamp produce different output; add an explicit `Clamp` node to restore the old behavior. See the [4.7 migration guide](https://docs.godotengine.org/en/latest/tutorials/migrating/upgrading_to_godot_4.7.html).
+
 ---
 
 ## 6. Post-Processing Effects
@@ -281,28 +285,9 @@ This is an editor/export setting only — no runtime API is needed.
 
 ## 11. Shader Baker — Export-time Pre-compilation (Godot 4.5+)
 
-The Shader Baker pre-compiles all your project's shaders for the target platform at export time rather than at runtime. This eliminates the stutter players experience the first time a new material renders in-game, which is especially severe on macOS/Apple Silicon (Metal) and D3D12 (Windows) where shader translation is expensive.
+The Shader Baker pre-compiles all project shaders for the target platform at export time, eliminating the stutter players experience the first time a new material renders in-game — especially severe on macOS/Apple Silicon (Metal) and Windows (D3D12), where shader translation is expensive. Enable it per export preset for release builds; leave it off for development builds to keep exports fast. It operates at the Godot export pipeline level — see the **export-pipeline** skill for export preset configuration.
 
-### Enabling Shader Baker
-
-Shader baking is configured per export preset:
-
-1. Open **Project → Export**
-2. Select (or create) an export preset for your target platform
-3. In the preset options, locate **Shader Baker** and set it to **Enabled**
-4. Export as normal — baked shader cache files are bundled into the export
-
-### What It Does
-
-| Stage | Without Shader Baker | With Shader Baker |
-|-------|----------------------|-------------------|
-| Export | Fast | Slower (compiles shaders) |
-| First material use in game | Stutter (compiles shader on GPU) | Instant (pre-compiled) |
-| Subsequent loads | Cached after first run | Always cached |
-
-> **When to use:** Enable Shader Baker for all release builds targeting desktop (macOS, Windows/D3D12) or mobile. The extra export time is worth the stutter-free player experience. For development builds, leave it off to keep iteration fast.
-
-Shader Baker operates at the Godot export pipeline level — see the **export-pipeline** skill for how to configure export presets.
+> See [references/shader-baker.md](references/shader-baker.md) for enabling steps and the with/without comparison.
 
 ---
 
@@ -318,6 +303,8 @@ Shader Baker operates at the Godot export pipeline level — see the **export-pi
 | Performance drops with many shaders | Each unique shader = draw call break               | Share ShaderMaterial instances; use uniforms for variation        |
 | Screen-space UV is wrong            | `SCREEN_UV` not available in some contexts         | Ensure the node is rendered in the correct viewport              |
 | Visual shader node missing          | Node was renamed or removed in newer Godot version | Check Godot docs for the current node name                       |
+
+> ⚠️ **Changed in Godot 4.7:** `textureQueryLod()` is available only in the fragment shader, and Godot 4.7 enforces this with a compile error — shaders calling it from `vertex()` stop compiling after upgrading. Move the call into `fragment()`. See [GH-118962](https://github.com/godotengine/godot/pull/118962).
 
 ---
 
