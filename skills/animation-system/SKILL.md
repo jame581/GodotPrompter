@@ -179,6 +179,20 @@ Two approaches for 2D character animation: `AnimatedSprite2D` (quick, frames-onl
 
 > See [references/sprite-animation.md](references/sprite-animation.md) for the full GDScript and C# example (a CharacterBody2D walking with `AnimatedSprite2D` driven by `Input.get_vector` and `flip_h`).
 
+### Ping-Pong Playback (Godot 4.7+)
+
+`SpriteFrames` gains a `LoopMode` enum — `LOOP_NONE = 0`, `LOOP_LINEAR = 1`, `LOOP_PINGPONG = 2` — set per animation with `set_animation_loop_mode(anim, loop_mode)` and read back with `get_animation_loop_mode(anim)`. The old bool `set_animation_loop()` / `get_animation_loop()` are deprecated. Ping-pong alternates direction each time the animation reaches the end or start, and works with both `AnimatedSprite2D` and `AnimatedSprite3D`.
+
+```gdscript
+var frames: SpriteFrames = $AnimatedSprite2D.sprite_frames
+frames.set_animation_loop_mode(&"sway", SpriteFrames.LOOP_PINGPONG)
+```
+
+```csharp
+var frames = GetNode<AnimatedSprite2D>("AnimatedSprite2D").SpriteFrames;
+frames.SetAnimationLoopMode("sway", SpriteFrames.LoopMode.Pingpong);
+```
+
 ---
 
 ## 5. AnimationTree — Canonical State Machine
@@ -195,74 +209,11 @@ Character (CharacterBody2D)
 
 **Setup:** Add AnimationTree as a sibling of AnimationPlayer. Set `anim_player` to point at the AnimationPlayer. Set `active = true`. Choose a root: **AnimationNodeStateMachine** (discrete states with transitions) or **AnimationNodeBlendTree** (continuous blending).
 
-### State Machine — GDScript
+### State Machine Playback
 
-```gdscript
-extends CharacterBody2D
+The canonical pattern: cache `AnimationNodeStateMachinePlayback` from `anim_tree["parameters/playback"]`, call `travel("state")` from gameplay code (`travel()` transitions smoothly; `start()` switches immediately), and query the active state with `get_current_node()`.
 
-@onready var anim_tree: AnimationTree = $AnimationTree
-@onready var state_machine: AnimationNodeStateMachinePlayback = anim_tree["parameters/playback"]
-
-func _physics_process(delta: float) -> void:
-    var input_dir := Input.get_vector("ui_left", "ui_right", "ui_up", "ui_down")
-
-    if input_dir != Vector2.ZERO:
-        velocity = input_dir * 200.0
-        state_machine.travel("walk")
-    else:
-        velocity = Vector2.ZERO
-        state_machine.travel("idle")
-
-    move_and_slide()
-
-func attack() -> void:
-    # travel() transitions smoothly; use start() for immediate switch
-    state_machine.travel("attack")
-
-func get_current_state() -> StringName:
-    return state_machine.get_current_node()
-```
-
-### State Machine — C#
-
-```csharp
-using Godot;
-
-public partial class Character : CharacterBody2D
-{
-    private AnimationTree _animTree;
-    private AnimationNodeStateMachinePlayback _stateMachine;
-
-    public override void _Ready()
-    {
-        _animTree = GetNode<AnimationTree>("AnimationTree");
-        _stateMachine = _animTree.Get("parameters/playback").As<AnimationNodeStateMachinePlayback>();
-    }
-
-    public override void _PhysicsProcess(double delta)
-    {
-        Vector2 inputDir = Input.GetVector("ui_left", "ui_right", "ui_up", "ui_down");
-
-        if (inputDir != Vector2.Zero)
-        {
-            Velocity = inputDir * 200.0f;
-            _stateMachine.Travel("walk");
-        }
-        else
-        {
-            Velocity = Vector2.Zero;
-            _stateMachine.Travel("idle");
-        }
-
-        MoveAndSlide();
-    }
-
-    public void Attack()
-    {
-        _stateMachine.Travel("attack");
-    }
-}
-```
+> See [references/state-machine-examples.md](references/state-machine-examples.md) for the full GDScript and C# CharacterBody2D example.
 
 ### Blend Trees — BlendSpace1D / BlendSpace2D
 
@@ -282,6 +233,24 @@ _animTree.Set("parameters/BlendSpace1D/blend_position", blendAmount);
 _animTree.Set("parameters/BlendSpace2D/blend_position", inputDir);
 ```
 
+### Named Blend Points (Godot 4.7+)
+
+`AnimationNodeBlendSpace1D/2D.add_blend_point()` gains an optional `name: StringName = &""` parameter, and blend point names/indices can be set and displayed in the editor. Passing a name explicitly is recommended (empty names will be deprecated); look points up with `find_blend_point_by_name()`.
+
+```gdscript
+blend_space.add_blend_point(walk_node, 0.0, -1, &"walk")
+blend_space.add_blend_point(run_node, 1.0, -1, &"run")
+var run_index := blend_space.find_blend_point_by_name(&"run")
+```
+
+```csharp
+blendSpace.AddBlendPoint(walkNode, 0.0f, -1, "walk");
+blendSpace.AddBlendPoint(runNode, 1.0f, -1, "run");
+int runIndex = blendSpace.FindBlendPointByName("run");
+```
+
+> ⚠️ **Changed in Godot 4.7:** `AnimationNodeBlendSpace1D/2D` replace the bool `sync` property (now deprecated) with a `sync_mode` `SyncMode` enum: `SYNC_MODE_NONE = 0` (default — inactive animations are frozen), `SYNC_MODE_INDEPENDENT = 1` (the old `sync = true` behavior), `SYNC_MODE_CYCLIC_MUTABLE = 2` (cycle length computed dynamically from blend weights), `SYNC_MODE_CYCLIC_CONSTANT = 3` (one cycle per `cyclic_length` seconds — must be > 0). If an AnimationTree that blended correctly in 4.6 stops transitioning correctly, set `sync_mode` on each blend space. See the [4.7 migration guide](https://docs.godotengine.org/en/latest/tutorials/migrating/upgrading_to_godot_4.7.html).
+
 ---
 
 ## 6. Skeleton Modifiers (3D, 4.4+)
@@ -291,6 +260,8 @@ _animTree.Set("parameters/BlendSpace2D/blend_position", inputDir);
 Procedurally rotates a bone to look at a world-space target. Ideal for head tracking and eye contact without extra animation clips.
 
 > See [references/skeleton-modifiers.md](references/skeleton-modifiers.md) for the full GDScript and C# example with angle limits and influence blending.
+
+> ⚠️ **Changed in Godot 4.7:** `LookAtModifier3D.relative` now defaults to `false` (was `true`) — the rotation is applied relative to the rest pose by default instead of the current pose. Set `relative = true` to restore the 4.6 behavior. See the [4.7 migration guide](https://docs.godotengine.org/en/latest/tutorials/migrating/upgrading_to_godot_4.7.html).
 
 ### BoneConstraint3D (Godot 4.5+)
 
@@ -320,17 +291,9 @@ Godot 4.3 retargets animations from one skeleton to another during `.glb`/`.gltf
 
 Godot 4.6 adds `IKModifier3D`, a base class for skeletal IK solvers, with eight subclasses covering the most common algorithms. These are `SkeletonModifier3D` children of `Skeleton3D` and work alongside other modifiers (e.g., `LookAtModifier3D`).
 
-**Pick the right solver:**
+Pick the cheapest solver that fits the chain: `TwoBoneIK3D` for exactly-two-bone limbs (the common humanoid case), `CCDIK3D` for short non-2-bone chains, `FABRIK3D` for longer or variable-length chains, and `JacobianIK3D` only when rig accuracy matters more than CPU cost.
 
-| Solver | Algorithm | Cost | Best for | Joint count | Notes |
-|---|---|---|---|---|---|
-| `TwoBoneIK3D` | Analytical two-bone | Cheapest | Legs, arms (chain is exactly 2 bones) | Exactly 2 | Fast and exact. Default when the chain is hip→knee→ankle or shoulder→elbow→wrist. |
-| `CCDIK3D` | Cyclic Coordinate Descent | Cheap | Tails, tentacles, simple arms | 2–6 joints | Iterative; can twist unnaturally on long chains. Good default for short arms. |
-| `FABRIK3D` | Forward And Backward Reaching | Moderate | Spines, longer limbs, natural reach | 3–10 joints | Forward-and-backward reaching; smooth, stable. Best when the chain length is variable. |
-| `JacobianIK3D` | Jacobian / pseudo-inverse | Expensive | Overdetermined rigs, robotic arms | Any | Solves a Jacobian per step; most accurate, most CPU. Reserve for cinematic or hero rigs. |
-| (4 further subclasses) | Various | Varies | See 4.6 release notes | — | — |
-
-Default to `TwoBoneIK3D` when the chain is exactly 2 bones (the common humanoid case). Use `CCDIK3D` for short non-2-bone chains. Upgrade to `FABRIK3D` when the result twists or overshoots, or when chain length varies. Reach for `JacobianIK3D` only when rig accuracy is the bottleneck of frame quality, not frame time.
+> See [references/ik-solver-comparison.md](references/ik-solver-comparison.md) for the full solver comparison table and selection guidance.
 
 > See [references/ik-recipes.md](references/ik-recipes.md) for the full GDScript and C# recipes — two-bone arm reach with influence blending (CCDIK3D), foot placement on uneven terrain (FABRIK3D + raycast), and basic FABRIK arm IK setup.
 
@@ -346,15 +309,9 @@ Two gameplay-flavored animation recipes: a hit-flash modulate tween and a buffer
 
 ## 9. Common Pitfalls
 
-| Symptom                                          | Cause                                                  | Fix                                                                |
-|--------------------------------------------------|--------------------------------------------------------|--------------------------------------------------------------------|
-| Animation snaps instead of blending              | Using `AnimationPlayer.play()` instead of AnimationTree | Switch to AnimationTree with state machine or blend tree           |
-| AnimationTree does nothing                       | `active` is `false`                                    | Set `anim_tree.active = true` in Inspector or `_ready()`           |
-| `travel()` doesn't transition                    | No transition path between states                      | Add transition arrows in the AnimationTree state machine editor    |
-| Animation plays but sprite doesn't change        | Track targets wrong node path                          | Verify the track's node path matches the actual scene tree         |
-| Method call track doesn't fire                   | Method name typo or wrong target node                  | Check the track's node path and method name match exactly          |
-| Blend parameters have no effect                  | Wrong parameter path string                            | Use `"parameters/<NodeName>/blend_position"` — check in Inspector  |
-| Animation resets to frame 0 every physics frame  | Calling `play()` every frame on a non-looping clip     | Guard with `if anim_player.current_animation != "name"`            |
+Quick symptom → cause → fix table covering animation snapping instead of blending, an inactive AnimationTree, `travel()` not transitioning, wrong track node paths, silent Call Method tracks, dead blend parameters, and per-frame `play()` resets.
+
+> See [references/common-pitfalls.md](references/common-pitfalls.md) for the full table.
 
 ---
 

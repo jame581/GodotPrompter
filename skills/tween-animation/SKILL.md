@@ -273,6 +273,24 @@ Tweens are owned by their host SceneTree. Kill running tweens with `tween.kill()
 
 > See [references/lifecycle.md](references/lifecycle.md) for kill/replace patterns, pause modes, speed scale, ignore-time-scale.
 
+### has_tweeners() (Godot 4.7+)
+
+`Tween.has_tweeners()` (const) returns `true` if any `Tweener` has been added to the tween and the tween is valid — useful when tweeners are appended dynamically and the tween can end up empty. Killing an empty tween before it starts prevents errors.
+
+```gdscript
+var tween := create_tween()
+_add_intro_steps(tween)  # may append zero tweeners
+if not tween.has_tweeners():
+    tween.kill()
+```
+
+```csharp
+var tween = CreateTween();
+AddIntroSteps(tween); // may append zero tweeners
+if (!tween.HasTweeners())
+    tween.Kill();
+```
+
 ---
 
 ## 8. Common Recipes
