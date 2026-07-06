@@ -266,6 +266,8 @@ public partial class FollowCamListener : AudioListener3D
 }
 ```
 
+> ⚠️ **Changed in Godot 4.7:** The default `area_mask` on `AudioStreamPlayer2D`/`AudioStreamPlayer3D` changed from `1` to `0` (disabled) — the `audio_bus_override` feature on `Area2D`/`Area3D` (e.g. an underwater bus) stops working for players left at the default. Set `area_mask` back to layer 1 to restore it; masks explicitly set to anything other than layer 1 keep working. (The migration guide says "AudioStreamPlayer", but `area_mask` only exists on the 2D/3D variants.) See the [4.7 migration guide](https://docs.godotengine.org/en/latest/tutorials/migrating/upgrading_to_godot_4.7.html).
+
 ---
 
 ## 5. Music Manager (Autoload)
@@ -296,7 +298,9 @@ Wire HSliders in the settings menu to bus volumes via `AudioServer.set_bus_volum
 
 Three stream types for adaptive music: `AudioStreamPlaylist` (sequenced or shuffled tracks), `AudioStreamSynchronized` (multiple stems played in sync — vertical layering for combat intensity), `AudioStreamInteractive` (clip transitions on triggers — state-driven music). Godot 4.4+ adds `AudioStreamWAV.load_from_file()` for runtime WAV loading.
 
-> See [references/interactive-music.md](references/interactive-music.md) for the stream-type comparison, GDScript recipes, and the 4.4+ runtime-load example.
+> **Godot 4.7+:** `AudioStreamInteractive` now exposes `TRANSITION_TO_TIME_PREVIOUS_POSITION` (`TransitionToTime` enum) to scripts — the destination clip resumes from the position it last played at, or from its start if it never played. Ideal for exploration ↔ combat music that picks up where it left off.
+
+> See [references/interactive-music.md](references/interactive-music.md) for the stream-type comparison, GDScript recipes, the 4.7+ resume-position transition, and the 4.4+ runtime-load example.
 
 ---
 
