@@ -69,6 +69,18 @@ Add packages in `MyProject.csproj` inside `<ItemGroup>`:
 
 Run `dotnet restore` or let the IDE restore automatically after editing.
 
+### Godot.NET Preview Bindings (Godot 4.7+)
+
+Godot 4.7's `Godot.NET.Sdk` accepts an opt-in MSBuild property that switches the project from the classic GodotSharp bindings to the preview Godot.NET bindings (the `Godot.Bindings` assembly instead of `GodotSharp`):
+
+```xml
+<PropertyGroup>
+  <EnableGodotDotNetPreview>true</EnableGodotDotNetPreview>
+</PropertyGroup>
+```
+
+The preview bindings are experimental — leave the property unset for production projects. See [GH-118001](https://github.com/godotengine/godot/pull/118001).
+
 ### IDE Setup
 
 | IDE | Setup Required | Notes |
@@ -316,6 +328,8 @@ Non-`[GlobalClass]` C# types are not visible to GDScript by name but can still b
 | Node path strings | `GetNode("../UI/Label")` fails silently if the path changes | Use `GetNode<Label>("%Label")` with unique names or typed `[Export]` node references |
 | `partial class` forgotten | Source generators silently fail; `[Export]` and `[Signal]` don't register | Every class extending a Godot type must be `partial` |
 | `async void` vs `async Task` | `async void` swallows exceptions | Use `async Task` except for top-level event handlers that Godot calls |
+
+> ⚠️ **Changed in Godot 4.7:** The 4.7 C# assemblies ship several compatibility breaks. Binary-incompatible (rebuild required): `OptimizedTranslation.Generate()` now returns `bool` instead of `void` (GH-119563), `Control.AccessibilityLive` changed enum type from `DisplayServer.AccessibilityLiveMode` to `AccessibilityServer.AccessibilityLiveMode` (GH-116839), and `Animation.Length` changed type metadata from `float` to `double` (GH-116394). Source-incompatible: `RichTextLabel.ImageUpdateMask.UpdateWidthInPercent` was renamed to `UpdateWidthUnit` (GH-112617), and the `EditorSceneFormatImporter` `IMPORT_*` constants moved into the `ImportFlags` enum (GH-115788). Removed: `AudioEffectSpectrumAnalyzer.TapBackPos` (GH-114355). Rebuild against 4.7 and fix any renamed symbols. See the [4.7 migration guide](https://docs.godotengine.org/en/latest/tutorials/migrating/upgrading_to_godot_4.7.html).
 
 ---
 

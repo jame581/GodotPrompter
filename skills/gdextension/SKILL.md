@@ -21,6 +21,8 @@ Reach for GDScript or C# for almost all game logic. Choose GDExtension only when
 
 Contrast with **C++ modules**, which are compiled *into* the engine and therefore require shipping a custom engine binary. GDExtension's key advantage is that it runs against a **stock** Godot — you distribute just a shared library. It is "more complicated to use than GDScript and C#," so don't reach for it by default.
 
+> ⚠️ **Changed in Godot 4.7:** Custom text servers are no longer a GDExtension use case — TextServer GDExtension build support was removed, so a custom `TextServer` must be compiled into the engine as a C++ module. See [GH-117056](https://github.com/godotengine/godot/pull/117056).
+
 ---
 
 ## 2. Project & build setup
@@ -47,6 +49,8 @@ gdextension_example/
 ```
 
 Build with `scons platform=<platform>` (omit the platform to target the current one; default build is **debug**). The official `SConstruct` is a downloadable file from the C++ tutorial rather than hand-rolled here — follow godot-cpp's build docs. SCons is the official path; godot-cpp also supports CMake.
+
+> **Godot 4.7+:** Upstream's reference GDExtension interface files (e.g. `gdextension_interface.h`) now live in the godot-headers repository instead of godot-cpp ([GH-115401](https://github.com/godotengine/godot/pull/115401)). godot-cpp consumes them from there, so the submodule workflow above is unchanged — this only matters if you vendor the raw interface headers directly (e.g. for a custom language binding).
 
 ---
 
@@ -104,6 +108,8 @@ The patterns:
 - **`PROPERTY_HINT_RANGE`** with `"0,20,0.01"` turns the Inspector field into a slider (min, max, step).
 - **`ADD_SIGNAL(MethodInfo("name", PropertyInfo(...), ...))`** — declares a signal with typed arguments; emit it from code with `emit_signal("position_changed", this, new_pos)`.
 
+> ⚠️ **Changed in Godot 4.7:** The GDExtension interface functions `object_cast_to` and `classdb_get_class_tag` are deprecated in favor of `is_class`-based casts. Binding libraries (godot-cpp, gdext) handle this internally — but native code that calls these interface functions directly should migrate its cast paths. See [GH-119254](https://github.com/godotengine/godot/pull/119254).
+
 ---
 
 ## 4. Entry point & the .gdextension file
@@ -151,6 +157,8 @@ linux.release.x86_64 = "res://bin/libgdexample.linux.template_release.x86_64.so"
 
 The exported `extern "C"` symbol name **must equal** `entry_symbol`, or the extension won't load. Register classes with `GDREGISTER_CLASS`, gated on `MODULE_INITIALIZATION_LEVEL_SCENE`. The `[libraries]` keys are `platform.feature.arch` tags; `template_debug` / `template_release` distinguish build configs. Optional sections: `[icons]` (per-node editor icon) and `[dependencies]` (extra libs copied on export).
 
+> **Godot 4.7+:** The raw GDExtension interface adds refcount-aware construction and registration entry points — `classdb_construct_object3` and `classdb_register_extension_class6` ([GH-118214](https://github.com/godotengine/godot/pull/118214)). Binding libraries built against 4.7 headers use them automatically; they only concern code that calls the interface directly.
+
 ---
 
 ## 5. Compatibility rules
@@ -161,6 +169,8 @@ The exported `extern "C"` symbol name **must equal** `entry_symbol`, or the exte
 - `reloadable = true` hot reload works in **debug builds only**.
 - Set `compatibility_minimum` to the lowest engine version you actually support — too low and the extension fails to load at runtime.
 - Exported games need the matching `template_release` binaries present, or the native node type simply won't exist at runtime.
+
+> ⚠️ **Changed in Godot 4.7:** `Object.is_class()` changed its `class` parameter type from `String` to `StringName` for performance. GDScript is unaffected and C# gained a compatibility method, but GDExtension binaries compiled against the old signature rely on the engine's compatibility mapping — rebuild against bindings matching your target version when updating to 4.7. See the [4.7 migration guide](https://docs.godotengine.org/en/latest/tutorials/migrating/upgrading_to_godot_4.7.html).
 
 ---
 
