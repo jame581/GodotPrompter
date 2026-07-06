@@ -117,6 +117,7 @@ playback.SwitchToClip(2);
 ```gdscript
 # Clip 0 = exploration, clip 1 = combat.
 # Combat → exploration: resume exploration where it left off.
+var interactive: AudioStreamInteractive = $MusicPlayer.stream
 interactive.add_transition(
     1, 0,
     AudioStreamInteractive.TRANSITION_FROM_TIME_NEXT_BEAT,
@@ -127,6 +128,7 @@ interactive.add_transition(
 ```
 
 ```csharp
+var interactive = (AudioStreamInteractive)GetNode<AudioStreamPlayer>("MusicPlayer").Stream;
 interactive.AddTransition(
     1, 0,
     AudioStreamInteractive.TransitionFromTime.NextBeat,
