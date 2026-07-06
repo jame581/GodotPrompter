@@ -215,10 +215,13 @@ func _can_commit_handle_on_click() -> bool:
 ```
 
 ```csharp
+// Add inside the SpawnerGizmoPlugin class above.
+#if TOOLS
 public override bool _CanCommitHandleOnClick()
 {
     return true; // commit even when the handle did not move
 }
+#endif
 ```
 
 ---
