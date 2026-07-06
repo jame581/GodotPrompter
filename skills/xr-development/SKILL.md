@@ -132,99 +132,15 @@ For headsets that support it (Quest 2+, Vision Pro), set `OpenXRInterface.enviro
 
 > **Critical:** VR must maintain consistent frame rate. Dropped frames cause nausea. Profile aggressively and keep draw calls low.
 
+> ⚠️ **Changed in Godot 4.7:** New project settings `xr/openxr/foveation_eye_tracked` and `xr/openxr/foveation_with_subsampled_images` both default to `true` — when the foveation level is not "Disabled", eye-tracked foveation is used where the headset supports it, and subsampled images are used on Vulkan for a bigger foveation win. Subsampled images are incompatible with many screen-space features (e.g., FXAA, glow); if any are enabled, subsampled images are automatically disabled with a log warning. Set either setting to `false` to opt out. See [GH-117868](https://github.com/godotengine/godot/pull/117868).
+
 ---
 
 ## 8. Godot 4.5+ XR Features
 
-### D3D12 OpenXR Backend (Windows) (Godot 4.5+)
+Godot 4.5 adds a D3D12 OpenXR backend on Windows (Quest Link / SteamVR alternative to Vulkan), foveated rendering on the Mobile Vulkan renderer, Application SpaceWarp frame synthesis for Quest/Pico, OpenXR Render Models for platform-native controller meshes, and native visionOS export via the Apple Embedded preset. All are enabled through Project Settings or the Godot OpenXR Vendors plugin — no engine-level code changes.
 
-On Windows, Godot 4.5 adds a Direct3D 12 rendering backend for OpenXR. Previously, Windows XR builds required Vulkan. D3D12 is relevant for Quest Link and SteamVR on machines with good D3D12 driver support.
-
-**Enable in Project Settings:**
-
-1. **Project Settings → Rendering → Rendering Device → Driver** → select `D3D12` (Windows only)
-2. Re-export the Windows build — no code changes required.
-
-> **When to use D3D12:** If your target audience runs Quest Link or SteamVR on Windows and encounters Vulkan driver issues, D3D12 can be more stable. Vulkan remains the default and is typically preferred for performance.
-
----
-
-### Foveated Rendering on Mobile Vulkan (Godot 4.5+)
-
-Standalone VR headsets (Meta Quest, Pico) running the **Mobile Vulkan** renderer now support foveated rendering via the `VK_EXT_fragment_density_map` extension. The peripheral view is rendered at lower resolution while the foveal region stays sharp, significantly reducing GPU load.
-
-**Enable via the OpenXR Vendors plugin:**
-
-1. Install or update the **Godot OpenXR Vendors** plugin (Project Settings → Plugins).
-2. In the Android export preset, ensure **Renderer** is set to **Mobile** (not Forward+).
-3. In the vendor plugin settings, enable **Foveated Rendering** and choose a density level (e.g., `LOW`, `MEDIUM`, `HIGH`).
-4. The `VK_EXT_fragment_density_map` device extension is requested automatically by the plugin at runtime — no Vulkan code needed.
-
-> **Note:** Foveated rendering requires the Mobile Vulkan renderer. It has no effect on the Forward+ renderer or on PC VR headsets. Test GPU utilization with and without it on device using Meta's OVR Metrics Tool or Pico's equivalents.
-
----
-
-### Application SpaceWarp (ASW) (Godot 4.5+)
-
-Application SpaceWarp is a frame-synthesis technique supported on Meta Quest and Pico headsets. The GPU renders every other frame at half rate; the SpaceWarp runtime synthesizes the missing frames using motion vectors. This halves the rendering budget while maintaining perceived smoothness.
-
-**Enable via the OpenXR Vendors plugin:**
-
-1. Update to **Godot OpenXR Vendors** plugin 4.x (supports ASW).
-2. In the Android export preset extras, enable **Application SpaceWarp**.
-3. Ensure the **Motion Vectors** rendering pass is active — the vendor plugin enables this automatically when ASW is on.
-4. Set your target frame rate to **half the native headset rate** (e.g., 40 Hz on Quest 3 at 80 Hz mode) in your XR session configuration.
-
-> **Caution:** SpaceWarp can introduce ghosting artifacts on fast-moving objects. Disable per-object if you see visual glitches. Test thoroughly on device.
-
----
-
-### OpenXR Render Models (Godot 4.5+)
-
-The OpenXR Render Models extension lets the platform supply animated, branded controller meshes at runtime. You no longer need to bundle Quest Touch or Pico controller meshes in your project.
-
-**Enable:**
-
-1. Update to **Godot OpenXR Vendors** plugin 4.x.
-2. In Project Settings (or via the vendor plugin toggle), enable **OpenXR Render Models**.
-3. In your scene, add `OpenXRRenderModel` nodes as children of each `XRController3D` — the plugin populates them with the platform-native mesh automatically.
-
-```gdscript
-# The render model node auto-populates; no manual mesh assignment needed.
-# You can show/hide it to toggle between your own model and the platform model:
-@onready var render_model: Node3D = $XRController3D/OpenXRRenderModel
-
-func _ready() -> void:
-    render_model.visible = true  # Use platform-native controller model
-```
-
-```csharp
-// The render model node auto-populates; no manual mesh assignment needed.
-[Export] public Node3D RenderModel { get; set; }
-
-public override void _Ready()
-{
-    RenderModel.Visible = true; // Use platform-native controller model
-}
-```
-
-> **Availability:** Render Models require the platform runtime to support the `XR_EXT_hand_tracking_data_source` or equivalent render model extension. Confirmed on Meta Quest and Pico runtimes. Fall back to bundled meshes when the node has no mesh loaded.
-
----
-
-### visionOS Export (Godot 4.5+)
-
-Godot 4.5 adds native **visionOS** (Apple Vision Pro) export via the unified "Apple Embedded" platform driver. Windowed visionOS apps (running in the Shared Space) can be exported directly without additional tooling beyond Xcode.
-
-**Setup:**
-
-1. Ensure you have Xcode 15.4+ with the visionOS SDK installed.
-2. In **Export → Add Preset**, select **Apple Embedded** — it covers iOS, iPadOS, and visionOS.
-3. Set **Target SDK** to `visionOS` in the preset options.
-4. For XR content in visionOS Full Space, use OpenXR with the appropriate entitlements — see Apple's documentation for `ARKit` + `Passthrough` entitlements.
-5. Build and deploy via Xcode as usual.
-
-> **Note:** visionOS Full Space XR (immersive mode) requires Apple's `com.apple.developer.arkit` entitlement and is distinct from windowed Shared Space mode. The OpenXR path on visionOS mirrors the passthrough workflow in Section 6.
+> See [references/godot-4-5-features.md](references/godot-4-5-features.md) for enabling steps, GDScript + C# render-model snippets, and per-feature caveats.
 
 ---
 
@@ -284,7 +200,62 @@ public partial class SpatialAnchorManager : Node3D
 
 ---
 
-## 10. Common Pitfalls
+## 10. Godot 4.7+ XR Features
+
+### User Presence Detection (Godot 4.7+)
+
+`OpenXRInterface` exposes the OpenXR user presence extension: the `user_presence_changed(is_user_present: bool)` signal fires when the user puts on or removes the headset, `is_user_presence_supported()` reports whether the extension is supported and enabled, and `is_user_present()` polls the current state (both only return valid values after OpenXR is initialized). Typical use: pause the game and mute audio when the headset comes off.
+
+> **Note:** The signal is not emitted during application startup or shutdown — assume user presence is gained on startup and lost on shutdown.
+
+```gdscript
+func _ready() -> void:
+    var xr_interface: OpenXRInterface = XRServer.find_interface("OpenXR")
+    if xr_interface and xr_interface.is_user_presence_supported():
+        xr_interface.user_presence_changed.connect(_on_user_presence_changed)
+
+func _on_user_presence_changed(is_user_present: bool) -> void:
+    get_tree().paused = not is_user_present
+```
+
+```csharp
+public override void _Ready()
+{
+    var xrInterface = XRServer.FindInterface("OpenXR") as OpenXRInterface;
+    if (xrInterface != null && xrInterface.IsUserPresenceSupported())
+        xrInterface.UserPresenceChanged += OnUserPresenceChanged;
+}
+
+private void OnUserPresenceChanged(bool isUserPresent)
+{
+    GetTree().Paused = !isUserPresent;
+}
+```
+
+### Composition Layer Eye Visibility (Godot 4.7+)
+
+`OpenXRCompositionLayer` gains `eye_visibility` (`EyeVisibility` enum: `EYE_VISIBILITY_BOTH = 0` default, `EYE_VISIBILITY_LEFT = 1`, `EYE_VISIBILITY_RIGHT = 2`) — the eye(s) the composition layer is visible to. Renders a quad/cylinder/equirect layer to one eye only, e.g. for per-eye calibration screens or stereo content authored per eye.
+
+```gdscript
+$OpenXRCompositionLayerQuad.eye_visibility = OpenXRCompositionLayer.EYE_VISIBILITY_LEFT
+```
+
+```csharp
+GetNode<OpenXRCompositionLayerQuad>("OpenXRCompositionLayerQuad").EyeVisibility =
+    OpenXRCompositionLayer.EyeVisibilityEnum.Left;
+```
+
+> **Note:** Not all composition layer types or runtimes support restricting visibility to a single eye.
+
+### Spatial Anchor Extensibility (Godot 4.7+)
+
+`OpenXRSpatialAnchorCapability.create_new_anchor()` gains an optional `next` parameter — full signature: `create_new_anchor(transform: Transform3D, spatial_context: RID = RID(), next: OpenXRStructureBase = null) -> OpenXRAnchorTracker`. `next` must be a valid next object for the `XrSpatialAnchorCreateInfoEXT` chain, letting vendor-specific create-info structs be appended when creating an anchor. Existing calls are unaffected (compatible change, [GH-118128](https://github.com/godotengine/godot/pull/118128)).
+
+> **Note:** `OpenXRSpatialAnchorCapability` is still marked experimental — the class may change in future versions. For typical anchor placement, keep using the node-based workflow from Section 9.
+
+---
+
+## 11. Common Pitfalls
 
 | Symptom | Cause | Fix |
 |---------|-------|-----|
@@ -298,7 +269,7 @@ public partial class SpatialAnchorManager : Node3D
 
 ---
 
-## 11. Implementation Checklist
+## 12. Implementation Checklist
 
 - [ ] OpenXR is enabled in Project Settings
 - [ ] Scene uses `XROrigin3D` → `XRCamera3D` + `XRController3D` hierarchy
@@ -316,3 +287,5 @@ public partial class SpatialAnchorManager : Node3D
 - [ ] OpenXR Render Models used for controller visuals instead of bundled meshes where supported (Godot 4.5+)
 - [ ] visionOS export uses the Apple Embedded preset with visionOS SDK target (Godot 4.5+)
 - [ ] Spatial anchors use `XRSpatialAnchor` and vendor plugin spatial entities extension (Godot 4.6+)
+- [ ] Headset on/off handled via `OpenXRInterface.user_presence_changed` — pause/mute when the user is away (Godot 4.7+)
+- [ ] Foveation defaults reviewed — `xr/openxr/foveation_eye_tracked` and `xr/openxr/foveation_with_subsampled_images` are on by default; disable subsampled images if you rely on FXAA/glow (Godot 4.7+)
