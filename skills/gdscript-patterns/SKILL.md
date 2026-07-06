@@ -92,6 +92,21 @@ In **Project > Project Settings > Debug > GDScript**:
 
 > Set warnings to **Error** for strict enforcement in team projects.
 
+### Typed Return Inheritance in Overrides
+
+> ⚠️ **Changed in Godot 4.7:** Methods that override a method with a typed return now inherit the return type, so an override without an explicit `return` statement becomes an error. Add `return null` (or a typed return value) at the end of the override. See the [4.7 migration guide](https://docs.godotengine.org/en/latest/tutorials/migrating/upgrading_to_godot_4.7.html).
+
+```gdscript
+class Enemy:
+    var weapon: Node
+    func get_weapon() -> Node:
+        return weapon
+
+class UnarmedEnemy extends Enemy:
+    func get_weapon():  # 4.7+: inherits -> Node from Enemy
+        return null     # explicit return now required — omitting it is an error
+```
+
 ---
 
 ## 2. Await & Coroutines
@@ -407,6 +422,9 @@ The recurring small patterns: ternary expressions (`value if cond else other`), 
 | `class_name` conflict                 | Two scripts with same `class_name`           | Use unique names; check for duplicates in Project                |
 | Export group applies to wrong vars     | Group scope continues until next group       | Add a new `@export_group("")` to end the group scope             |
 | Parent `_ready()` logic doesn't run in child | Missing `super()` call in child's `_ready()` | Add `super()` as first line; see Section 7 |
+| `type_exists()` flagged as deprecated | Deprecated in Godot 4.7                      | Use `ClassDB.class_exists()` instead                             |
+
+> ⚠️ **Changed in Godot 4.7:** The global `type_exists()` function is deprecated — replace `type_exists("Sprite2D")` with `ClassDB.class_exists("Sprite2D")`. See the [4.7 migration guide](https://docs.godotengine.org/en/latest/tutorials/migrating/upgrading_to_godot_4.7.html).
 
 ---
 

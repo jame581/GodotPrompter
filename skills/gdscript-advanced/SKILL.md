@@ -226,6 +226,25 @@ for i in 5:
 
 **Resource sharing surprises** — `@export var item: ItemData` with the same Resource asset in two scenes shares state by reference. Mutating one mutates the other. Use `item.duplicate()` when each instance needs its own state.
 
+**Packed-array property setters skip element writes**
+
+> ⚠️ **Changed in Godot 4.7:** Setting an element of a packed-array property (e.g. `obj.packed_prop[i] = x`) no longer calls the setter for the entire packed array property. Code that relied on the setter firing for per-element writes silently breaks — reassign the whole array to trigger the setter. See the [4.7 migration guide](https://docs.godotengine.org/en/latest/tutorials/migrating/upgrading_to_godot_4.7.html).
+
+```gdscript
+var points: PackedVector2Array:
+    set(value):
+        points = value
+        _rebuild_mesh()
+
+func move_point() -> void:
+    points[0] = Vector2.ONE    # 4.6: setter (and _rebuild_mesh) ran; 4.7+: it does NOT
+    var updated := points      # fix: modify a copy...
+    updated[0] = Vector2.ONE
+    points = updated           # ...then reassign — the setter fires
+```
+
+> **Godot 4.7+:** the new `CONFUSABLE_TEMPORARY_MODIFICATION` warning flags modifying a temporary (discarded) value — e.g. a built-in `Packed*Array` property changed through a complex assignment chain or a non-`const` method call, where only a temporary copy changes and the property keeps its old value. Controlled by `debug/gdscript/warnings/confusable_temporary_modification` (default `1`, warn).
+
 ## Implementation Checklist
 
 - [ ] Identify which performance idiom applies (typed vectors, PackedArray, static methods)
@@ -234,4 +253,4 @@ for i in 5:
 - [ ] Audit `await` calls for deadlock risk (signal that may not fire) and `_ready` ordering bugs
 - [ ] Pick signal vs Callable per the trade-off table; disconnect lambdas in `_exit_tree`
 - [ ] Profile before optimizing; match the hot-spot to the table in section 7
-- [ ] Audit lambda captures, `@onready` ordering, static var lifecycle, and Resource sharing for the listed pitfalls
+- [ ] Audit lambda captures, `@onready` ordering, static var lifecycle, Resource sharing, and packed-array property setters (Godot 4.7) for the listed pitfalls
