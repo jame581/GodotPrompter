@@ -4,6 +4,41 @@ All notable changes to GodotPrompter will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
+## [1.11.0] - 2026-07-06
+
+### Changed
+
+- **Godot 4.7 alignment pass** across the skill library, replaying the v1.5.0 method: verified per-skill delta inventory (`docs/superpowers/notes/2026-07-05-godot-4.7-deltas.md`) applied as annotated additive sections and behavior-change warnings — ~75 applied rows across 26 skills. Per-skill highlights:
+  - `physics-system` — one-way collision direction (`CollisionShape2D.one_way_collision_direction`, `PhysicsServer2D` param); Jolt behavior-change warnings (SoftBody3D mass/stiffness reinterpretation, WorldBoundaryShape3D plane sign flip, Area3D↔SoftBody3D overlaps)
+  - `animation-system` — BlendSpace `sync_mode` enum migration warning, named blend points, ping-pong sprite playback (`SpriteFrames.LoopMode`), `LookAtModifier3D.relative` default-flip warning
+  - `tween-animation` — `Tween.has_tweeners()` guard for lazily built tweens
+  - `input-handling` — `VirtualJoystick` node, joypad motion sensors (accelerometer/gyroscope + calibration), vibration capability checks, `DEVICE_ID_MOUSE`/`DEVICE_ID_KEYBOARD` warning, `ignore_joypad_on_unfocused_application` setting, `JOY_BUTTON_MISC2–6`
+  - `audio-system` — `area_mask` default change warning (Area bus overrides), `AudioStreamInteractive.TRANSITION_TO_TIME_PREVIOUS_POSITION`
+  - `gdscript-advanced` / `gdscript-patterns` — packed-array per-element setter and typed-return inheritance warnings, new `CONFUSABLE_TEMPORARY_MODIFICATION` warning, `type_exists()` deprecation
+  - `particles-vfx` — inherit-emitter-scale flag, per-axis 3D scale/rotation, orientation rework (`TRANSFORM_ALIGN_LOCAL_BILLBOARD`, rotation velocity over lifetime), sub-frame particle seeking, subemitter velocity-inheritance fix warning
+  - `xr-development` — user presence signal (`XR_EXT_user_presence`), composition layer eye visibility, spatial anchor `next` param, foveation default changes
+  - `mobile-development` — Java interface proxies from GDScript (`JavaClassWrapper.create_proxy`/`create_sam_callback`), Android picture-in-picture, `orientation_changed` signal, VirtualJoystick cross-ref, native file picker on all devices, Gradle build no longer experimental, OBB expansion-file removal warning
+  - `godot-ui` — `AccessibilityServer` split warning (C#-breaking), `custom_maximum_size`, Control offset transform (layout-safe UI juice), `_get_cursor_shape()` virtual, PopupMenu search bar, conic gradients, AtlasTexture tiling, RichTextLabel image-sizing rework warning, `all_tabs_in_front` deprecation
+  - `responsive-ui` / `godot-project-setup` — new-project stretch defaults now `canvas_items`/`expand`
+  - `3d-essentials` — AreaLight3D, GridMap octant queries, CSG autosmooth, HDR output setting, volumetric fog blending and `roughness_layers` default warnings; Vulkan raytracing noted as experimental
+  - `2d-essentials` — antialiased-line feather removal warning; DrawableTexture2D noted as experimental
+  - `shader-basics` — `in_shadow_pass`/`specular_amount` visual shader inputs, `LinearToSRGB` HDR clamp warning, `textureQueryLod()` fragment-only compile error warning
+  - `addon-development` — unsaved-state and script-editor control APIs, `EditorInspector.create_default_inspector()`, inspector-property context-menu slot, `_can_commit_handle_on_click()` gizmo virtual
+  - `csharp-godot` — 4.7 C# binary/source compatibility-break table warning, `EnableGodotDotNetPreview` opt-in for the Godot.NET preview bindings
+  - `gdextension` — `Object.is_class(StringName)` signature warning, refcount-aware init entry points, `object_cast_to` deprecation, godot-headers relocation, TextServer-as-GDExtension removal
+  - `localization` — `_customize_strings()` POT virtual, `OptimizedTranslation.generate()` bool return, `Control.translation_context`, accessibility-string POT extraction
+  - `assets-pipeline` — Mesh/MeshLibrary scene import types, `GLTFDocument.ImportFlags`, `EditorSceneFormatImporter` constants-moved warning, font-hinting import default warning, DDS R8/R8G8
+  - `export-pipeline` — Android patch PCKs, SparsePCK index encryption, `PCKPacker.add_file_from_buffer()`, stale `runnable=` preset text fixed
+  - `math-essentials` — `Basis.is_orthonormal()`
+  - `multithreading` — threaded resource loading reliability fixes; pre-4.7 deadlock caveats dropped
+  - `ai-navigation` — `map_get_closest_point_normal()` now-normalized warning
+  - `save-load` — `JSON.stringify()` empty-dictionary compaction warning
+- Pattern X relocations to keep every SKILL.md within the 16 KB budget created **16 new reference files** this release (physics-system ×4, animation-system ×3, input-handling ×2, plus 3d-essentials, ai-navigation, assets-pipeline, localization, particles-vfx, shader-basics, xr-development).
+- Stale pre-4.7 notes corrected: "Godot 4.6 is in beta" caveats removed from `physics-system` §8 (Jolt) and `localization/references/csv-plural-context.md` — 4.6 has long been stable and 4.7 is out.
+- README and agent routing text updated for 4.7.
+
+> **Release notes:** Alignment release — no new skills (51 total). Repo-wide minimum stays at Godot 4.3+; all 4.7 content is additive and annotated `(Godot 4.7+)`. Experimental 4.7 subsystems (Vulkan raytracing, DrawableTexture2D) are mention-only. Validator baseline: 0 errors, 13 warnings (pre-existing `csharp-parity-accepted`). Every SKILL.md ≤ 16 KB.
+
 ## [1.10.1] - 2026-06-27
 
 ### Fixed

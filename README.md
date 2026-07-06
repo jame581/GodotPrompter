@@ -56,7 +56,7 @@ grok plugin enable godot-prompter
 Pin to a release:
 
 ```bash
-grok plugin install jame581/GodotPrompter@v1.9.0 --trust
+grok plugin install jame581/GodotPrompter@v1.11.0 --trust
 grok plugin enable godot-prompter
 ```
 
@@ -311,7 +311,7 @@ Produces a per-skill / per-agent table (bytes, KB, estimated tokens, Claude / GP
 
 CI gate: `.github/workflows/release.yml` runs both `node scripts/validate-skills.mjs` and a tag-vs-manifest version-consistency check on every `v*.*.*` push. The release is blocked if the validator returns errors or any of `package.json` / `.claude-plugin/plugin.json` / `.claude-plugin/marketplace.json` drifts from the tag.
 
-**Current baseline (v1.10.0):** 0 errors, 13 warnings (all `csharp-parity-accepted` GDScript-only; 0 token-budget). Every `SKILL.md` is at or below the 16 KB budget.
+**Current baseline (v1.11.0):** 0 errors, 13 warnings (all `csharp-parity-accepted` GDScript-only; 0 token-budget). Every `SKILL.md` is at or below the 16 KB budget.
 
 A manual agent-integration test plan covering full workflows (skill discovery, cross-reference navigation, end-to-end feature implementation) lives in [`tests/agent-integration/TEST_PLAN.md`](tests/agent-integration/TEST_PLAN.md) for spot-checks against new agent versions or platforms.
 
