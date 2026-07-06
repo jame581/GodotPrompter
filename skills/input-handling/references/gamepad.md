@@ -1,6 +1,6 @@
 # Controller / Gamepad
 
-Reference for `skills/input-handling/SKILL.md` — detecting controllers, gamepad-via-Input-Map, analog stick with deadzone, vibration, detecting input device for UI prompts.
+Reference for `skills/input-handling/SKILL.md` — detecting controllers, gamepad-via-Input-Map, analog stick with deadzone, vibration, motion sensors (Godot 4.7+), detecting input device for UI prompts.
 
 > ← Back to [SKILL.md](../SKILL.md)
 
@@ -92,6 +92,62 @@ Input.stop_joy_vibration(0)
 Input.StartJoyVibration(0, 0.5f, 0.3f, 0.2f);
 Input.StopJoyVibration(0);
 ```
+
+#### Vibration Capability Checks (Godot 4.7+)
+
+Not every pad rumbles — Godot 4.7 lets you check support and inspect the running vibration.
+
+```gdscript
+if Input.has_joy_vibration(0):
+    Input.start_joy_vibration(0, 0.5, 0.3, 0.2)
+
+var strength := Input.get_joy_vibration_strength(0)  # Vector2(weak, strong)
+var duration := Input.get_joy_vibration_duration(0)  # as passed to start_joy_vibration
+var remaining := Input.get_joy_vibration_remaining_duration(0)
+```
+
+```csharp
+if (Input.HasJoyVibration(0))
+    Input.StartJoyVibration(0, 0.5f, 0.3f, 0.2f);
+
+Vector2 strength = Input.GetJoyVibrationStrength(0);  // (weak, strong)
+float duration = Input.GetJoyVibrationDuration(0);
+float remaining = Input.GetJoyVibrationRemainingDuration(0);
+```
+
+### Joypad Motion Sensors (Godot 4.7+)
+
+Godot 4.7 exposes joypad gyroscopes and accelerometers (e.g. DualSense, Switch Pro) — the basis for gyro aiming. Check support, enable the sensors, then poll.
+
+```gdscript
+func _ready() -> void:
+    if Input.has_joy_motion_sensors(0):
+        Input.set_joy_motion_sensors_enabled(0, true)
+
+func _physics_process(_delta: float) -> void:
+    if Input.is_joy_motion_sensors_enabled(0):
+        var gyro := Input.get_joy_gyroscope(0)       # rad/s around X/Y/Z
+        var accel := Input.get_joy_accelerometer(0)  # m/s², includes gravity
+```
+
+```csharp
+public override void _Ready()
+{
+    if (Input.HasJoyMotionSensors(0))
+        Input.SetJoyMotionSensorsEnabled(0, true);
+}
+
+public override void _PhysicsProcess(double delta)
+{
+    if (Input.IsJoyMotionSensorsEnabled(0))
+    {
+        Vector3 gyro = Input.GetJoyGyroscope(0);       // rad/s around X/Y/Z
+        Vector3 accel = Input.GetJoyAccelerometer(0);  // m/s², includes gravity
+    }
+}
+```
+
+`Input.get_joy_motion_sensors_rate(device)` returns the sensor rate in Hz. To remove gyro drift, calibrate with the pad resting still: `start_joy_motion_sensors_calibration(device)` / `stop_joy_motion_sensors_calibration(device)`, with `is_joy_motion_sensors_calibrating()`, `is_joy_motion_sensors_calibrated()`, and `get/set/clear_joy_motion_sensors_calibration()` to persist or reset the calibration. Once calibrated, `get_joy_gyroscope()` reads near `Vector3.ZERO` when the pad is not rotating.
 
 ### Detecting Input Device for UI Prompts
 

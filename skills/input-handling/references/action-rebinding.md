@@ -1,8 +1,36 @@
 # Action Rebinding at Runtime
 
-Reference for `skills/input-handling/SKILL.md` — full action-rebinding flow with GDScript and C#: capture new key, swap action's events, persist via ConfigFile, restore on launch.
+Reference for `skills/input-handling/SKILL.md` — adding actions in code, plus the full action-rebinding flow with GDScript and C#: capture new key, swap action's events, persist via ConfigFile, restore on launch.
 
 > ← Back to [SKILL.md](../SKILL.md)
+
+---
+## 2. Input Map Setup — Adding Actions in Code
+
+```gdscript
+# Typically done in an autoload _ready(), not every frame
+func _ready() -> void:
+    if not InputMap.has_action("move_left"):
+        InputMap.add_action("move_left")
+        var event := InputEventKey.new()
+        event.physical_keycode = KEY_A
+        InputMap.action_add_event("move_left", event)
+```
+
+```csharp
+public override void _Ready()
+{
+    if (!InputMap.HasAction("move_left"))
+    {
+        InputMap.AddAction("move_left");
+        var ev = new InputEventKey();
+        ev.PhysicalKeycode = Key.A;
+        InputMap.ActionAddEvent("move_left", ev);
+    }
+}
+```
+
+> **Best practice:** Define actions in the editor Input Map. Only add actions in code for dynamically generated bindings or mod support.
 
 ---
 ## 7. Action Rebinding at Runtime
