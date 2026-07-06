@@ -41,6 +41,10 @@ Godot uses a **right-handed** coordinate system with metric units (1 unit = 1 me
 | `CSGBox3D` etc.    | Constructive Solid Geometry — prototyping       |
 | `GridMap`           | 3D tile-based level building                   |
 
+> **Godot 4.7+:** `GridMap` exposes its internal octants for spatial queries — `cell_octant_size = 8` (cells per octant, per axis) plus `get_used_octants()`, `get_used_octants_by_item(item)`, `get_octants_in_bounds(bounds)` (includes empty octants), `get_used_octants_in_bounds(bounds)`, `get_used_cells_in_octant(octant_coords)`, `get_used_cells_in_octant_by_item(octant_coords, item)`, and `get_octant_coords_from_cell_coords(cell_coords)`. Octant and cell coordinates are `Vector3i` (returned in `Array[Vector3i]`); `bounds` is a local-space `AABB`.
+
+> **Godot 4.7+:** `CSGShape3D` gains automatic smoothing — enable `autosmooth` (default `false`) and tune `smoothing_angle` (default `50.0`): faces meeting at an angle greater than `smoothing_angle` are smoothed, smaller angles stay sharp; a value below `0.1` disables all smoothing (a performance escape hatch). Children of a `CSGCombiner3D` are treated as a single mesh.
+
 ### Minimal 3D Scene
 
 ```
@@ -70,13 +74,9 @@ The PBR core: `albedo_color` / `albedo_texture` (base color), `metallic` (0 diel
 
 ### Transparency Modes
 
-| Mode                | Performance | Shadows | Use For                          |
-|---------------------|-------------|---------|----------------------------------|
-| Disabled            | Fastest     | Yes     | Fully opaque objects             |
-| Alpha               | Slow        | No      | Semi-transparent glass, water    |
-| Alpha Scissor       | Fast        | Yes     | Binary cutout (leaves, fences)   |
-| Alpha Hash          | Medium      | Yes     | Dithered transparency (hair)     |
-| Depth Pre-Pass      | Medium      | Partial | Mostly opaque with transparent edges |
+Prefer Alpha Scissor (fast, shadowed cutouts) or Alpha Hash (dithered — hair) over plain Alpha (slow, no shadows); Depth Pre-Pass suits mostly-opaque meshes with transparent edges.
+
+> See [references/materials-and-lighting-recipes.md](references/materials-and-lighting-recipes.md#transparency-modes) for the comparison table.
 
 ### Setting Materials from Code & Material Instancing
 
@@ -95,32 +95,21 @@ Create a `StandardMaterial3D` at runtime, assign to `mesh.material_override`, an
 | `DirectionalLight3D` | Parallel rays | PSSM    | Cheapest | 8 (Forward+)       |
 | `OmniLight3D`       | Sphere        | Cube/Dual Paraboloid | Medium | 512 clustered* |
 | `SpotLight3D`       | Cone          | Single texture | Cheap | 512 clustered*     |
+| `AreaLight3D` (4.7+) | Rectangle    | PCSS soft      | Most expensive | — |
 
 *Forward+ shares 512 clustered element slots among omni lights, spot lights, decals, and reflection probes.
 
 ### Light Properties
 
-| Property | Type | Default | Notes |
-|---|---|---|---|
-| `light_color` | `Color` | white | Drive day/night with a Tween or `Environment.sun_position` |
-| `light_energy` | `float` | 1.0 | HDR; values >1 are valid |
-| `shadow_enabled` | `bool` | false | Big perf hit when enabled |
-| `directional_shadow_mode` | enum | 4 splits | `ORTHOGONAL` / `PARALLEL_2_SPLITS` / `PARALLEL_4_SPLITS` |
-| `directional_shadow_max_distance` | `float` | 100 m | Lower = sharper shadows |
+Key knobs: `light_color`, `light_energy` (HDR — values >1 are valid), `shadow_enabled` (big perf hit), `directional_shadow_mode`, `directional_shadow_max_distance` (lower = sharper shadows).
 
-```gdscript
-sun.light_color = Color(1.0, 0.95, 0.9)
-sun.shadow_enabled = true
-sun.directional_shadow_mode = DirectionalLight3D.SHADOW_PARALLEL_4_SPLITS
-sun.directional_shadow_max_distance = 100.0
-```
+> See [references/materials-and-lighting-recipes.md](references/materials-and-lighting-recipes.md#light-properties) for the properties table and the GDScript + C# sun setup snippet.
 
-```csharp
-sun.LightColor = new Color(1.0f, 0.95f, 0.9f);
-sun.ShadowEnabled = true;
-sun.DirectionalShadowMode = DirectionalLight3D.ShadowMode.Parallel4Splits;
-sun.DirectionalShadowMaxDistance = 100.0f;
-```
+### AreaLight3D (Godot 4.7+)
+
+`AreaLight3D` emits light from a rectangle along the node's **-Z** — neon tubes, screens, softbox panels — with PCSS soft shadows driven by `light_size`. Key properties: `area_size = Vector2(1, 1)` (meters), `area_range = 5.0`, `area_attenuation = 1.0` (`2.0` = physically accurate inverse square), `area_normalize_energy = true` (resizing keeps total output stable), optional `area_texture` for textured emission (Forward+/Mobile only). Mobile support is limited and Compatibility cannot cast area-light shadows; in Forward+, a single visible area light adds clustered-lighting cost to *all* rendered objects — reserve for cinematics or high-end targets.
+
+> See [references/materials-and-lighting-recipes.md](references/materials-and-lighting-recipes.md#arealight3d-godot-47) for the full property table and the GDScript + C# setup recipe.
 
 ### Dynamic Point Light
 
@@ -128,23 +117,11 @@ Spawn an `OmniLight3D` at runtime, drive its energy with a tween, queue-free on 
 
 > See [references/materials-and-lighting-recipes.md](references/materials-and-lighting-recipes.md#dynamic-point-light) for the full GDScript and C# recipe.
 
-### Shadow Configuration Tips
+### Shadow Configuration & Bake Modes
 
-| Setting                     | Effect                                             | Recommendation                       |
-|-----------------------------|-----------------------------------------------------|--------------------------------------|
-| `shadow_bias`               | Prevents self-shadowing (shadow acne)               | Start at 0.1, increase if acne visible |
-| `shadow_normal_bias`        | Better acne fix than regular bias                   | Prefer this over `shadow_bias`       |
-| `directional_shadow_max_distance` | Limits shadow range from camera               | Lower = better quality; 50–100m typical |
-| Shadow map resolution       | Project Settings > Rendering > Lights and Shadows  | 2048 for perf, 4096 for quality      |
-| `shadow_blur`               | Softens shadow edges                                | 1.0–2.0 for gentle softness         |
+Prefer `shadow_normal_bias` over `shadow_bias` against acne; keep `directional_shadow_max_distance` at the minimum needed (50–100 m typical). Bake modes: Disabled (fully real-time, default), Static (fully baked, no runtime cost), Dynamic (indirect baked, direct real-time).
 
-### Light Bake Modes
-
-| Mode     | Description                                               | Use For                             |
-|----------|-----------------------------------------------------------|-------------------------------------|
-| Disabled | Not included in lightmap baking; fully real-time (default) | Moving lights, player flashlight    |
-| Static   | Fully baked into lightmaps — no runtime cost              | Architecture, terrain, fixed lights |
-| Dynamic  | Indirect light baked, direct light stays real-time        | Lights that change color/intensity  |
+> See [references/materials-and-lighting-recipes.md](references/materials-and-lighting-recipes.md#shadow-configuration-tips) for the shadow-tuning table and the bake-modes table.
 
 ---
 
@@ -153,6 +130,10 @@ Spawn an `OmniLight3D` at runtime, drive its energy with a tween, queue-free on 
 Configure global rendering — sky background, tonemapping, glow, SSR, SSAO/SSIL/SDFGI, depth-of-field — through a `WorldEnvironment` node holding an `Environment` resource. Pick a tonemap (`Linear`, `Reinhard`, `Filmic`, `ACES`, or `AgX`) on the Environment resource. Forward+ enables SSAO, SSIL, SSR, and SDFGI; mobile/compatibility renderers omit these.
 
 > See [references/environment-and-post.md](references/environment-and-post.md) for the full setup recipes (sky options, tonemap modes, all post-processing effects, the 4.6+ glow-before-tonemapping pipeline change, AgX `tonemap_white` / `tonemap_contrast` controls, and the 4.6+ SSR quality upgrade).
+
+> **Godot 4.7+:** `display/window/hdr/request_hdr_output` (default `false`, promoted to a basic project setting) requests HDR display output for the main window and editor where supported, auto-switching between HDR and SDR as screens or system settings change; it forces `Viewport.use_hdr_2d` on for the main viewport (other `SubViewport`s must enable it themselves). Read only at startup — toggle `Window.hdr_output_requested` at runtime.
+
+> ⚠️ **Changed in Godot 4.7:** The `rendering/reflections/sky_reflections/roughness_layers` default changed from `7` to `8`, altering sky-reflection roughness mip distribution for projects that left it at the default. Set it back to `7` to keep the 4.6 output. See the [4.7 migration guide](https://docs.godotengine.org/en/latest/tutorials/migrating/upgrading_to_godot_4.7.html).
 
 ## 5. Global Illumination
 
@@ -182,6 +163,8 @@ Three layers: depth/height fog set on `WorldEnvironment.environment` (cheap, all
 
 > See [references/fog-recipes.md](references/fog-recipes.md) for the full GDScript and C# recipes — depth/height fog setup, volumetric fog parameters and performance notes, and FogVolume placement.
 
+> ⚠️ **Changed in Godot 4.7:** Volumetric fog is now blended using transmittance instead of opacity, so existing volumetric fog can look different after upgrading. Enable the project setting `rendering/environment/fog/use_legacy_blending` (default `false`) to restore the previous behavior. See [GH-119414](https://github.com/godotengine/godot/pull/119414).
+
 ## 7. Decals
 
 `Decal` nodes project a texture onto whatever surfaces fall within their bounding box — bullet holes, blood splatter, ground details, signage. All renderers support decals; performance scales with overdraw and decal count.
@@ -207,23 +190,15 @@ Four tools: automatic mesh LOD (set on import or per `MeshInstance3D`), manual `
 
 Choose in **Project Settings → Rendering → Renderer → Rendering Method**. Rule of thumb: Forward+ for desktop, Mobile for mobile, Compatibility only for web or very low-end hardware.
 
+> **Godot 4.7+:** Vulkan raytracing (RenderingDevice BLAS/TLAS and raytracing pipelines) shipped experimental in 4.7 and is not yet recommended for production.
+
 ---
 
 ## 10. Common Pitfalls
 
-| Symptom                              | Cause                                          | Fix                                                              |
-|--------------------------------------|-------------------------------------------------|------------------------------------------------------------------|
-| 3D scene is completely black         | No Camera3D or no lights in scene               | Add Camera3D + DirectionalLight3D + WorldEnvironment             |
-| Objects appear dark despite lighting | No ambient light or sky                          | Set Environment ambient_light_source to Sky or Color             |
-| Shadow acne (striped shadows)        | Shadow bias too low                              | Increase `shadow_normal_bias` (preferred over `shadow_bias`)     |
-| Peter-panning (shadows detached)     | Shadow bias too high                             | Lower `shadow_bias`; use `shadow_normal_bias` instead            |
-| Shadows pop in/out                   | `directional_shadow_max_distance` too high       | Lower to 50–100m; quality improves as range shrinks              |
-| Material looks flat / no reflections | Missing ReflectionProbe or Sky                   | Add ReflectionProbe or set Environment reflected light to Sky    |
-| Decals don't appear                  | Y extent too small or wrong cull mask            | Increase Decal Y size; check cull mask matches target layer      |
-| Transparency sorting artifacts       | Overlapping transparent meshes                   | Use Alpha Scissor/Hash where possible; avoid layered transparency |
-| SDFGI shows light leaking           | Thin walls or small geometry                     | Thicken walls; increase SDFGI cascade count                      |
-| Volumetric fog not visible           | Wrong renderer (Mobile/Compatibility)            | Switch to Forward+ renderer                                      |
-| MultiMesh instances invisible         | `instance_count` set after transforms           | Set `instance_count` before calling `set_instance_transform()`   |
+Quick symptom → cause → fix table covering black scenes, dark objects without ambient light, shadow acne and peter-panning, popping shadows, flat materials, invisible decals, transparency sorting artifacts, SDFGI light leaking, missing volumetric fog, and invisible MultiMesh instances.
+
+> See [references/common-pitfalls.md](references/common-pitfalls.md) for the full table.
 
 ---
 
@@ -246,3 +221,4 @@ Choose in **Project Settings → Rendering → Renderer → Rendering Method**. 
 - [ ] Hero assets with complex surface detail use bent normal maps in the StandardMaterial3D Bent Normal slot for improved indirect lighting (Godot 4.5+)
 - [ ] After upgrading to Godot 4.6, glow settings are re-tuned if appearance has changed (glow now runs before tonemapping)
 - [ ] AgX `tonemap_white` and `tonemap_contrast` are adjusted when using AgX tonemapper for precise look control (Godot 4.6+)
+- [ ] After upgrading to Godot 4.7, volumetric fog and sky reflections are re-checked (fog blending and the `roughness_layers` default changed)

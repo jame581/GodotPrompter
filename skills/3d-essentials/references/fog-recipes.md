@@ -66,6 +66,8 @@ env.VolumetricFogLength = 64.0f;
 env.VolumetricFogTemporalReprojectionEnabled = true;
 ```
 
+> ⚠️ **Changed in Godot 4.7:** Volumetric fog is now blended using transmittance instead of opacity, so fog tuned on earlier versions can look different after upgrading. Enable the project setting `rendering/environment/fog/use_legacy_blending` (default `false`) to restore the previous behavior. See [GH-119414](https://github.com/godotengine/godot/pull/119414).
+
 ### FogVolume (Localized Fog)
 
 Create fog in specific areas (caves, steam vents, magic effects):

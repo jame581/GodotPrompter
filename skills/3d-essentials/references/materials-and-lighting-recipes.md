@@ -1,6 +1,6 @@
 # Materials & Lighting Recipes
 
-Reference for `skills/3d-essentials/SKILL.md` — runnable code recipes for creating materials at runtime, per-instance material copies, and dynamic lights with tween-driven decay.
+Reference for `skills/3d-essentials/SKILL.md` — runnable code recipes for creating materials at runtime, per-instance material copies, dynamic lights with tween-driven decay, light properties, shadow configuration, bake modes, and AreaLight3D (Godot 4.7+).
 
 > ← Back to [SKILL.md](../SKILL.md)
 
@@ -57,6 +57,16 @@ public void FlashEmissive()
 }
 ```
 
+## Transparency Modes
+
+| Mode                | Performance | Shadows | Use For                          |
+|---------------------|-------------|---------|----------------------------------|
+| Disabled            | Fastest     | Yes     | Fully opaque objects             |
+| Alpha               | Slow        | No      | Semi-transparent glass, water    |
+| Alpha Scissor       | Fast        | Yes     | Binary cutout (leaves, fences)   |
+| Alpha Hash          | Medium      | Yes     | Dithered transparency (hair)     |
+| Depth Pre-Pass      | Medium      | Partial | Mostly opaque with transparent edges |
+
 ## Material Instancing
 
 When multiple `MeshInstance3D` nodes share the same material, changing one affects all. To make a per-instance copy:
@@ -69,6 +79,100 @@ mesh.material_override = mesh.material_override.duplicate()
 ```csharp
 _mesh.MaterialOverride = (Material)_mesh.MaterialOverride.Duplicate();
 ```
+
+## Light Properties
+
+| Property | Type | Default | Notes |
+|---|---|---|---|
+| `light_color` | `Color` | white | Drive day/night with a Tween or `Environment.sun_position` |
+| `light_energy` | `float` | 1.0 | HDR; values >1 are valid |
+| `shadow_enabled` | `bool` | false | Big perf hit when enabled |
+| `directional_shadow_mode` | enum | 4 splits | `ORTHOGONAL` / `PARALLEL_2_SPLITS` / `PARALLEL_4_SPLITS` |
+| `directional_shadow_max_distance` | `float` | 100 m | Lower = sharper shadows |
+
+```gdscript
+sun.light_color = Color(1.0, 0.95, 0.9)
+sun.shadow_enabled = true
+sun.directional_shadow_mode = DirectionalLight3D.SHADOW_PARALLEL_4_SPLITS
+sun.directional_shadow_max_distance = 100.0
+```
+
+```csharp
+sun.LightColor = new Color(1.0f, 0.95f, 0.9f);
+sun.ShadowEnabled = true;
+sun.DirectionalShadowMode = DirectionalLight3D.ShadowMode.Parallel4Splits;
+sun.DirectionalShadowMaxDistance = 100.0f;
+```
+
+## Shadow Configuration Tips
+
+| Setting                     | Effect                                             | Recommendation                       |
+|-----------------------------|-----------------------------------------------------|--------------------------------------|
+| `shadow_bias`               | Prevents self-shadowing (shadow acne)               | Start at 0.1, increase if acne visible |
+| `shadow_normal_bias`        | Better acne fix than regular bias                   | Prefer this over `shadow_bias`       |
+| `directional_shadow_max_distance` | Limits shadow range from camera               | Lower = better quality; 50–100m typical |
+| Shadow map resolution       | Project Settings > Rendering > Lights and Shadows  | 2048 for perf, 4096 for quality      |
+| `shadow_blur`               | Softens shadow edges                                | 1.0–2.0 for gentle softness         |
+
+## Light Bake Modes
+
+| Mode     | Description                                               | Use For                             |
+|----------|-----------------------------------------------------------|-------------------------------------|
+| Disabled | Not included in lightmap baking; fully real-time (default) | Moving lights, player flashlight    |
+| Static   | Fully baked into lightmaps — no runtime cost              | Architecture, terrain, fixed lights |
+| Dynamic  | Indirect light baked, direct light stays real-time        | Lights that change color/intensity  |
+
+## AreaLight3D (Godot 4.7+)
+
+`AreaLight3D` is a `Light3D` node that emits light over a two-dimensional rectangle — neon tubes, screens, softbox panels. Light is emitted along the node's **-Z** axis, and PCSS soft shadows are controlled through `light_size` (the shadow map is drawn from the light's center).
+
+| Property | Default | Notes |
+|---|---|---|
+| `area_size` | `Vector2(1, 1)` | Width and height of the rectangle in meters |
+| `area_range` | `5.0` | Max distance (meters) from any point on the area that still receives light |
+| `area_attenuation` | `1.0` | `0.0` ≈ constant brightness through most of the range; `2.0` = physically accurate inverse square |
+| `area_normalize_energy` | `true` | Divides energy by surface area — resizing doesn't change total light output |
+| `area_texture` | (none) | Optional textured emission (e.g. a screen). Forward+ and Mobile only |
+| `light_size` | `0.5` | Overridden `Light3D` default — drives the PCSS penumbra |
+| `shadow_normal_bias` | `1.0` | Overridden `Light3D` default |
+
+> **Note:** With `area_attenuation` at `2.0` or higher, distant objects may receive almost no light even within range. For runtime `area_texture` swaps, keep each texture dimension a multiple of 128 px or a power of two to skip the scaling pass (e.g. 32x64, 128x128, 256x384).
+
+### GDScript
+
+```gdscript
+func add_screen_light() -> void:
+    var panel := AreaLight3D.new()
+    panel.light_color = Color(0.85, 0.9, 1.0)
+    panel.light_energy = 4.0
+    panel.area_size = Vector2(2.0, 1.2)  # meters
+    panel.area_range = 8.0
+    panel.area_attenuation = 2.0  # physically accurate inverse-square falloff
+    panel.area_normalize_energy = true  # resizing keeps total output stable
+    panel.shadow_enabled = true  # PCSS soft shadows (not in Compatibility)
+    panel.area_texture = load("res://textures/screen_content.png")  # Forward+/Mobile only
+    add_child(panel)
+```
+
+### C#
+
+```csharp
+public void AddScreenLight()
+{
+    var panel = new AreaLight3D();
+    panel.LightColor = new Color(0.85f, 0.9f, 1.0f);
+    panel.LightEnergy = 4.0f;
+    panel.AreaSize = new Vector2(2.0f, 1.2f);
+    panel.AreaRange = 8.0f;
+    panel.AreaAttenuation = 2.0f;
+    panel.AreaNormalizeEnergy = true;
+    panel.ShadowEnabled = true;
+    panel.AreaTexture = GD.Load<Texture2D>("res://textures/screen_content.png");
+    AddChild(panel);
+}
+```
+
+> **Warning:** Shadows can look incorrect when the caster has few subdivisions and sits very close to the light (same limitation as OmniLight3D's Dual Paraboloid mode). In Mobile, the PCSS penumbra size doesn't vary as it should; in Compatibility, area lights cannot cast shadows.
 
 ## Dynamic Point Light
 

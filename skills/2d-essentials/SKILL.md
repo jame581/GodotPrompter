@@ -120,6 +120,8 @@ Override `_draw()` on any `CanvasItem` to draw lines, polygons, text, or arbitra
 
 > See [references/custom-drawing.md](references/custom-drawing.md) for the `_draw()` method, redrawing patterns, full drawing-methods reference, default font usage, `@tool` editor preview, line-width gotchas.
 
+> **Godot 4.7+:** `DrawableTexture2D` — a runtime-drawable texture type — shipped experimental in 4.7 and is not yet recommended for production.
+
 ---
 
 ## 7. 2D Meshes
@@ -162,6 +164,8 @@ public override void _Draw()
 ```
 
 `Line2D` has an `Antialiased` property in the inspector — set it via `line2D.Antialiased = true` in C# or as an Inspector toggle in the editor. This works by generating additional geometry — no MSAA needed.
+
+> ⚠️ **Changed in Godot 4.7:** `CanvasItem` antialiased line drawing no longer adds the antialiasing feather. The feather made `draw_line()`-style lines appear thicker than intended, so antialiased lines render thinner after upgrading — projects that relied on the old look must draw a thicker `width`. See the [4.7 migration guide](https://docs.godotengine.org/en/latest/tutorials/migrating/upgrading_to_godot_4.7.html).
 
 ### MSAA 2D
 
