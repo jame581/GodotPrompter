@@ -93,132 +93,74 @@ particles.Restart();
 particles.Emitting = true;
 ```
 
+### Local Billboard Alignment (Godot 4.7+)
+
+`GPUParticles3D` gains `TRANSFORM_ALIGN_LOCAL_BILLBOARD` (`= 4`): each particle's Z axis faces the camera while preserving a given axis — X or Y, chosen via `transform_align_axis`. For billboarded particles, `transform_align_channel_filter` selects which custom channel to read to calculate their angle. `ParticleProcessMaterial` pairs this with per-axis rotation velocity: enable `use_rotation_velocity_3d`, then set `rotation_velocity_3d_min/max` (`Vector3`, on the particle's local axes) and optionally `rotation_velocity_3d_curve` (per-axis curve over lifetime).
+
+```gdscript
+# 3D only — billboard toward the camera while keeping the Y axis fixed
+$GPUParticles3D.transform_align = GPUParticles3D.TRANSFORM_ALIGN_LOCAL_BILLBOARD
+$GPUParticles3D.transform_align_axis = RenderingServer.PARTICLES_ALIGN_AXIS_Y
+
+var mat: ParticleProcessMaterial = $GPUParticles3D.process_material
+mat.use_rotation_velocity_3d = true
+mat.rotation_velocity_3d_min = Vector3(-2.0, 0.0, 0.0)
+mat.rotation_velocity_3d_max = Vector3(2.0, 0.0, 0.0)
+```
+
+```csharp
+var particles = GetNode<GpuParticles3D>("GPUParticles3D");
+particles.TransformAlign = GpuParticles3D.TransformAlignEnum.LocalBillboard;
+particles.TransformAlignAxis = RenderingServer.ParticlesTransformAlignAxis.Y;
+
+var mat = (ParticleProcessMaterial)particles.ProcessMaterial;
+mat.UseRotationVelocity3D = true;
+mat.RotationVelocity3DMin = new Vector3(-2.0f, 0.0f, 0.0f);
+mat.RotationVelocity3DMax = new Vector3(2.0f, 0.0f, 0.0f);
+```
+
 ---
 
 ## 3. ParticleProcessMaterial — Essential Properties
 
-### Emission Shape
+The material drives per-particle behavior: **emission shape** (Point / Sphere / Box / Ring / Points / Directed Points), **direction + spread + initial velocity**, **gravity**, **scale and color over lifetime** (via `scale_curve` / `color_ramp`), **damping**, **radial/tangential acceleration**, and **angular velocity**.
 
-| Shape             | Description                                    |
-|-------------------|------------------------------------------------|
-| `Point`           | All particles spawn at origin                  |
-| `Sphere`          | Random position within a sphere                |
-| `Sphere Surface`  | Random position on sphere surface only         |
-| `Box`             | Random position within a box                   |
-| `Ring`             | Random position on a ring/torus               |
-| `Points`          | Spawn at positions from a texture/mesh         |
-| `Directed Points` | Spawn at positions with normals from mesh      |
+> See [references/process-material-basics.md](references/process-material-basics.md) for the emission-shape table and GDScript + C# snippets for each property group.
+
+### Per-Axis 3D Scale & Rotation (Godot 4.7+)
+
+Randomize scale and initial orientation per axis instead of uniformly. `use_scale_3d` enables `scale_3d_min/max` (`Vector3` random scale per particle); `use_rotation_3d` enables `rotation_3d_min/max` (`Vector3`, degrees — works only in 3D).
 
 ```gdscript
-var mat := ParticleProcessMaterial.new()
-mat.emission_shape = ParticleProcessMaterial.EMISSION_SHAPE_SPHERE
-mat.emission_sphere_radius = 2.0
+mat.use_scale_3d = true
+mat.scale_3d_min = Vector3(0.5, 1.0, 0.5)
+mat.scale_3d_max = Vector3(1.0, 2.0, 1.0)
+
+mat.use_rotation_3d = true  # 3D only
+mat.rotation_3d_min = Vector3(0.0, -180.0, 0.0)  # degrees
+mat.rotation_3d_max = Vector3(0.0, 180.0, 0.0)
 ```
 
 ```csharp
-var mat = new ParticleProcessMaterial();
-mat.EmissionShape = ParticleProcessMaterial.EmissionShapeEnum.Sphere;
-mat.EmissionSphereRadius = 2.0f;
+mat.UseScale3D = true;
+mat.Scale3DMin = new Vector3(0.5f, 1.0f, 0.5f);
+mat.Scale3DMax = new Vector3(1.0f, 2.0f, 1.0f);
+
+mat.UseRotation3D = true;  // 3D only
+mat.Rotation3DMin = new Vector3(0.0f, -180.0f, 0.0f);  // degrees
+mat.Rotation3DMax = new Vector3(0.0f, 180.0f, 0.0f);
 ```
 
-### Direction, Velocity & Gravity
+### Inheriting Emitter Scale (Godot 4.7+)
+
+`particle_flag_inherit_emitter_scale` (default `false`): if `true`, particles inherit the scale of the emitter node. Has no effect when `local_coords` is `true`, since particles in local space are already affected by the emitter's scale.
 
 ```gdscript
-var mat := ParticleProcessMaterial.new()
-
-# Direction particles move (normalized)
-mat.direction = Vector3(0.0, 1.0, 0.0)  # upward
-mat.spread = 30.0  # degrees of randomness around direction
-
-# Speed
-mat.initial_velocity_min = 5.0
-mat.initial_velocity_max = 10.0
-
-# Gravity
-mat.gravity = Vector3(0.0, -9.8, 0.0)
+mat.particle_flag_inherit_emitter_scale = true
 ```
 
 ```csharp
-var mat = new ParticleProcessMaterial();
-mat.Direction = new Vector3(0.0f, 1.0f, 0.0f);
-mat.Spread = 30.0f;
-mat.InitialVelocityMin = 5.0f;
-mat.InitialVelocityMax = 10.0f;
-mat.Gravity = new Vector3(0.0f, -9.8f, 0.0f);
-```
-
-### Scale Over Lifetime
-
-```gdscript
-mat.scale_min = 1.0
-mat.scale_max = 1.5
-
-# Scale curve — shrink over lifetime
-var curve := CurveTexture.new()
-var c := Curve.new()
-c.add_point(Vector2(0.0, 1.0))  # full size at birth
-c.add_point(Vector2(1.0, 0.0))  # zero at death
-curve.curve = c
-mat.scale_curve = curve
-```
-
-```csharp
-var mat = new ParticleProcessMaterial();
-mat.ScaleMin = 1.0f;
-mat.ScaleMax = 1.5f;
-
-var curve = new CurveTexture();
-var c = new Curve();
-c.AddPoint(new Vector2(0.0f, 1.0f));
-c.AddPoint(new Vector2(1.0f, 0.0f));
-curve.Curve = c;
-mat.ScaleCurve = curve;
-```
-
-### Color Over Lifetime
-
-```gdscript
-# Gradient: white → orange → transparent
-var grad := GradientTexture1D.new()
-var g := Gradient.new()
-g.set_color(0, Color(1.0, 1.0, 1.0, 1.0))  # start: white
-g.add_point(0.5, Color(1.0, 0.5, 0.0, 0.8))  # middle: orange
-g.set_color(1, Color(1.0, 0.2, 0.0, 0.0))  # end: transparent red
-grad.gradient = g
-mat.color_ramp = grad
-```
-
-```csharp
-var grad = new GradientTexture1D();
-var g = new Gradient();
-g.SetColor(0, new Color(1.0f, 1.0f, 1.0f, 1.0f));
-g.AddPoint(0.5f, new Color(1.0f, 0.5f, 0.0f, 0.8f));
-g.SetColor(1, new Color(1.0f, 0.2f, 0.0f, 0.0f));
-grad.Gradient = g;
-mat.ColorRamp = grad;
-```
-
-### Damping & Acceleration
-
-```gdscript
-# Damping — slow particles down over time (smoke deceleration)
-mat.damping_min = 2.0
-mat.damping_max = 5.0
-
-# Radial acceleration — push away from center (explosion) or pull in (implosion)
-mat.radial_accel_min = 5.0   # positive = outward
-mat.radial_accel_max = 8.0
-
-# Tangential acceleration — orbit around center
-mat.tangential_accel_min = 2.0
-mat.tangential_accel_max = 3.0
-```
-
-### Angular Velocity (Rotation)
-
-```gdscript
-mat.angular_velocity_min = -90.0  # degrees per second
-mat.angular_velocity_max = 90.0
+mat.ParticleFlagInheritEmitterScale = true;
 ```
 
 ---
@@ -244,6 +186,8 @@ Set `trail_enabled = true` on `GPUParticles2D/3D` and assign a `Mesh` (`RibbonTr
 A particle can spawn another particle scene at lifecycle events (birth, collision, death, manual). Configure via `ParticleProcessMaterial.SubEmitterMode` + `subemitter` property on the parent particles node.
 
 > See [references/subemitters.md](references/subemitters.md) for trigger modes, scene setup, GDScript and C# (v1.6.0 parity), and limitations.
+
+> ⚠️ **Changed in Godot 4.7:** Subemitter velocity inheritance was reworked ([GH-118062](https://github.com/godotengine/godot/pull/118062)). With `sub_emitter_keep_velocity = true` (default `false`), subemitted particles inherit the parent particle's velocity when they spawn. Subemitter effects authored on earlier versions may look different after upgrading — re-check initial velocity and spread on affected systems.
 
 ---
 
@@ -281,6 +225,22 @@ Sprite-sheet animated particles via `ParticleProcessMaterial.AnimSpeedMin/Max` +
 | Disable `turbulence`         | Removes 3D noise cost | Mobile/web targets                   |
 | Fewer `trail_sections`       | Less trail geometry  | When trail smoothness isn't critical |
 | `visibility_rect` (2D)       | Skips off-screen     | Always set for 2D particles          |
+
+### Seeking the Particle Timeline (Godot 4.7+)
+
+`request_particles_process(process_time, process_time_residual = 0.0)` — on `GPUParticles2D/3D` and `CPUParticles2D/3D` — requests extra process time during a single frame. `process_time` is simulated with emitting on; the 4.7-added `process_time_residual` is simulated with emitting turned off. Combined with `speed_scale = 0.0`, this lets you seek a paused particle system's timeline (e.g., scrubbing VFX in a cutscene or replay).
+
+```gdscript
+$GPUParticles3D.speed_scale = 0.0
+# Simulate 1.5s with emission on, then 0.25s with emission off
+$GPUParticles3D.request_particles_process(1.5, 0.25)
+```
+
+```csharp
+var particles = GetNode<GpuParticles3D>("GPUParticles3D");
+particles.SpeedScale = 0.0f;
+particles.RequestParticlesProcess(1.5f, 0.25f);
+```
 
 ### Dynamic Quality Scaling
 
