@@ -167,6 +167,23 @@ Transform3D b = GetNode<Node3D>("End").GlobalTransform;
 GlobalTransform = a.InterpolateWith(b, 0.5f);
 ```
 
+### is_orthonormal() (Godot 4.7+)
+
+`Basis.is_orthonormal()` (const) returns `true` if the basis is *orthogonal* (axes perpendicular to each other) **and** *normalized* (every axis has length `1.0`) — especially useful during physics calculations. It complements `orthonormalized()`: check first, and only re-orthonormalize when accumulated floating-point drift has denormalized the basis.
+
+```gdscript
+if not global_transform.basis.is_orthonormal():
+    global_transform.basis = global_transform.basis.orthonormalized()
+```
+
+```csharp
+if (!GlobalTransform.Basis.IsOrthonormal())
+{
+    GlobalTransform = new Transform3D(
+        GlobalTransform.Basis.Orthonormalized(), GlobalPosition);
+}
+```
+
 ---
 
 ## 3. Interpolation

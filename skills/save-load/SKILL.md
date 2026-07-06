@@ -38,6 +38,8 @@ Choose the right serialization strategy for your data type. All examples target 
 
 > See [references/json-saves.md](references/json-saves.md) for the full GDScript + C# save/load implementation, including FileAccess wrapping and error handling.
 
+> ⚠️ **Changed in Godot 4.7:** `JSON.stringify(data, indent = "", sort_keys = true, full_precision = false)` now serializes an empty `Dictionary` compactly as `{}` even when an `indent` is passed ([GH-115883](https://github.com/godotengine/godot/pull/115883)). Save files written with an indent change formatting for empty-dict fields after upgrading — anything that diffs or hashes save output byte-for-byte must tolerate the new form. Parsing is unaffected.
+
 ---
 
 ## 4. Save Architecture Pattern
