@@ -298,7 +298,7 @@ Wire HSliders in the settings menu to bus volumes via `AudioServer.set_bus_volum
 
 Three stream types for adaptive music: `AudioStreamPlaylist` (sequenced or shuffled tracks), `AudioStreamSynchronized` (multiple stems played in sync — vertical layering for combat intensity), `AudioStreamInteractive` (clip transitions on triggers — state-driven music). Godot 4.4+ adds `AudioStreamWAV.load_from_file()` for runtime WAV loading.
 
-> **Godot 4.7+:** `AudioStreamInteractive` now exposes `TRANSITION_TO_TIME_PREVIOUS_POSITION` (`TransitionToTime` enum) to scripts — the destination clip resumes from the position it last played at, or from its start if it never played. Ideal for exploration ↔ combat music that picks up where it left off.
+> **Godot 4.7+:** `AudioStreamInteractive` now exposes `TRANSITION_TO_TIME_PREVIOUS_POSITION` (`TransitionToTime` enum) to scripts — the destination clip resumes from its last played position if there was a previous transition from that clip, otherwise it plays from its start. Ideal for exploration ↔ combat music that picks up where it left off.
 
 > See [references/interactive-music.md](references/interactive-music.md) for the stream-type comparison, GDScript recipes, the 4.7+ resume-position transition, and the 4.4+ runtime-load example.
 
