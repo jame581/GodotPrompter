@@ -73,30 +73,9 @@ Godot ships with `ui_*` actions: `ui_accept`, `ui_cancel`, `ui_left`, `ui_right`
 
 ### Adding Actions in Code
 
-```gdscript
-# Typically done in an autoload _ready(), not every frame
-func _ready() -> void:
-    if not InputMap.has_action("move_left"):
-        InputMap.add_action("move_left")
-        var event := InputEventKey.new()
-        event.physical_keycode = KEY_A
-        InputMap.action_add_event("move_left", event)
-```
+Actions can be created at runtime with `InputMap.add_action()` + `InputMap.action_add_event()` — typically in an autoload `_ready()`, guarded by `InputMap.has_action()`. Define actions in the editor Input Map; only add them in code for dynamically generated bindings or mod support.
 
-```csharp
-public override void _Ready()
-{
-    if (!InputMap.HasAction("move_left"))
-    {
-        InputMap.AddAction("move_left");
-        var ev = new InputEventKey();
-        ev.PhysicalKeycode = Key.A;
-        InputMap.ActionAddEvent("move_left", ev);
-    }
-}
-```
-
-> **Best practice:** Define actions in the editor Input Map. Only add actions in code for dynamically generated bindings or mod support.
+> See [references/action-rebinding.md](references/action-rebinding.md) for the GDScript and C# snippet.
 
 ### Recommended Action Names
 
@@ -207,61 +186,9 @@ public override void _PhysicsProcess(double delta)
 
 ### Input Buffering
 
-Buffer discrete actions so they aren't lost between physics frames.
+Buffer discrete actions so they aren't lost between physics frames: catch the action in `_unhandled_input()`, set a flag with a short timer (0.1 s is typical), and consume the flag in `_physics_process()`.
 
-```gdscript
-var _jump_buffered: bool = false
-var _jump_buffer_timer: float = 0.0
-const JUMP_BUFFER_TIME: float = 0.1
-
-func _unhandled_input(event: InputEvent) -> void:
-    if event.is_action_pressed("jump"):
-        _jump_buffered = true
-        _jump_buffer_timer = JUMP_BUFFER_TIME
-
-func _physics_process(delta: float) -> void:
-    if _jump_buffered:
-        _jump_buffer_timer -= delta
-        if _jump_buffer_timer <= 0.0:
-            _jump_buffered = false
-
-    if _jump_buffered and is_on_floor():
-        velocity.y = JUMP_VELOCITY
-        _jump_buffered = false
-```
-
-```csharp
-private bool _jumpBuffered;
-private float _jumpBufferTimer;
-private const float JumpBufferTime = 0.1f;
-
-public override void _UnhandledInput(InputEvent @event)
-{
-    if (@event.IsActionPressed("jump"))
-    {
-        _jumpBuffered = true;
-        _jumpBufferTimer = JumpBufferTime;
-    }
-}
-
-public override void _PhysicsProcess(double delta)
-{
-    if (_jumpBuffered)
-    {
-        _jumpBufferTimer -= (float)delta;
-        if (_jumpBufferTimer <= 0f)
-            _jumpBuffered = false;
-    }
-
-    if (_jumpBuffered && IsOnFloor())
-    {
-        Vector2 vel = Velocity;
-        vel.Y = JumpVelocity;
-        Velocity = vel;
-        _jumpBuffered = false;
-    }
-}
-```
+> See [references/input-buffering.md](references/input-buffering.md) for the full GDScript and C# jump-buffer implementation.
 
 ---
 
@@ -277,7 +204,9 @@ public override void _PhysicsProcess(double delta)
 
 `Input.get_connected_joypads()` for runtime detection, `Input.joy_connection_changed` signal for hot-plug. Use Input Map actions with joypad button events for portability. Analog sticks: `Input.get_vector("left", "right", "up", "down", deadzone)` returns a length-clamped Vector2 with built-in deadzone.
 
-> See [references/gamepad.md](references/gamepad.md) for the GDScript and C# recipes (controller detection, deadzone analog reading, vibration via `start_joy_vibration`, detecting last-input-device for UI prompt swapping).
+> See [references/gamepad.md](references/gamepad.md) for the GDScript and C# recipes (controller detection, deadzone analog reading, vibration via `start_joy_vibration`, motion sensors, detecting last-input-device for UI prompt swapping).
+
+> **Godot 4.7+:** Joypad motion sensors — `Input.get_joy_accelerometer(device)` / `get_joy_gyroscope(device)` (both `Vector3`), guarded by `has_joy_motion_sensors()` and enabled with `set_joy_motion_sensors_enabled()`; recipe in [references/gamepad.md](references/gamepad.md). Vibration is now queryable — `Input.has_joy_vibration(device)` plus `get_joy_vibration_strength/duration/remaining_duration()`. `JoyButton` gains `JOY_BUTTON_MISC2` (`21`) through `JOY_BUTTON_MISC6` (`25`) (C#: `JoyButton.Misc2`…). New project setting `input_devices/joypads/ignore_joypad_on_unfocused_application` (default `false`) ignores joypad input (including motion sensors) and LED changes and stops vibration while the app is unfocused.
 
 ---
 
@@ -286,6 +215,48 @@ public override void _PhysicsProcess(double delta)
 `InputEventScreenTouch` for tap/release, `InputEventScreenDrag` for finger drag. Multi-touch tracked by `event.index`. Enable **Project Settings → Input Devices → Pointing → Emulate Touch From Mouse** to test on desktop.
 
 > See [references/touch.md](references/touch.md) for the GDScript and C# basic touch event handling and the emulate-touch-from-mouse setting.
+
+### VirtualJoystick (Godot 4.7+)
+
+Godot 4.7 adds a built-in `VirtualJoystick` Control node for on-screen touch joysticks. Add it to a `CanvasLayer`, point its `action_up/down/left/right` properties (`StringName`, defaults `&"ui_up"` etc.) at your movement actions, and it triggers those actions like a physical stick.
+
+```gdscript
+@onready var joystick: VirtualJoystick = $CanvasLayer/VirtualJoystick
+
+func _ready() -> void:
+    joystick.action_left = &"move_left"
+    joystick.action_right = &"move_right"
+    joystick.action_up = &"move_up"
+    joystick.action_down = &"move_down"
+    joystick.joystick_mode = VirtualJoystick.JOYSTICK_DYNAMIC  # recenters on touch
+    joystick.visibility_mode = VirtualJoystick.VISIBILITY_WHEN_TOUCHED
+
+func _physics_process(_delta: float) -> void:
+    # The joystick drives the actions — normal polling just works
+    var direction := Input.get_vector("move_left", "move_right", "move_up", "move_down")
+```
+
+```csharp
+private VirtualJoystick _joystick;
+
+public override void _Ready()
+{
+    _joystick = GetNode<VirtualJoystick>("CanvasLayer/VirtualJoystick");
+    _joystick.ActionLeft = "move_left";
+    _joystick.ActionRight = "move_right";
+    _joystick.ActionUp = "move_up";
+    _joystick.ActionDown = "move_down";
+    _joystick.JoystickMode = VirtualJoystick.JoystickModeEnum.Dynamic;
+    _joystick.VisibilityMode = VirtualJoystick.VisibilityModeEnum.WhenTouched;
+}
+
+public override void _PhysicsProcess(double delta)
+{
+    Vector2 direction = Input.GetVector("move_left", "move_right", "move_up", "move_down");
+}
+```
+
+Tune `deadzone_ratio` (default `0.0` — InputMap action deadzones apply on top), `clampzone_ratio` (`1.0`), `joystick_size` (`100.0` px), and `tip_size` (`50.0` px); restyle via the `normal_joystick`/`normal_tip` and `pressed_joystick`/`pressed_tip` StyleBox theme slots. The `released(input_vector)` and `flicked(input_vector)` signals report final direction and strength.
 
 ---
 
@@ -299,51 +270,9 @@ Three steps: (1) capture the user's chosen key via `_input` while in "rebinding"
 
 ## 8. Consuming and Propagating Input
 
-### Stopping Event Propagation
+Input propagates in **reverse scene tree order** (deepest child first, root last); call `get_viewport().set_input_as_handled()` after consuming an event to stop it reaching other nodes. During pause, only nodes with `process_mode = PROCESS_MODE_ALWAYS` receive input.
 
-```gdscript
-func _unhandled_input(event: InputEvent) -> void:
-    if event.is_action_pressed("interact"):
-        _interact()
-        # Mark as handled — no other node receives this event
-        get_viewport().set_input_as_handled()
-```
-
-```csharp
-public override void _UnhandledInput(InputEvent @event)
-{
-    if (@event.IsActionPressed("interact"))
-    {
-        Interact();
-        GetViewport().SetInputAsHandled();
-    }
-}
-```
-
-### Node Processing Order
-
-Input propagates in **reverse scene tree order** (deepest child first, root last). To control which node gets input first:
-
-- Move it deeper in the tree, or
-- Use `Node.set_process_input(true/false)` to enable/disable input on specific nodes
-- Call `get_viewport().set_input_as_handled()` to stop propagation
-
-### Paused Input
-
-By default, `_unhandled_input()` and `_input()` don't fire when the tree is paused. To receive input during pause (e.g., pause menu):
-
-```gdscript
-# On the pause menu node:
-func _ready() -> void:
-    process_mode = Node.PROCESS_MODE_ALWAYS
-```
-
-```csharp
-public override void _Ready()
-{
-    ProcessMode = ProcessModeEnum.Always;
-}
-```
+> See [references/event-propagation.md](references/event-propagation.md) for the GDScript and C# recipes (stopping propagation, node processing order, receiving input while paused).
 
 ---
 
@@ -361,6 +290,8 @@ public override void _Ready()
 | Touch input doesn't work on desktop  | "Emulate Touch From Mouse" is disabled           | Enable in Project Settings > Input Devices > Pointing              |
 | Input fires during pause             | Node `process_mode` is `INHERIT` (pauses with parent) | Set pause menu to `PROCESS_MODE_ALWAYS`                      |
 | Action triggers twice per press      | Same action checked in both `_input` and `_unhandled_input` | Pick one callback per action                              |
+
+> ⚠️ **Changed in Godot 4.7:** Mouse and keyboard device IDs changed from `0` to `InputEvent.DEVICE_ID_MOUSE` (`32`) and `InputEvent.DEVICE_ID_KEYBOARD` (`16`), because some joypads use `0` as their device ID. Code checking `event.device == 0` to detect keyboard/mouse input silently breaks — compare against the constants or check the event type (`event is InputEventKey`) instead. See the [4.7 migration guide](https://docs.godotengine.org/en/latest/tutorials/migrating/upgrading_to_godot_4.7.html).
 
 ---
 
