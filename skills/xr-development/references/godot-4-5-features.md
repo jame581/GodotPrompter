@@ -71,6 +71,7 @@ func _ready() -> void:
 
 ```csharp
 // The render model node auto-populates; no manual mesh assignment needed.
+// Assign the OpenXRRenderModel node in the Inspector.
 [Export] public Node3D RenderModel { get; set; }
 
 public override void _Ready()

@@ -98,7 +98,8 @@ particles.Emitting = true;
 `GPUParticles3D` gains `TRANSFORM_ALIGN_LOCAL_BILLBOARD` (`= 4`): each particle's Z axis faces the camera while preserving a given axis — X or Y, chosen via `transform_align_axis`. For billboarded particles, `transform_align_channel_filter` selects which custom channel to read to calculate their angle. `ParticleProcessMaterial` pairs this with per-axis rotation velocity: enable `use_rotation_velocity_3d`, then set `rotation_velocity_3d_min/max` (`Vector3`, on the particle's local axes) and optionally `rotation_velocity_3d_curve` (per-axis curve over lifetime).
 
 ```gdscript
-# 3D only — billboard toward the camera while keeping the Y axis fixed
+# 3D only — billboard toward the camera while keeping the Y axis fixed.
+# Assumes a ParticleProcessMaterial is assigned (section 1 setup).
 $GPUParticles3D.transform_align = GPUParticles3D.TRANSFORM_ALIGN_LOCAL_BILLBOARD
 $GPUParticles3D.transform_align_axis = RenderingServer.PARTICLES_ALIGN_AXIS_Y
 
@@ -109,6 +110,7 @@ mat.rotation_velocity_3d_max = Vector3(2.0, 0.0, 0.0)
 ```
 
 ```csharp
+// Assumes a ParticleProcessMaterial is assigned (section 1 setup).
 var particles = GetNode<GpuParticles3D>("GPUParticles3D");
 particles.TransformAlign = GpuParticles3D.TransformAlignEnum.LocalBillboard;
 particles.TransformAlignAxis = RenderingServer.ParticlesTransformAlignAxis.Y;
