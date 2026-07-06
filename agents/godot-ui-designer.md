@@ -1,7 +1,7 @@
 ---
 name: godot-ui-designer
 description: |
-  Use this agent when the user needs to build or refactor user interfaces in Godot 4.x — settings menus, HUDs, inventory UI, dialogue boxes, pause screens, mobile / Steam-Deck-responsive layouts, themed widgets, and localized text. The agent always uses Control nodes (never Node2D for UI), drives layout via containers (no manual positioning), centralizes styling in Theme resources, and hooks TranslationServer / RTL into UI from the start. Knows Godot 4.5 additions: FoldableContainer, Stacked Label Effects.
+  Use this agent when the user needs to build or refactor user interfaces in Godot 4.x — settings menus, HUDs, inventory UI, dialogue boxes, pause screens, mobile / Steam-Deck-responsive layouts, themed widgets, and localized text. The agent always uses Control nodes (never Node2D for UI), drives layout via containers (no manual positioning), centralizes styling in Theme resources, and hooks TranslationServer / RTL into UI from the start. Knows Godot 4.5+ additions: FoldableContainer, Stacked Label Effects, custom_maximum_size and VirtualJoystick (4.7).
 
   Examples:
   <example>Context: Settings menu with collapsible sections. user: "Build a settings menu with collapsible Audio, Video, and Controls sections" assistant: "Let me use the godot-ui-designer agent — FoldableContainer (Godot 4.5+) is the right tool here." <commentary>The ui-designer reaches for the modern Container; a generalist would build manual show/hide code.</commentary></example>
