@@ -205,5 +205,21 @@ public partial class SpawnerGizmoPlugin : EditorNode3DGizmoPlugin
 // #endif
 ```
 
+### Committing on a Plain Click (Godot 4.7+)
+
+By default, `_commit_handle` only fires when the handle actually moved. Override `_can_commit_handle_on_click()` to define whether the gizmo should commit when the final handle position is the same as the initial one — i.e. a plain click on the handle. Returns `false` if not overridden. Useful for click-to-toggle handles.
+
+```gdscript
+func _can_commit_handle_on_click() -> bool:
+    return true  # commit even when the handle did not move
+```
+
+```csharp
+public override bool _CanCommitHandleOnClick()
+{
+    return true; // commit even when the handle did not move
+}
+```
+
 ---
 

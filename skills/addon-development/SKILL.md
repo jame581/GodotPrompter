@@ -186,6 +186,41 @@ public partial class MyPlugin : EditorPlugin
 
 **add_tool_menu_item** adds an entry under **Project** in the top menu bar. Pass a `Callable` that takes no arguments.
 
+### Unsaved-State & Script Editor Control (Godot 4.7+)
+
+Godot 4.7 adds file-management APIs useful for build/export tooling — check for unsaved work before running an action, or refresh scripts changed by an external tool.
+
+```gdscript
+func _run_pre_build_check() -> void:
+    var unsaved_scenes := EditorInterface.get_unsaved_scenes()  # PackedStringArray of scene paths
+    var script_editor := EditorInterface.get_script_editor()
+    var unsaved_files := script_editor.get_unsaved_files()      # PackedStringArray of script paths
+    if not unsaved_scenes.is_empty() or not unsaved_files.is_empty():
+        push_warning("Unsaved work detected — save before building.")
+
+    script_editor.save_all_scripts()   # saves every open script
+    script_editor.reload_open_files()  # re-read files changed outside the editor
+    # Closes the tab, discarding unsaved changes; OK or ERR_FILE_NOT_FOUND.
+    var err := script_editor.close_file("res://addons/my_plugin/generated.gd")
+```
+
+```csharp
+#if TOOLS
+private void RunPreBuildCheck()
+{
+    string[] unsavedScenes = EditorInterface.Singleton.GetUnsavedScenes();
+    var scriptEditor = EditorInterface.Singleton.GetScriptEditor();
+    string[] unsavedFiles = scriptEditor.GetUnsavedFiles();
+    if (unsavedScenes.Length > 0 || unsavedFiles.Length > 0)
+        GD.PushWarning("Unsaved work detected — save before building.");
+
+    scriptEditor.SaveAllScripts();
+    scriptEditor.ReloadOpenFiles();
+    Error err = scriptEditor.CloseFile("res://addons/my_plugin/Generated.cs");
+}
+#endif
+```
+
 ---
 
 ## 4. Custom Inspector Plugin
@@ -193,6 +228,8 @@ public partial class MyPlugin : EditorPlugin
 When you want a custom widget for an exported property of a specific type, register an `EditorInspectorPlugin` from your main `EditorPlugin`. The inspector plugin overrides `_can_handle` to opt in and `_parse_property` (or `_parse_begin`) to inject custom widgets. Pair with an `EditorProperty` subclass for the actual UI.
 
 > See [references/inspector-plugins.md](references/inspector-plugins.md) for the full GDScript and C# scaffold (custom inspector + EditorProperty + registration boilerplate).
+
+> **Godot 4.7+:** the static `EditorInspector.create_default_inspector(filter_line_edit: LineEdit = null)` returns an inspector with the same configuration as the editor's Inspector dock, ready to embed in plugin UIs — pass a `LineEdit` for live property filtering (see [references/inspector-plugins.md](references/inspector-plugins.md)). `EditorContextMenuPlugin` also gains `CONTEXT_SLOT_INSPECTOR_PROPERTY` in `ContextMenuSlot`, so context-menu plugins can extend the inspector property right-click menu: `_popup_menu()` receives `[object ID, property name]` and the option callback receives the `EditorProperty` directly.
 
 ---
 
@@ -217,6 +254,8 @@ Add a custom dock to the editor by calling `add_control_to_dock(slot, control)` 
 `EditorNode3DGizmoPlugin` adds visual handles for 3D nodes in the editor — wireframe shapes, draggable handles, rotation rings. Implement `_init` (materials), `_get_gizmo_name`, `_has_gizmo`, `_redraw` (draw lines/handles), and `_get_handle_value` / `_set_handle` / `_commit_handle` for interactive editing.
 
 > See [references/gizmos-deep-dive.md](references/gizmos-deep-dive.md) for the full GDScript and C# gizmo plugin (with undo/redo wiring for handle commits).
+
+> **Godot 4.7+:** override `_can_commit_handle_on_click() -> bool` (returns `false` if not overridden) to commit a handle action even when the final handle position is the same as the initial one — i.e. on a plain click.
 
 ---
 
