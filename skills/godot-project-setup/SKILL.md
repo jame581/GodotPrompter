@@ -187,6 +187,8 @@ Configure these in `Project > Project Settings` or directly in `project.godot`.
 
 For pixel-art projects use `stretch/mode = viewport` and `texture_filter = nearest` on the root CanvasItem or globally via `rendering/textures/canvas_textures/default_texture_filter`.
 
+> **Godot 4.7+:** Projects **newly created** in Godot 4.7 already default `display/window/stretch/mode` to `canvas_items` and `display/window/stretch/aspect` to `expand` (previously `disabled` / `keep`), so only `aspect` needs changing if you want `keep`'s letterboxing. Projects created on older versions keep their existing values — set both explicitly when upgrading.
+
 ### Input Map
 
 Define actions in `Project > Project Settings > Input Map` rather than hard-coding key constants. This lets players rebind controls at runtime.

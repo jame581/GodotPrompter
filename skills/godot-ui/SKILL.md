@@ -38,6 +38,8 @@ Every UI widget (`Button`, `Label`, `LineEdit`, etc.) extends `Control`. The key
 
 Place UI nodes inside a `CanvasLayer` (or directly under the scene root's built-in canvas) so they always render on top of the 3D/2D world and are not affected by `Camera` transforms.
 
+> ⚠️ **Changed in Godot 4.7:** `Control.accessibility_live` changed type from `DisplayServer.AccessibilityLiveMode` to `AccessibilityServer.AccessibilityLiveMode` (`LIVE_OFF = 0` default, `LIVE_POLITE`, `LIVE_ASSERTIVE`) — the accessibility enums/APIs moved to the new `AccessibilityServer` singleton. GDScript-compatible; breaks C# binary/source compatibility (rebuild against the new enum). See the [4.7 migration guide](https://docs.godotengine.org/en/latest/tutorials/migrating/upgrading_to_godot_4.7.html).
+
 ---
 
 ## 2. Common Container Nodes
@@ -56,6 +58,10 @@ Place UI nodes inside a `CanvasLayer` (or directly under the scene root's built-
 - Set `size_flags_horizontal = SIZE_EXPAND_FILL` on children that should fill available space.
 - Use `custom_minimum_size` to prevent a child from collapsing to zero.
 - `MarginContainer` reads margin from the theme property `margin_*`; override at runtime with `add_theme_constant_override("margin_left", 16)`.
+
+> **Godot 4.7+:** `custom_maximum_size` (`Vector2(-1, -1)`) caps size per axis, with priority over `custom_minimum_size`; `propagate_maximum_size` (default `false`) makes a parent's maximum constrain its Control children; the `_get_maximum_size()` virtual computes maximums from code.
+
+> ⚠️ **Changed in Godot 4.7:** `TabContainer.all_tabs_in_front` is deprecated — it no longer does anything, as tabs are always in front. Remove code that sets it. See [GH-118623](https://github.com/godotengine/godot/pull/118623).
 
 ---
 
@@ -148,6 +154,8 @@ A `Theme` resource centralizes fonts, colors, and `StyleBox`es. Apply at the roo
 
 > See [references/theme-system.md](references/theme-system.md) for the full Theme resource creation walk-through, StyleBoxFlat properties, font overrides, theme inheritance rules, and per-node `theme_override_*` methods.
 
+> **Godot 4.7+:** `GradientTexture2D`'s `Fill` enum gains `FILL_CONIC` — colors interpolated in a cone (angular) pattern; radial progress/cooldown indicators without a shader (C#: `FillEnum.Conic`).
+
 ---
 
 ## 5. Focus & Navigation
@@ -163,6 +171,10 @@ Focus modes (`FOCUS_NONE`, `FOCUS_CLICK`, `FOCUS_ALL`) gate keyboard/gamepad nav
 Three canonical scenes: a **main menu** (centered VBoxContainer with title + button list), a **settings screen with tabs** (`TabContainer` + child panels per category), and a **pause menu overlay** (full-rect `ColorRect` background + centered options panel, paused via `get_tree().paused = true`).
 
 > See [references/ui-patterns.md](references/ui-patterns.md) for the full scene-tree fragments and GDScript wiring for each pattern.
+
+> **Godot 4.7+:** `offset_transform_*` — visual-only transform for UI juice (shake/pulse) that never re-triggers container layout; `_get_cursor_shape(at_position)` virtual — per-position cursor shapes; `PopupMenu` search bar (`search_bar_enabled`, fuzzy by default) plus `set_item_index()` for reordering; `TextureRect` `STRETCH_TILE` now tiles `AtlasTexture`s (only non-zero `margin` unsupported). Code: [references/ui-patterns.md](references/ui-patterns.md#godot-47-additions).
+
+> ⚠️ **Changed in Godot 4.7:** `RichTextLabel.add_image()` / `update_image()` sizing was reworked — `width`/`height` are now `float`; the `width_in_percent`/`height_in_percent` bools become `width_unit`/`height_unit` taking the new `ImageUnit` enum (`IMAGE_UNIT_PIXEL`, `IMAGE_UNIT_PERCENT`, `IMAGE_UNIT_EM` — em scales with font size). `ImageUpdateMask.UPDATE_WIDTH_IN_PERCENT` is renamed `UPDATE_WIDTH_UNIT`, breaking GDScript that uses the old name. See the [4.7 migration guide](https://docs.godotengine.org/en/latest/tutorials/migrating/upgrading_to_godot_4.7.html).
 
 ---
 
