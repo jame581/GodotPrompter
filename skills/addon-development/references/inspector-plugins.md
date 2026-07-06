@@ -168,6 +168,62 @@ public partial class IconPreviewProperty : EditorProperty
 // #endif
 ```
 
+### Embedding a Default Inspector (Godot 4.7+)
+
+The static `EditorInspector.create_default_inspector(filter_line_edit: LineEdit = null)` creates an inspector with the same configuration as the one used in the editor's Inspector dock — no manual setup of categories, plugins, or property editors. When you pass a `LineEdit` into `filter_line_edit`, the inspector filters its properties based on `LineEdit.text` whenever `text_changed` is emitted. Useful for dock panels or tool dialogs that need a full inspector for an arbitrary object.
+
+```gdscript
+# Inside a dock or editor tool scene
+@tool
+extends VBoxContainer
+
+var _inspector: EditorInspector
+
+
+func _ready() -> void:
+    var filter := LineEdit.new()
+    filter.placeholder_text = "Filter properties"
+    add_child(filter)
+
+    # Fully configured default inspector; the LineEdit drives live filtering.
+    _inspector = EditorInspector.create_default_inspector(filter)
+    _inspector.size_flags_vertical = Control.SIZE_EXPAND_FILL
+    add_child(_inspector)
+
+
+func show_object(object: Object) -> void:
+    _inspector.edit(object)
+```
+
+```csharp
+// res://addons/my_plugin/EmbeddedInspectorPanel.cs
+#if TOOLS
+using Godot;
+
+[Tool]
+public partial class EmbeddedInspectorPanel : VBoxContainer
+{
+    private EditorInspector _inspector;
+
+    public override void _Ready()
+    {
+        var filter = new LineEdit { PlaceholderText = "Filter properties" };
+        AddChild(filter);
+
+        // Fully configured default inspector; the LineEdit drives live filtering.
+        _inspector = EditorInspector.CreateDefaultInspector(filter);
+        _inspector.SizeFlagsVertical = Control.SizeFlags.ExpandFill;
+        AddChild(_inspector);
+    }
+
+    public void ShowObject(GodotObject @object)
+    {
+        _inspector.Edit(@object);
+    }
+}
+#endif
+```
+
 ---
 
 ## 6. Custom Resource Editors
