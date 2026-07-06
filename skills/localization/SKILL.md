@@ -131,9 +131,9 @@ public partial class CommentAwareParser : EditorTranslationParserPlugin
 {
     public override Godot.Collections.Array<string[]> _CustomizeStrings(Godot.Collections.Array<string[]> strings)
     {
-        strings.Add(["Test 1", "context", "test 1 plurals", "test 1 comment"]);
+        strings.Add(new[] { "Test 1", "context", "test 1 plurals", "test 1 comment" });
         // Drop internal strings that begin with "$".
-        return new(strings.Where(s => !s[0].StartsWith("$")));
+        return new Godot.Collections.Array<string[]>(strings.Where(s => !s[0].StartsWith("$")));
     }
 }
 #endif
