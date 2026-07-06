@@ -25,6 +25,8 @@ Key settings and their `.godot/project.godot` keys:
 | Stretch aspect | `window/stretch/aspect` | `expand` (fill screen) or `keep` (letterbox) |
 | Scale factor | `window/stretch/scale` | `1` (adjust for pixel art integer scaling) |
 
+> **Godot 4.7+:** Projects **newly created** in Godot 4.7 already default `display/window/stretch/mode` to `canvas_items` and `display/window/stretch/aspect` to `expand` (previously `disabled` / `keep`) — the recommendations above are now the out-of-the-box values. Projects created on older versions are unchanged (the property default is still `disabled`), so set both explicitly when upgrading. See the [4.7 migration guide](https://docs.godotengine.org/en/latest/tutorials/migrating/upgrading_to_godot_4.7.html).
+
 These can also be set at runtime:
 
 **GDScript:**
