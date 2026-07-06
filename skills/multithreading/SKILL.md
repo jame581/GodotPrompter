@@ -244,6 +244,8 @@ public override void _Process(double delta)
 }
 ```
 
+> **Godot 4.7+:** 4.7 shipped several threaded-load correctness fixes — `load_threaded_get()` deadlocks ([GH-119757](https://github.com/godotengine/godot/pull/119757), [GH-120077](https://github.com/godotengine/godot/pull/120077)), a race in `load_threaded_request()` ([GH-118824](https://github.com/godotengine/godot/pull/118824)), and resources returned by `load_threaded_get()` never being unloaded ([GH-119394](https://github.com/godotengine/godot/pull/119394)). No API change; if you carry workarounds for rare threaded-load hangs or leaks from earlier versions, re-test on 4.7 before keeping them. The poll-before-get rule above still applies.
+
 ---
 
 ## 6. C# concurrency: Tasks vs Godot threads

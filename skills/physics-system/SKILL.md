@@ -165,8 +165,6 @@ The `intersect_ray` result dictionary contains `position`, `normal`, `collider`,
 
 Jolt is a built-in alternative physics engine available since Godot 4.4. It is the **default for new 3D projects** starting in 4.4. **(Godot 4.6+)** Jolt is no longer marked experimental and is the confirmed stable default for all new 3D projects.
 
-> **Note:** Godot 4.6 is in beta; verify behavior on stable release.
-
 ### Enabling Jolt
 
 **Project Settings → Physics → 3D → Physics Engine** → `Jolt Physics` → Save → Restart editor. (3D only; 2D always uses GodotPhysics.)

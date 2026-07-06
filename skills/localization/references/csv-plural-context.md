@@ -4,8 +4,6 @@
 
 Godot 4.6 extends the CSV translation format with three optional header columns that enable features previously only available in PO files.
 
-> **Note:** Godot 4.6 is in beta; verify behavior on stable release.
-
 ## New CSV Columns
 
 | Column header | Purpose |
