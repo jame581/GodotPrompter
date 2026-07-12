@@ -272,7 +272,7 @@ GodotPrompter includes 9 specialized agents:
 
 ### Third-Party Addons (2 skills)
 
-These skills cover community addons with pinned versions — LimboAI v1.7.1 and Beehave v2.9.2. They require the corresponding addon to be installed in your project.
+These skills cover community addons with pinned versions — LimboAI v1.8.0 and Beehave v2.9.2. They require the corresponding addon to be installed in your project.
 
 | Skill | Description |
 |-------|-------------|

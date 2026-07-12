@@ -7,7 +7,7 @@ description: Use when using the LimboAI addon — behavior trees and hierarchica
 
 > **Related skills:** **ai-navigation** for movement the tasks drive, **state-machine** for core-engine FSM (when you don't need an addon), **godot-brainstorming** for choosing an AI approach.
 
-> **Addon:** LimboAI · version `v1.7.1` · Godot 4.6+ · MIT · source: https://github.com/limbonaut/limboai · written in C++ (GDExtension; engine-module build also available). GDExtension exposes GDScript; **C# requires the module build** (not GDExtension in v1.7.1).
+> **Addon:** LimboAI · version `v1.8.0` · Godot 4.6+ (GDExtension) · MIT · source: https://github.com/limbonaut/limboai · written in C++ (GDExtension; engine-module build also available). GDExtension exposes GDScript; **C# requires the module build** (not GDExtension in v1.8.0), and the v1.8.0 module build targets **Godot 4.7**.
 
 ---
 
@@ -51,7 +51,7 @@ macos.release          = "res://addons/limboai/bin/liblimboai.macos.template_rel
 
 ### Module version (C# or full editor integration)
 
-Download pre-compiled editor + export templates from [GitHub Releases](https://github.com/limbonaut/limboai/releases). Requires the custom engine for export. The module build ships a NuGet package for C#:
+Download pre-compiled editor + export templates from [GitHub Releases](https://github.com/limbonaut/limboai/releases). Requires the custom engine for export. v1.8.0 module builds are based on **Godot 4.7** (GDExtension supports 4.6+). The module build ships a NuGet package for C#:
 
 ```ini
 # Add local NuGet source to your project:

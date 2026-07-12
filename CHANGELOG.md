@@ -4,6 +4,15 @@ All notable changes to GodotPrompter will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
+## [1.11.1] - 2026-07-12
+
+### Changed
+
+- **`limboai` skill: pinned version bumped v1.7.1 → v1.8.0.** Upstream v1.8.0 is a Godot 4.7 compatibility release (18 commits, all internal — header/GDExtension compile fixes and CI updates) with no user-facing API changes, so no pattern or example updates were needed. Version-support facts refreshed: GDExtension still supports Godot 4.6+, but the module build — required for C# — now targets Godot 4.7 (was 4.6); noted in the addon header line and the install section.
+- README third-party addon blurb updated to LimboAI v1.8.0.
+
+> **Release notes:** Maintenance release — no new skills (51 total). Repo-wide minimum stays at Godot 4.3+.
+
 ## [1.11.0] - 2026-07-06
 
 ### Changed
