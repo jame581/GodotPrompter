@@ -19,6 +19,8 @@ Bumps the version string across all in-repo files that track it:
 - `package.json`
 - `.claude-plugin/plugin.json`
 - `.claude-plugin/marketplace.json`
+- `.cursor-plugin/plugin.json`
+- `plugin.json` (at root, for Antigravity CLI)
 
 If sibling marketplace repos are present at `../skillsmith` and `../godot-prompter-marketplace`, also bumps their `.claude-plugin/marketplace.json`. Otherwise prints manual instructions.
 
@@ -32,7 +34,7 @@ Verifies current versions match before bumping; errors out on drift.
 
 `.github/workflows/release.yml` runs automatically on tag pushes matching `v*.*.*`. It:
 
-1. Verifies version consistency between the tag, `package.json`, `.claude-plugin/plugin.json`, and `.claude-plugin/marketplace.json`
+1. Verifies version consistency between the tag, `package.json`, `.claude-plugin/plugin.json`, `.claude-plugin/marketplace.json`, `.cursor-plugin/plugin.json`, and `plugin.json`
 2. Runs `validate-skills.mjs`
 3. Creates the GitHub release using the matching CHANGELOG section as the body
 4. Opens marketplace PRs against `skillsmith` and `godot-prompter-marketplace` (requires `MARKETPLACE_TOKEN` secret)

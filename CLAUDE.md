@@ -10,11 +10,11 @@ This is a **documentation/skills repository**. There is no application build/lin
 
 - Claude Code (primary — tool names are canonical)
 - GitHub Copilot CLI
-- Gemini CLI
+- Antigravity (IDE + `agy` CLI) — succeeds Gemini CLI, which Google retired on 2026-06-18
 - Codex
 - Cursor
 - OpenCode
-- Antigravity
+- Grok Build
 
 ## Conventions
 
@@ -61,7 +61,8 @@ tests/agent-integration/    # Agent test plan and results
 scripts/                    # Release/maintenance helpers
   validate-skills.mjs       # Frontmatter/cross-ref validator (used by CI)
   bump-version.mjs          # Version bumper across plugin.json, package.json, marketplace.json
-AGENTS.md, GEMINI.md        # Root @-imports re-exporting using-godot-prompter for Codex/Gemini
+AGENTS.md, GEMINI.md        # Root @-imports re-exporting using-godot-prompter for Codex/Antigravity
+plugin.json                 # Antigravity plugin manifest (root; version must match package.json)
 .claude-plugin/             # Claude Code plugin manifest
   plugin.json               # Plugin metadata (version must match package.json)
   marketplace.json          # Self-marketplace entry (mirrors plugin.json version)
