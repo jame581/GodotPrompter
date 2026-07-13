@@ -56,6 +56,38 @@ Add a related skills line after the intro paragraph:
 
 Keep to 3-5 references max. Only link genuinely related skills.
 
+## Third-Party Addon Skills
+
+Skills that document a community addon (`limboai`, `beehave`, `popochiu`, `dialogue-manager`,
+`phantom-camera`) follow extra rules, because they describe code we don't control:
+
+1. **Pin the version** in a header line under the Related-skills line, with the addon's own minimum Godot
+   version — which may be higher than the repo's 4.3+ baseline:
+
+   ```markdown
+   > **Addon:** Popochiu · version `v2.1.1` · Godot 4.6 · MIT · source: https://github.com/carenalgas/popochiu · pure GDScript.
+   ```
+
+2. **Research against the pinned tag, never the live docs site.** Addon docs sites track `main`/`develop`
+   and routinely document APIs that don't exist in the released version. Read the tag's source
+   (`git show v<tag>:<path>` on a clone) and record findings in
+   `docs/superpowers/notes/<date>-<addon>-research.md` with a source citation per API fact. Real examples
+   this caught: Popochiu's docs site shows an `E.active_command` that doesn't exist in v2.1.1 (it's
+   `E.current_command`), and Dialogue Manager's `API.md` claims end-of-dialogue returns `{}` when the
+   source returns `null`.
+
+3. **Decide C# parity by what the addon actually ships** — not by assumption. If it has an official C#
+   API, the skill needs a C# block in every GDScript-bearing section (`dialogue-manager`,
+   `phantom-camera`). If it's genuinely GDScript-only, add it to `GDSCRIPT_ONLY_BY_DESIGN` in
+   `scripts/validate-skills.mjs` so its sections emit intentional `csharp-parity-accepted` warnings
+   instead of parity debt (`beehave`, `popochiu`). **Check for `.cs`/`.csproj` files in the addon before
+   deciding** — v1.12.0 shipped `phantom-camera` as "GDScript-only" on a false assumption and had to
+   rewrite it mid-release.
+
+4. **Wire it in**: README's Third-Party Addons table, the `using-godot-prompter` index, the routing lines
+   in `agents/godot-game-dev.md` + `agents/godot-game-architect.md`, and a bidirectional cross-ref with
+   the core skill it sits next to (e.g. `phantom-camera` ↔ `camera-system`).
+
 ## Improving Existing Skills
 
 - Fix incorrect API references or deprecated methods
@@ -63,6 +95,21 @@ Keep to 3-5 references max. Only link genuinely related skills.
 - Add cross-references to related skills
 - Expand checklist items
 - Fix typos or unclear wording
+
+## Token Budget (enforced)
+
+Every `SKILL.md` must stay **under 16 KB** (16,384 bytes). Since v1.12.0 this is a **hard rule**: the
+validator raises a `token-budget-exceeded` **error** and CI fails the release. An advisory
+`token-budget-approaching` **warning** fires from 15.5 KB (15,872 bytes) so you get a signal before the
+wall.
+
+Bytes are measured **LF-normalized**, so a Windows (CRLF) checkout reports the same numbers as CI —
+trust `node scripts/validate-skills.mjs` over a raw `wc -c`.
+
+If a skill would exceed the budget, don't cut teaching content — restructure with **Pattern X**: keep the
+canonical recipe, key decisions, and anti-patterns in `SKILL.md`, and move deep dives into
+`skills/<name>/references/<topic>.md` (unlimited size, loaded only when an agent opens them). Link every
+reference file from `SKILL.md` or the validator will flag it as orphaned.
 
 ## Testing Skills
 
@@ -72,6 +119,8 @@ Before submitting:
 2. **Try the code** — Open Godot 4.3+ and verify examples compile and run
 3. **Check C# parity** — Every GDScript example should have a C# equivalent (unless language-specific)
 4. **Verify cross-refs** — Referenced skills must exist
+5. **Run the validator** — `node scripts/validate-skills.mjs` must report **0 errors** (it checks
+   frontmatter, cross-references, the token budget, and orphaned reference files)
 
 ## Adding Agents
 
