@@ -12,15 +12,17 @@ const args = process.argv.slice(2);
 const jsonMode = args.includes('--json');
 const includeFixtures = args.includes('--include-fixtures');
 
-// Token-budget rule: skills should keep SKILL.md <= 16 KB. References (skills/<name>/references/*.md)
-// are unrestricted because they only load when an agent explicitly opens them.
+// Token-budget rule: skills must keep SKILL.md under 16 KB (error — fails CI).
+// An advisory warning fires at >= 15.5 KB so authors get a signal before the hard wall.
+// References (skills/<name>/references/*.md) are unrestricted because they only load on demand.
 const TOKEN_BUDGET_BYTES = 16 * 1024;
+const TOKEN_BUDGET_APPROACHING_BYTES = 15.5 * 1024;
 
 // Skills that are intentionally GDScript-only by design. Their sections still emit
 // a `csharp-parity-accepted` warning (so the count is visible) but do NOT count as
 // deferred parity debt.
 // 'beehave' is a GDScript-only addon (no official C# API), so its sections are accepted, not debt.
-const GDSCRIPT_ONLY_BY_DESIGN = new Set(['gdscript-patterns', 'gdscript-advanced', 'beehave']);
+const GDSCRIPT_ONLY_BY_DESIGN = new Set(['gdscript-patterns', 'gdscript-advanced', 'beehave', 'popochiu', 'phantom-camera']);
 
 const errors = [];
 const warnings = [];
@@ -143,12 +145,15 @@ function validateSkill({ name, path }) {
     record(warnings, path, 'checklist-missing', 'No implementation checklist (`- [ ]` items) found near end of file');
   }
 
-  // Token-budget warning: SKILL.md should be under 16 KB.
+  // Token-budget rule: error at >= 16 KB (fails CI), advisory warning at >= 15.5 KB.
+  // Measured on LF-normalized bytes so Windows (CRLF) checkouts match CI — see v1.10.1 CRLF caveat.
   // Restructure long skills using Pattern X (core SKILL.md + references/<topic>.md).
-  const sizeBytes = Buffer.byteLength(content, 'utf8');
+  const sizeBytes = Buffer.byteLength(content.replace(/\r\n/g, '\n'), 'utf8');
+  const kb = (sizeBytes / 1024).toFixed(1);
   if (sizeBytes >= TOKEN_BUDGET_BYTES) {
-    const kb = (sizeBytes / 1024).toFixed(1);
-    record(warnings, path, 'token-budget-exceeded', `SKILL.md is ${kb} KB (budget: ${TOKEN_BUDGET_BYTES/1024} KB) — consider splitting into references/*.md`);
+    record(errors, path, 'token-budget-exceeded', `SKILL.md is ${kb} KB (budget: ${TOKEN_BUDGET_BYTES / 1024} KB) — split into references/*.md (Pattern X)`);
+  } else if (sizeBytes >= TOKEN_BUDGET_APPROACHING_BYTES) {
+    record(warnings, path, 'token-budget-approaching', `SKILL.md is ${kb} KB (>= ${TOKEN_BUDGET_APPROACHING_BYTES / 1024} KB) — approaching the ${TOKEN_BUDGET_BYTES / 1024} KB budget`);
   }
 }
 
