@@ -108,7 +108,7 @@ When publishing a new version (e.g., v1.8.1):
    - `.claude-plugin/plugin.json`
    - `.claude-plugin/marketplace.json` (the `godot-prompter` plugin entry)
    - `.cursor-plugin/plugin.json`
-   - `gemini-extension.json`
+   - `plugin.json` (at root, for Antigravity CLI)
 
    It also attempts to bump sibling marketplaces when present at known relative paths:
    - `../skillsmith/.claude-plugin/marketplace.json` (or `../../AI/skillsmith/.claude-plugin/marketplace.json`)
@@ -138,7 +138,7 @@ Users update with:
 ```bash
 claude plugins update godot-prompter          # Claude Code
 copilot plugin update godot-prompter          # Copilot CLI
-gemini extensions update godot-prompter       # Gemini CLI
+agy plugin update godot-prompter              # Antigravity CLI
 ```
 
 ## Conventions

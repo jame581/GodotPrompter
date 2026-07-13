@@ -15,7 +15,7 @@ GodotPrompter provides Godot 4.x domain-specific skills for AI coding agents. Sk
 
 **In Copilot CLI:** Use the `skill` tool. Skills are auto-discovered from installed plugins.
 
-**In Gemini CLI:** Use the `activate_skill` tool. See `references/gemini-tools.md` for tool mapping.
+**In Gemini CLI:** Deprecated (succeeded by Antigravity CLI).
 
 **In Cursor:** Skills are loaded via custom instructions / rules system.
 
@@ -23,7 +23,12 @@ GodotPrompter provides Godot 4.x domain-specific skills for AI coding agents. Sk
 
 **In OpenCode:** Skills are discovered from the installed plugin. Use the `/skills` command to browse or invoke skills directly. See `.opencode/INSTALL.md` for setup.
 
-**In Antigravity (2.0, IDE, CLI):** Skills activate automatically when your prompt matches a skill's `description` frontmatter — no tool call needed. Install skills into `.agents/skills/` (workspace) or `~/.gemini/config/skills/` (global). See `references/antigravity-tools.md` for tool mapping and full install instructions.
+**In Antigravity (2.0, IDE, CLI):** Skills activate automatically when your prompt matches a skill's `description` frontmatter — no tool call needed. Install the plugin using:
+```bash
+git clone https://github.com/jame581/GodotPrompter
+agy plugin install GodotPrompter
+```
+For manual, workspace, or cross-project installations:
 
 ### Installing GodotPrompter for Antigravity
 

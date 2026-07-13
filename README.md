@@ -60,10 +60,11 @@ grok plugin install jame581/GodotPrompter@v1.11.0 --trust
 grok plugin enable godot-prompter
 ```
 
-### Gemini CLI
+### Antigravity CLI (`agy`)
 
 ```bash
-gemini extensions install https://github.com/jame581/GodotPrompter
+git clone https://github.com/jame581/GodotPrompter
+agy plugin install GodotPrompter
 ```
 
 ### GitHub Copilot CLI
@@ -155,7 +156,7 @@ GodotPrompter includes 9 specialized agents:
 |----------|--------|---------|
 | Claude Code | Primary | `claude plugins marketplace add jame581/skillsmith` |
 | Grok Build | Supported | `grok plugin install jame581/GodotPrompter --trust` |
-| Gemini CLI | Supported | `gemini extensions install https://github.com/jame581/GodotPrompter` |
+| Antigravity CLI (`agy`) | Supported | `git clone https://github.com/jame581/GodotPrompter && agy plugin install GodotPrompter` |
 | GitHub Copilot CLI | Supported | `copilot plugin marketplace add jame581/skillsmith` |
 | Cursor | Supported | `/add-plugin godot-prompter` or clone with `.cursor-plugin/` |
 | Codex | Supported | Clone + symlink (see `.codex/INSTALL.md`) |
@@ -309,7 +310,7 @@ node scripts/count-tokens.mjs --tokenizer --markdown
 
 Produces a per-skill / per-agent table (bytes, KB, estimated tokens, Claude / GPT tokenizer counts, status) that lives between `<!-- BEGIN-TOKEN-TABLE -->` markers in [`docs/token-budget.md`](docs/token-budget.md).
 
-CI gate: `.github/workflows/release.yml` runs both `node scripts/validate-skills.mjs` and a tag-vs-manifest version-consistency check on every `v*.*.*` push. The release is blocked if the validator returns errors or any of `package.json` / `.claude-plugin/plugin.json` / `.claude-plugin/marketplace.json` drifts from the tag.
+CI gate: `.github/workflows/release.yml` runs both `node scripts/validate-skills.mjs` and a tag-vs-manifest version-consistency check on every `v*.*.*` push. The release is blocked if the validator returns errors or any of `package.json` / `.claude-plugin/plugin.json` / `.claude-plugin/marketplace.json` / `.cursor-plugin/plugin.json` / `plugin.json` drifts from the tag.
 
 **Current baseline (v1.11.0):** 0 errors, 13 warnings (all `csharp-parity-accepted` GDScript-only; 0 token-budget). Every `SKILL.md` is at or below the 16 KB budget.
 
