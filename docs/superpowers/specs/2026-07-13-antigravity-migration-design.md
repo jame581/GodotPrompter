@@ -70,14 +70,13 @@ Replace legacy Gemini CLI install headers with Antigravity instructions:
 +### Antigravity CLI (`agy`)
 +
 +```bash
-+git clone https://github.com/jame581/GodotPrompter
-+cd GodotPrompter && agy plugin install .
++agy plugin install https://github.com/jame581/GodotPrompter
 +```
 ```
 And replace the table row:
 ```diff
 -| Gemini CLI | Supported | `gemini extensions install https://github.com/jame581/GodotPrompter` |
-+| Antigravity CLI (`agy`) | Supported | `git clone https://github.com/jame581/GodotPrompter && cd GodotPrompter && agy plugin install .` |
++| Antigravity CLI (`agy`) | Supported | `agy plugin install https://github.com/jame581/GodotPrompter` |
 ```
 
 ### 6. Skill Bootstrap Instructions (`skills/using-godot-prompter/SKILL.md`)

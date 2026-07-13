@@ -25,8 +25,7 @@ GodotPrompter provides Godot 4.x domain-specific skills for AI coding agents. Sk
 
 **In Antigravity (2.0, IDE, CLI):** Skills activate automatically when your prompt matches a skill's `description` frontmatter — no tool call needed. Install the plugin using:
 ```bash
-git clone https://github.com/jame581/GodotPrompter
-cd GodotPrompter && agy plugin install .
+agy plugin install https://github.com/jame581/GodotPrompter
 ```
 For manual, workspace, or cross-project installations:
 

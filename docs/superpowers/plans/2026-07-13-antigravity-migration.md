@@ -179,14 +179,13 @@ In [README.md](../../../README.md), replace lines 63-67:
 ### Antigravity CLI (`agy`)
 
 ```bash
-git clone https://github.com/jame581/GodotPrompter
-cd GodotPrompter && agy plugin install .
+agy plugin install https://github.com/jame581/GodotPrompter
 ```
 ```
 
 And in the "Supported Platforms" table on line 158:
 ```markdown
-| Antigravity CLI (`agy`) | Supported | `git clone https://github.com/jame581/GodotPrompter && cd GodotPrompter && agy plugin install .` |
+| Antigravity CLI (`agy`) | Supported | `agy plugin install https://github.com/jame581/GodotPrompter` |
 ```
 
 - [ ] **Step 3: Update using-godot-prompter SKILL.md**
@@ -201,8 +200,7 @@ Update it to add the `agy plugin install` method:
 ```markdown
 **In Antigravity (2.0, IDE, CLI):** Skills activate automatically when your prompt matches a skill's `description` frontmatter — no tool call needed. Install the plugin using:
 ```bash
-git clone https://github.com/jame581/GodotPrompter
-cd GodotPrompter && agy plugin install .
+agy plugin install https://github.com/jame581/GodotPrompter
 ```
 For manual, workspace, or cross-project installations:
 ... [keep existing instructions for workspace junctions and global symlinks as fallback references]
