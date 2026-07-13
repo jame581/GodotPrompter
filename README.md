@@ -64,7 +64,7 @@ grok plugin enable godot-prompter
 
 ```bash
 git clone https://github.com/jame581/GodotPrompter
-agy plugin install GodotPrompter
+cd GodotPrompter && agy plugin install .
 ```
 
 ### GitHub Copilot CLI
@@ -156,7 +156,7 @@ GodotPrompter includes 9 specialized agents:
 |----------|--------|---------|
 | Claude Code | Primary | `claude plugins marketplace add jame581/skillsmith` |
 | Grok Build | Supported | `grok plugin install jame581/GodotPrompter --trust` |
-| Antigravity CLI (`agy`) | Supported | `git clone https://github.com/jame581/GodotPrompter && agy plugin install GodotPrompter` |
+| Antigravity CLI (`agy`) | Supported | `git clone https://github.com/jame581/GodotPrompter && cd GodotPrompter && agy plugin install .` |
 | GitHub Copilot CLI | Supported | `copilot plugin marketplace add jame581/skillsmith` |
 | Cursor | Supported | `/add-plugin godot-prompter` or clone with `.cursor-plugin/` |
 | Codex | Supported | Clone + symlink (see `.codex/INSTALL.md`) |

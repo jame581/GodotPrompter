@@ -39,7 +39,7 @@ git mv gemini-extension.json plugin.json
 
 - [x] **Step 2: Update `plugin.json` content**
 
-Overwrite [plugin.json](file:///C:/Users/jakub.hubacek/source/repos/GodotPrompter/plugin.json) with:
+Overwrite [plugin.json](../../../plugin.json) with:
 ```json
 {
   "$schema": "https://antigravity.google/schemas/v1/plugin.json",
@@ -102,7 +102,7 @@ git commit -m "chore: migrate gemini-extension.json to plugin.json"
 
 - [ ] **Step 1: Modify bump script manifest target**
 
-In [bump-version.mjs](file:///C:/Users/jakub.hubacek/source/repos/GodotPrompter/scripts/bump-version.mjs), update line 37:
+In [bump-version.mjs](../../../scripts/bump-version.mjs), update line 37:
 ```javascript
   { path: resolve(ROOT, 'plugin.json'), key: 'version', descKey: 'description' },
 ```
@@ -137,7 +137,7 @@ git commit -m "chore: update version bumper script to target plugin.json"
 
 - [ ] **Step 1: Update version check variables in release workflow**
 
-In [.github/workflows/release.yml](file:///C:/Users/jakub.hubacek/source/repos/GodotPrompter/.github/workflows/release.yml), update lines 29-31:
+In [.github/workflows/release.yml](../../../.github/workflows/release.yml), update lines 29-31:
 ```yaml
           ANTIGRAVITY=$(node -p "require('./plugin.json').version")
           echo "tag=$TAG  package.json=$PKG  .claude-plugin/plugin.json=$PLUGIN  marketplace.json=$MARKET  .cursor-plugin/plugin.json=$CURSOR  plugin.json=$ANTIGRAVITY"
@@ -163,7 +163,7 @@ git commit -m "ci: update release verification to check plugin.json version"
 
 - [ ] **Step 1: Update CONTRIBUTING.md manifests**
 
-In [CONTRIBUTING.md](file:///C:/Users/jakub.hubacek/source/repos/GodotPrompter/CONTRIBUTING.md) line 111, change:
+In [CONTRIBUTING.md](../../../CONTRIBUTING.md) line 111, change:
 ```markdown
     - `gemini-extension.json`
 ```
@@ -174,24 +174,24 @@ to:
 
 - [ ] **Step 2: Update README.md platform commands**
 
-In [README.md](file:///C:/Users/jakub.hubacek/source/repos/GodotPrompter/README.md), replace lines 63-67:
+In [README.md](../../../README.md), replace lines 63-67:
 ```markdown
 ### Antigravity CLI (`agy`)
 
 ```bash
 git clone https://github.com/jame581/GodotPrompter
-agy plugin install GodotPrompter
+cd GodotPrompter && agy plugin install .
 ```
 ```
 
 And in the "Supported Platforms" table on line 158:
 ```markdown
-| Antigravity CLI (`agy`) | Supported | `git clone https://github.com/jame581/GodotPrompter && agy plugin install GodotPrompter` |
+| Antigravity CLI (`agy`) | Supported | `git clone https://github.com/jame581/GodotPrompter && cd GodotPrompter && agy plugin install .` |
 ```
 
 - [ ] **Step 3: Update using-godot-prompter SKILL.md**
 
-In [SKILL.md](file:///C:/Users/jakub.hubacek/source/repos/GodotPrompter/skills/using-godot-prompter/SKILL.md) lines 18-20, update the Gemini CLI reference:
+In [SKILL.md](../../../skills/using-godot-prompter/SKILL.md) lines 18-20, update the Gemini CLI reference:
 ```markdown
 **In Gemini CLI:** Deprecated (succeeded by Antigravity CLI).
 ```
@@ -202,7 +202,7 @@ Update it to add the `agy plugin install` method:
 **In Antigravity (2.0, IDE, CLI):** Skills activate automatically when your prompt matches a skill's `description` frontmatter — no tool call needed. Install the plugin using:
 ```bash
 git clone https://github.com/jame581/GodotPrompter
-agy plugin install GodotPrompter
+cd GodotPrompter && agy plugin install .
 ```
 For manual, workspace, or cross-project installations:
 ... [keep existing instructions for workspace junctions and global symlinks as fallback references]
