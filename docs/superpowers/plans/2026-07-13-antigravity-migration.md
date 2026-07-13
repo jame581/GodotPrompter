@@ -58,7 +58,7 @@ agy plugin validate .
 ```
 Expected output:
 ```
-  [ok]    C:\Users\jakub.hubacek\source\repos\GodotPrompter
+  [ok]    <repo-root>
           ✔ skills      : 51 processed
           ✔ agents      : 9 processed
 ```
