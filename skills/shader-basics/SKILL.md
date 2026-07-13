@@ -15,13 +15,13 @@ All examples target Godot 4.3+ with no deprecated APIs.
 
 ### Shader Types
 
-| Shader Type      | Applied To               | Use For                                          |
+| Shader Type | Applied To | Use For |
 |------------------|--------------------------|--------------------------------------------------|
-| `canvas_item`    | 2D nodes (Sprite2D, Control, etc.) | 2D effects — outlines, dissolve, color swap |
-| `spatial`        | 3D meshes (MeshInstance3D)         | 3D materials — water, terrain, toon shading |
-| `particles`      | GPUParticles2D/3D                  | Custom particle behavior                    |
-| `sky`            | WorldEnvironment                   | Procedural sky rendering                    |
-| `fog`            | FogVolume                          | Volumetric fog effects                      |
+| `canvas_item` | 2D nodes (Sprite2D, Control, etc.) | 2D effects — outlines, dissolve, color swap |
+| `spatial` | 3D meshes (MeshInstance3D) | 3D materials — water, terrain, toon shading |
+| `particles` | GPUParticles2D/3D | Custom particle behavior |
+| `sky` | WorldEnvironment | Procedural sky rendering |
+| `fog` | FogVolume | Volumetric fog effects |
 
 ### Shader vs ShaderMaterial
 
@@ -75,28 +75,28 @@ void fragment() {
 
 ### Built-in Variables (canvas_item)
 
-| Variable   | Type   | Description                           |
+| Variable | Type | Description |
 |------------|--------|---------------------------------------|
-| `UV`       | `vec2` | Texture coordinates                   |
-| `COLOR`    | `vec4` | Output color (set this in `fragment()`) |
-| `TEXTURE`  | `sampler2D` | The node's texture                |
-| `VERTEX`   | `vec2` | Vertex position (in `vertex()`)       |
-| `TIME`     | `float`| Elapsed time in seconds               |
-| `SCREEN_UV`| `vec2` | Screen-space UV (for screen effects)  |
+| `UV` | `vec2` | Texture coordinates |
+| `COLOR` | `vec4` | Output color (set this in `fragment()`) |
+| `TEXTURE` | `sampler2D` | The node's texture |
+| `VERTEX` | `vec2` | Vertex position (in `vertex()`) |
+| `TIME` | `float`| Elapsed time in seconds |
+| `SCREEN_UV`| `vec2` | Screen-space UV (for screen effects) |
 
 > `SCREEN_TEXTURE` was removed in Godot 4.0. To read the screen, declare a uniform: `uniform sampler2D screen_texture : hint_screen_texture, filter_linear_mipmap;`
 
 ### Built-in Variables (spatial)
 
-| Variable    | Type   | Description                           |
+| Variable | Type | Description |
 |-------------|--------|---------------------------------------|
-| `ALBEDO`    | `vec3` | Base surface color                    |
-| `METALLIC`  | `float`| Metallic value (0.0–1.0)             |
-| `ROUGHNESS` | `float`| Roughness value (0.0–1.0)            |
-| `NORMAL`    | `vec3` | Surface normal (for normal mapping)   |
-| `EMISSION`  | `vec3` | Emissive color                        |
-| `ALPHA`     | `float`| Transparency (enable in render mode)  |
-| `VERTEX`    | `vec3` | Vertex position (in `vertex()`)       |
+| `ALBEDO` | `vec3` | Base surface color |
+| `METALLIC` | `float`| Metallic value (0.0–1.0) |
+| `ROUGHNESS` | `float`| Roughness value (0.0–1.0) |
+| `NORMAL` | `vec3` | Surface normal (for normal mapping) |
+| `EMISSION` | `vec3` | Emissive color |
+| `ALPHA` | `float`| Transparency (enable in render mode) |
+| `VERTEX` | `vec3` | Vertex position (in `vertex()`) |
 
 ### Uniforms (Shader Parameters)
 
@@ -117,13 +117,13 @@ void fragment() {
 
 ### Common Uniform Hints
 
-| Hint                        | Type         | Description                         |
+| Hint | Type | Description |
 |-----------------------------|--------------|-------------------------------------|
-| `hint_range(min, max, step)` | `float/int` | Slider in Inspector                 |
-| `source_color`              | `vec4`       | Color picker in Inspector           |
-| `filter_linear_mipmap`      | `sampler2D`  | Texture filtering mode              |
-| `repeat_enable`             | `sampler2D`  | Allow texture tiling                |
-| `hint_normal`               | `sampler2D`  | Treat as normal map                 |
+| `hint_range(min, max, step)` | `float/int` | Slider in Inspector |
+| `source_color` | `vec4` | Color picker in Inspector |
+| `filter_linear_mipmap` | `sampler2D` | Texture filtering mode |
+| `repeat_enable` | `sampler2D` | Allow texture tiling |
+| `hint_normal` | `sampler2D` | Treat as normal map |
 
 ### Setting Uniforms from Code
 
@@ -167,11 +167,11 @@ Visual shaders provide a node-based graph editor — no code required.
 
 ### When to Use Visual Shaders
 
-| Use Visual Shaders When        | Use Code Shaders When              |
+| Use Visual Shaders When | Use Code Shaders When |
 |--------------------------------|------------------------------------|
-| Prototyping effects quickly    | Complex math or branching logic    |
-| Artists need to tweak values   | Need precise control over every line |
-| Learning shader concepts       | Performance-critical shaders       |
+| Prototyping effects quickly | Complex math or branching logic |
+| Artists need to tweak values | Need precise control over every line |
+| Learning shader concepts | Performance-critical shaders |
 | Simple effects (color adjust, UV scroll) | Loops or advanced techniques |
 
 ### Creating a Visual Shader
@@ -184,17 +184,17 @@ Visual shaders provide a node-based graph editor — no code required.
 
 ### Key Visual Shader Nodes
 
-| Node                | Purpose                              |
+| Node | Purpose |
 |---------------------|--------------------------------------|
-| `Texture2D`         | Sample a texture                     |
-| `ColorConstant`     | Solid color value                    |
-| `VectorOp`          | Math operations on vectors           |
-| `ScalarOp`          | Math operations on floats            |
-| `Mix`               | Lerp between two values              |
-| `Step` / `SmoothStep` | Threshold / smooth threshold      |
-| `Time`              | Current time (for animation)         |
-| `UV`                | Texture coordinates                  |
-| `Input` (custom)    | Expose a uniform to Inspector        |
+| `Texture2D` | Sample a texture |
+| `ColorConstant` | Solid color value |
+| `VectorOp` | Math operations on vectors |
+| `ScalarOp` | Math operations on floats |
+| `Mix` | Lerp between two values |
+| `Step` / `SmoothStep` | Threshold / smooth threshold |
+| `Time` | Current time (for animation) |
+| `UV` | Texture coordinates |
+| `Input` (custom) | Expose a uniform to Inspector |
 
 > Visual shaders compile to the same GPU code as written shaders. There is no performance difference.
 
@@ -293,16 +293,16 @@ The Shader Baker pre-compiles all project shaders for the target platform at exp
 
 ## 12. Common Pitfalls
 
-| Symptom                             | Cause                                             | Fix                                                              |
+| Symptom | Cause | Fix |
 |-------------------------------------|----------------------------------------------------|------------------------------------------------------------------|
-| Shader has no visible effect        | Material not assigned or shader not saved           | Check node's Material property in Inspector                      |
-| Transparent parts render as black   | Alpha not handled in shader                        | Set `COLOR.a = tex.a;` and use appropriate blend mode            |
-| Uniform doesn't appear in Inspector | Typo in uniform name or wrong type                 | Re-save the shader; check for compilation errors                 |
-| Texture appears stretched/tiled     | Missing `repeat_enable` or wrong UV scale          | Add `repeat_enable` hint to sampler2D uniform                    |
-| Shader works in editor but not in game | Screen texture uniform needs backbuffer          | Use `hint_screen_texture` on a `sampler2D` uniform (Godot 4.x)  |
-| Performance drops with many shaders | Each unique shader = draw call break               | Share ShaderMaterial instances; use uniforms for variation        |
-| Screen-space UV is wrong            | `SCREEN_UV` not available in some contexts         | Ensure the node is rendered in the correct viewport              |
-| Visual shader node missing          | Node was renamed or removed in newer Godot version | Check Godot docs for the current node name                       |
+| Shader has no visible effect | Material not assigned or shader not saved | Check node's Material property in Inspector |
+| Transparent parts render as black | Alpha not handled in shader | Set `COLOR.a = tex.a;` and use appropriate blend mode |
+| Uniform doesn't appear in Inspector | Typo in uniform name or wrong type | Re-save the shader; check for compilation errors |
+| Texture appears stretched/tiled | Missing `repeat_enable` or wrong UV scale | Add `repeat_enable` hint to sampler2D uniform |
+| Shader works in editor but not in game | Screen texture uniform needs backbuffer | Use `hint_screen_texture` on a `sampler2D` uniform (Godot 4.x) |
+| Performance drops with many shaders | Each unique shader = draw call break | Share ShaderMaterial instances; use uniforms for variation |
+| Screen-space UV is wrong | `SCREEN_UV` not available in some contexts | Ensure the node is rendered in the correct viewport |
+| Visual shader node missing | Node was renamed or removed in newer Godot version | Check Godot docs for the current node name |
 
 > ⚠️ **Changed in Godot 4.7:** `textureQueryLod()` is available only in the fragment shader, and Godot 4.7 enforces this with a compile error — shaders calling it from `vertex()` stop compiling after upgrading. Move the call into `fragment()`. See [GH-118962](https://github.com/godotengine/godot/pull/118962).
 
