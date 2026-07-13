@@ -182,8 +182,14 @@ func create_resource_from_text(text: String) -> DialogueResource  # runs text th
 `resource.get_next_dialogue_line(title)` also works directly on a loaded `DialogueResource` (equivalent to
 calling the autoload method with that resource).
 
-`DialogueManager.MutationBehaviour` enum: `Wait` (default — await mutation lines), `DoNotWait` (run but
+`MutationBehaviour` enum: `Wait` (default — await mutation lines), `DoNotWait` (run but
 don't await), `Skip` (skip mutations entirely). *The example balloon only supports `Wait`.*
+
+> **Correction 2026-07-14:** this enum lives on **`DMConstants`** (`constants.gd:1,8` — `class_name
+> DMConstants`), not on the `DialogueManager` autoload: `dialogue_manager.gd:90` types the param as
+> `DMConstants.MutationBehaviour`. GDScript must write `DMConstants.MutationBehaviour.Wait`; in C# the
+> enum is namespace-level in `DialogueManagerRuntime`, so it is plain `MutationBehaviour.Wait`.
+> `DialogueManager.MutationBehaviour` does not resolve. Same applies to `TranslationSource` (§ below).
 
 `DialogueManager.get_current_scene` — a `Callable` property; override it if your game manages "current scene"
 differently than `get_tree().current_scene`.
@@ -297,9 +303,10 @@ Editor: **Wrap Long Lines**, **New File Template**, **Missing Translations Are E
 ## 6. Translations
 
 - By default all dialogue/response text passes through Godot's `tr()`.
-- `DialogueManager.translation_source` (enum `DialogueManager.TranslationSource`: `None`, `CSV`, `PO`,
-  `Guess` [default]) controls which translation backend is assumed; `Guess` inspects the locale project
-  settings (PO file present → PO, else CSV).
+- `DialogueManager.translation_source` — the *property* is on the autoload, but its enum **type** is
+  `DMConstants.TranslationSource` (GDScript) / namespace-level `TranslationSource` (C#), per
+  `dialogue_manager.gd:54`; `DialogueManager.TranslationSource` does not resolve. Values: `None`, `CSV`,
+  `PO`, `Guess` [default]. `Guess` inspects the locale project settings (PO file present → PO, else CSV).
 - Static per-line translation keys: `Nathan: Hi! I'm Nathan. [ID:HI_IM_NATHAN]` — becomes the
   `translation_key` on `DialogueLine`/`DialogueResponse`, and the POT context for that line.
 - All `.dialogue` files are auto-registered in the POT Generation list (Project Settings → Localization).

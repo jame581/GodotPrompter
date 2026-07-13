@@ -205,9 +205,10 @@ specific balloon scene), `show_example_dialogue_balloon(resource, title)` (force
 names are identical PascalCase: `ShowDialogueBalloonScene`, `ShowExampleDialogueBalloon`,
 `CreateResourceFromText`.
 
-`get_next_dialogue_line` takes a `mutation_behaviour` param (`DialogueManager.MutationBehaviour`:
-`Wait` default, `DoNotWait`, `Skip`) — leave it `Wait` unless you know you need otherwise; the example
-balloon only supports `Wait`.
+`get_next_dialogue_line` takes a `mutation_behaviour` param — GDScript `DMConstants.MutationBehaviour`,
+C# `MutationBehaviour` (both: `Wait` default, `DoNotWait`, `Skip`). The enum lives on `DMConstants`, **not**
+on the `DialogueManager` autoload. Leave it `Wait` unless you know otherwise; the example balloon only
+supports `Wait`.
 
 ---
 
@@ -280,9 +281,10 @@ every time a `~ title` marker is crossed — useful for analytics or save-point 
 
 ## 6. Translations
 
-By default all dialogue/response text is run through Godot's `tr()`. `DialogueManager.translation_source`
-(`DialogueManager.TranslationSource`: `None`, `CSV`, `PO`, `Guess` default) picks the backend; `Guess`
-inspects your locale project settings for a PO file and falls back to CSV.
+By default all dialogue/response text is run through Godot's `tr()`. The `DialogueManager.translation_source`
+property picks the backend — its enum type is GDScript `DMConstants.TranslationSource` / C#
+`TranslationSource` (`None`, `CSV`, `PO`, `Guess` default), **not** `DialogueManager.TranslationSource`.
+`Guess` inspects your locale project settings for a PO file and falls back to CSV.
 
 Static per-line IDs (`Nathan: Hi! I'm Nathan. [ID:HI_IM_NATHAN]`) give a stable `translation_key` for
 matching voiced lines and CSV/PO round-trips, instead of keying off the literal text. `.dialogue` files

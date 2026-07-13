@@ -55,12 +55,12 @@ Columns:
 | skill | component-system | 14009 | 13.7 | 3502 | 3662 | 3146 | ✓ under budget |
 | skill | player-controller | 13918 | 13.6 | 3480 | 3801 | 3447 | ✓ under budget |
 | skill | inventory-system | 13915 | 13.6 | 3479 | 3412 | 2995 | ✓ under budget |
+| skill | dialogue-manager | 13469 | 13.2 | 3367 | 3756 | 3315 | ✓ under budget |
 | skill | math-essentials | 13411 | 13.1 | 3353 | 3911 | 3337 | ✓ under budget |
 | skill | godot-project-setup | 13191 | 12.9 | 3298 | 4032 | 3294 | ✓ under budget |
 | skill | mobile-development | 13118 | 12.8 | 3280 | 3655 | 3188 | ✓ under budget |
 | skill | limboai | 13042 | 12.7 | 3261 | 3976 | 3451 | ✓ under budget |
 | reference | save-load/json-saves.md | 12833 | 12.5 | 3208 | 3209 | 2718 | — |
-| skill | dialogue-manager | 12820 | 12.5 | 3205 | 3575 | 3151 | ✓ under budget |
 | skill | resource-pattern | 12545 | 12.3 | 3136 | 3495 | 3068 | ✓ under budget |
 | skill | using-godot-prompter | 12453 | 12.2 | 3113 | 3423 | 2969 | ✓ under budget |
 | skill | godot-debugging | 12259 | 12.0 | 3065 | 3215 | 2853 | ✓ under budget |
@@ -90,8 +90,8 @@ Columns:
 | reference | dedicated-server/lobby-management.md | 9121 | 8.9 | 2280 | 2410 | 2067 | — |
 | reference | ai-navigation/chase-attack.md | 8531 | 8.3 | 2133 | 2208 | 1940 | — |
 | reference | dialogue-system/ui-presentation.md | 8498 | 8.3 | 2125 | 1963 | 1704 | — |
+| reference | dialogue-system/dialogue-manager.md | 7812 | 7.6 | 1953 | 2039 | 1731 | — |
 | reference | godot-optimization/cpu-bottlenecks.md | 7642 | 7.5 | 1911 | 2189 | 1879 | — |
-| reference | dialogue-system/dialogue-manager.md | 7540 | 7.4 | 1885 | 1963 | 1662 | — |
 | reference | addon-development/gizmos-deep-dive.md | 7405 | 7.2 | 1851 | 2370 | 2065 | — |
 | reference | procedural-generation/wave-function-collapse.md | 7334 | 7.2 | 1834 | 1965 | 1783 | — |
 | reference | inventory-system/ui-binding.md | 6873 | 6.7 | 1718 | 1846 | 1590 | — |
