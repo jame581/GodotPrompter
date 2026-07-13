@@ -257,6 +257,12 @@ public override void _Ready()
 }
 ```
 
+> ⚠️ These C# events are bridged to the underlying Godot signals lazily, on the **first access to
+> `DialogueManager.Instance`**. A project that only subscribes here and then drives dialogue from
+> GDScript never touches `Instance`, so the handlers never fire. Touch the API from C# at least once
+> (e.g. `_ = DialogueManager.Instance;`, or run the dialogue via `GetNextDialogueLine`/`ShowDialogueBalloon`
+> from C#) to wire them up.
+
 The built-in responses menu node only exposes `response_selected` as a Godot signal, so connect it with
 `Connect` + `Callable` instead of a C# event handler:
 

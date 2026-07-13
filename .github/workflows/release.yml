@@ -36,6 +36,17 @@ jobs:
       - name: Run skill validator
         run: node scripts/validate-skills.mjs
 
+      # Self-test: the fixtures under scripts/fixtures/ are deliberately broken (over budget,
+      # bad frontmatter, broken cross-ref). If the validator ever stops catching them, its rules
+      # have been silently disabled — fail loudly rather than pass a release that isn't checked.
+      - name: Validator self-test (fixtures must fail)
+        run: |
+          if node scripts/validate-skills.mjs --include-fixtures; then
+            echo "::error::Validator passed on the broken fixtures — its rules are not being enforced."
+            exit 1
+          fi
+          echo "Validator correctly rejected the fixtures."
+
   release:
     name: Create GitHub release
     needs: verify

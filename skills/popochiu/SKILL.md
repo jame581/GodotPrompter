@@ -83,7 +83,7 @@ func _on_room_transition_finished() -> void:
     E.queue([
         "Popsy: Finally, some fresh air.",
         C.Popsy.queue_walk_to(Vector2(400, 300)),
-        "...",  # 0.5s pause
+        "...",  # 1s pause
         C.Popsy.queue_say("Now, where did I put that key?"),
     ])
 ```
