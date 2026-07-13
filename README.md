@@ -315,7 +315,7 @@ Produces a per-skill / per-agent table (bytes, KB, estimated tokens, Claude / GP
 
 CI gate: `.github/workflows/release.yml` runs both `node scripts/validate-skills.mjs` and a tag-vs-manifest version-consistency check on every `v*.*.*` push. The release is blocked if the validator returns errors or any of `package.json` / `.claude-plugin/plugin.json` / `.claude-plugin/marketplace.json` / `.cursor-plugin/plugin.json` / `plugin.json` drifts from the tag.
 
-**Current baseline (v1.11.0):** 0 errors, 13 warnings (all `csharp-parity-accepted` GDScript-only; 0 token-budget). Every `SKILL.md` is at or below the 16 KB budget.
+**Current baseline (v1.12.0):** 0 errors, 16 warnings (all `csharp-parity-accepted` for intentionally GDScript-only skills; 0 token-budget). Every `SKILL.md` is **under** the 16 KB budget — since v1.12.0 that is a validator **error**, not a warning, so an over-budget skill fails the release.
 
 A manual agent-integration test plan covering full workflows (skill discovery, cross-reference navigation, end-to-end feature implementation) lives in [`tests/agent-integration/TEST_PLAN.md`](tests/agent-integration/TEST_PLAN.md) for spot-checks against new agent versions or platforms.
 

@@ -4,6 +4,37 @@ All notable changes to GodotPrompter will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
+## [1.12.0] - 2026-07-14
+
+### Added
+
+- **Three new third-party addon skills** (51 → 54 skills; the Third-Party Addons category grows from 2 to 5). Every API fact in each skill was verified against the addon's **pinned tag**, not its docs site — each ships a research digest under `docs/superpowers/notes/`:
+  - **`popochiu`** — Popochiu v2.1.1 (Godot 4.6, GDScript-only): point-and-click adventure framework. One-letter autoloads (`E`/`C`/`R`/`D`/`I`/`G`/`A`/`T`), the Room → Props / Hotspots / Regions / Walkable Areas / Markers model, `E.queue()` cutscene scripting, clickable lifecycle callbacks. Four Pattern X references: dialogs, inventory, GUI templates, pipeline (Aseprite / audio / save-load / transitions).
+  - **`dialogue-manager`** — Dialogue Manager v3.10.4 (Godot 4.6, **full C# parity**): `.dialogue` syntax (titles, responses, conditions, mutations, jumps), runtime balloons, signals and typed access, translations.
+  - **`phantom-camera`** — Phantom Camera v0.11.0.2 (Godot 4.4+, **full C# parity**, pre-1.0): `PhantomCameraHost` + PCam model, priority-based switching, follow modes, look-at modes (3D), tweened transitions.
+- **`using-godot-prompter` gained a Third-Party Addons index section.** LimboAI and Beehave had never been listed in the bootstrap skill's catalog — all five addon skills are now discoverable there.
+- **Validator self-test in CI** (`release.yml`): asserts the validator still *rejects* the deliberately-broken fixtures, so a future refactor cannot silently disable the rules while CI stays green.
+- **CONTRIBUTING.md**: documents the enforced token budget and the third-party addon skill conventions (pin the version; research the tag, not the docs site; decide C# parity by what the addon actually ships; the four places to wire a new addon in).
+
+### Changed
+
+- **The 16 KB token budget is now enforced.** `token-budget-exceeded` was promoted from a warning to a **CI-failing error** (≥ 16,384 bytes), and a new advisory `token-budget-approaching` **warning** fires from 15.5 KB (15,872 bytes) so authors get a signal before the wall. Two fixtures (`scripts/fixtures/token-budget-{over,near}/`) cover both thresholds.
+- **Byte measurement is LF-normalized** in `validate-skills.mjs` and `count-tokens.mjs`, and `.gitattributes` pins `eol=lf`. On CRLF (Windows) checkouts raw byte counts over-reported by ~1 byte per line, which had produced a **false "9 skills over budget" reading** — on real LF bytes none of them ever exceeded the limit. Local numbers now match CI, and `docs/token-budget.md` can finally be regenerated on Windows.
+- **Headroom trim across 10 skills** to clear the new advisory band — `localization`, `gdscript-patterns`, `godot-ui`, `assets-pipeline`, `shader-basics`, `3d-essentials`, `multiplayer-basics`, `event-bus`, `input-handling`, `physics-system`. No teaching content removed: the bulk was markdown table-alignment whitespace plus prose tightening.
+- **Migrated from Gemini CLI to Antigravity CLI** (PR [#13](https://github.com/jame581/GodotPrompter/pull/13), thanks @hubacekjakub). Google [retired Gemini CLI on 2026-06-18](https://developers.googleblog.com/an-important-update-transitioning-gemini-cli-to-antigravity-cli/); Antigravity CLI (`agy`) is the official successor. `gemini-extension.json` → root `plugin.json` (Antigravity schema), with `bump-version.mjs`, the release version-drift gate, `GEMINI.md`, README, and CONTRIBUTING retargeted.
+- README, CLAUDE.md, `docs/token-budget.md`, and both agent routing lines updated for the new skills, counts, and validator rules.
+
+### Fixed
+
+- `dialogue-manager`: `MutationBehaviour` / `TranslationSource` live on **`DMConstants`** (GDScript) and are namespace-level in `DialogueManagerRuntime` (C#) — not on the `DialogueManager` autoload, as first written.
+- `dialogue-manager`: end of dialogue returns **`null`**, not an empty dictionary — the addon's own `API.md` is wrong at this tag. Also documents that the C# events wire lazily on first `DialogueManager.Instance` access.
+- `popochiu`: a `"..."` string is a **1 s** pause, not 0.5 s (`0.25 × 2^(dots−1)`).
+- `dialogue-system/references/dialogue-manager.md` now states up front that it documents a *hand-rolled* autoload, not the identically-named addon.
+
+> **Release notes:** 54 skills. Validator baseline: **0 errors, 16 warnings** (13 pre-existing `csharp-parity-accepted` + 3 for the intentionally GDScript-only `popochiu`). Repo-wide minimum stays Godot 4.3+; addon skills carry their own higher minimums. Agent integration tests for the three new skills: 3/3 pass.
+>
+> **Heads-up for contributors:** four skills now sit within ~35 bytes of the 15.5 KB advisory band (`localization` has just 8 bytes of headroom), so the next small edit to `localization`, `physics-system`, `addon-development`, or `particles-vfx` will trip the new warning. Use Pattern X rather than trimming teaching content.
+
 ## [1.11.1] - 2026-07-12
 
 ### Changed

@@ -1,8 +1,8 @@
 {
   "name": "godot-prompter",
   "displayName": "GodotPrompter",
-  "description": "Agentic skills framework for Godot 4.x — 51 domain-specific skills for GDScript and C#",
-  "version": "1.11.1",
+  "description": "Agentic skills framework for Godot 4.x — 54 domain-specific skills for GDScript and C#",
+  "version": "1.12.0",
   "author": {
     "name": "Jan Mesarc"
   },
