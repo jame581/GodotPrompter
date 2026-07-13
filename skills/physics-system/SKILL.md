@@ -24,7 +24,7 @@ Four collision-object types (the last three extend `PhysicsBody2D`/`3D`):
 
 Every collision object needs at least one `CollisionShape2D`/`3D` (or `CollisionPolygon2D`/`3D`) child. **Jolt Physics is the default 3D engine since 4.4** (non-experimental from 4.6) — see Section 8. 2D always uses GodotPhysics.
 
-> **Critical rule:** NEVER scale collision shapes or physics bodies via `scale`. Use the shape's own size parameters (radius, extents, height) — scaled shapes produce incorrect collision results.
+> **Critical rule:** NEVER scale collision shapes or physics bodies via `scale`. Use the shape's own size parameters (radius, extents, height) — scaling breaks collision accuracy.
 
 ---
 
@@ -41,19 +41,19 @@ Every collision object needs at least one `CollisionShape2D`/`3D` (or `Collision
 | `apply_torque(torque)` | Continuous angular accel | Steering, spinning |
 | `apply_torque_impulse(impulse)` | Instant angular velocity change | Impact spin |
 
-> See [references/rigidbody-recipes.md](references/rigidbody-recipes.md) for a worked thrust-and-spin example (GDScript + C#) using `apply_force` + `apply_central_impulse` + `apply_torque`.
+> See [references/rigidbody-recipes.md](references/rigidbody-recipes.md) for a thrust-and-spin example (GDScript + C#) using `apply_force` + `apply_central_impulse` + `apply_torque`.
 
 ### _integrate_forces() — Safe Physics Modification
 
-Use `_integrate_forces(state)` instead of `_physics_process()` when you need to read/modify a RigidBody's transform, velocity, or angular velocity. Setting `position` or `linear_velocity` directly in `_physics_process()` fights the physics engine.
+Use `_integrate_forces(state)` instead of `_physics_process()` to read/modify a RigidBody's transform, velocity, or angular velocity. Setting `position` or `linear_velocity` directly in `_physics_process()` fights the physics engine.
 
-> **Warning:** `_integrate_forces()` is NOT called while the body is sleeping. Set `can_sleep = false` if you need continuous callbacks; otherwise prefer letting bodies sleep for performance.
+> **Warning:** `_integrate_forces()` is NOT called while the body is sleeping. Set `can_sleep = false` if you need continuous callbacks; otherwise let bodies sleep for performance.
 
-> See [references/rigidbody-recipes.md](references/rigidbody-recipes.md) for the full thrust + torque example using `state.apply_force` / `state.apply_torque` (GDScript + C#).
+> See [references/rigidbody-recipes.md](references/rigidbody-recipes.md) for the thrust + torque example using `state.apply_force` / `state.apply_torque` (GDScript + C#).
 
 ### Contact Monitoring, PhysicsMaterial, Freeze, look_at
 
-- **Contact signals** require `contact_monitor = true` + `max_contacts_reported > 0`. Then `body_entered`/`body_exited` fire as expected.
+- **Contact signals** require `contact_monitor = true` + `max_contacts_reported > 0`. Then `body_entered`/`body_exited` fire.
 - **`PhysicsMaterial`** resource controls `friction` (0 ice → 1 rubber) and `bounce` (0 → 1).
 - **Freeze modes:** `FREEZE_MODE_STATIC` (acts like a StaticBody) or `FREEZE_MODE_KINEMATIC` (code-moved, pushes others).
 - **RigidBody3D orientation:** never `look_at()` a RigidBody — use `_integrate_forces` and set `state.angular_velocity` from a cross-product steering term.
@@ -64,7 +64,7 @@ Use `_integrate_forces(state)` instead of `_physics_process()` when you need to 
 
 ## 3. StaticBody2D/3D
 
-`StaticBody` is not moved by the physics engine but can push other bodies via `constant_linear_velocity` (e.g. conveyor belts). For platforms that move via code AND push CharacterBodies, use **`AnimatableBody2D`/`3D`** — a plain `StaticBody` moved by code will not push CharacterBodies reliably.
+`StaticBody` is not moved by the physics engine but can push other bodies via `constant_linear_velocity` (e.g. conveyor belts). For platforms that move via code AND push CharacterBodies, use **`AnimatableBody2D`/`3D`** — a code-moved `StaticBody` won't push CharacterBodies reliably.
 
 > See [references/staticbody-recipes.md](references/staticbody-recipes.md) for the conveyor belt and moving-platform recipes (GDScript + C#, with Tween-driven AnimatableBody2D loop).
 
@@ -104,11 +104,11 @@ Areas detect overlaps and override physics properties within their bounds. They 
 
 ### Performance Rules
 
-Favor primitives for dynamic bodies; minimize shape count per body (each costs narrow-phase checks); never translate/rotate/scale CollisionShape nodes — a single non-transformed shape enables broad-phase optimization; concave shapes only on StaticBodies (O(n) triangle checks); multiple shapes on one body don't collide with each other (this is correct, not a bug); shapes must be direct children — indirect children are ignored.
+Favor primitives for dynamic bodies; minimize shape count per body (each costs narrow-phase checks); never translate/rotate/scale CollisionShape nodes (see §1) — a non-transformed shape enables broad-phase optimization; concave shapes only on StaticBodies (O(n) triangle checks); multiple shapes on one body don't collide with each other (expected, not a bug); shapes must be direct children — indirect children are ignored.
 
 ### One-Way Collision Direction (Godot 4.7+)
 
-`CollisionShape2D.one_way_collision_direction: Vector2` (default `Vector2(0, 1)`) sets the direction used for one-way collision, so 2D one-way platforms can use a custom pass-through direction. `PhysicsServer2D.body_set_shape_as_one_way_collision()` gains a matching optional `direction: Vector2 = Vector2(0, 1)` parameter.
+`CollisionShape2D.one_way_collision_direction: Vector2` (default `Vector2(0, 1)`) sets a custom pass-through direction for 2D one-way platforms. `PhysicsServer2D.body_set_shape_as_one_way_collision()` gains a matching optional `direction: Vector2 = Vector2(0, 1)` parameter.
 
 ```gdscript
 var shape: CollisionShape2D = $CollisionShape2D
@@ -163,7 +163,7 @@ The `intersect_ray` result dictionary contains `position`, `normal`, `collider`,
 
 ## 8. Jolt Physics
 
-Jolt is a built-in alternative physics engine available since Godot 4.4. It is the **default for new 3D projects** starting in 4.4. **(Godot 4.6+)** Jolt is no longer marked experimental and is the confirmed stable default for all new 3D projects.
+Jolt is a built-in alternative physics engine, the **default for new 3D projects** since Godot 4.4. **(Godot 4.6+)** Jolt is no longer marked experimental and is the confirmed stable default for all new 3D projects.
 
 ### Enabling Jolt
 

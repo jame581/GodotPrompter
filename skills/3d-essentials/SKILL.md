@@ -17,29 +17,29 @@ All examples target Godot 4.3+ with no deprecated APIs. GDScript is shown first,
 
 Godot uses a **right-handed** coordinate system with metric units (1 unit = 1 meter):
 
-| Axis | Direction | Color  |
+| Axis | Direction | Color |
 |------|-----------|--------|
-| X    | Right     | Red    |
-| Y    | Up        | Green  |
-| Z    | Out of screen (+Z toward viewer) | Blue |
+| X | Right | Red |
+| Y | Up | Green |
+| Z | Out of screen (+Z toward viewer) | Blue |
 
 > Cameras and lights point along **-Z** by default. When a character "faces forward," they look along -Z.
 
 ### Essential 3D Nodes
 
-| Node               | Purpose                                         |
+| Node | Purpose |
 |--------------------|-------------------------------------------------|
-| `Node3D`           | Base transform node — position, rotation, scale |
-| `MeshInstance3D`    | Displays a mesh with a material                 |
-| `Camera3D`         | Required to render 3D — perspective or orthogonal |
-| `DirectionalLight3D` | Sun/moon — parallel rays, cheapest light      |
-| `OmniLight3D`      | Point light — emits in all directions           |
-| `SpotLight3D`      | Cone light — flashlights, spotlights            |
-| `WorldEnvironment` | Sky, fog, tonemap, post-processing              |
-| `Decal`            | Projected texture onto surfaces                 |
-| `GPUParticles3D`   | GPU-driven particle effects                     |
-| `CSGBox3D` etc.    | Constructive Solid Geometry — prototyping       |
-| `GridMap`           | 3D tile-based level building                   |
+| `Node3D` | Base transform node — position, rotation, scale |
+| `MeshInstance3D` | Displays a mesh with a material |
+| `Camera3D` | Required to render 3D — perspective or orthogonal |
+| `DirectionalLight3D` | Sun/moon — parallel rays, cheapest light |
+| `OmniLight3D` | Point light — emits in all directions |
+| `SpotLight3D` | Cone light — flashlights, spotlights |
+| `WorldEnvironment` | Sky, fog, tonemap, post-processing |
+| `Decal` | Projected texture onto surfaces |
+| `GPUParticles3D` | GPU-driven particle effects |
+| `CSGBox3D` etc. | Constructive Solid Geometry — prototyping |
+| `GridMap` | 3D tile-based level building |
 
 > **Godot 4.7+:** `GridMap` exposes its internal octants for spatial queries — `cell_octant_size = 8` (cells per octant, per axis) plus `get_used_octants()`, `get_used_octants_by_item(item)`, `get_octants_in_bounds(bounds)` (includes empty octants), `get_used_octants_in_bounds(bounds)`, `get_used_cells_in_octant(octant_coords)`, `get_used_cells_in_octant_by_item(octant_coords, item)`, and `get_octant_coords_from_cell_coords(cell_coords)`. Octant and cell coordinates are `Vector3i` (returned in `Array[Vector3i]`); `bounds` is a local-space `AABB`.
 
@@ -62,11 +62,11 @@ World (Node3D)
 
 ### StandardMaterial3D vs ShaderMaterial
 
-| Material             | Use For                                     | Notes                          |
+| Material | Use For | Notes |
 |----------------------|---------------------------------------------|--------------------------------|
-| `StandardMaterial3D` | Most 3D objects — PBR workflow              | No code; Inspector-driven      |
-| `ORMMaterial3D`      | Same as Standard but with packed ORM texture | Occlusion+Roughness+Metallic in one texture |
-| `ShaderMaterial`     | Custom effects — toon, water, dissolve      | Requires spatial shader code   |
+| `StandardMaterial3D` | Most 3D objects — PBR workflow | No code; Inspector-driven |
+| `ORMMaterial3D` | Same as Standard but with packed ORM texture | Occlusion+Roughness+Metallic in one texture |
+| `ShaderMaterial` | Custom effects — toon, water, dissolve | Requires spatial shader code |
 
 ### Key StandardMaterial3D Properties
 
@@ -90,12 +90,12 @@ Create a `StandardMaterial3D` at runtime, assign to `mesh.material_override`, an
 
 ### Light Types Comparison
 
-| Light               | Shape         | Shadows | Cost    | Max Visible          |
+| Light | Shape | Shadows | Cost | Max Visible |
 |---------------------|---------------|---------|---------|----------------------|
-| `DirectionalLight3D` | Parallel rays | PSSM    | Cheapest | 8 (Forward+)       |
-| `OmniLight3D`       | Sphere        | Cube/Dual Paraboloid | Medium | 512 clustered* |
-| `SpotLight3D`       | Cone          | Single texture | Cheap | 512 clustered*     |
-| `AreaLight3D` (4.7+) | Rectangle    | PCSS soft      | Most expensive | — |
+| `DirectionalLight3D` | Parallel rays | PSSM | Cheapest | 8 (Forward+) |
+| `OmniLight3D` | Sphere | Cube/Dual Paraboloid | Medium | 512 clustered* |
+| `SpotLight3D` | Cone | Single texture | Cheap | 512 clustered* |
+| `AreaLight3D` (4.7+) | Rectangle | PCSS soft | Most expensive | — |
 
 *Forward+ shares 512 clustered element slots among omni lights, spot lights, decals, and reflection probes.
 

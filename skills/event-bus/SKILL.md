@@ -42,16 +42,16 @@ NodeA emits the signal. NodeB and NodeC each connected to EventBus independently
 
 ## 2. When to Use vs Direct Signals
 
-| Scenario                                   | Recommended approach          |
+| Scenario | Recommended approach |
 |--------------------------------------------|-------------------------------|
-| Parent notifying its own child             | Direct signal or method call  |
-| Child notifying its parent                 | Direct signal (bubble up)     |
-| Two nodes with the same parent             | Direct signal via parent      |
-| Completely unrelated nodes in the tree     | Event bus                     |
-| UI reacting to gameplay state changes      | Event bus                     |
-| Audio manager reacting to game events      | Event bus                     |
-| Data manager / save system reacting        | Event bus                     |
-| Tight, performance-sensitive inner loop    | Direct method call            |
+| Parent notifying its own child | Direct signal or method call |
+| Child notifying its parent | Direct signal (bubble up) |
+| Two nodes with the same parent | Direct signal via parent |
+| Completely unrelated nodes in the tree | Event bus |
+| UI reacting to gameplay state changes | Event bus |
+| Audio manager reacting to game events | Event bus |
+| Data manager / save system reacting | Event bus |
+| Tight, performance-sensitive inner loop | Direct method call |
 
 **Rule of thumb:** if you would otherwise need `get_node("../../SomeDistantNode")` or a hard-coded NodePath, the event bus is a better fit.
 
