@@ -134,8 +134,10 @@ character name). `[#happy, #mood=calm]` attaches tags, readable via `line.get_ta
 ## 4. Runtime API & example balloon
 
 Load a `DialogueResource` (`.dialogue` file) and either let `DialogueManager` open a balloon for you, or
-pull lines manually with `await DialogueManager.get_next_dialogue_line(resource, title)`. A missing next
-line comes back as an empty dictionary `{}` (falsy) — treat that as "dialogue ended".
+pull lines manually with `await DialogueManager.get_next_dialogue_line(resource, title)`. When there is
+no next line it returns `null` — check falsy in GDScript (`if not line:` / `while line:`) and
+`line != null` in C#. (The tag's `API.md` prose says "empty dictionary `{}`", but the v3.10.4 source
+returns `null` on every end-of-dialogue path — a `line == {}` check would never fire.)
 
 ### GDScript
 
@@ -293,7 +295,7 @@ only produces the translation keys and CSV/PO export; wiring locale changes into
 - [ ] Dialogue Manager plugin enabled in **Project Settings → Plugins** (registers the `DialogueManager` autoload automatically)
 - [ ] `.dialogue` resources loaded via `load()`/`preload()`, not parsed by hand
 - [ ] Every `get_next_dialogue_line` / `GetNextDialogueLine` call is `await`ed
-- [ ] Manual traversal loops check for a falsy/empty `{}` result to detect dialogue end
+- [ ] Manual traversal loops detect dialogue end via the `null` return (`if not line:` in GDScript, `line != null` in C#) — never compare against `{}`
 - [ ] Response lines put `[if condition]` before any `=> target` jump, never after
 - [ ] `extra_game_states` entries are **instances** (`GameStateClass.new()`), not bare classes
 - [ ] C# state properties that dialogue reads/writes carry `[Export]`

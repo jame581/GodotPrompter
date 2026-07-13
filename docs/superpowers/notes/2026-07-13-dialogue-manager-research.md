@@ -206,10 +206,13 @@ differently than `get_tree().current_scene`.
 `DialogueResponse` fields: `id`, `next_id`, `is_allowed: bool`, `condition_as_text: String`, `character`, `text`,
 `tags`, `translation_key`.
 
-If there is no next line, `get_next_dialogue_line` returns an **empty dictionary `{}`** (not `null`) —
-callers must check for this to detect dialogue end (in practice: `if not dialogue_line: break` — an empty
-`{}` is falsy in GDScript, but note the return type is documented as `DialogueLine`; treat a falsy/empty
-result as "no next line").
+If there is no next line, `get_next_dialogue_line` returns **`null`**. The tag's `API.md` prose claims
+"an empty dictionary (`{}`)", but that is **stale at v3.10.4** — verified against the actual source
+(`addons/dialogue_manager/dialogue_manager.gd` fetched at the tag): the method is typed
+`-> DialogueLine`, the public wrapper does `if line == null: dialogue_ended.emit(resource)`, and every
+end-of-dialogue path in `_get_next_dialogue_line` does `return null`. Detect dialogue end with a falsy
+check (`if not line:` / `while line:`) in GDScript and `line != null` in C# — never `line == {}`, which
+can never be true.
 
 ### `DialogueLabel` (extends `RichTextLabel`)
 
@@ -315,7 +318,12 @@ Editor: **Wrap Long Lines**, **New File Template**, **Missing Translations Are E
    that's what this exact tag targets (confirmed via the Releases API, not just the README).
 2. **`get_next_dialogue_line` must be awaited** — it is a coroutine; forgetting `await` yields a
    `GDScriptFunctionState`/`Signal` rather than a `DialogueLine`.
-3. **End-of-dialogue sentinel is an empty dictionary `{}`**, not `null` — treat any falsy return as "stop".
+3. **End-of-dialogue return is `null` — the tag's `API.md` prose is stale.** `API.md` says "an empty
+   dictionary (`{}`)", but the v3.10.4 source (`addons/dialogue_manager/dialogue_manager.gd`) types the
+   method `-> DialogueLine` and every end-of-dialogue path does `return null` (the public wrapper even
+   checks `if line == null` to emit `dialogue_ended`). Teaching the `{}` sentinel would produce a
+   `line == {}` check that never fires (in GDScript `null == {}` is `false`) → infinite dialogue loop.
+   Detect end with a falsy check (`if not line:` / `while line:`) in GDScript, `line != null` in C#.
 4. **`locals.*` is example-balloon convention, not a core Dialogue Manager feature** — don't imply it's a
    built-in special namespace; a custom balloon that doesn't set up an `extra_game_states` entry named
    `locals` won't have it.
@@ -333,12 +341,15 @@ Editor: **Wrap Long Lines**, **New File Template**, **Missing Translations Are E
    is invisible to dialogue conditions/mutations.
 10. **Import/jump-and-return syntax is easy to typo**: `=><` (jump-and-return) vs `=>` (plain jump) vs
     `=> END!` (force-end past nested returns) are three distinct directives.
-11. **C# end-of-dialogue check is authored, not doc-verbatim.** `CSharp.md` only shows a single
-    `var line = await DialogueManager.GetNextDialogueLine(dialogue, "start");` call, no traversal loop.
-    The skill's C# manual-traversal example uses `while (line != null)` as the natural typed counterpart
-    of GDScript's falsy-`{}` check (C#'s `DialogueLine` return can't carry an empty-`Dictionary` sentinel
-    the way GDScript's untyped return can) — this is a reasonable inference, not a fact confirmed by the
-    docs, so treat it as best-effort rather than verified API behavior.
+11. **C# end-of-dialogue check: `while (line != null)`.** `CSharp.md` only shows a single
+    `var line = await DialogueManager.GetNextDialogueLine(dialogue, "start");` call, no traversal loop —
+    but since the GDScript source returns `null` at end of dialogue (gotcha #3), the null check is the
+    verified-correct pattern, not an inference.
+12. **Condition + jump on one response line is documented upstream.** The exact form
+    `- Another one [if SomeGlobal.some_method()] => another_title` appears verbatim in
+    `Conditions_Mutations.md` at the tag (with the accompanying rule "If using a condition and a goto on
+    a response line, make sure the goto is provided last") — the skill's §3 snippet is doc-verbatim, not
+    an authored composition.
 
 ## Skill-authoring implications
 
