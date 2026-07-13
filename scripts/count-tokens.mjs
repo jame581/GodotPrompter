@@ -21,6 +21,8 @@ const markdown = args.includes('--markdown');
 const json = args.includes('--json');
 
 const BUDGET_BYTES = 16 * 1024;
+// Mirrors validate-skills.mjs: >= BUDGET_BYTES is a CI-failing error, >= this is an advisory warning.
+const BUDGET_APPROACHING_BYTES = 15.5 * 1024;
 
 let countClaude = null;
 let countGpt = null;
@@ -65,12 +67,13 @@ function listFiles() {
 const rows = [];
 for (const f of listFiles()) {
   const text = readFileSync(f.path, 'utf8');
-  const bytes = Buffer.byteLength(text, 'utf8');
+  const bytes = Buffer.byteLength(text.replace(/\r\n/g, '\n'), 'utf8');
   const estTokens = Math.round(bytes / 4);
   const claude = countClaude ? countClaude(text) : null;
   const gpt = countGpt ? countGpt(text) : null;
   const overBudget = f.kind === 'skill' && bytes >= BUDGET_BYTES;
-  rows.push({ kind: f.kind, name: f.name, path: relative(ROOT, f.path).replace(/\\/g, '/'), bytes, estTokens, claude, gpt, overBudget });
+  const approaching = f.kind === 'skill' && !overBudget && bytes >= BUDGET_APPROACHING_BYTES;
+  rows.push({ kind: f.kind, name: f.name, path: relative(ROOT, f.path).replace(/\\/g, '/'), bytes, estTokens, claude, gpt, overBudget, approaching });
 }
 
 rows.sort((a, b) => b.bytes - a.bytes);
@@ -81,7 +84,7 @@ if (json) {
   console.log('| Kind | Name | Bytes | KB | Est. tokens | Claude | GPT | Status |');
   console.log('|---|---|---:|---:|---:|---:|---:|---|');
   for (const r of rows) {
-    const status = r.kind !== 'skill' ? '—' : (r.overBudget ? '⚠️ over budget' : '✓ under budget');
+    const status = r.kind !== 'skill' ? '—' : (r.overBudget ? '⚠️ over budget' : r.approaching ? '⚠️ approaching' : '✓ under budget');
     console.log(`| ${r.kind} | ${r.name} | ${r.bytes} | ${(r.bytes/1024).toFixed(1)} | ${r.estTokens} | ${r.claude ?? '—'} | ${r.gpt ?? '—'} | ${status} |`);
   }
 } else {
@@ -91,7 +94,7 @@ if (json) {
   console.log(header);
   console.log('-'.repeat(header.length));
   for (const r of rows) {
-    const status = r.kind !== 'skill' ? '' : (r.overBudget ? 'OVER' : 'ok');
+    const status = r.kind !== 'skill' ? '' : (r.overBudget ? 'OVER' : r.approaching ? 'NEAR' : 'ok');
     const kb = (r.bytes/1024).toFixed(1).padStart(5);
     const name = r.name.padEnd(38);
     const bytes = String(r.bytes).padStart(7);

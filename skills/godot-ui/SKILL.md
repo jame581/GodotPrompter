@@ -5,7 +5,7 @@ description: Use when building user interfaces — Control nodes, themes, anchor
 
 # Godot UI — Control Nodes, Themes & Layout
 
-All examples target Godot 4.3+ with no deprecated APIs. GDScript is shown first, then C#.
+All examples target Godot 4.3+ with no deprecated APIs; GDScript first, then C#.
 
 > **Related skills:** **responsive-ui** for multi-resolution scaling, **hud-system** for in-game HUD patterns, **dialogue-system** for dialogue UI presentation, **tween-animation** for UI transition and animation effects.
 
@@ -15,7 +15,7 @@ All examples target Godot 4.3+ with no deprecated APIs. GDScript is shown first,
 
 ### How Control Differs from Node2D
 
-`Control` is the base class for all UI nodes. It lives in a separate branch of the scene tree from `Node2D`/`Node3D` and has a fundamentally different layout model.
+`Control` is the base class for all UI nodes — it lives in a separate scene-tree branch from `Node2D`/`Node3D` with a fundamentally different layout model.
 
 | Feature | `Node2D` | `Control` |
 |---|---|---|
@@ -28,17 +28,17 @@ All examples target Godot 4.3+ with no deprecated APIs. GDScript is shown first,
 
 ### Control as Base Class
 
-Every UI widget (`Button`, `Label`, `LineEdit`, etc.) extends `Control`. The key properties defined on `Control` itself are:
+Every UI widget (`Button`, `Label`, `LineEdit`, etc.) extends `Control`. Key properties defined on `Control` itself:
 
-- `anchor_left`, `anchor_top`, `anchor_right`, `anchor_bottom` — fractional values (0.0–1.0) relative to the parent's rect
-- `offset_left`, `offset_top`, `offset_right`, `offset_bottom` — pixel offsets applied after the anchor is resolved
+- `anchor_left`, `anchor_top`, `anchor_right`, `anchor_bottom` — fractional values (0.0–1.0) relative to the parent rect
+- `offset_left`, `offset_top`, `offset_right`, `offset_bottom` — pixel offsets applied after the anchor resolves
 - `size_flags_horizontal`, `size_flags_vertical` — how the node participates in `Container` layout
-- `theme` — a `Theme` resource; if `null` the node walks up the tree to find the nearest ancestor with one
-- `focus_mode` — controls whether the node can receive keyboard/gamepad focus
+- `theme` — a `Theme` resource; if `null`, walks up the tree to the nearest ancestor with one
+- `focus_mode` — whether the node can receive keyboard/gamepad focus
 
-Place UI nodes inside a `CanvasLayer` (or directly under the scene root's built-in canvas) so they always render on top of the 3D/2D world and are not affected by `Camera` transforms.
+Place UI nodes inside a `CanvasLayer` (or directly under the scene root's built-in canvas) so they render on top of the 3D/2D world, unaffected by `Camera` transforms.
 
-> ⚠️ **Changed in Godot 4.7:** `Control.accessibility_live` changed type from `DisplayServer.AccessibilityLiveMode` to `AccessibilityServer.AccessibilityLiveMode` (`LIVE_OFF = 0` default, `LIVE_POLITE`, `LIVE_ASSERTIVE`) — the accessibility enums/APIs moved to the new `AccessibilityServer` singleton. GDScript-compatible; breaks C# binary/source compatibility (rebuild against the new enum). See the [4.7 migration guide](https://docs.godotengine.org/en/latest/tutorials/migrating/upgrading_to_godot_4.7.html).
+> ⚠️ **Changed in Godot 4.7:** `Control.accessibility_live` changed type from `DisplayServer.AccessibilityLiveMode` to `AccessibilityServer.AccessibilityLiveMode` (`LIVE_OFF = 0` default, `LIVE_POLITE`, `LIVE_ASSERTIVE`) — accessibility enums/APIs moved to the new `AccessibilityServer` singleton. GDScript-compatible; breaks C# binary/source compatibility (rebuild against the new enum). See the [4.7 migration guide](https://docs.godotengine.org/en/latest/tutorials/migrating/upgrading_to_godot_4.7.html).
 
 ---
 
@@ -46,8 +46,8 @@ Place UI nodes inside a `CanvasLayer` (or directly under the scene root's built-
 
 | Container | Purpose | When to Use |
 |---|---|---|
-| `VBoxContainer` | Stacks children vertically, top to bottom | Lists, option rows, vertical menus |
-| `HBoxContainer` | Stacks children horizontally, left to right | Toolbars, stat rows, horizontal nav |
+| `VBoxContainer` | Stacks children vertically | Lists, option rows, vertical menus |
+| `HBoxContainer` | Stacks children horizontally | Toolbars, stat rows, horizontal nav |
 | `GridContainer` | Arranges children in a fixed-column grid | Inventory grids, key-binding tables |
 | `MarginContainer` | Adds padding around a single child | Wrapping any node to give it breathing room |
 | `PanelContainer` | Draws a `StyleBox` background, then lays out children | Card UI, dialog boxes, HUD panels |
@@ -59,9 +59,9 @@ Place UI nodes inside a `CanvasLayer` (or directly under the scene root's built-
 - Use `custom_minimum_size` to prevent a child from collapsing to zero.
 - `MarginContainer` reads margin from the theme property `margin_*`; override at runtime with `add_theme_constant_override("margin_left", 16)`.
 
-> **Godot 4.7+:** `custom_maximum_size` (`Vector2(-1, -1)`) caps size per axis, with priority over `custom_minimum_size`; `propagate_maximum_size` (default `false`) makes a parent's maximum constrain its Control children; the `_get_maximum_size()` virtual computes maximums from code.
+> **Godot 4.7+:** `custom_maximum_size` (`Vector2(-1, -1)`) caps size per axis, prioritized over `custom_minimum_size`; `propagate_maximum_size` (default `false`) makes a parent's maximum constrain its Control children; `_get_maximum_size()` computes maximums from code.
 
-> ⚠️ **Changed in Godot 4.7:** `TabContainer.all_tabs_in_front` is deprecated — it no longer does anything, as tabs are always in front. Remove code that sets it. See [GH-118623](https://github.com/godotengine/godot/pull/118623).
+> ⚠️ **Changed in Godot 4.7:** `TabContainer.all_tabs_in_front` is deprecated — it does nothing now, since tabs are always in front. Remove code that sets it. See [GH-118623](https://github.com/godotengine/godot/pull/118623).
 
 ---
 
@@ -93,17 +93,17 @@ The editor exposes built-in presets:
 **GDScript:**
 
 ```gdscript
-# Fill parent completely (equivalent to "Full Rect" preset)
+# Fill parent completely ("Full Rect" preset)
 $Panel.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
 
 # Anchor to top-right corner, fixed 200x60 size
 $HUDLabel.set_anchors_and_offsets_preset(Control.PRESET_TOP_RIGHT)
 $HUDLabel.size = Vector2(200.0, 60.0)
-# Fine-tune with a 16 px margin from the right and top edges
+# 16 px margin from the right and top edges
 $HUDLabel.offset_right  = -16.0
 $HUDLabel.offset_top    =  16.0
 
-# Custom responsive anchor: right half of screen, full height
+# Custom anchor: right half of screen, full height
 $SidePanel.anchor_left   = 0.5
 $SidePanel.anchor_top    = 0.0
 $SidePanel.anchor_right  = 1.0
@@ -141,16 +141,16 @@ panel.OffsetBottom = 0f;
 
 ### Anchor vs Offset
 
-- **Anchor** determines *where on the parent* the node's edges track. It is resolution-independent.
-- **Offset** is a *fixed pixel value* added after the anchor. It does not scale with the parent.
+- **Anchor** determines *where on the parent* the node's edges track — resolution-independent.
+- **Offset** is a *fixed pixel value* added after the anchor — doesn't scale with the parent.
 
-For fully responsive layout, keep offsets at 0 and let anchors do the work. Add small fixed offsets only for cosmetic margins (e.g., a 16 px gutter from an edge).
+For fully responsive layout, keep offsets at 0 and let anchors do the work; add small fixed offsets only for cosmetic margins (e.g., a 16 px gutter from an edge).
 
 ---
 
 ## 4. Theme System
 
-A `Theme` resource centralizes fonts, colors, and `StyleBox`es. Apply at the root and let inheritance do the work; use `theme_override_*` only for one-off tweaks. `StyleBoxFlat` covers most flat-design needs (`bg_color`, `border_color`, `corner_radius`, `border_width`); `StyleBoxTexture` for textured backgrounds.
+A `Theme` resource centralizes fonts, colors, and `StyleBox`es. Apply at the root and let inheritance do the work; use `theme_override_*` only for one-off tweaks. `StyleBoxFlat` covers most flat-design needs (`bg_color`, `border_color`, `corner_radius`, `border_width`); `StyleBoxTexture` for textures.
 
 > See [references/theme-system.md](references/theme-system.md) for the full Theme resource creation walk-through, StyleBoxFlat properties, font overrides, theme inheritance rules, and per-node `theme_override_*` methods.
 
@@ -160,7 +160,7 @@ A `Theme` resource centralizes fonts, colors, and `StyleBox`es. Apply at the roo
 
 ## 5. Focus & Navigation
 
-Focus modes (`FOCUS_NONE`, `FOCUS_CLICK`, `FOCUS_ALL`) gate keyboard/gamepad navigation. Use `focus_neighbor_top` / `_bottom` / `_left` / `_right` to wire navigation chains, or rely on automatic spatial detection. Call `grab_focus()` on the first interactive element when a menu opens.
+Focus modes (`FOCUS_NONE`, `FOCUS_CLICK`, `FOCUS_ALL`) gate keyboard/gamepad navigation. Wire chains with `focus_neighbor_top` / `_bottom` / `_left` / `_right`, or rely on automatic spatial detection. Call `grab_focus()` on the first interactive element when a menu opens.
 
 > See [references/focus-and-navigation.md](references/focus-and-navigation.md) for focus mode details, `focus_neighbor` chain examples, gamepad/keyboard input handling, and grab_focus patterns.
 
@@ -172,9 +172,9 @@ Three canonical scenes: a **main menu** (centered VBoxContainer with title + but
 
 > See [references/ui-patterns.md](references/ui-patterns.md) for the full scene-tree fragments and GDScript wiring for each pattern.
 
-> **Godot 4.7+:** `offset_transform_*` — visual-only transform for UI juice (shake/pulse) that never re-triggers container layout; `_get_cursor_shape(at_position)` virtual — per-position cursor shapes; `PopupMenu` search bar (`search_bar_enabled`, fuzzy by default) plus `set_item_index()` for reordering; `TextureRect` `STRETCH_TILE` now tiles `AtlasTexture`s (only non-zero `margin` unsupported). Code: [references/ui-patterns.md](references/ui-patterns.md#godot-47-additions).
+> **Godot 4.7+:** `offset_transform_*` — visual-only UI-juice transform (shake/pulse) that never re-triggers container layout; `_get_cursor_shape(at_position)` — per-position cursor shapes; `PopupMenu` search bar (`search_bar_enabled`, fuzzy by default) plus `set_item_index()` for reordering; `TextureRect` `STRETCH_TILE` now tiles `AtlasTexture`s (only non-zero `margin` unsupported). Code: [references/ui-patterns.md](references/ui-patterns.md#godot-47-additions).
 
-> ⚠️ **Changed in Godot 4.7:** `RichTextLabel.add_image()` / `update_image()` sizing was reworked — `width`/`height` are now `float`; the `width_in_percent`/`height_in_percent` bools become `width_unit`/`height_unit` taking the new `ImageUnit` enum (`IMAGE_UNIT_PIXEL`, `IMAGE_UNIT_PERCENT`, `IMAGE_UNIT_EM` — em scales with font size). `ImageUpdateMask.UPDATE_WIDTH_IN_PERCENT` is renamed `UPDATE_WIDTH_UNIT`, breaking GDScript that uses the old name. See the [4.7 migration guide](https://docs.godotengine.org/en/latest/tutorials/migrating/upgrading_to_godot_4.7.html).
+> ⚠️ **Changed in Godot 4.7:** `RichTextLabel.add_image()` / `update_image()` sizing was reworked — `width`/`height` are now `float`; `width_in_percent`/`height_in_percent` bools become `width_unit`/`height_unit`, taking the new `ImageUnit` enum (`IMAGE_UNIT_PIXEL`, `IMAGE_UNIT_PERCENT`, `IMAGE_UNIT_EM` — em scales with font size). `ImageUpdateMask.UPDATE_WIDTH_IN_PERCENT` is renamed `UPDATE_WIDTH_UNIT`, breaking GDScript using the old name. See the [4.7 migration guide](https://docs.godotengine.org/en/latest/tutorials/migrating/upgrading_to_godot_4.7.html).
 
 ---
 
@@ -188,12 +188,12 @@ Three canonical scenes: a **main menu** (centered VBoxContainer with title + but
 
 ## 8. FoldableContainer (Godot 4.5+)
 
-`FoldableContainer` is a new built-in `Container` node introduced in Godot 4.5. It provides accordion-style collapsible sections with a toggle header, eliminating the boilerplate of manually wiring a `Button` to show/hide a child `VBoxContainer`.
+`FoldableContainer` is a built-in `Container` node introduced in Godot 4.5, providing accordion-style collapsible sections with a toggle header — eliminating the boilerplate of manually wiring a `Button` to show/hide a child `VBoxContainer`.
 
 ### Basic Usage
 
 ```gdscript
-# In a script that builds UI dynamically:
+# Build UI dynamically:
 func _ready() -> void:
     var foldable := FoldableContainer.new()
     foldable.title = "Advanced Settings"
@@ -211,7 +211,7 @@ func _ready() -> void:
 
     add_child(foldable)
 
-# Listen for toggle events:
+# Listen for toggle:
 func _ready() -> void:
     var foldable := $FoldableContainer
     foldable.folding_changed.connect(_on_section_toggled)
@@ -261,26 +261,22 @@ private void OnSectionToggled(bool isFolded)
 |--------|-----------|--------------|
 | `folding_changed` | `(folded: bool)` | Emitted whenever the fold state toggles |
 
-> **Replaces boilerplate:** Prior to Godot 4.5, accordion sections required a `Button` + `VBoxContainer` + signal connection. `FoldableContainer` handles all of this in one node.
+> **Replaces boilerplate:** Before Godot 4.5, accordion sections required a `Button` + `VBoxContainer` + signal connection — `FoldableContainer` handles it all in one node.
 
 ---
 
 ## 9. Stacked Label Effects (Godot 4.5+)
 
-In Godot 4.5, `Label` and `RichTextLabel` support multiple layered text effects simultaneously — for example, stacking two outline effects at different widths and colors, or combining a shadow with a glow. Previously, achieving multiple outline layers required duplicating Label nodes and layering them manually.
+Godot 4.5 lets `Label` and `RichTextLabel` layer multiple text effects simultaneously — e.g., stacking two outline effects at different widths/colors, or combining a shadow with a glow. Previously, multiple outline layers required duplicating and manually layering Label nodes.
 
 ```gdscript
-# In the inspector: Label → Theme Overrides → Constants
-# Add multiple outline layers by stacking VisualShaderNodeTextureParameter entries
-# in the Theme, or configure via add_theme_* overrides at runtime.
-
-# Example: thick outer outline + thin inner outline via theme overrides
+# Configure via Theme Overrides → Constants in the inspector, or add_theme_* overrides at runtime.
 func apply_stacked_outlines(label: Label) -> void:
     # Outer outline — wide, dark
     label.add_theme_constant_override("outline_size", 6)
     label.add_theme_color_override("font_outline_color", Color(0.0, 0.0, 0.0, 0.9))
 
-    # Shadow (counts as a second layered effect)
+    # Shadow (second layered effect)
     label.add_theme_constant_override("shadow_offset_x", 2)
     label.add_theme_constant_override("shadow_offset_y", 2)
     label.add_theme_color_override("font_shadow_color", Color(0.0, 0.0, 0.0, 0.5))
@@ -300,15 +296,15 @@ public void ApplyStackedOutlines(Label label)
 }
 ```
 
-For `RichTextLabel`, stacked effects can also be applied using BBCode in combination with theme overrides:
+For `RichTextLabel`, stacked effects can also be applied via BBCode combined with theme overrides:
 
 ```gdscript
-# RichTextLabel with multiple outline-style effects via BBCode + theme
+# Multiple outline-style effects via BBCode + theme
 $RichTextLabel.text = "[outline size=4 color=#000000]Level Up![/outline]"
-# Additional layers are set via theme overrides on the node as above.
+# Additional layers via theme overrides, as above.
 ```
 
-> **Editor workflow:** Stacked effects are most easily configured via **Theme Editor → Label → Constants** or by adding multiple `FontFile`-style outline passes in the Font resource. The runtime API (`add_theme_*_override`) above works for dynamic scenarios.
+> **Editor workflow:** Configure stacked effects via **Theme Editor → Label → Constants**, or add multiple `FontFile`-style outline passes in the Font resource. The runtime API (`add_theme_*_override`) above covers dynamic scenarios.
 
 ---
 
@@ -317,7 +313,7 @@ $RichTextLabel.text = "[outline size=4 color=#000000]Level Up![/outline]"
 - [ ] Root UI `Control` has anchor preset **Full Rect** (or appropriate preset for the layout)
 - [ ] All interactive widgets (`Button`, `LineEdit`, `Slider`) have `focus_mode = FOCUS_ALL`
 - [ ] Decorative nodes (`Label`, `TextureRect`) have `focus_mode = FOCUS_NONE`
-- [ ] Focus neighbours are wired for non-linear layouts so gamepad navigation wraps correctly
+- [ ] Focus neighbours wired for non-linear layouts so gamepad navigation wraps correctly
 - [ ] `grab_focus()` called on the first interactive widget in `_ready()` for each screen
 - [ ] Pause menu root `Control` has `process_mode = PROCESS_MODE_ALWAYS`
 - [ ] One `Theme` resource assigned at the screen root — not duplicated on every child

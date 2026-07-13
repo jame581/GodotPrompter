@@ -7,7 +7,7 @@ description: Use when implementing save/load systems — ConfigFile, JSON, Resou
 
 Choose the right serialization strategy for your data type. All examples target Godot 4.3+ with no deprecated APIs.
 
-> **Related skills:** **resource-pattern** for custom Resource data containers, **inventory-system** for inventory serialization patterns, **godot-project-setup** for SaveManager autoload setup.
+> **Related skills:** **resource-pattern** for custom Resource data containers, **inventory-system** for inventory serialization patterns, **godot-project-setup** for SaveManager autoload setup, **popochiu** for adventure-framework saves.
 
 ---
 

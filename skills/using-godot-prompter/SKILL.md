@@ -202,6 +202,13 @@ Skills use Claude Code tool names as the canonical reference. Non-Claude platfor
 ### Math & Data
 - `math-essentials` — Vectors, transforms, interpolation, curves, paths, RNG
 
+### Third-Party Addons (require the addon installed)
+- `limboai` — LimboAI behavior trees + hierarchical state machines
+- `beehave` — Beehave GDScript behavior trees
+- `popochiu` — Popochiu point-and-click adventure framework
+- `dialogue-manager` — Dialogue Manager branching dialogue
+- `phantom-camera` — Phantom Camera dynamic cameras
+
 ---
 
 ## Implementation Checklist

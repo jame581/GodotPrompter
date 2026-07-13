@@ -232,6 +232,57 @@ func take_damage(amount):
 
 ---
 
+## Category 4: Third-Party Addon Skills
+
+These skills only apply when the corresponding addon is installed in the user's project. Each test
+checks that the agent reaches for the addon skill (not generic Godot advice, and not the core skill it
+sits next to) and answers with the addon's real API.
+
+### Test 4.1: Popochiu (adventure framework)
+
+**Prompt:** "I'm building a point-and-click adventure with the Popochiu addon. How do I script a cutscene where the character walks to a door and the room changes?"
+
+**Expected skill:** `popochiu`
+
+**Expected behavior:**
+- Uses `E.queue([...])` cutscene scripting with `queue_*` variants inside the array
+- Room change via `R.goto_room(...)` (NOT `E.goto_room` — that does not exist)
+- Character movement via the `C` autoload
+
+**Pass criteria:** Answer is grounded in Popochiu's one-letter autoloads and the queue model, not hand-rolled Godot code or the generic `dialogue-system` skill.
+
+---
+
+### Test 4.2: Dialogue Manager (branching dialogue, C# path)
+
+**Prompt:** "Using the Dialogue Manager addon, write a .dialogue file with a branching choice and show how to run it from C#."
+
+**Expected skill:** `dialogue-manager`
+
+**Expected behavior:**
+- Valid `.dialogue` syntax: `~ title`, `- response` options, `=> jump` / `=> END`
+- C# runtime call using `DialogueManagerRuntime` namespace and `GetNextDialogueLine` / balloon API
+- End of dialogue treated as `null` (not an empty dictionary)
+
+**Pass criteria:** Both the `.dialogue` snippet and the C# are addon-real, not invented.
+
+---
+
+### Test 4.3: Phantom Camera (camera switching)
+
+**Prompt:** "With Phantom Camera, how do I switch between two cameras when the player enters an area?"
+
+**Expected skill:** `phantom-camera`
+
+**Expected behavior:**
+- Priority-based switching (`set_priority()` / C# `Priority`), not manual `Camera2D.make_current()`
+- Mentions `PhantomCameraHost` as a child of the real camera
+- Uses the trigger-area pattern from the skill
+
+**Pass criteria:** Answer uses the addon's priority model rather than the hand-rolled `camera-system` approach.
+
+---
+
 ## How to Run
 
 1. Start a fresh Claude Code session
@@ -239,3 +290,8 @@ func take_damage(amount):
 3. Navigate to an empty test directory
 4. Run each test sequentially, recording results in RESULTS.md
 5. For Category 3, keep the same session (tests build on each other)
+
+**Note on Category 4:** a newly added skill is not in the installed plugin cache until the release ships,
+so pre-release runs test the skill *as it exists in the working tree* (agent reads `skills/<name>/SKILL.md`)
+rather than plugin-cache routing. Re-run Category 4 against the installed plugin after release to
+validate description-based routing end to end.

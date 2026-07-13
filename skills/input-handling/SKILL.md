@@ -33,12 +33,12 @@ _unhandled_input()    ← game input (movement, actions)
 
 ### Where to Handle Input
 
-| Method                    | Use For                                    | When It Runs     |
+| Method | Use For | When It Runs |
 |---------------------------|--------------------------------------------|------------------|
-| `_input()`                | Camera look, global hotkeys                | First — before everything |
-| `_shortcut_input()`       | Global shortcuts (pause, screenshot)       | After `_input`, before UI |
-| `_unhandled_key_input()`  | Key-only events that UI didn't consume     | After UI, keys only |
-| `_unhandled_input()`      | Gameplay actions (jump, attack, interact)  | Last — after UI consumes |
+| `_input()` | Camera look, global hotkeys | First — before everything |
+| `_shortcut_input()` | Global shortcuts (pause, screenshot) | After `_input`, before UI |
+| `_unhandled_key_input()` | Key-only events that UI didn't consume | After UI, keys only |
+| `_unhandled_input()` | Gameplay actions (jump, attack, interact) | Last — after UI consumes |
 | `Input.is_action_pressed()` in `_physics_process()` | Continuous movement | N/A — polling, not event-driven |
 
 **Rule of thumb:** Use `_unhandled_input()` for discrete game actions (jump, attack). Use `Input` polling in `_physics_process()` for continuous movement. Use `_input()` only when you need input before UI consumes it (e.g., mouse look).
@@ -81,13 +81,13 @@ Actions can be created at runtime with `InputMap.add_action()` + `InputMap.actio
 
 Use descriptive, game-specific names instead of key names:
 
-| Good                | Bad              | Why                                  |
+| Good | Bad | Why |
 |---------------------|------------------|--------------------------------------|
-| `move_left`         | `press_a`        | Decoupled from physical key          |
-| `attack`            | `left_click`     | Works for mouse and gamepad          |
-| `interact`          | `press_e`        | Rebindable without changing logic    |
-| `sprint`            | `hold_shift`     | Input-agnostic                       |
-| `pause`             | `press_escape`   | Can map to gamepad Start button too  |
+| `move_left` | `press_a` | Decoupled from physical key |
+| `attack` | `left_click` | Works for mouse and gamepad |
+| `interact` | `press_e` | Rebindable without changing logic |
+| `sprint` | `hold_shift` | Input-agnostic |
+| `pause` | `press_escape` | Can map to gamepad Start button too |
 
 ---
 
@@ -171,16 +171,16 @@ public override void _PhysicsProcess(double delta)
 
 ### Key Input Methods
 
-| Method                            | Returns | Use For                              |
+| Method | Returns | Use For |
 |-----------------------------------|---------|--------------------------------------|
-| `Input.is_action_pressed()`       | `bool`  | Held buttons (sprint, crouch, fire)  |
-| `Input.is_action_just_pressed()`  | `bool`  | One-shot triggers (jump, interact)   |
-| `Input.is_action_just_released()` | `bool`  | Release triggers (variable jump cut) |
-| `Input.get_action_strength()`     | `float` | Analog pressure (0.0–1.0)           |
-| `Input.get_axis()`                | `float` | Single axis (-1.0 to 1.0)           |
-| `Input.get_vector()`              | `Vector2` | 2D direction, normalized          |
-| `event.is_action_pressed()`       | `bool`  | Check in `_unhandled_input` callback |
-| `event.is_action_released()`      | `bool`  | Check in `_unhandled_input` callback |
+| `Input.is_action_pressed()` | `bool` | Held buttons (sprint, crouch, fire) |
+| `Input.is_action_just_pressed()` | `bool` | One-shot triggers (jump, interact) |
+| `Input.is_action_just_released()` | `bool` | Release triggers (variable jump cut) |
+| `Input.get_action_strength()` | `float` | Analog pressure (0.0–1.0) |
+| `Input.get_axis()` | `float` | Single axis (-1.0 to 1.0) |
+| `Input.get_vector()` | `Vector2` | 2D direction, normalized |
+| `event.is_action_pressed()` | `bool` | Check in `_unhandled_input` callback |
+| `event.is_action_released()` | `bool` | Check in `_unhandled_input` callback |
 
 > **`Input.is_action_just_pressed()` in `_physics_process()` can miss inputs** if the physics framerate is lower than the render framerate. For reliability, catch one-shot actions in `_unhandled_input()` and set a flag, or use the input buffering pattern below.
 
@@ -278,18 +278,18 @@ Input propagates in **reverse scene tree order** (deepest child first, root last
 
 ## 9. Common Pitfalls
 
-| Symptom                              | Cause                                           | Fix                                                                |
+| Symptom | Cause | Fix |
 |--------------------------------------|--------------------------------------------------|--------------------------------------------------------------------|
-| Action not recognized               | Action name not defined in Input Map             | Add the action in Project > Project Settings > Input Map           |
-| `is_action_just_pressed()` misses input | Called in `_physics_process` at low tick rate  | Catch discrete actions in `_unhandled_input()` instead             |
-| Input still fires when UI is open    | Using `_input()` instead of `_unhandled_input()` | Switch to `_unhandled_input()` so UI consumes events first         |
-| Mouse look works through menus       | Mouse motion in `_input()` without mode check    | Guard with `if Input.mouse_mode == Input.MOUSE_MODE_CAPTURED`      |
-| Gamepad stick drifts                 | Deadzone too low or not set                      | Set deadzone per-action in Input Map (0.2 is a good default)       |
-| Controller not detected              | Not connected before game start                  | Connect `joy_connection_changed` signal, handle hot-plug           |
-| Key rebinding captures modifier keys | No filter for Shift/Ctrl/Alt alone               | Skip events where keycode is a modifier key                        |
-| Touch input doesn't work on desktop  | "Emulate Touch From Mouse" is disabled           | Enable in Project Settings > Input Devices > Pointing              |
-| Input fires during pause             | Node `process_mode` is `INHERIT` (pauses with parent) | Set pause menu to `PROCESS_MODE_ALWAYS`                      |
-| Action triggers twice per press      | Same action checked in both `_input` and `_unhandled_input` | Pick one callback per action                              |
+| Action not recognized | Action name not defined in Input Map | Add the action in Project > Project Settings > Input Map |
+| `is_action_just_pressed()` misses input | Called in `_physics_process` at low tick rate | Catch discrete actions in `_unhandled_input()` instead |
+| Input still fires when UI is open | Using `_input()` instead of `_unhandled_input()` | Switch to `_unhandled_input()` so UI consumes events first |
+| Mouse look works through menus | Mouse motion in `_input()` without mode check | Guard with `if Input.mouse_mode == Input.MOUSE_MODE_CAPTURED` |
+| Gamepad stick drifts | Deadzone too low or not set | Set deadzone per-action in Input Map (0.2 is a good default) |
+| Controller not detected | Not connected before game start | Connect `joy_connection_changed` signal, handle hot-plug |
+| Key rebinding captures modifier keys | No filter for Shift/Ctrl/Alt alone | Skip events where keycode is a modifier key |
+| Touch input doesn't work on desktop | "Emulate Touch From Mouse" is disabled | Enable in Project Settings > Input Devices > Pointing |
+| Input fires during pause | Node `process_mode` is `INHERIT` (pauses with parent) | Set pause menu to `PROCESS_MODE_ALWAYS` |
+| Action triggers twice per press | Same action checked in both `_input` and `_unhandled_input` | Pick one callback per action |
 
 > ⚠️ **Changed in Godot 4.7:** Mouse and keyboard device IDs changed from `0` to `InputEvent.DEVICE_ID_MOUSE` (`32`) and `InputEvent.DEVICE_ID_KEYBOARD` (`16`), because some joypads use `0` as their device ID. Code checking `event.device == 0` to detect keyboard/mouse input silently breaks — compare against the constants or check the event type (`event is InputEventKey`) instead. See the [4.7 migration guide](https://docs.godotengine.org/en/latest/tutorials/migrating/upgrading_to_godot_4.7.html).
 

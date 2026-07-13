@@ -48,13 +48,13 @@ project/
 
 ### Compression Modes
 
-| Mode           | Quality   | VRAM     | File Size | Use For                         |
+| Mode | Quality | VRAM | File Size | Use For |
 |----------------|-----------|----------|-----------|----------------------------------|
-| **Lossless**   | Perfect   | High     | Large     | Pixel art, UI elements           |
-| **Lossy**      | Good      | High     | Small     | Large photos, backgrounds        |
-| **VRAM Compressed** | Reduced | Low   | Small     | 3D textures, large 2D sprites    |
-| **VRAM Uncompressed** | Perfect | High | Large    | When VRAM compression artifacts are unacceptable |
-| **Basis Universal** | Reduced | Low  | Very small | Cross-platform, multiple GPU formats |
+| **Lossless** | Perfect | High | Large | Pixel art, UI elements |
+| **Lossy** | Good | High | Small | Large photos, backgrounds |
+| **VRAM Compressed** | Reduced | Low | Small | 3D textures, large 2D sprites |
+| **VRAM Uncompressed** | Perfect | High | Large | When VRAM compression artifacts are unacceptable |
+| **Basis Universal** | Reduced | Low | Very small | Cross-platform, multiple GPU formats |
 
 ### When to Use Each
 
@@ -68,14 +68,14 @@ Mobile targets             → VRAM Compressed (essential for memory)
 
 ### Key Import Settings
 
-| Setting            | Description                                   | Default     |
+| Setting | Description | Default |
 |--------------------|-----------------------------------------------|-------------|
-| **Compress > Mode** | Compression algorithm (see table above)      | VRAM Compressed |
-| **Mipmaps > Generate** | Generate mipmaps for distance rendering   | Off         |
-| **Process > Fix Alpha Border** | Prevents dark outlines on transparent sprites | On    |
-| **Process > Premult Alpha** | Pre-multiply alpha (avoids dark halos)   | Off         |
-| **Flags > Filter** | Bilinear filtering (smooth) vs nearest (crisp) | Linear    |
-| **Flags > Repeat** | Enable texture tiling                        | Disabled    |
+| **Compress > Mode** | Compression algorithm (see table above) | VRAM Compressed |
+| **Mipmaps > Generate** | Generate mipmaps for distance rendering | Off |
+| **Process > Fix Alpha Border** | Prevents dark outlines on transparent sprites | On |
+| **Process > Premult Alpha** | Pre-multiply alpha (avoids dark halos) | Off |
+| **Flags > Filter** | Bilinear filtering (smooth) vs nearest (crisp) | Linear |
+| **Flags > Repeat** | Enable texture tiling | Disabled |
 
 ### Pixel Art Setup
 
@@ -101,13 +101,13 @@ Mipmaps prevent shimmering on textures viewed at an angle or from a distance. Re
 
 ### Supported Formats
 
-| Format    | Extension    | Recommendation                              |
+| Format | Extension | Recommendation |
 |-----------|-------------|----------------------------------------------|
-| **glTF**  | `.gltf`, `.glb` | **Recommended** — open standard, best support |
-| **Blend** | `.blend`    | Direct Blender import (requires Blender installed) |
-| **FBX**   | `.fbx`      | Good for legacy pipelines                    |
-| **Collada** | `.dae`    | Older format, use glTF if possible           |
-| **OBJ**   | `.obj`      | Static meshes only — no animations/rigs      |
+| **glTF** | `.gltf`, `.glb` | **Recommended** — open standard, best support |
+| **Blend** | `.blend` | Direct Blender import (requires Blender installed) |
+| **FBX** | `.fbx` | Good for legacy pipelines |
+| **Collada** | `.dae` | Older format, use glTF if possible |
+| **OBJ** | `.obj` | Static meshes only — no animations/rigs |
 
 > **glTF is the recommended format.** It has the best Godot support, is an open standard, and preserves materials, animations, and rigs accurately.
 
@@ -115,13 +115,13 @@ Mipmaps prevent shimmering on textures viewed at an angle or from a distance. Re
 
 Godot auto-creates appropriate node types based on **suffixes** in your 3D model's object names:
 
-| Suffix                | Generated Node            | Example Name               |
+| Suffix | Generated Node | Example Name |
 |-----------------------|---------------------------|----------------------------|
-| `-col`                | StaticBody3D + collision  | `Wall-col`                 |
-| `-convcol`            | ConvexPolygonShape3D      | `Rock-convcol`             |
-| `-rigid`              | RigidBody3D               | `Barrel-rigid`             |
-| `-navmesh`            | NavigationRegion3D        | `Floor-navmesh`            |
-| `-occluder`           | OccluderInstance3D        | `BigWall-occluder`         |
+| `-col` | StaticBody3D + collision | `Wall-col` |
+| `-convcol` | ConvexPolygonShape3D | `Rock-convcol` |
+| `-rigid` | RigidBody3D | `Barrel-rigid` |
+| `-navmesh` | NavigationRegion3D | `Floor-navmesh` |
+| `-occluder` | OccluderInstance3D | `BigWall-occluder` |
 
 ```
 In Blender:                  In Godot (after import):
@@ -134,14 +134,14 @@ Wall-col                  →  StaticBody3D
 
 Select the imported `.glb`/`.gltf` in FileSystem, then in the Import dock:
 
-| Setting                    | Description                                      |
+| Setting | Description |
 |----------------------------|--------------------------------------------------|
-| **Root Type**              | Override root node type (Node3D, RigidBody3D, etc.) |
-| **Root Name**              | Custom name for the root node                    |
-| **Meshes > Generate LOD**  | Auto-generate LOD levels (on by default)         |
-| **Meshes > Light Baking**  | Static or Dynamic for lightmap baking            |
-| **Animation > Import**     | Enable/disable animation import                 |
-| **Animation > FPS**        | Bake animation at this framerate                 |
+| **Root Type** | Override root node type (Node3D, RigidBody3D, etc.) |
+| **Root Name** | Custom name for the root node |
+| **Meshes > Generate LOD** | Auto-generate LOD levels (on by default) |
+| **Meshes > Light Baking** | Static or Dynamic for lightmap baking |
+| **Animation > Import** | Enable/disable animation import |
+| **Animation > FPS** | Bake animation at this framerate |
 
 > **Godot 4.7+:** The Import dock's import-type option can also import a 3D scene file as a single `Mesh` resource or as a `MeshLibrary` (for GridMap), instead of a full scene — no separate export step in the 3D authoring tool needed. ([GH-107856](https://github.com/godotengine/godot/pull/107856))
 
@@ -196,12 +196,12 @@ Share animations between characters with different skeletons:
 
 ### Animation Import Settings
 
-| Setting               | Description                              |
+| Setting | Description |
 |-----------------------|------------------------------------------|
-| **Import**            | Enable/disable animation import          |
-| **FPS**               | Bake framerate (30 is standard)          |
-| **Trimming**          | Remove empty frames at start/end         |
-| **Remove Immutable Tracks** | Remove tracks that don't change  |
+| **Import** | Enable/disable animation import |
+| **FPS** | Bake framerate (30 is standard) |
+| **Trimming** | Remove empty frames at start/end |
+| **Remove Immutable Tracks** | Remove tracks that don't change |
 
 ---
 
@@ -211,21 +211,21 @@ Share animations between characters with different skeletons:
 
 ### Format Recommendations
 
-| Format | Import As       | Use For                   | Key Settings            |
+| Format | Import As | Use For | Key Settings |
 |--------|-----------------|---------------------------|-------------------------|
-| WAV    | AudioStreamWAV  | Short SFX                 | Loop Mode, Mix Rate     |
-| OGG    | AudioStreamOggVorbis | Music, long SFX      | Loop, Loop Offset       |
-| MP3    | AudioStreamMP3  | Music (fallback)          | Loop, BPM               |
+| WAV | AudioStreamWAV | Short SFX | Loop Mode, Mix Rate |
+| OGG | AudioStreamOggVorbis | Music, long SFX | Loop, Loop Offset |
+| MP3 | AudioStreamMP3 | Music (fallback) | Loop, BPM |
 
 ### Key Import Settings
 
-| Setting       | Description                                    | When to Use             |
+| Setting | Description | When to Use |
 |---------------|------------------------------------------------|-------------------------|
-| **Loop**      | Enable looping playback                        | Music, ambient loops    |
-| **Loop Offset** | Start position for loop restart             | Avoid intro on loop     |
-| **Force Mono** | Convert stereo to mono                        | 3D positional audio     |
-| **BPM**       | Beats per minute                               | Rhythm games            |
-| **Beat Count** | Total beats in the track                      | Rhythm sync             |
+| **Loop** | Enable looping playback | Music, ambient loops |
+| **Loop Offset** | Start position for loop restart | Avoid intro on loop |
+| **Force Mono** | Convert stereo to mono | 3D positional audio |
+| **BPM** | Beats per minute | Rhythm games |
+| **Beat Count** | Total beats in the track | Rhythm sync |
 
 > **Import tip:** Use WAV for short SFX (zero decode latency). Use OGG for music (small file, good quality). Enable **Force Mono** for any audio used with AudioStreamPlayer3D — stereo doesn't spatialize properly.
 
@@ -235,10 +235,10 @@ Share animations between characters with different skeletons:
 
 ### .tres vs .res
 
-| Format | Type       | Readable | Use For                              |
+| Format | Type | Readable | Use For |
 |--------|------------|----------|--------------------------------------|
-| `.tres` | Text      | Yes      | Resources you edit by hand or diff   |
-| `.res`  | Binary    | No       | Large resources, faster loading      |
+| `.tres` | Text | Yes | Resources you edit by hand or diff |
+| `.res` | Binary | No | Large resources, faster loading |
 
 ```gdscript
 # Save as text resource
@@ -272,18 +272,18 @@ Load large resources without freezing the game with the `ResourceLoader.load_thr
 
 ## 7. Common Pitfalls
 
-| Symptom                               | Cause                                       | Fix                                                               |
+| Symptom | Cause | Fix |
 |---------------------------------------|----------------------------------------------|--------------------------------------------------------------------|
-| Texture looks blurry                  | Filter is set to Linear for pixel art        | Set Default Texture Filter to Nearest in Project Settings          |
-| Dark outlines on transparent sprites  | Alpha border not fixed on import             | Enable "Fix Alpha Border" in Import dock                           |
-| 3D model has no collisions            | No naming suffix in source model             | Add `-col` suffix to mesh names in Blender, or add manually       |
-| Imported animations missing           | "Import Animation" disabled in Import dock   | Enable Animation > Import and reimport                             |
-| Texture VRAM too high on mobile       | Using Lossless compression for large textures | Switch to VRAM Compressed for textures > 256px                    |
-| 3D textures shimmer at distance       | Mipmaps not generated                        | Enable Mipmaps > Generate in Import dock                           |
-| Audio has pop/click at loop point     | Loop offset not set correctly                | Adjust Loop Offset in Import dock; add fade in audio editor       |
-| Scene file is enormous                | Using binary `.scn` instead of `.tscn`       | Save scenes as `.tscn` (text) for VCS; use `.scn` only if needed  |
-| Import settings lost after reclone    | `.import` files not committed to VCS         | Always commit `.import` files; only `.godot/` goes in .gitignore  |
-| Threaded load freezes game            | Checking status every frame with `load()`    | Use `ResourceLoader.load_threaded_request/get_status` pattern      |
+| Texture looks blurry | Filter is set to Linear for pixel art | Set Default Texture Filter to Nearest in Project Settings |
+| Dark outlines on transparent sprites | Alpha border not fixed on import | Enable "Fix Alpha Border" in Import dock |
+| 3D model has no collisions | No naming suffix in source model | Add `-col` suffix to mesh names in Blender, or add manually |
+| Imported animations missing | "Import Animation" disabled in Import dock | Enable Animation > Import and reimport |
+| Texture VRAM too high on mobile | Using Lossless compression for large textures | Switch to VRAM Compressed for textures > 256px |
+| 3D textures shimmer at distance | Mipmaps not generated | Enable Mipmaps > Generate in Import dock |
+| Audio has pop/click at loop point | Loop offset not set correctly | Adjust Loop Offset in Import dock; add fade in audio editor |
+| Scene file is enormous | Using binary `.scn` instead of `.tscn` | Save scenes as `.tscn` (text) for VCS; use `.scn` only if needed |
+| Import settings lost after reclone | `.import` files not committed to VCS | Always commit `.import` files; only `.godot/` goes in .gitignore |
+| Threaded load freezes game | Checking status every frame with `load()` | Use `ResourceLoader.load_threaded_request/get_status` pattern |
 
 > ⚠️ **Changed in Godot 4.7:** The font import `hinting` default changed from `1` (Light) to `3` (Light (Except Pixel Fonts)) — pixel-style fonts now auto-disable hinting on import, so their rendering can change after upgrading. Set `hinting` back to `1` (Light) in the Import dock per font to keep the 4.6 look. See the [4.7 migration guide](https://docs.godotengine.org/en/latest/tutorials/migrating/upgrading_to_godot_4.7.html).
 

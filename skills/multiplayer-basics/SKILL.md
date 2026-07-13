@@ -204,8 +204,7 @@ public partial class NetworkManager : Node
 # chat.gd
 extends Node
 
-# Any peer can call this; executed on the server only.
-# The server then broadcasts to all peers.
+# Any peer can call; server validates then broadcasts to all peers.
 @rpc("any_peer", "reliable")
 func send_chat_message(text: String) -> void:
 	if not multiplayer.is_server():
@@ -234,8 +233,7 @@ func request_spawn(scene_path: String, spawn_position: Vector2) -> void:
 	get_tree().root.add_child(instance)
 
 
-# High-frequency position sync — unreliable_ordered is acceptable here.
-# transfer_channel separates this stream from other RPC traffic.
+# High-frequency sync; unreliable_ordered + a channel keeps this off other RPC traffic.
 @rpc("authority", "unreliable_ordered", "call_local", 1)
 func sync_position(pos: Vector2) -> void:
 	global_position = pos
@@ -320,13 +318,12 @@ Every node has exactly one authoritative peer — the peer that is permitted to 
 extends CharacterBody2D
 
 func _ready() -> void:
-	# multiplayer.get_unique_id() returns this peer's ID.
-	# The server assigns authority during spawn (see Section 6).
+	# multiplayer.get_unique_id() = this peer's ID; server assigns authority during spawn (see Section 6).
 	pass
 
 
 func _physics_process(delta: float) -> void:
-	# Guard: only the authority peer reads input and moves.
+	# Guard: authority-only input and movement.
 	if not is_multiplayer_authority():
 		return
 
@@ -334,7 +331,6 @@ func _physics_process(delta: float) -> void:
 	velocity = direction * 200.0
 	move_and_slide()
 
-	# Broadcast position to all other peers.
 	sync_position.rpc(global_position)
 
 
@@ -344,7 +340,6 @@ func sync_position(pos: Vector2) -> void:
 		global_position = pos
 
 
-# Check who owns this node at runtime:
 func print_authority_info() -> void:
 	print("My peer ID : %d" % multiplayer.get_unique_id())
 	print("Authority  : %d" % get_multiplayer_authority())
@@ -361,7 +356,7 @@ public partial class Player : CharacterBody2D
 {
     public override void _PhysicsProcess(double delta)
     {
-        // Guard: only the authority peer processes input.
+        // Guard: authority-only input.
         if (!IsMultiplayerAuthority()) return;
 
         var direction = Input.GetVector("ui_left", "ui_right", "ui_up", "ui_down");

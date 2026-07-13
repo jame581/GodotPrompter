@@ -1,5 +1,7 @@
 # DialogueManager (Autoload)
 
+> ⚠️ **Not the addon.** This page documents a **hand-rolled** `DialogueManager` autoload you write yourself. For Nathan Hoad's *Dialogue Manager* addon (`.dialogue` files, balloons), read the **dialogue-manager** skill instead — `skills/dialogue-manager/SKILL.md`.
+
 Reference for `skills/dialogue-system/SKILL.md` — full DialogueManager implementation: line-by-line traversal, choice handling, condition evaluation hooks, signals. GDScript + C#.
 
 > ← Back to [SKILL.md](../SKILL.md)

@@ -83,12 +83,12 @@ if sprite:
 
 In **Project > Project Settings > Debug > GDScript**:
 
-| Warning                 | Effect                                      |
+| Warning | Effect |
 |-------------------------|---------------------------------------------|
-| `UNTYPED_DECLARATION`   | Warns on any untyped variable/parameter     |
-| `INFERRED_DECLARATION`  | Warns on `:=` (prefers explicit types)      |
-| `UNSAFE_CAST`           | Warns on unsafe `as` casts                  |
-| `UNSAFE_CALL_ARGUMENT`  | Warns when passing wrong type to a function |
+| `UNTYPED_DECLARATION` | Warns on any untyped variable/parameter |
+| `INFERRED_DECLARATION` | Warns on `:=` (prefers explicit types) |
+| `UNSAFE_CAST` | Warns on unsafe `as` casts |
+| `UNSAFE_CALL_ARGUMENT` | Warns when passing wrong type to a function |
 
 > Set warnings to **Error** for strict enforcement in team projects.
 
@@ -389,40 +389,40 @@ The recurring small patterns: ternary expressions (`value if cond else other`), 
 
 ## 9. Annotations Reference
 
-| Annotation            | Purpose                                    |
+| Annotation | Purpose |
 |-----------------------|--------------------------------------------|
-| `@export`             | Expose variable in Inspector               |
-| `@export_range`       | Numeric with slider                        |
-| `@export_enum`        | Dropdown from string list                  |
-| `@export_file`        | File path picker                           |
-| `@export_dir`         | Directory picker                           |
-| `@export_multiline`   | Multi-line text box                        |
-| `@export_group`       | Group heading in Inspector                 |
-| `@export_subgroup`    | Subgroup heading                           |
-| `@export_category`    | Category divider                           |
-| `@onready`            | Initialize when node enters tree, just before `_ready()` body runs |
-| `@tool`               | Run script in editor                       |
-| `@icon`               | Custom icon for the script                 |
-| `@warning_ignore`     | Suppress specific warning on next line     |
-| `@static_unload`      | Allow static variables to be freed         |
+| `@export` | Expose variable in Inspector |
+| `@export_range` | Numeric with slider |
+| `@export_enum` | Dropdown from string list |
+| `@export_file` | File path picker |
+| `@export_dir` | Directory picker |
+| `@export_multiline` | Multi-line text box |
+| `@export_group` | Group heading in Inspector |
+| `@export_subgroup` | Subgroup heading |
+| `@export_category` | Category divider |
+| `@onready` | Initialize when node enters tree, just before `_ready()` body runs |
+| `@tool` | Run script in editor |
+| `@icon` | Custom icon for the script |
+| `@warning_ignore` | Suppress specific warning on next line |
+| `@static_unload` | Allow static variables to be freed |
 
 ---
 
 ## 10. Common Pitfalls
 
-| Symptom                               | Cause                                       | Fix                                                              |
+| Symptom | Cause | Fix |
 |---------------------------------------|----------------------------------------------|------------------------------------------------------------------|
-| `as` cast silently returns `null`     | Type mismatch — `as` doesn't error          | Use `is` check first, then cast                                  |
-| Await never resumes                   | Signal never emitted, or node freed          | Check `is_instance_valid(self)` after await; ensure signal fires |
-| Lambda captures stale variable        | Loop variable captured by reference          | Copy to local var before lambda: `var local := i`                |
-| `UNTYPED_DECLARATION` warnings flood  | Warning enabled but codebase isn't typed     | Type incrementally; use `@warning_ignore` for legacy code        |
-| Typed array rejects valid items       | Item type doesn't match exactly              | Ensure items match the declared type (no implicit upcasting)     |
-| `@onready` is `null`                  | Accessed before `_ready()` runs              | Never access `@onready` vars in `_init()` or variable declarations |
-| Match doesn't enter any branch        | No matching pattern and no `_:` wildcard     | Always add `_:` default branch                                   |
-| `class_name` conflict                 | Two scripts with same `class_name`           | Use unique names; check for duplicates in Project                |
-| Export group applies to wrong vars     | Group scope continues until next group       | Add a new `@export_group("")` to end the group scope             |
+| `as` cast silently returns `null` | Type mismatch — `as` doesn't error | Use `is` check first, then cast |
+| Await never resumes | Signal never emitted, or node freed | Check `is_instance_valid(self)` after await; ensure signal fires |
+| Lambda captures stale variable | Loop variable captured by reference | Copy to local var before lambda: `var local := i` |
+| `UNTYPED_DECLARATION` warnings flood | Warning enabled but codebase isn't typed | Type incrementally; use `@warning_ignore` for legacy code |
+| Typed array rejects valid items | Item type doesn't match exactly | Ensure items match the declared type (no implicit upcasting) |
+| `@onready` is `null` | Accessed before `_ready()` runs | Never access `@onready` vars in `_init()` or variable declarations |
+| Match doesn't enter any branch | No matching pattern and no `_:` wildcard | Always add `_:` default branch |
+| `class_name` conflict | Two scripts with same `class_name` | Use unique names; check for duplicates in Project |
+| Export group applies to wrong vars | Group scope continues until next group | Add a new `@export_group("")` to end the group scope |
 | Parent `_ready()` logic doesn't run in child | Missing `super()` call in child's `_ready()` | Add `super()` as first line; see Section 7 |
-| `type_exists()` flagged as deprecated | Deprecated in Godot 4.7                      | Use `ClassDB.class_exists()` instead                             |
+| `type_exists()` flagged as deprecated | Deprecated in Godot 4.7 | Use `ClassDB.class_exists()` instead |
 
 > ⚠️ **Changed in Godot 4.7:** The global `type_exists()` function is deprecated — replace `type_exists("Sprite2D")` with `ClassDB.class_exists("Sprite2D")`. See [GH-116899](https://github.com/godotengine/godot/pull/116899).
 
