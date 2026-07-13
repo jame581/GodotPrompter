@@ -93,7 +93,7 @@ public partial class CameraRig : Camera2D
         // Host.Camera2D / Host.Camera3D are populated automatically from GetParent()
         _host = GetNode<Node>("PhantomCameraHost").AsPhantomCameraHost();
         var active = _host.GetActivePhantomCamera();
-        GD.Print("Active PCam: ", active is PhantomCamera2D p ? p.Node2D.Name : "none");
+        GD.Print("Active PCam: ", active is PhantomCamera2D p ? p.Node2D.Name.ToString() : "none");
     }
 }
 ```
@@ -145,8 +145,8 @@ public partial class TriggerArea : Area2D
     public override void _Ready()
     {
         _areaPCam = _areaPCamNode.AsPhantomCamera2D();
-        AreaEntered += _ => _areaPCam.Priority = 20;
-        AreaExited  += _ => _areaPCam.Priority = 0;
+        AreaEntered += a => { if (a.GetParent() is CharacterBody2D) _areaPCam.Priority = 20; };
+        AreaExited  += a => { if (a.GetParent() is CharacterBody2D) _areaPCam.Priority = 0; };
     }
 }
 ```
@@ -363,5 +363,7 @@ at runtime, it tweens the camera into place on load; set `false` to cut instantl
 - [ ] 3D `THIRD_PERSON` rotation setters (`set_third_person_rotation`/`_degrees`/`_quaternion`) guard on `follow_mode == THIRD_PERSON` and no-op with a printed error otherwise — `set_follow_distance`/`set_spring_length`/`set_collision_mask(_value)`/`set_shape` have **no** such guard and print nothing
 - [ ] Combined `follow_mode` + `look_at_mode` on one `PhantomCamera3D` tested manually (addon marks this untested)
 - [ ] `tween_resource` shared deliberately (same `.tres`) when multiple PCams should transition identically
-- [ ] C# obtains wrappers via `AsPhantomCamera2D()`/`AsPhantomCamera3D()`/`AsPhantomCameraHost()`/`AsPhantomCameraTween()`; enums are the `…2D`/`…3D` variants (`FollowMode2D`, `FollowLockAxis3D`, …); `FollowMode`/`LookAtMode` are getter-only on the wrapper — set via `.Set("follow_mode", ...)` on the node
+- [ ] C# obtains wrappers via `AsPhantomCamera2D()`/`AsPhantomCamera3D()`/`AsPhantomCameraHost()`/`AsPhantomCameraTween()` — they are plain classes wrapping the node, **not** `Node` subclasses, so never `class MyCam : PhantomCamera2D`
+- [ ] C# enum names: only `FollowMode`/`FollowLockAxis` are dimension-suffixed (`FollowMode2D`, `FollowLockAxis3D`); `LookAtMode`, `TransitionType`, `EaseType`, `InterpolationMode` are not
+- [ ] `FollowMode`/`LookAtMode` are getter-only on the wrapper — set them via `.Set("follow_mode", (int)FollowMode2D.Simple)` on the underlying node
 - [ ] Pin the addon version in `plugin.cfg`/version control — pre-1.0, minor bumps can break API
