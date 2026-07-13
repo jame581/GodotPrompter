@@ -26,9 +26,9 @@ jobs:
           PLUGIN=$(node -p "require('./.claude-plugin/plugin.json').version")
           MARKET=$(node -p "const p=require('./.claude-plugin/marketplace.json').plugins.find(x=>x.name==='godot-prompter'); p ? p.version : ''")
           CURSOR=$(node -p "require('./.cursor-plugin/plugin.json').version")
-          GEMINI=$(node -p "require('./gemini-extension.json').version")
-          echo "tag=$TAG  package.json=$PKG  plugin.json=$PLUGIN  marketplace.json=$MARKET  .cursor-plugin/plugin.json=$CURSOR  gemini-extension.json=$GEMINI"
-          if [ "$TAG" != "$PKG" ] || [ "$TAG" != "$PLUGIN" ] || [ "$TAG" != "$MARKET" ] || [ "$TAG" != "$CURSOR" ] || [ "$TAG" != "$GEMINI" ]; then
+          ANTIGRAVITY=$(node -p "require('./plugin.json').version")
+          echo "tag=$TAG  package.json=$PKG  .claude-plugin/plugin.json=$PLUGIN  marketplace.json=$MARKET  .cursor-plugin/plugin.json=$CURSOR  plugin.json=$ANTIGRAVITY"
+          if [ "$TAG" != "$PKG" ] || [ "$TAG" != "$PLUGIN" ] || [ "$TAG" != "$MARKET" ] || [ "$TAG" != "$CURSOR" ] || [ "$TAG" != "$ANTIGRAVITY" ]; then
             echo "::error::Version drift between tag and in-repo files"
             exit 1
           fi
