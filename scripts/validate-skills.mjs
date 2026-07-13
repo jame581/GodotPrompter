@@ -22,7 +22,7 @@ const TOKEN_BUDGET_APPROACHING_BYTES = 15.5 * 1024;
 // a `csharp-parity-accepted` warning (so the count is visible) but do NOT count as
 // deferred parity debt.
 // 'beehave' is a GDScript-only addon (no official C# API), so its sections are accepted, not debt.
-const GDSCRIPT_ONLY_BY_DESIGN = new Set(['gdscript-patterns', 'gdscript-advanced', 'beehave', 'popochiu', 'phantom-camera']);
+const GDSCRIPT_ONLY_BY_DESIGN = new Set(['gdscript-patterns', 'gdscript-advanced', 'beehave', 'popochiu']);
 
 const errors = [];
 const warnings = [];

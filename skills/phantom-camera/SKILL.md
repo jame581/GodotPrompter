@@ -7,7 +7,7 @@ description: Use when using the Phantom Camera addon — PhantomCamera2D/3D with
 
 > **Related skills:** **camera-system** for hand-rolled camera patterns, **tween-animation** for the easing concepts the transitions build on.
 
-> **Addon:** Phantom Camera · version `v0.11.0.2` · Godot 4.4+ · MIT · source: https://github.com/ramokz/phantom-camera · pure GDScript (no C# API — GDScript-only skill). **Pre-1.0:** minor versions may break API.
+> **Addon:** Phantom Camera · version `v0.11.0.2` · Godot 4.4+ · MIT · source: https://github.com/ramokz/phantom-camera · nodes are GDScript, plus an official C# wrapper API (`namespace PhantomCamera`) shipped as source `.cs` files in the addon. **Pre-1.0:** minor versions may break API.
 
 ---
 
@@ -35,10 +35,15 @@ their own.
 way.
 
 Enabling the plugin auto-registers a `PhantomCameraManager` autoload singleton and **restarts the
-editor** the first time — expected behavior, not a bug. No manual autoload setup is needed. Six custom
-node types become available in the "Create New Node" dialog: `PhantomCamera2D`, `PhantomCamera3D`,
-`PhantomCameraHost`, `PhantomCameraNoiseEmitter2D`, `PhantomCameraNoiseEmitter3D`, and
-`PhantomCameraTweenDirector`.
+editor every time `_enable_plugin()` runs** (not just the first time) — expected behavior, not a bug.
+No manual autoload setup is needed. Six custom node types become available in the "Create New Node"
+dialog: `PhantomCamera2D`, `PhantomCamera3D`, `PhantomCameraHost`, `PhantomCameraNoiseEmitter2D`,
+`PhantomCameraNoiseEmitter3D`, and `PhantomCameraTweenDirector`.
+
+**C# projects:** the addon ships its official wrapper as plain `.cs` source files under
+`addons/phantom_camera/scripts/**` (`namespace PhantomCamera`) — no NuGet package to add. A
+C#-enabled Godot project (one with its own generated `.csproj`, `Godot.NET.Sdk`) picks these up
+automatically once the addon folder is present; `using PhantomCamera;` is then enough (§3–§7).
 
 ---
 
@@ -75,7 +80,26 @@ func _ready() -> void:
     print("Active PCam: ", active.name if active else "none")
 ```
 
-`PhantomCameraHost.interpolation_mode` controls when the Host updates the real camera:
+```csharp
+// CameraRig.cs — on the Camera2D/Camera3D
+using PhantomCamera;
+
+public partial class CameraRig : Camera2D
+{
+    private PhantomCameraHost _host;
+
+    public override void _Ready()
+    {
+        // Host.Camera2D / Host.Camera3D are populated automatically from GetParent()
+        _host = GetNode<Node>("PhantomCameraHost").AsPhantomCameraHost();
+        var active = _host.GetActivePhantomCamera();
+        GD.Print("Active PCam: ", active is PhantomCamera2D p ? p.Node2D.Name : "none");
+    }
+}
+```
+
+`PhantomCameraHost.interpolation_mode` (C#: `InterpolationMode`, enum `Auto`/`Idle`/`Physics`/`Manual`)
+controls when the Host updates the real camera:
 `AUTO` (default — picks physics or idle based on the active PCam's target), `IDLE`, `PHYSICS`, or
 `MANUAL` (call `host.process(delta)` yourself each tick).
 
@@ -110,9 +134,27 @@ func _on_exited(area: Area2D) -> void:
         area_pcam.set_priority(0)
 ```
 
-Useful signals on each PCam: `became_active`, `became_inactive`, `tween_started`, `is_tweening`
-(every frame while transitioning), `tween_interrupted(pcam)` (a higher-priority PCam preempted this
-tween — argument is the interrupting node), `tween_completed`.
+```csharp
+using PhantomCamera;
+
+public partial class TriggerArea : Area2D
+{
+    [Export] private Node2D _areaPCamNode;
+    private PhantomCamera2D _areaPCam;
+
+    public override void _Ready()
+    {
+        _areaPCam = _areaPCamNode.AsPhantomCamera2D();
+        AreaEntered += _ => _areaPCam.Priority = 20;
+        AreaExited  += _ => _areaPCam.Priority = 0;
+    }
+}
+```
+
+Useful events on each PCam wrapper: `BecameActive`, `BecameInactive`, `TweenStarted`, `IsTweening`
+(every frame while transitioning), `TweenInterrupted` (a higher-priority PCam preempted this tween —
+argument is the interrupting node), `TweenCompleted` — subscribe with `+=`, same names as the GDScript
+signals in PascalCase.
 
 `priority_override: bool` is an editor-only "force preview" toggle for quickly previewing a shot without
 touching `priority`; it's disabled automatically in exported builds — don't use it for gameplay logic.
@@ -162,6 +204,30 @@ func _ready() -> void:
     auto_zoom_max = 2.5
 ```
 
+```csharp
+using PhantomCamera;
+
+public partial class PlayerFollowSetup : Node
+{
+    [Export] private Node2D _pCamNode; // has a PhantomCamera2D node/script attached
+    [Export] private Node2D _player;
+
+    public override void _Ready()
+    {
+        // FollowMode has no wrapper setter (getter-only) — set it on the underlying node.
+        _pCamNode.Set("follow_mode", (int)FollowMode2D.Simple);
+
+        var pCam = _pCamNode.AsPhantomCamera2D();
+        pCam.FollowTarget = _player;
+        pCam.FollowDamping = true;
+        pCam.FollowDampingValue = new Vector2(0.15f, 0.15f); // lower = snappier
+    }
+}
+```
+
+`GROUP` follows the same pattern: `_pCamNode.Set("follow_mode", (int)FollowMode2D.Group)`, then
+`pCam.FollowTargets`, `pCam.AutoZoom`, `pCam.AutoZoomMin`/`AutoZoomMax` — identical PascalCase names.
+
 `GROUP` auto-reframe uses `auto_zoom`/`auto_zoom_min`/`auto_zoom_max`/`auto_zoom_margin` in 2D (adjusts
 `Camera2D.zoom`), and `auto_follow_distance`/`auto_follow_distance_min`/`auto_follow_distance_max` in 3D
 (adjusts distance along local `-z`).
@@ -199,6 +265,29 @@ func _ready() -> void:
     look_at_damping = true
     look_at_damping_value = 0.25  # single scalar, not per-axis
     up_target = get_node("../GroundNormalMarker")  # overrides `up` continuously
+```
+
+```csharp
+using PhantomCamera;
+
+public partial class BossLookAtSetup : Node
+{
+    [Export] private Node3D _pCamNode; // has a PhantomCamera3D node/script attached
+    [Export] private Node3D _boss;
+    [Export] private Node3D _groundNormalMarker;
+
+    public override void _Ready()
+    {
+        // LookAtMode has no wrapper setter (getter-only) — set it on the underlying node.
+        _pCamNode.Set("look_at_mode", (int)LookAtMode.Simple);
+
+        var pCam = _pCamNode.AsPhantomCamera3D();
+        pCam.LookAtTarget = _boss;
+        pCam.LookAtDamping = true;
+        pCam.LookAtDampingValue = 0.25f; // single scalar, not per-axis
+        pCam.UpTarget = _groundNormalMarker;
+    }
+}
 ```
 
 **Gotcha (from the addon's own runtime warning):** combining a non-`NONE` `follow_mode` with a
@@ -240,6 +329,24 @@ func _ready() -> void:
     tween_ease = PhantomCameraTween.EaseType.EASE_OUT
 ```
 
+```csharp
+using PhantomCamera;
+
+public partial class CutsceneCamSetup : Node
+{
+    [Export] private Node3D _pCamNode; // has a PhantomCamera3D node/script attached
+
+    public override void _Ready()
+    {
+        var pCam = _pCamNode.AsPhantomCamera3D();
+        pCam.TweenResource = PhantomCameraTween.New();
+        pCam.TweenDuration = 1.5f;   // passthrough — writes TweenResource.Duration
+        pCam.TweenTransition = TransitionType.Elastic;
+        pCam.TweenEase = EaseType.EaseOut;
+    }
+}
+```
+
 `tween_on_load: bool = true` — if this PCam is already the highest-priority one when it's instantiated
 at runtime, it tweens the camera into place on load; set `false` to cut instantly instead. If
 `tween_resource` is `null`, `get_tween_duration()` returns `0.0` (instant cut).
@@ -253,8 +360,8 @@ at runtime, it tweens the camera into place on load; set `false` to cut instantl
 - [ ] Priority changes use `set_priority()` or the `priority` property (both route through the setter, which notifies the Host)
 - [ ] `follow_target` / `follow_targets` assigned before relying on `is_following()`
 - [ ] `GROUP` follow mode uses `follow_targets` (array), not `follow_target` (single node)
-- [ ] 3D `THIRD_PERSON` follow only reads `follow_distance`/`collision_mask`/`shape` while `follow_mode == THIRD_PERSON` — the setters no-op with a printed error otherwise
+- [ ] 3D `THIRD_PERSON` rotation setters (`set_third_person_rotation`/`_degrees`/`_quaternion`) guard on `follow_mode == THIRD_PERSON` and no-op with a printed error otherwise — `set_follow_distance`/`set_spring_length`/`set_collision_mask(_value)`/`set_shape` have **no** such guard and print nothing
 - [ ] Combined `follow_mode` + `look_at_mode` on one `PhantomCamera3D` tested manually (addon marks this untested)
 - [ ] `tween_resource` shared deliberately (same `.tres`) when multiple PCams should transition identically
-- [ ] No C# usage attempted — this addon is GDScript-only in v0.11.0.2
+- [ ] C# obtains wrappers via `AsPhantomCamera2D()`/`AsPhantomCamera3D()`/`AsPhantomCameraHost()`/`AsPhantomCameraTween()`; enums are the `…2D`/`…3D` variants (`FollowMode2D`, `FollowLockAxis3D`, …); `FollowMode`/`LookAtMode` are getter-only on the wrapper — set via `.Set("follow_mode", ...)` on the node
 - [ ] Pin the addon version in `plugin.cfg`/version control — pre-1.0, minor bumps can break API

@@ -8,6 +8,16 @@
 > live docs site tracks a newer/rolling version than the pin; every name below was verified against the
 > v0.11.0.2 source, not the site.
 
+> **Correction 2026-07-14:** this note originally claimed the addon has "no C# API, no `.cs` files, no
+> GodotSharp/NuGet references anywhere" and dismissed the tree's `.cs` files as "editor tooling for the
+> Godot-C#-hybrid dev workflow". **Both claims were false.** The pinned tag ships an official C# wrapper
+> API — `namespace PhantomCamera`, static `As…` extension methods, PascalCase wrapper classes — under
+> `addons/phantom_camera/scripts/**/*.cs`. This is the addon's real, public, game-code-facing C# surface,
+> not internal tooling. `skills/phantom-camera/SKILL.md` shipped GDScript-only on commit `c0354a5` on the
+> strength of this note's error and has since been corrected to ship full C# parity (§9 below is the
+> digest that correction was built from). See also the THIRD_PERSON setter correction in §5 and the
+> restart-editor correction in §2.
+
 ## 1. Release metadata
 
 | Field | Value |
@@ -15,7 +25,7 @@
 | **Version** | 0.11.0.2 (`addons/phantom_camera/plugin.cfg`) |
 | **Min Godot** | 4.4+ (README badge `Godot-4.4%2B-blue`; confirmed by `PROPERTY_HINT_TOOL_BUTTON` usage in `phantom_camera_3d.gd`, a 4.4 addition) |
 | **License** | MIT — Copyright (c) 2022 Marcus Skov |
-| **Language** | Pure GDScript — no C# API, no GDExtension binary |
+| **Language** | GDScript nodes + an official C# wrapper API (`namespace PhantomCamera`, shipped as `.cs` source in the addon); no GDExtension binary |
 | **Repo** | https://github.com/ramokz/phantom-camera |
 | **Stability** | Pre-1.0 (`0.x`) — minor versions may break API |
 
@@ -27,9 +37,10 @@ Asset Library (recommended): search "Phantom Camera" in Godot's AssetLib → Dow
 GitHub zip: extract `addons/phantom_camera/` into the project root, then enable the plugin the same way.
 
 `plugin.gd` (`_enable_plugin()`) auto-registers an autoload singleton named `PhantomCameraManager`
-(`res://addons/phantom_camera/scripts/managers/phantom_camera_manager.gd`) and calls
-`EditorInterface.restart_editor()` — **the editor restarts itself** the first time the plugin is enabled.
-No manual autoload setup is required. `_enter_tree()` also registers six custom node types:
+(`res://addons/phantom_camera/scripts/managers/phantom_camera_manager.gd`) and unconditionally calls
+`EditorInterface.restart_editor()` — **the editor restarts itself every time `_enable_plugin()` runs**,
+not just the first time (confirmed: the call is not guarded by any "already enabled" check in
+`plugin.gd` lines 45–49). No manual autoload setup is required. `_enter_tree()` also registers six custom node types:
 `PhantomCamera2D`, `PhantomCamera3D`, `PhantomCameraHost`, `PhantomCameraNoiseEmitter2D`,
 `PhantomCameraNoiseEmitter3D`, and `PhantomCameraTweenDirector`.
 
@@ -128,8 +139,15 @@ lookahead subgroup; not present on `PhantomCamera3D`).
 the internal `SpringArm3D.rotation`), `set_third_person_rotation_degrees` /
 `get_third_person_rotation_degrees`, `set_third_person_quaternion` / `get_third_person_quaternion`,
 `set_spring_length(float)` (writes both `follow_distance` and the live `SpringArm3D.spring_length`),
-`set_collision_mask` / `set_collision_mask_value(layer, enabled)`, `set_shape(Shape3D)`. All of these
-print an error ("Follow Mode is not set to Third Person") and no-op if `follow_mode != THIRD_PERSON`.
+`set_collision_mask` / `set_collision_mask_value(layer, enabled)`, `set_shape(Shape3D)`.
+
+**Correction 2026-07-14 (verified against source directly, not paraphrase):** only the three rotation
+setters — `set_third_person_rotation`, `set_third_person_rotation_degrees`,
+`set_third_person_quaternion` — guard on `follow_mode == THIRD_PERSON` and `printerr("Follow Mode is
+not set to Third Person")` + no-op otherwise. `set_follow_distance`, `set_spring_length`,
+`set_collision_mask`/`set_collision_mask_value`, and `set_shape` have **no** such guard — they always
+apply, regardless of `follow_mode`, and print nothing. The original note's blanket "all of these
+no-op" claim was wrong and has been fixed in the skill's checklist accordingly.
 
 Public state helper on both: `is_following() -> bool`, `teleport_position()` (snap-follow, bypassing
 damping), `get_transform_output() -> Transform2D/3D`.
@@ -229,15 +247,61 @@ the `TRANS_`/`EASE_` prefixes) — the Host applies them via the engine's own `T
    README's feature list and the source during this pass, but the skill should be re-verified against
    source (not the live site) on any future version bump given the addon is pre-1.0.
 
+## 9. C# API digest (official wrapper — corrects §"Skill-authoring implications" below)
+
+All facts below read directly from the `.cs` files under `addons/phantom_camera/scripts/**` at the
+v0.11.0.2 pin (not the live docs site, which may drift further from source than the GDScript pages do).
+
+- **Namespace**: `namespace PhantomCamera;` on every wrapper file (`PhantomCamera.cs`,
+  `PhantomCamera2D.cs`, `PhantomCamera3D.cs`, `phantom_camera_host/PhantomCameraHost.cs`,
+  `managers/PhantomCameraManager.cs` uses `namespace PhantomCamera.Manager;`,
+  `resources/PhantomCameraTween.cs`).
+- **Enums** (PascalCase members): `FollowMode2D`/`FollowMode3D` (`PhantomCamera2D.cs` /
+  `PhantomCamera3D.cs` — 3D adds `ThirdPerson`), `FollowLockAxis2D`/`FollowLockAxis3D` (same files),
+  `LookAtMode` (`PhantomCamera3D.cs`), `InactiveUpdateMode` (`PhantomCamera.cs`), `InterpolationMode`
+  (`PhantomCameraHost.cs`), `TransitionType`/`EaseType` (`PhantomCameraTween.cs`).
+- **Wrapper classes are plain C# classes, not `Node` subclasses**: `PhantomCamera` (abstract base,
+  `PhantomCamera.cs`), `PhantomCamera2D : PhantomCamera` (`PhantomCamera2D.cs`),
+  `PhantomCamera3D : PhantomCamera` (`PhantomCamera3D.cs`), `PhantomCameraHost` (`PhantomCameraHost.cs`),
+  `PhantomCameraTween` (`resources/PhantomCameraTween.cs`). Each wraps a `GodotObject` reference to the
+  real GDScript-authored node/resource and proxies calls through `Node.Call(...)`/`Node.Get(...)`.
+  A C# script therefore cannot `extends PhantomCamera2D` — it obtains a wrapper *around* a reference to
+  the node that has the addon's GDScript attached.
+- **Extension methods** (static classes, one per wrapper): `AsPhantomCamera2D(this Node2D)` /
+  `AsPhantomCameraNoiseEmitter2D(this Node2D)` / `AsPhantomCameraNoise2D(this Resource)`
+  (`PhantomCamera2D.cs`); `AsPhantomCamera3D(this Node3D)` / `AsPhantomCameraNoiseEmitter3D(this Node3D)`
+  / `AsPhantomCameraNoise3D(this Resource)` / `AsCamera3DResource(this Resource)` (`PhantomCamera3D.cs`);
+  `AsPhantomCameraHost(this Node)` (`PhantomCameraHost.cs`); `AsPhantomCameraTween(this Resource)`
+  (`PhantomCameraTween.cs`).
+- **Key properties** (all confirmed present with the exact PascalCase name and get/set-ability shown):
+  `Priority` (get/set, `PhantomCamera.cs`), `FollowTarget`/`FollowTargets` (get/set),
+  `FollowDamping`/`FollowDampingValue` (get/set), `FollowAxisLock` (get/set), `FollowMode` (**get-only —
+  no setter exists in `MethodName`**, `PhantomCamera2D.cs`/`PhantomCamera3D.cs`), `LookAtMode` (**also
+  get-only**, `PhantomCamera3D.cs`), `TweenResource`/`TweenDuration`/`TweenTransition`/`TweenEase` (all
+  get/set, `PhantomCamera.cs`), `AutoZoom`/`AutoZoomMin`/`AutoZoomMax` (2D, get/set), `LookAtTarget`/
+  `LookAtDamping`/`LookAtDampingValue`/`UpTarget` (3D, get/set), `InterpolationMode`/`HostLayers`
+  (`PhantomCameraHost.cs`, get/set), `Camera2D`/`Camera3D` (`PhantomCameraHost.cs`, get-only, nullable).
+  Because `FollowMode`/`LookAtMode` have no wrapper setter, changing them from C# requires calling
+  `.Set("follow_mode", (int)value)` / `.Set("look_at_mode", (int)value)` on the underlying node
+  reference directly (bypassing the wrapper) — a real asymmetry the skill's checklist now calls out.
+- **Static factories/singletons**: `PhantomCameraTween.New()` (`PhantomCameraTween.cs` — builds a fresh
+  `Resource` and attaches the GDScript tween-resource script); `PhantomCameraManager` static class
+  (`managers/PhantomCameraManager.cs`) wraps the `PhantomCameraManager` autoload singleton and exposes
+  `PhantomCamera2Ds`/`PhantomCamera3Ds`/`PhantomCameraHosts` array properties.
+- **C# project setup**: root `PhantomCamera.csproj` targets `Godot.NET.Sdk/4.4.1`, `net8.0` — this is
+  the repo's *own* project file (this clone doubles as the addon's C#-enabled test project), not a NuGet
+  package to reference. Because the wrapper ships as plain `.cs` source inside
+  `addons/phantom_camera/scripts/**`, any C#-enabled Godot project (one with its own generated
+  `.csproj`/`Godot.NET.Sdk`) picks the files up automatically once the addon folder is copied in — no
+  README section documents this explicitly (`README.md` has zero "C#"/"csharp" mentions), it follows
+  directly from Godot's default `.csproj` glob including all `.cs` files under the project directory.
+
 ## Skill-authoring implications
 
-- **GDScript-only**: zero `csharp` blocks — no C# API exists in this addon (confirmed: no `.cs` files,
-  no `GodotSharp`/NuGet references anywhere in the v0.11.0.2 tree). Every code section in the skill will
-  emit an intentional `csharp-parity-accepted` validator warning; `phantom-camera` is already on the
-  validator's GDScript-only allowlist (Task 3).
-  Note: a `PhantomCamera.csproj`/`.sln` exist at repo root, but these build the **addon's own editor
-  tooling for the Godot-C#-hybrid dev workflow**, not a public C# API for game code — do not present
-  them as a C# usage path.
+- **Full C# parity, not GDScript-only** (corrected 2026-07-14 — see the top-of-file correction notice):
+  the skill ships a `csharp` block in every numbered section that has a `gdscript` block (§3–§7), built
+  from the §9 digest above. `phantom-camera` has been **removed** from the validator's
+  `GDSCRIPT_ONLY_BY_DESIGN` allowlist; it must produce zero `csharp-parity-*` warnings of either kind.
 - **Section mapping to source**: §3 → host + camera model section; §4 → priority switching section;
   §5 → follow modes section; §6 → look-at (3D) section; §7 → tweening section.
 - **Cross-refs**: `camera-system` (hand-rolled camera patterns this addon replaces/complements),
