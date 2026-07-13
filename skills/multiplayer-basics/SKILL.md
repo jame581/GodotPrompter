@@ -318,7 +318,7 @@ Every node has exactly one authoritative peer — the peer that is permitted to 
 extends CharacterBody2D
 
 func _ready() -> void:
-	# Server assigns authority during spawn (see Section 6).
+	# multiplayer.get_unique_id() = this peer's ID; server assigns authority during spawn (see Section 6).
 	pass
 
 
