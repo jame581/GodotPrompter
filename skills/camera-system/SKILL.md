@@ -7,7 +7,7 @@ description: Use when implementing cameras — smooth follow, screen shake, came
 
 All examples target Godot 4.3+ with no deprecated APIs. GDScript is shown first, then C#.
 
-> **Related skills:** **player-controller** for first-person camera setup, **state-machine** for camera state transitions, **godot-optimization** for camera culling and performance, **physics-system** for physics interpolation and camera smoothing, **2d-essentials** for canvas layers, parallax scrolling, and coordinate conversion, **math-essentials** for smoothstep and lerp-based interpolation, **tween-animation** for camera shake and cinematic transitions.
+> **Related skills:** **player-controller** for first-person camera setup, **state-machine** for camera state transitions, **godot-optimization** for camera culling and performance, **physics-system** for physics interpolation and camera smoothing, **2d-essentials** for canvas layers, parallax scrolling, and coordinate conversion, **math-essentials** for smoothstep and lerp-based interpolation, **tween-animation** for camera shake and cinematic transitions, **phantom-camera** for a Cinemachine-style camera addon.
 
 ---
 

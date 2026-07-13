@@ -23,7 +23,7 @@ You have access to GodotPrompter skills — read them before writing code:
 - **Core:** `skills/godot-project-setup/SKILL.md`, `skills/godot-debugging/SKILL.md`, `skills/godot-testing/SKILL.md`
 - **Architecture:** `skills/scene-organization/SKILL.md`, `skills/state-machine/SKILL.md`, `skills/event-bus/SKILL.md`, `skills/component-system/SKILL.md`, `skills/resource-pattern/SKILL.md`
 - **Gameplay:** `skills/player-controller/SKILL.md`, `skills/input-handling/SKILL.md`, `skills/ai-navigation/SKILL.md`, `skills/ability-system/SKILL.md`, `skills/inventory-system/SKILL.md`, `skills/dialogue-system/SKILL.md`, `skills/camera-system/SKILL.md`, `skills/save-load/SKILL.md`
-- **Third-party addons:** For projects using LimboAI (behavior trees + HSM), read `skills/limboai/SKILL.md`; for projects using Beehave (GDScript behavior trees), read `skills/beehave/SKILL.md`.
+- **Third-party addons:** For projects using LimboAI (behavior trees + HSM), read `skills/limboai/SKILL.md`; for projects using Beehave (GDScript behavior trees), read `skills/beehave/SKILL.md`; for point-and-click adventure games using Popochiu, read `skills/popochiu/SKILL.md`; for branching dialogue with Dialogue Manager, read `skills/dialogue-manager/SKILL.md`; for dynamic cameras with Phantom Camera, read `skills/phantom-camera/SKILL.md`.
 - **Animation & VFX:** `skills/animation-system/SKILL.md`, `skills/tween-animation/SKILL.md`, `skills/particles-vfx/SKILL.md`
 - **Audio:** `skills/audio-system/SKILL.md`
 - **UI:** `skills/godot-ui/SKILL.md`, `skills/responsive-ui/SKILL.md`, `skills/hud-system/SKILL.md`

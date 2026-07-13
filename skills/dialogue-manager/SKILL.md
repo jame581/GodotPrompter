@@ -5,7 +5,7 @@ description: Use when using the Dialogue Manager addon — .dialogue files with 
 
 # Dialogue Manager
 
-> **Related skills:** **dialogue-system** for hand-rolled dialogue data structures, **localization** for translating lines.
+> **Related skills:** **dialogue-system** for hand-rolled dialogue data structures, **localization** for translating lines, **popochiu** for full adventure-game workflows.
 
 > **Addon:** Dialogue Manager · version `v3.10.4` · Godot 4.6 · MIT · source: https://github.com/nathanhoad/godot_dialogue_manager · GDScript with official C# support.
 
