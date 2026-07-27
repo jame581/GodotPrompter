@@ -254,125 +254,17 @@ func _on_language_selected(index: int) -> void:
 
 ## 5. Right-to-Left (RTL) Support
 
-For Arabic, Hebrew, Persian, and other RTL languages.
+Arabic, Hebrew, and Persian need `layout_direction` on Controls (`LOCALE` auto-follows the current locale), `structured_text_type` so URLs and paths do not fully reverse, and a font covering the script — Godot's default font does not. Flip layout on the `locale_changed` signal, and disconnect it in `_ExitTree`: `TranslationServer` outlives every scene, so a C# handler leaks for the process lifetime otherwise.
 
-### Enabling RTL
-
-```gdscript
-# On any Control node
-control.layout_direction = Control.LAYOUT_DIRECTION_RTL
-
-# Or set globally in Project Settings:
-# Internationalization → Rendering → Text Direction → RTL
-```
-
-### Per-Control Settings
-
-| Property | Purpose |
-|----------|---------|
-| `layout_direction` | `LTR`, `RTL`, `LOCALE` (auto from current locale), `INHERITED` |
-| `text_direction` | On Label/RichTextLabel: override text direction |
-| `structured_text_type` | Handles special structures (URLs, paths, email) that shouldn't fully reverse |
-
-### RichTextLabel BBCode for Mixed Direction
-
-```gdscript
-# Force LTR for a number or URL inside RTL text
-rich_text.text = "النتيجة: [ltr]100/200[/ltr]"
-```
-
-### C# parity
-
-```csharp
-// LocaleAwarePanel.cs — flip layout direction on locale change.
-using Godot;
-
-public partial class LocaleAwarePanel : Control
-{
-    public override void _Ready()
-    {
-        ApplyLayoutForLocale();
-        TranslationServer.Singleton.LocaleChanged += ApplyLayoutForLocale;
-    }
-
-    public override void _ExitTree()
-    {
-        // TranslationServer outlives every scene — without this, each panel
-        // leaks a delegate reference for the process lifetime.
-        TranslationServer.Singleton.LocaleChanged -= ApplyLayoutForLocale;
-    }
-
-    private void ApplyLayoutForLocale()
-    {
-        string locale = TranslationServer.Singleton.GetLocale();
-        bool isRtl = TextServerManager.GetPrimaryInterface().IsLocaleRightToLeft(locale);
-        LayoutDirection = isRtl
-            ? Control.LayoutDirectionEnum.Rtl
-            : Control.LayoutDirectionEnum.Ltr;
-    }
-}
-
-// RichTextLabel mixed-direction — same BBCode as GDScript, assigned in C#.
-public partial class ScoreLabel : RichTextLabel
-{
-    public void SetArabicScore(int score, int max)
-    {
-        BbcodeEnabled = true;
-        Text = $"النتيجة: [ltr]{score}/{max}[/ltr]";
-    }
-}
-```
-
-### Font Requirements
-
-RTL scripts need fonts covering the relevant Unicode ranges — Godot's default font doesn't cover Arabic/Hebrew. Import Noto Sans Arabic (or similar) and assign via Theme.
+Full recipes, per-control property table, BBCode for mixed direction, and the C# `LocaleAwarePanel`: [references/rtl-support.md](references/rtl-support.md)
 
 ---
 
 ## 6. Locale-Aware Formatting
 
-### Numbers
+GDScript has no locale-aware number or date formatting — `"%d" % 1234567` is always `1234567`, so you group digits by hand. C# does have it: look up a `CultureInfo` from `TranslationServer.GetLocale()` (swap `_` for `-`) and use `ToString("N"/"C"/"d", culture)`.
 
-```gdscript
-# Locale-appropriate number formatting
-var formatted: String = "%d" % 1234567
-# Always outputs "1234567" — GDScript doesn't locale-format numbers
-
-# Locale-aware formatting helper:
-func format_number(value: int) -> String:
-    var s := str(value)
-    var result := ""
-    var count := 0
-    for i in range(s.length() - 1, -1, -1):
-        if count > 0 and count % 3 == 0:
-            result = "," + result  # or "." for European locales
-        result = s[i] + result
-        count += 1
-    return result
-```
-
-### Dates and Times
-
-Godot has no built-in locale-aware date formatting — use `Time.get_datetime_dict_from_system()` and format manually per locale.
-
-### C#
-
-```csharp
-using Godot;
-using System.Globalization;
-
-public partial class LocaleFormatter : Node
-{
-    public string FormatNumber(double value)
-    {
-        var culture = CultureInfo.GetCultureInfo(TranslationServer.GetLocale().Replace("_", "-"));
-        return value.ToString("N", culture);
-    }
-
-    // FormatCurrency/FormatDate follow the same pattern: same culture lookup with
-    // ToString("C", culture) / ToString("d", culture).
-}
-```
+Both helpers in full: [references/locale-formatting.md](references/locale-formatting.md)
 
 ---
 
@@ -423,23 +315,9 @@ ITEM_SWORD_DESC          # Inventory item description
 
 ## 9. Editor Locale Preview (Godot 4.5+)
 
-Godot 4.5 adds a live locale preview to the editor — see how your UI looks in any configured locale (translated text, RTL layout, font changes) without running the game.
+Godot 4.5 adds a **Preview Language** dropdown under Project Settings → Internationalization: the editor viewport re-renders in any registered locale, so you catch overflow from longer translations and verify RTL layout without entering Play mode. Editor-only — it does not affect exported builds.
 
-### How to Use
-
-1. Open **Project → Project Settings → Internationalization**.
-2. Find the **Preview Language** dropdown.
-3. Select a locale from the list of registered translations (e.g., `ja`, `cs`, `ar`).
-4. The editor viewport updates immediately to reflect the selected locale.
-
-### Benefits
-
-- Spot layout issues from longer translated text without entering Play mode.
-- Verify RTL layout direction for Arabic, Hebrew, and Persian.
-- Confirm Control nodes with text properties use `tr()` keys (untranslated keys show as-is in non-English preview).
-- Faster translation QA — iterate directly in the editor.
-
-> Reset to the default locale via the blank or `en` entry in the **Preview Language** dropdown. The preview is editor-only and doesn't affect exported builds.
+Steps and QA benefits: [references/editor-preview.md](references/editor-preview.md)
 
 ---
 
