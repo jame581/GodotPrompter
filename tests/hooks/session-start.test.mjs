@@ -1,7 +1,7 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { execFileSync } from 'node:child_process';
-import { mkdtempSync, mkdirSync, writeFileSync, readFileSync, rmSync, existsSync } from 'node:fs';
+import { mkdtempSync, mkdirSync, writeFileSync, readFileSync, readdirSync, rmSync, existsSync } from 'node:fs';
 import { tmpdir, homedir } from 'node:os';
 import { createHash } from 'node:crypto';
 import { join, resolve, dirname } from 'node:path';
@@ -127,7 +127,34 @@ test('handles a version-only features array', () => {
   const { base, cwd } = makeProject(0, 'PackedStringArray("4.6")');
   const ctx = ctxOf(runHook(cwd));
   assert.match(ctx, /Godot 4\.6/);
-  assert.doesNotMatch(ctx, /renderer/);
+  // Scope the negative to the version line — the routing card legitimately contains other
+  // prose, so asserting over the whole context would fail for unrelated reasons.
+  const versionLine = ctx.split('\n').find(l => l.includes('targets **Godot'));
+  assert.ok(versionLine, 'expected a version line');
+  assert.doesNotMatch(versionLine, /renderer/);
+  rmSync(base, { recursive: true, force: true });
+});
+
+// A sanitized environment must cost the mentor lookup, never the session card.
+test('still emits the session card when HOME is unset', () => {
+  const { base, cwd } = makeProject();
+  const env = { ...process.env, CLAUDE_PLUGIN_ROOT: ROOT };
+  delete env.HOME;
+  delete env.CURSOR_PLUGIN_ROOT;
+  delete env.COPILOT_CLI;
+  const out = execFileSync(BASH, [HOOK], { cwd, env, encoding: 'utf8' });
+  assert.match(ctxOf(out), /GodotPrompter is active/);
+  rmSync(base, { recursive: true, force: true });
+});
+
+// The polyglot wrapper is the least portable part of the release and the plan explicitly
+// warns against "fixing" its heredoc. Guard it.
+test('the polyglot wrapper dispatches to the hook', () => {
+  const { base, cwd } = makeProject();
+  const out = execFileSync(BASH, [join(ROOT, 'hooks', 'run-hook.cmd'), 'session-start'], {
+    cwd, env: { ...process.env, CLAUDE_PLUGIN_ROOT: ROOT }, encoding: 'utf8',
+  });
+  assert.match(ctxOf(out), /GodotPrompter is active/);
   rmSync(base, { recursive: true, force: true });
 });
 
@@ -140,7 +167,19 @@ test('survives a project.godot with no config/features line', () => {
 test('shipped hook scripts contain no CR bytes', () => {
   for (const f of ['hooks/session-start', 'hooks/run-hook.cmd']) {
     const buf = readFileSync(join(ROOT, f));
-    assert.equal(buf.includes(0x0d), false, `${f} contains CR bytes — bash will fail on $'\\r'`);
+    assert.equal(buf.includes(0x0d), false, `${f} contains CR bytes — bash will fail on a CR`);
+  }
+});
+
+// The CR test above reads the working tree, and CI checks out LF regardless of .gitattributes —
+// so on the runner it is vacuous. This asserts the *rule* that protects Windows contributors,
+// which is what can actually regress.
+test('.gitattributes pins the hook scripts to LF', () => {
+  for (const f of ['hooks/session-start', 'hooks/run-hook.cmd']) {
+    const attrs = execFileSync('git', ['check-attr', 'text', 'eol', '--', f],
+      { cwd: ROOT, encoding: 'utf8' });
+    assert.match(attrs, new RegExp(`${f}: text: set`), `${f} is not marked text in .gitattributes`);
+    assert.match(attrs, new RegExp(`${f}: eol: lf`), `${f} is not pinned to eol=lf`);
   }
 });
 
@@ -179,7 +218,12 @@ test('injects the mentor contract when state enables mentor mode', () => {
   mkdirSync(dirname(sf), { recursive: true });
   writeFileSync(sf, JSON.stringify({ project: base, mode: 'mentor', level: 'beginner' }));
   try {
-    assert.match(ctxOf(runHook(cwd)), /Mentor mode is ACTIVE/);
+    const ctx = ctxOf(runHook(cwd));
+    assert.match(ctx, /Mentor mode is ACTIVE/);
+    // The off-ramp tells the agent to set mode:normal in "the state file". After a /clear the
+    // agent has the card but not the skill, so the card must name the path.
+    assert.match(ctx, /Mentor state file for this project:/);
+    assert.ok(ctx.includes('.godot-prompter'), 'card must name the state file path');
   } finally {
     rmSync(sf, { force: true });
     rmSync(base, { recursive: true, force: true });
@@ -205,9 +249,13 @@ test('omits the mentor contract when no state file exists', () => {
   rmSync(base, { recursive: true, force: true });
 });
 
+// The README promises the hook writes *nothing* — snapshot the whole tree, not just one path.
 test('writes nothing into the user project', () => {
   const { base, cwd } = makeProject();
+  const before = readdirSync(base).sort().join(',');
   runHook(cwd);
+  const after = readdirSync(base).sort().join(',');
+  assert.equal(after, before, `hook modified the project directory: "${before}" -> "${after}"`);
   assert.equal(existsSync(join(base, '.godot-prompter')), false, 'hook must not write into the game repo');
   rmSync(base, { recursive: true, force: true });
 });

@@ -225,7 +225,7 @@ Full performance table, the 4.7+ timeline-seek API, dynamic quality scaling (GDS
 
 ---
 
-## 12. Implementation Checklist
+## 11. Implementation Checklist
 
 - [ ] Particle `amount` is set to the minimum needed for the visual effect
 - [ ] `lifetime` matches the visual duration — not too short or too long

@@ -39,10 +39,10 @@ This is a **documentation/skills repository**. There is no application build/lin
 The layout is self-evident from `ls`; these constraints are not:
 
 - **SKILL.md size:** keep under 16 KB. `validate-skills.mjs` errors at ≥ 16 KB (fails CI) and warns at ≥ 15.5 KB. Overflow goes in `references/` as load-on-demand deep dives (Pattern X).
-- **Version lockstep:** the root `plugin.json` (Antigravity), `.claude-plugin/plugin.json`, and `.claude-plugin/marketplace.json` must all match `package.json`.
+- **Version lockstep:** `release.yml` verifies **five** files — `package.json`, the root `plugin.json` (Antigravity), `.claude-plugin/plugin.json`, `.claude-plugin/marketplace.json`, and `.cursor-plugin/plugin.json`. `scripts/bump-version.mjs <version>` updates all five and syncs the skill-count description.
 - **Two hook directories:** `hooks/` (root) ships to plugin users — the SessionStart routing card. `scripts/hooks/` is repo development tooling wired via `.claude/settings.json`. Never merge them.
 - **Card regions:** `using-godot-prompter` (`SESSION-CARD`) and `godot-mentor` (`MENTOR-CARD`) contain marker-delimited regions the hook injects verbatim. `validate-skills.mjs` enforces markers, uniqueness, non-emptiness, and a 3 KB cap. Edit the region, never a copy — and never paste the marker strings into a fenced example, which trips `card-marker-duplicate`.
-- **The hook does not reach subagents.** `SessionStart` fires on startup/clear/compact only. A `## GodotPrompter` section in the project's CLAUDE.md is what subagents read.
+- **The hook does not reach subagents.** `SessionStart` fires on startup/resume/clear/compact only. A `## GodotPrompter` section in the project's CLAUDE.md is what subagents read.
 - **Hook changes require `npm run test:hooks`.** `node --test tests/hooks/` does *not* work on Node 24 — a directory argument is imported as a module.
 - **`AGENTS.md` / `GEMINI.md`** are root @-imports that re-export `using-godot-prompter` for Codex and Antigravity — edit the skill, not these.
 - **`.github/workflows/release.yml`** is tag-triggered: it validates, creates the GitHub release, and opens marketplace PRs.

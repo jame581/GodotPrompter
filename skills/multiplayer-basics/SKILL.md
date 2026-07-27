@@ -18,7 +18,7 @@ Godot uses a **client-server model** built on top of `MultiplayerAPI`. One peer 
 | Peer ID | Role |
 |---------|------|
 | `1` | The server (always) |
-| `2`, `3`, … | Connected clients |
+| `2`+ | Connected clients — randomly generated unique IDs, **not** sequential |
 
 **Multiplayer authority** is the concept of ownership over a node. Only the authoritative peer should read input and drive that node's state. By default the server (peer `1`) is the authority for every node. Call `set_multiplayer_authority(peer_id)` to transfer ownership to a client.
 
@@ -36,9 +36,9 @@ Client (peer 2, 3, …)
 
 ## 2. Setting Up ENetMultiplayerPeer
 
-Both sides use the same three steps: create an `ENetMultiplayerPeer`, call `create_server(port, max_clients)` or `create_client(address, port)`, then assign it to `multiplayer.multiplayer_peer`. Connect `peer_connected` / `peer_disconnected` on the server and `connected_to_server` / `connection_failed` / `server_disconnected` on the client **before** assigning the peer, or you can miss the first events.
+Both sides use the same three steps: create an `ENetMultiplayerPeer`, call `create_server(port, max_clients)` or `create_client(address, port)`, then assign it to `multiplayer.multiplayer_peer` and connect the four `MultiplayerAPI` signals. **Check the `create_*` return value** — it returns an `Error`, and a silent `ERR_CANT_CREATE` (port already in use) otherwise looks exactly like a hang.
 
-The server is always peer ID `1`; clients get random positive IDs. Check `create_*` return values — they return an `Error`, and a silent `ERR_CANT_CREATE` (port in use) otherwise looks like a hang.
+The server is always peer ID `1`; clients receive randomly generated unique IDs, so never assume they are sequential.
 
 Full server and client implementations with every signal handler, in GDScript and C#: [references/enet-setup.md](references/enet-setup.md)
 

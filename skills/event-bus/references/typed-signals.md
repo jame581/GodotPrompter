@@ -4,7 +4,7 @@
 
 For signals that need to pass multiple related values, prefer a dedicated `Resource` (strongly typed, Inspector-friendly) over a plain `Dictionary` (flexible but untyped).
 
-### Option A — Resource payload (recommended for structured data)
+## Option A — Resource payload (recommended for structured data)
 
 ```gdscript
 # combat_event_data.gd
@@ -79,7 +79,7 @@ private void OnCombatHit(CombatEventData data)
 }
 ```
 
-### Option B — Dictionary payload (acceptable for prototyping)
+## Option B — Dictionary payload (acceptable for prototyping)
 
 ```gdscript
 # In event_bus.gd:

@@ -2,7 +2,7 @@
 
 # Event Bus Anti-patterns
 
-### Using the event bus for everything (over-decoupling)
+## Using the event bus for everything (over-decoupling)
 
 ```gdscript
 # BAD — a parent querying its own child through the event bus
@@ -17,7 +17,7 @@ func _on_request_player_position() -> void:
 var player_pos: Vector2 = $Player.global_position
 ```
 
-### Side effects in handlers that emit further signals
+## Side effects in handlers that emit further signals
 
 ```gdscript
 # BAD — handler emits another signal, which triggers another handler,
@@ -36,7 +36,7 @@ func _on_player_died() -> void:
     get_tree().reload_current_scene()
 ```
 
-### Circular event chains
+## Circular event chains
 
 ```gdscript
 # BAD — PlayerHealth connects to health_changed and re-emits it.
@@ -50,7 +50,7 @@ func _on_health_changed(current: int, maximum: int) -> void:
     _update_display()
 ```
 
-### Connecting without disconnecting in C#
+## Connecting without disconnecting in C#
 
 ```csharp
 // BAD — node is freed but EventBus still holds a reference to the delegate.

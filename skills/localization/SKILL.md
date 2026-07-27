@@ -254,7 +254,7 @@ func _on_language_selected(index: int) -> void:
 
 ## 5. Right-to-Left (RTL) Support
 
-Arabic, Hebrew, and Persian need `layout_direction` on Controls (`LOCALE` auto-follows the current locale), `structured_text_type` so URLs and paths do not fully reverse, and a font covering the script — Godot's default font does not. Flip layout on the `locale_changed` signal, and disconnect it in `_ExitTree`: `TranslationServer` outlives every scene, so a C# handler leaks for the process lifetime otherwise.
+Arabic, Hebrew, and Persian need `layout_direction` on Controls (`LOCALE` auto-follows the current locale), `structured_text_type` so URLs and paths do not fully reverse, and a font covering the script — Godot's default font does not. Re-apply layout direction whenever the locale changes, and disconnect any handler you attach in `_ExitTree` — `TranslationServer` outlives every scene, so a C# handler leaks for the process lifetime otherwise.
 
 Full recipes, per-control property table, BBCode for mixed direction, and the C# `LocaleAwarePanel`: [references/rtl-support.md](references/rtl-support.md)
 

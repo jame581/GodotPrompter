@@ -92,7 +92,7 @@ Areas detect overlaps and override physics properties within their bounds. They 
 | `WorldBoundary2D` / — | Infinite floor/wall/ceiling |
 | — / `Cylinder3D` | Pillars, barrels (Jolt only — unstable on GodotPhysics) |
 
-Prefer primitives for dynamic bodies. `ConvexPolygonShape` is fast but cannot express holes or inward curves; `ConcavePolygonShape` is accurate for level geometry but is **StaticBody-only** and the slowest. Never scale or rotate a CollisionShape node — an untransformed shape unlocks a broad-phase optimization. Godot 4.7+ adds `one_way_collision_direction` for sideways one-way platforms.
+Prefer primitives for dynamic bodies. `ConvexPolygonShape` is fast but cannot express holes or inward curves; `ConcavePolygonShape` is accurate for level geometry but is **StaticBody-only** and the slowest. Never translate, rotate, or scale a CollisionShape node — an untransformed shape unlocks a broad-phase optimization. Godot 4.7+ adds `one_way_collision_direction` for sideways one-way platforms.
 
 Convex/concave cost table, shape-generation menus, the full performance rules, and the 4.7+ one-way direction API (GDScript + C#): [references/collision-shapes.md](references/collision-shapes.md)
 

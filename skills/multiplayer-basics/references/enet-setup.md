@@ -2,7 +2,7 @@
 
 # Setting Up ENetMultiplayerPeer
 
-### GDScript
+## GDScript
 
 ```gdscript
 # network_manager.gd — add as autoload named NetworkManager
@@ -74,7 +74,7 @@ func _on_connection_failed() -> void:
 | `connected_to_server` | Client only | This client successfully connected |
 | `connection_failed` | Client only | This client could not connect |
 
-### C#
+## C#
 
 ```csharp
 // NetworkManager.cs — add as autoload named NetworkManager

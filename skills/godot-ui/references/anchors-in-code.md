@@ -51,7 +51,7 @@ panel.OffsetRight  = 0f;
 panel.OffsetBottom = 0f;
 ```
 
-### Anchor vs Offset
+## Anchor vs Offset
 
 - **Anchor** determines *where on the parent* the node's edges track — resolution-independent.
 - **Offset** is a *fixed pixel value* added after the anchor — doesn't scale with the parent.

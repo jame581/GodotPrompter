@@ -290,7 +290,7 @@ Typed signal declarations, payload-object patterns, and the C# `[Signal]` delega
 
 ## 7. Anti-patterns
 
-The recurring failures: routing **everything** through the bus (parent→child calls should stay direct calls), emitting from `_process` (a per-frame broadcast storm), never disconnecting so freed listeners leak, using the bus to return values (signals are fire-and-forget — pass a callback or await a dedicated response signal), and stringly-typed event names instead of declared signals.
+Four recurring failures: routing **everything** through the bus when a parent could just reach its own child (over-decoupling); handlers whose side effects emit further signals, so tracing one event means reading every handler; **circular chains**, where a listener re-emits the signal it just received and loops forever; and connecting without disconnecting in C#, which leaks the handler for the bus's lifetime.
 
 Each anti-pattern with the failing code, why it hurts, and the fix, in GDScript and C#: [references/anti-patterns.md](references/anti-patterns.md)
 
