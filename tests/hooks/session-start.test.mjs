@@ -161,8 +161,15 @@ test('stays quiet when CLAUDE.md already has the GodotPrompter section', () => {
 
 // --- mentor mode: state lives in the user's HOME, never in the game repo ---------------------
 
+// Canonical state key: absolute, forward slashes, native drive letter (C:/Users/x/game).
+// Must match hooks/session-start's canonical_path() — bash and Node see the same directory
+// under different path spellings on Windows, so the raw path is not a usable key.
+function canonicalPath(p) {
+  return resolve(p).replace(/\\/g, '/');
+}
+
 function stateFileFor(projectPath) {
-  const hash = createHash('sha256').update(projectPath).digest('hex').slice(0, 16);
+  const hash = createHash('sha256').update(canonicalPath(projectPath)).digest('hex').slice(0, 16);
   return join(homedir(), '.godot-prompter', 'state', `${hash}.json`);
 }
 
