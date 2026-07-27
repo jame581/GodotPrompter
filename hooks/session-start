@@ -1,0 +1,123 @@
+#!/usr/bin/env bash
+# SessionStart hook for the GodotPrompter plugin.
+#
+# Fires only inside a Godot project (project.godot found within 4 levels up from CWD);
+# elsewhere it is a silent no-op. Injects the SESSION-CARD region from the bootstrap skill,
+# the detected Godot version/renderer, and the MENTOR-CARD region when mentor mode is on.
+#
+# Adapted from the Superpowers plugin (MIT, Jesse Vincent) — the JSON escaper and the
+# three-way platform output branching originate there. https://github.com/obra/superpowers
+
+set -euo pipefail
+
+SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
+PLUGIN_ROOT="$(cd "${SCRIPT_DIR}/.." && pwd)"
+
+# --- 1. Locate the Godot project (CWD, then up to 4 ancestors) ------------------------------
+find_godot_project() {
+  local dir="$PWD" depth=0 parent
+  while [ "$depth" -le 4 ]; do
+    if [ -f "${dir}/project.godot" ]; then
+      printf '%s' "$dir"
+      return 0
+    fi
+    parent="$(dirname "$dir")"
+    [ "$parent" = "$dir" ] && break
+    dir="$parent"
+    depth=$((depth + 1))
+  done
+  return 1
+}
+
+PROJECT_ROOT="$(find_godot_project)" || exit 0
+
+# --- 2. Extract a marked card region ---------------------------------------------------------
+extract_card() {
+  local file="$1" marker="$2"
+  [ -f "$file" ] || return 0
+  # awk, not a sed range: sed restarts the range on a second START marker (concatenating
+  # regions and leaking raw markers) and runs to EOF when the END marker is missing.
+  awk -v s="<!-- ${marker}-START -->" -v e="<!-- ${marker}-END -->" '
+    !seen && index($0, s) { inside=1; seen=1; next }
+    inside && index($0, e) { inside=0; done=1; next }
+    inside { buf = buf $0 "\n" }
+    END { if (done) printf "%s", buf }
+  ' "$file"
+}
+
+SESSION_CARD="$(extract_card "${PLUGIN_ROOT}/skills/using-godot-prompter/SKILL.md" 'SESSION-CARD')"
+[ -z "$SESSION_CARD" ] && exit 0
+
+# --- 3. Detect Godot version and renderer ----------------------------------------------------
+# config/features=PackedStringArray("4.5", "C#", "Forward Plus")
+GODOT_VERSION=""
+GODOT_RENDERER=""
+GODOT_USES_CSHARP=""
+if features_line="$(grep -m1 '^config/features=' "${PROJECT_ROOT}/project.godot" 2>/dev/null)"; then
+  tokens="$(printf '%s' "$features_line" | grep -o '"[^"]*"' | tr -d '"' || true)"
+  # Token 1 is always the engine version branch.
+  GODOT_VERSION="$(printf '%s\n' "$tokens" | sed -n '1p')"
+  # The renderer is whichever token NAMES a rendering method — never token 2, which is
+  # "C#" in .NET projects and "Double Precision" in double-precision builds.
+  GODOT_RENDERER="$(printf '%s\n' "$tokens" | grep -m1 -E '^(Forward Plus|Forward Mobile|Mobile|GL Compatibility)$' || true)"
+  printf '%s\n' "$tokens" | grep -qx 'C#' && GODOT_USES_CSHARP=1
+fi
+
+VERSION_LINE=""
+if [ -n "$GODOT_VERSION" ]; then
+  if [ -n "$GODOT_RENDERER" ]; then
+    VERSION_LINE="This project targets **Godot ${GODOT_VERSION}** (${GODOT_RENDERER} renderer). Prefer APIs and advice valid for that version and renderer."
+  else
+    # Say nothing about a renderer we did not detect — a stray mention reads as a claim.
+    VERSION_LINE="This project targets **Godot ${GODOT_VERSION}**. Prefer APIs and advice valid for that version."
+  fi
+  [ -n "$GODOT_USES_CSHARP" ] && VERSION_LINE="${VERSION_LINE} This is a **C# project** — lead with C# examples."
+fi
+
+# --- 4. Mentor mode (state lives in HOME, never in the user's repo) ---------------------------
+MENTOR_CARD=""
+if command -v sha256sum >/dev/null 2>&1; then
+  state_hash="$(printf '%s' "$PROJECT_ROOT" | sha256sum | cut -c1-16)"
+else
+  state_hash="$(printf '%s' "$PROJECT_ROOT" | shasum -a 256 | cut -c1-16)"
+fi
+STATE_FILE="${HOME}/.godot-prompter/state/${state_hash}.json"
+# Match the "mode" key specifically — a loose grep false-positives on
+# {"mode":"normal","last_mode":"mentor"}.
+if [ -f "$STATE_FILE" ] && grep -qE '"mode"[[:space:]]*:[[:space:]]*"mentor"' "$STATE_FILE"; then
+  MENTOR_CARD="$(extract_card "${PLUGIN_ROOT}/skills/godot-mentor/SKILL.md" 'MENTOR-CARD')"
+fi
+
+# --- 5. Subagent reach: offer the CLAUDE.md section once per project --------------------------
+CLAUDE_MD_LINE=""
+if [ ! -f "${PROJECT_ROOT}/CLAUDE.md" ] || ! grep -q '^## GodotPrompter' "${PROJECT_ROOT}/CLAUDE.md" 2>/dev/null; then
+  CLAUDE_MD_LINE="This project's CLAUDE.md has no \`## GodotPrompter\` section. Subagents do not receive this card — CLAUDE.md is what they read. Offer once, and only with the user's agreement, to add a short section telling agents to check for a matching \`godot-prompter:*\` skill before implementing any Godot system. Do not add it silently, and do not ask again if declined."
+fi
+
+# --- 6. Assemble and emit ---------------------------------------------------------------------
+escape_for_json() {
+  local s="$1"
+  s="${s//\\/\\\\}"
+  s="${s//\"/\\\"}"
+  s="${s//$'\n'/\\n}"
+  s="${s//$'\r'/\\r}"
+  s="${s//$'\t'/\\t}"
+  printf '%s' "$s"
+}
+
+payload="${SESSION_CARD}"
+[ -n "$VERSION_LINE" ]    && payload="${payload}"$'\n\n'"${VERSION_LINE}"
+[ -n "$MENTOR_CARD" ]     && payload="${payload}"$'\n\n'"${MENTOR_CARD}"
+[ -n "$CLAUDE_MD_LINE" ]  && payload="${payload}"$'\n\n'"${CLAUDE_MD_LINE}"
+
+context="<GODOT-PROJECT-CONTEXT>\n$(escape_for_json "$payload")\n</GODOT-PROJECT-CONTEXT>"
+
+if [ -n "${CURSOR_PLUGIN_ROOT:-}" ]; then
+  printf '{\n  "additional_context": "%s"\n}\n' "$context" | cat
+elif [ -n "${CLAUDE_PLUGIN_ROOT:-}" ] && [ -z "${COPILOT_CLI:-}" ]; then
+  printf '{\n  "hookSpecificOutput": {\n    "hookEventName": "SessionStart",\n    "additionalContext": "%s"\n  }\n}\n' "$context" | cat
+else
+  printf '{\n  "additionalContext": "%s"\n}\n' "$context" | cat
+fi
+
+exit 0

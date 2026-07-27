@@ -6,6 +6,10 @@
   "description": "Agentic skills framework for Godot 4.x game development — GDScript & C#",
   "author": "jame581",
   "license": "MIT",
+  "scripts": {
+    "test:hooks": "node --test tests/hooks/session-start.test.mjs",
+    "validate": "node scripts/validate-skills.mjs"
+  },
   "keywords": [
     "godot",
     "gamedev",

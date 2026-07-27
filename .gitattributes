@@ -2,3 +2,8 @@
 *.mjs text eol=lf
 *.json text eol=lf
 *.yml text eol=lf
+
+# Shipped hook scripts must keep LF — bash dies on $'\r', and core.autocrlf=true
+# (the Git-for-Windows default) would otherwise rewrite them on checkout.
+hooks/session-start text eol=lf
+*.cmd text eol=lf
