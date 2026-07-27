@@ -1,0 +1,69 @@
+> ← Back to [SKILL.md](../SKILL.md)
+
+# Event Bus Anti-patterns
+
+### Using the event bus for everything (over-decoupling)
+
+```gdscript
+# BAD — a parent querying its own child through the event bus
+# is unnecessarily indirect and hard to follow.
+func _ready() -> void:
+    EventBus.request_player_position.connect(_on_request_player_position)
+
+func _on_request_player_position() -> void:
+    EventBus.player_position_response.emit(global_position)
+
+# GOOD — a parent can access its child directly.
+var player_pos: Vector2 = $Player.global_position
+```
+
+### Side effects in handlers that emit further signals
+
+```gdscript
+# BAD — handler emits another signal, which triggers another handler,
+# which emits another signal. Tracing the flow requires reading all handlers.
+func _on_player_died() -> void:
+    _save_high_score()          # side effect
+    EventBus.high_score_saved.emit()  # triggers yet another chain
+
+# GOOD — each handler does one thing; orchestration lives in one place.
+func _on_player_died() -> void:
+    _show_death_screen()
+
+# A dedicated GameManager handles multi-step reactions:
+func _on_player_died() -> void:
+    _save_high_score()
+    get_tree().reload_current_scene()
+```
+
+### Circular event chains
+
+```gdscript
+# BAD — PlayerHealth connects to health_changed and re-emits it.
+func _on_health_changed(current: int, maximum: int) -> void:
+    _current = current
+    EventBus.health_changed.emit(_current, maximum)  # infinite loop
+
+# GOOD — update internal state only; let the original emitter own the signal.
+func _on_health_changed(current: int, maximum: int) -> void:
+    _current = current
+    _update_display()
+```
+
+### Connecting without disconnecting in C#
+
+```csharp
+// BAD — node is freed but EventBus still holds a reference to the delegate.
+// The next emission raises an InvalidOperationException or silently leaks memory.
+public override void _Ready()
+{
+    GetNode<EventBus>("/root/EventBus").PlayerDied += OnPlayerDied;
+    // No _ExitTree() override — memory leak.
+}
+
+// GOOD — always pair Connect with Disconnect in C#.
+public override void _ExitTree()
+{
+    GetNode<EventBus>("/root/EventBus").PlayerDied -= OnPlayerDied;
+}
+```
