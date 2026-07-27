@@ -31,6 +31,7 @@ const GDSCRIPT_ONLY_BY_DESIGN = new Set(['gdscript-patterns', 'gdscript-advanced
 const CARD_BUDGET_BYTES = 3 * 1024;
 const CARD_SPECS = [
   { skill: 'using-godot-prompter', marker: 'SESSION-CARD' },
+  { skill: 'godot-mentor', marker: 'MENTOR-CARD' },
 ];
 
 const errors = [];

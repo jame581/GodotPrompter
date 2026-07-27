@@ -75,11 +75,24 @@ if [ -n "$GODOT_VERSION" ]; then
 fi
 
 # --- 4. Mentor mode (state lives in HOME, never in the user's repo) ---------------------------
+# The state key must be identical whether bash or the agent computes it. Under Git Bash the
+# same directory is "/c/Users/x/game" to bash but "C:\Users\x\game" to Node — hashing the raw
+# path would produce two different keys and mentor mode would silently never restore on
+# Windows. Canonical form: absolute, forward slashes, native drive letter (C:/Users/x/game).
+canonical_path() {
+  if command -v cygpath >/dev/null 2>&1; then
+    cygpath -m "$1"
+  else
+    printf '%s' "$1"
+  fi
+}
+
 MENTOR_CARD=""
+STATE_KEY="$(canonical_path "$PROJECT_ROOT")"
 if command -v sha256sum >/dev/null 2>&1; then
-  state_hash="$(printf '%s' "$PROJECT_ROOT" | sha256sum | cut -c1-16)"
+  state_hash="$(printf '%s' "$STATE_KEY" | sha256sum | cut -c1-16)"
 else
-  state_hash="$(printf '%s' "$PROJECT_ROOT" | shasum -a 256 | cut -c1-16)"
+  state_hash="$(printf '%s' "$STATE_KEY" | shasum -a 256 | cut -c1-16)"
 fi
 STATE_FILE="${HOME}/.godot-prompter/state/${state_hash}.json"
 # Match the "mode" key specifically — a loose grep false-positives on
