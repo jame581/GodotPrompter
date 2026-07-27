@@ -36,6 +36,12 @@ jobs:
       - name: Run skill validator
         run: node scripts/validate-skills.mjs
 
+      # v1.13.0 ships executable code (hooks/) for the first time. Manual smoke-testing on one
+      # machine is not a gate — these cover platform output shapes, project detection,
+      # config/features parsing, and that the scripts carry no CR bytes.
+      - name: Run hook tests
+        run: npm run test:hooks
+
       # Self-test: the fixtures under scripts/fixtures/ are deliberately broken (over budget,
       # bad frontmatter, broken cross-ref). If the validator ever stops catching them, its rules
       # have been silently disabled — fail loudly rather than pass a release that isn't checked.

@@ -2,7 +2,7 @@
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 [![Godot 4.x](https://img.shields.io/badge/Godot-4.3+-blue.svg)](https://godotengine.org)
-[![Skills: 54](https://img.shields.io/badge/Skills-54-green.svg)](#available-skills)
+[![Skills: 55](https://img.shields.io/badge/Skills-55-green.svg)](#available-skills)
 
 Agentic skills framework for Godot 4.x game development. Gives AI coding agents domain-specific expertise for GDScript and C# projects.
 
@@ -12,7 +12,7 @@ Inspired by and built on top of the [Superpowers](https://github.com/obra/superp
 
 GodotPrompter is a plugin that provides **skills** — structured domain knowledge that AI agents load on demand. When you ask your agent to "add a state machine" or "set up multiplayer", it loads the relevant GodotPrompter skill and follows Godot-specific best practices instead of relying on generic knowledge.
 
-**54 skills** covering project setup, architecture, gameplay systems, input handling, physics, 2D/3D systems, animation, shaders, audio, UI, multiplayer, localization, procedural generation, XR/VR, native extensions, multithreading, mobile shipping, optimization, GDScript / C# patterns, and third-party addons (LimboAI, Beehave, Popochiu, Dialogue Manager, Phantom Camera). All targeting Godot 4.3+ with both GDScript and C# examples — newer features from Godot 4.5, 4.6, and 4.7 (variadic functions, abstract classes, stencil buffers, AreaLight3D, VirtualJoystick, OpenXR Spatial Entities, and more) are included as annotated additive sections.
+**55 skills** covering project setup, architecture, gameplay systems, input handling, physics, 2D/3D systems, animation, shaders, audio, UI, multiplayer, localization, procedural generation, XR/VR, native extensions, multithreading, mobile shipping, optimization, GDScript / C# patterns, a teaching mode, and third-party addons (LimboAI, Beehave, Popochiu, Dialogue Manager, Phantom Camera). All targeting Godot 4.3+ with both GDScript and C# examples — newer features from Godot 4.5, 4.6, and 4.7 (variadic functions, abstract classes, stencil buffers, AreaLight3D, VirtualJoystick, OpenXR Spatial Entities, and more) are included as annotated additive sections.
 
 **v1.7.0 introduces a 16 KB token budget** for `SKILL.md` files (validator-enforced) and the new **`gdscript-advanced`** skill for production-grade GDScript depth (performance idioms, metaprogramming, `@tool` lifecycle, profiler-driven idioms).
 
@@ -105,6 +105,34 @@ See `.opencode/INSTALL.md` for details.
 
 ## How It Works
 
+### Automatic activation
+
+GodotPrompter registers a SessionStart hook that injects its skill-routing card when it detects
+a Godot project (`project.godot` within four directories of your working directory). In any
+other repository the hook does nothing at all.
+
+The hook reads only your project's `project.godot` and its own state file under your home
+directory, makes no network requests, and writes nothing. If bash is unavailable on Windows it
+exits silently and the plugin behaves exactly as it did before v1.13.0.
+
+Verified on Claude Code. Cursor and Copilot CLI registrations ship but are not yet confirmed
+end-to-end. Codex and Antigravity have no hook mechanism and continue to load the bootstrap
+through `AGENTS.md` / `GEMINI.md`.
+
+> The hook covers your session. **Subagents do not receive it** — `SessionStart` does not fire on
+> subagent dispatch. When a Godot project's `CLAUDE.md` has no `## GodotPrompter` section, the
+> agent offers once to add one, since that is what subagents read. It never adds it silently.
+
+### Mentor mode
+
+Say "teach me as we go" in a Godot project and GodotPrompter switches to teaching delivery: the
+Godot concept and why that node, the editor setup, annotated GDScript and C#, what to verify when
+you run it, and one suggested next step. It wraps the domain skills rather than replacing them,
+so the guidance stays version-checked.
+
+Your preference is remembered per project in `~/.godot-prompter/state/` — nothing is written into
+your game repository. Say "just give me the code" to turn it off.
+
 ### 1. Design Phase
 Ask the agent to brainstorm a feature. It loads `godot-brainstorming` and walks you through:
 - Clarifying questions about your game/system
@@ -176,6 +204,7 @@ GodotPrompter includes 9 specialized agents:
 | `godot-code-review` | Review checklist — best practices, anti-patterns, Godot pitfalls |
 | `godot-debugging` | Remote debugger, print techniques, signal tracing, error patterns |
 | `godot-testing` | TDD with GUT and gdUnit4 — test structure, mocking, CI |
+| `godot-mentor` | Teaching mode — concept, editor setup, annotated code, verification, one next step |
 
 ### Architecture & Patterns (6 skills)
 
@@ -322,6 +351,11 @@ A manual agent-integration test plan covering full workflows (skill discovery, c
 ## Contributing
 
 See [CONTRIBUTING.md](CONTRIBUTING.md) for how to add new skills, conventions, and testing requirements.
+
+## Acknowledgements
+
+The SessionStart hook's polyglot Windows wrapper, JSON escaper, and platform output branching are
+adapted from [Superpowers](https://github.com/obra/superpowers) by Jesse Vincent (MIT).
 
 ## License
 

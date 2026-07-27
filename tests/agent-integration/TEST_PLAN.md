@@ -295,3 +295,103 @@ sits next to) and answers with the addon's real API.
 so pre-release runs test the skill *as it exists in the working tree* (agent reads `skills/<name>/SKILL.md`)
 rather than plugin-cache routing. Re-run Category 4 against the installed plugin after release to
 validate description-based routing end to end.
+
+---
+
+## Category 5: Mentor Mode & Presence (v1.13.0)
+
+### Test 5.1: Mentor mode wraps, never replaces
+
+**Setup:** Godot project with mentor mode activated (state in `~/.godot-prompter/state/`).
+
+**Prompt:** "add a dash to my player"
+
+**Expected:**
+- Agent invokes `godot-prompter:player-controller` (visible in the tool call)
+- All five beats in order: Concept, Editor, Code, Verify, Next
+- Exactly one suggestion in Beat 5
+
+**Pass criteria:** The domain skill is loaded. A five-beat answer with no `player-controller`
+invocation is a FAIL — that is the primary anti-pattern.
+
+---
+
+### Test 5.2: Editor beat boundary holds
+
+**Prompt:** "where do I click to add an autoload?"
+
+**Expected:** names the Project Settings → Autoload area at panel level and the fields to fill
+in; does **not** invent toolbar positions, dock coordinates, or version-specific UI chrome.
+
+**Pass criteria:** no fabricated click-path. Must keep passing after v1.14.0 relaxes the
+constraint — answers get fuller, never fabricated.
+
+---
+
+### Test 5.3: Off-ramp
+
+**Prompt (after 5.1):** "just give me the code"
+
+**Expected:** plain code, no beats; the state file's `mode` becomes `"normal"`.
+
+---
+
+### Test 5.4: Coexistence regression
+
+**Setup:** fresh session in a Godot project with Superpowers also installed.
+
+**Prompt:** "implement a save system for my game"
+
+**Expected:** `godot-prompter:save-load` is invoked during implementation, whether or not
+Superpowers drives the workflow.
+
+**Pass criteria:** this is the regression the release exists to fix. Generic serialization advice
+with no `save-load` invocation is a FAIL.
+
+---
+
+### Test 5.5: Hook stays silent outside Godot
+
+**Setup:** fresh session in a non-Godot repository.
+
+**Expected:** no GodotPrompter routing card in context; no unprompted mention of Godot skills.
+
+---
+
+### Test 5.6: Subagent reach via CLAUDE.md
+
+**Setup:** Godot project whose `CLAUDE.md` has no `## GodotPrompter` section.
+
+**Prompt:** "build me an inventory system" — then let the agent dispatch subagents.
+
+**Expected:**
+- The agent offers once to add the `## GodotPrompter` section, and waits for agreement
+- It does **not** add it silently
+- After the section exists, a dispatched subagent implementing a Godot system invokes the
+  matching skill
+
+**Pass criteria:** this is the only test covering subagents. The SessionStart hook does not reach
+them; CLAUDE.md is the mechanism.
+
+---
+
+### Test 5.7: No state written into the game repo
+
+**Setup:** activate mentor mode in a Godot project, then `git status` in that project.
+
+**Expected:** clean. No `.godot-prompter/` directory, no new untracked files.
+
+**Pass criteria:** state belongs in `~/.godot-prompter/state/`.
+
+---
+
+### Test 5.8: C# project leads with C#
+
+**Setup:** Godot project whose `project.godot` has `config/features=PackedStringArray("4.5", "C#", "Forward Plus")`.
+
+**Prompt:** "add a health component"
+
+**Expected:** the C# example leads (the hook detects the `C#` feature tag); the renderer is
+reported as Forward Plus, **not** "C#".
+
+**Pass criteria:** guards the token-position parsing bug — see `tests/hooks/`.

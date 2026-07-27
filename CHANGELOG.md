@@ -4,6 +4,84 @@ All notable changes to GodotPrompter will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
+## [1.13.0] - 2026-07-28
+
+### Added
+
+- **SessionStart hook (`hooks/`)** — GodotPrompter now injects its skill-routing card into
+  context automatically when it detects a Godot project (`project.godot` within four
+  directories of the working directory), and does nothing at all in any other repository.
+  This closes the gap that made the v1.4.1 coexistence fix underperform: routing guidance that
+  must be opened to be read loses to guidance already in context. Verified on Claude Code;
+  Cursor and Copilot CLI registrations ship but are not yet confirmed end-to-end. Codex and
+  Antigravity continue to inherit the bootstrap via `AGENTS.md` / `GEMINI.md`.
+- **`godot-mentor` skill** (54 → 55 skills) — teaching mode. Wraps the domain skills in a
+  five-beat contract: concept and why that node, editor setup, annotated GDScript and C#, what
+  to verify when you run it, one next step. Your preference is remembered per project in
+  `~/.godot-prompter/state/` — **nothing is written into your game repository**. Survives
+  `/clear` and compaction.
+- **Godot version, renderer, and C# detection** — the hook parses `config/features` from
+  `project.godot`, so advice targets the version and renderer actually in use. A `C#` feature
+  tag now makes C# the leading example.
+- **Subagent reach** — when a Godot project's `CLAUDE.md` has no `## GodotPrompter` section, the
+  agent offers once (never silently) to add one. The SessionStart hook does **not** fire on
+  subagent dispatch; CLAUDE.md is what subagents read.
+- **Hook test suite** (`tests/hooks/`, 19 cases) now runs in CI alongside the validator, and
+  `package.json` gains a `scripts` block (`npm run test:hooks`, `npm run validate`).
+
+### Changed
+
+- **Bootstrap routing table** replaced 20 partial rows with 16 category rows covering all 55
+  skills including the five addon skills, plus a Red Flags anti-rationalization table. Category
+  rows rather than one row per skill: a full enumeration measured 2,963 bytes against the
+  3,072-byte cap, leaving 109 bytes — one new skill from breaching CI.
+- **Pattern X restructure of 8 skills.** All eight sat within 145 bytes of the 15.5 KB advisory
+  band; the v1.12.0 notes named only four. No teaching content removed — sections moved to
+  `references/`.
+
+  | Skill | Before | After | Headroom |
+  |---|---:|---:|---:|
+  | `event-bus` | 15727 | 11616 | 145 → 4256 |
+  | `particles-vfx` | 15837 | 12134 | 35 → 3738 |
+  | `multiplayer-basics` | 15791 | 12400 | 81 → 3472 |
+  | `godot-ui` | 15826 | 12771 | 46 → 3101 |
+  | `localization` | 15864 | 12913 | 8 → 2959 |
+  | `addon-development` | 15843 | 13212 | 29 → 2660 |
+  | `physics-system` | 15853 | 14670 | 19 → 1202 |
+  | `3d-essentials` | 15813 | 15066 | 59 → 806 |
+
+  `physics-system` and `3d-essentials` end higher than the rest: both were already heavily
+  restructured in v1.7.0 (12 and 10 reference files now), so every remaining section but the
+  checklist already links one. Their numbers are close to the floor achievable without removing
+  teaching content.
+- **`.gitattributes`** pins `hooks/session-start` and `*.cmd` to LF, and both hook files are
+  tracked with the exec bit. With `core.autocrlf=true` they would otherwise check out CRLF and
+  bash would fail on `$''` at every session start on Windows.
+- **New validator rules:** `card-marker-missing`, `card-marker-malformed`,
+  `card-marker-duplicate`, `card-empty`, `card-oversized`, `card-skill-missing`. Three new
+  fixtures extend the v1.12.0 validator self-test.
+
+### Fixed
+
+- **Five skills were missing from the bootstrap's category index** — `ability-system`,
+  `gdextension`, `gdscript-advanced`, `mobile-development`, `multithreading`.
+
+> **Release notes:** 55 skills. Validator baseline: **0 errors, 16 warnings** (unchanged — all
+> `csharp-parity-accepted` by design). Hook tests: 19/19. Repo-wide minimum stays Godot 4.3+.
+>
+> **First release shipping executable code.** The hook reads only `project.godot` and its own
+> state file under your home directory, makes no network requests, and writes nothing. Its
+> Windows wrapper and JSON escaper are adapted from
+> [Superpowers](https://github.com/obra/superpowers) (MIT, Jesse Vincent).
+>
+> **Deferred to v1.14.0:** researched editor references (`editor-navigation.md`,
+> `editor-recipes.md`). Until they land, mentor mode's Editor beat is constrained to node-tree
+> and Inspector-level guidance — no menu paths.
+>
+> **Heads-up for contributors:** four more skills now sit closest to the advisory band —
+> `phantom-camera` (159 bytes), `ai-navigation` (164), `export-pipeline` (181), `csharp-godot`
+> (223). They are the next Pattern X candidates.
+
 ## [1.12.0] - 2026-07-14
 
 ### Added

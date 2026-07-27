@@ -202,3 +202,29 @@ agy plugin update godot-prompter              # Antigravity CLI
 ## Questions?
 
 Open an issue on GitHub or check existing skills for examples of the expected format.
+
+## Editing the session card
+
+The SessionStart hook injects the region between `<!-- SESSION-CARD-START -->` and
+`<!-- SESSION-CARD-END -->` in `skills/using-godot-prompter/SKILL.md`, and the `MENTOR-CARD`
+region in `skills/godot-mentor/SKILL.md`. Both are validated: markers must be present, appear
+exactly once, be correctly ordered, be non-empty, and the region must stay under 3 KB.
+
+The cards are injected on every session start and every compaction, so keep them lean — route by
+category and defer detail to the skill. **Do not reproduce the marker strings in documentation
+examples**; `card-marker-duplicate` will fail CI, because the hook extracts the first region only
+and a documented example above the real card would silently become the injected payload.
+
+After any change under `hooks/`, run `npm run test:hooks`. Note that `node --test tests/hooks/`
+does not work on Node 24 — a directory argument is imported as a module — so use the npm script.
+
+### The two hook directories
+
+| Path | Runs where | Purpose |
+|---|---|---|
+| `hooks/` | the plugin **user's** machine | SessionStart routing card — shipped |
+| `scripts/hooks/` | this repo, during development | `validate-skill-on-edit.mjs`, wired via `.claude/settings.json` |
+
+Never merge them. Files under `hooks/` are pinned to LF in `.gitattributes` and tracked with the
+exec bit — `bash` fails on `$'\r'`, and `chmod +x` alone is a no-op here because
+`core.filemode=false`. Use `git update-index --chmod=+x` if you add another hook script.
