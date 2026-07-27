@@ -24,6 +24,15 @@ const TOKEN_BUDGET_APPROACHING_BYTES = 15.5 * 1024;
 // 'beehave' is a GDScript-only addon (no official C# API), so its sections are accepted, not debt.
 const GDSCRIPT_ONLY_BY_DESIGN = new Set(['gdscript-patterns', 'gdscript-advanced', 'beehave', 'popochiu']);
 
+// Card rule: the SessionStart hook injects the region delimited by
+// <!-- <NAME>-START --> / <!-- <NAME>-END --> from these skills. The region is a slice of the
+// skill itself (never a copy) so it cannot drift. It is injected on every session start AND
+// every compaction, so it is capped.
+const CARD_BUDGET_BYTES = 3 * 1024;
+const CARD_SPECS = [
+  { skill: 'using-godot-prompter', marker: 'SESSION-CARD' },
+];
+
 const errors = [];
 const warnings = [];
 
@@ -175,6 +184,39 @@ function validateAgent(path) {
   }
 }
 
+function validateCard(path, markerName, budgetBytes) {
+  const content = readFileSync(path, 'utf8').replace(/\r\n/g, '\n');
+  const start = `<!-- ${markerName}-START -->`;
+  const end = `<!-- ${markerName}-END -->`;
+  const si = content.indexOf(start);
+  const ei = content.indexOf(end);
+
+  if (si === -1 || ei === -1) {
+    const missing = [si === -1 ? start : null, ei === -1 ? end : null].filter(Boolean).join(' and ');
+    record(errors, path, 'card-marker-missing', `Missing ${missing} — the SessionStart hook injects this region`);
+    return;
+  }
+  if (ei < si) {
+    record(errors, path, 'card-marker-malformed', `${end} appears before ${start}`);
+    return;
+  }
+  // The hook extracts the FIRST region only. A second pair — e.g. a fenced example documenting
+  // the markers above the real card — would silently become the injected payload.
+  if (content.indexOf(start, si + start.length) !== -1 || content.indexOf(end, ei + end.length) !== -1) {
+    record(errors, path, 'card-marker-duplicate', `${markerName} markers appear more than once — the hook extracts the first region only`);
+    return;
+  }
+  const region = content.slice(si + start.length, ei).trim();
+  if (region.length === 0) {
+    record(errors, path, 'card-empty', `Region between ${start} and ${end} is empty — the hook would inject nothing`);
+    return;
+  }
+  const bytes = Buffer.byteLength(region, 'utf8');
+  if (bytes > budgetBytes) {
+    record(errors, path, 'card-oversized', `${markerName} region is ${(bytes / 1024).toFixed(1)} KB (cap: ${budgetBytes / 1024} KB) — it is injected on every session start and compaction`);
+  }
+}
+
 // Run
 const targets = listSkills();
 if (includeFixtures) {
@@ -187,6 +229,25 @@ if (includeFixtures) {
   }
 }
 for (const t of targets) validateSkill(t);
+
+// Card regions injected by the SessionStart hook.
+for (const spec of CARD_SPECS) {
+  const cardPath = join(SKILLS_DIR, spec.skill, 'SKILL.md');
+  if (!existsSync(cardPath)) {
+    record(errors, cardPath, 'card-skill-missing', `CARD_SPECS names skills/${spec.skill} but no SKILL.md exists there`);
+    continue;
+  }
+  validateCard(cardPath, spec.marker, CARD_BUDGET_BYTES);
+}
+if (includeFixtures) {
+  const cardFixtures = join(ROOT, 'scripts', 'fixtures');
+  if (existsSync(cardFixtures)) {
+    for (const name of readdirSync(cardFixtures).filter(n => n.startsWith('session-card-'))) {
+      const cardPath = join(cardFixtures, name, 'SKILL.md');
+      if (existsSync(cardPath)) validateCard(cardPath, 'SESSION-CARD', CARD_BUDGET_BYTES);
+    }
+  }
+}
 
 // Orphan-reference check: every skills/<name>/references/*.md must be linked from its parent SKILL.md.
 function validateOrphanReferences() {
