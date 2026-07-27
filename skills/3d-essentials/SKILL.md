@@ -41,9 +41,7 @@ Godot uses a **right-handed** coordinate system with metric units (1 unit = 1 me
 | `CSGBox3D` etc. | Constructive Solid Geometry — prototyping |
 | `GridMap` | 3D tile-based level building |
 
-> **Godot 4.7+:** `GridMap` exposes its internal octants for spatial queries — `cell_octant_size = 8` (cells per octant, per axis) plus `get_used_octants()`, `get_used_octants_by_item(item)`, `get_octants_in_bounds(bounds)` (includes empty octants), `get_used_octants_in_bounds(bounds)`, `get_used_cells_in_octant(octant_coords)`, `get_used_cells_in_octant_by_item(octant_coords, item)`, and `get_octant_coords_from_cell_coords(cell_coords)`. Octant and cell coordinates are `Vector3i` (returned in `Array[Vector3i]`); `bounds` is a local-space `AABB`.
-
-> **Godot 4.7+:** `CSGShape3D` gains automatic smoothing — enable `autosmooth` (default `false`) and tune `smoothing_angle` (default `50.0`): faces meeting at an angle greater than `smoothing_angle` are smoothed, smaller angles stay sharp; a value below `0.1` disables all smoothing (a performance escape hatch). Children of a `CSGCombiner3D` are treated as a single mesh.
+> **Godot 4.7+:** `GridMap` exposes its internal octants for spatial queries (`cell_octant_size`, `get_used_octants()`, `get_octants_in_bounds()` and friends) so you can scope work to a region instead of walking every cell. `CSGShape3D` gains `autosmooth` / `smoothing_angle` for automatic face smoothing. Full method table and semantics: [references/godot-4.7-additions.md](references/godot-4.7-additions.md)
 
 ### Minimal 3D Scene
 
@@ -181,16 +179,9 @@ Four tools: automatic mesh LOD (set on import or per `MeshInstance3D`), manual `
 
 ## 9. Renderer Comparison
 
-| Feature | Forward+ | Mobile | Compatibility |
-|---|---|---|---|
-| SSAO / SSIL / SSR / Volumetric Fog / SDFGI / VoxelGI | Yes | No | No |
-| LightmapGI / Glow / Bloom | Yes | Yes | Yes |
-| Max Omni+Spot per mesh | 512 clustered | 8+8 | 8+8 (adjustable) |
-| Target | Desktop/Console | Mobile/Mid-range | Low-end/WebGL |
+Pick the renderer before you build the look: **Forward+** (desktop default) is the only one with SDFGI and volumetric fog, **Mobile** trades those for performance on tile-based GPUs, and **Compatibility** (GLES3-class) drops most advanced lighting entirely. Advice that assumes SDFGI silently fails on the other two.
 
-Choose in **Project Settings → Rendering → Renderer → Rendering Method**. Rule of thumb: Forward+ for desktop, Mobile for mobile, Compatibility only for web or very low-end hardware.
-
-> **Godot 4.7+:** Vulkan raytracing (RenderingDevice BLAS/TLAS and raytracing pipelines) shipped experimental in 4.7 and is not yet recommended for production.
+Full feature-by-renderer table and selection guidance: [references/renderer-comparison.md](references/renderer-comparison.md)
 
 ---
 
