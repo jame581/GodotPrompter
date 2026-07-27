@@ -69,14 +69,27 @@ The same directory has two spellings on Windows: bash sees `/c/Users/you/game`, 
 `C:\Users\you\game`. Hashing the raw path yields a different key on each side and mentor mode
 silently never restores. The hook normalizes with `cygpath -m`; match that form when you write.
 
+Compute the key exactly like the hook does:
+
+```bash
+# $P is the canonical project path, e.g. C:/Users/you/game
+printf '%s' "$P" | sha256sum | cut -c1-16      # or: shasum -a 256
+```
+
+The failure mode is silent — a wrong key just means mentor mode never comes back — so verify the
+file lands where the hook looks before relying on it.
+
 ```json
 {
-  "project": "/abs/path/to/the/game",
+  "project": "C:/Users/you/game",
   "mode": "mentor",
   "level": "beginner",
   "language": "gdscript"
 }
 ```
+
+> `project` is shown in the Windows canonical form because that is the platform where getting it
+> wrong fails silently. On macOS / Linux it is just the absolute path, e.g. `/home/you/game`.
 
 | Key | Values | Meaning |
 |---|---|---|

@@ -92,7 +92,7 @@ The editor exposes built-in presets:
 
 Anchors resolve as `parent_size * anchor + offset` per edge, so setting them by hand means setting eight properties. `set_anchors_and_offsets_preset(Control.PRESET_*)` does it in one call — use that, then adjust `offset_*` for margins (negative on right/bottom).
 
-Full GDScript + C# examples — full-rect fill, top-right HUD with 16 px margins, and a custom half-screen side panel: [references/anchors-in-code.md](references/anchors-in-code.md)
+The anchor-vs-offset rule (keep offsets at 0 and let anchors do the work) plus full GDScript + C# examples — full-rect fill, top-right HUD with 16 px margins, and a custom half-screen side panel: [references/anchors-in-code.md](references/anchors-in-code.md)
 
 ---
 
@@ -138,7 +138,7 @@ Three canonical scenes: a **main menu** (centered VBoxContainer with title + but
 
 `FoldableContainer` is a built-in accordion `Container` added in Godot 4.5 — a toggle header plus collapsible children, replacing the old boilerplate of wiring a `Button` to show/hide a `VBoxContainer`. Set `title`, set `folded` for the initial state, add children normally, and listen to `folding_changed(is_folded)`.
 
-Full GDScript + C# construction, the toggle signal handler, and theming notes: [references/foldable-container.md](references/foldable-container.md)
+Full GDScript + C# construction, the key-properties table, and the toggle signal: [references/foldable-container.md](references/foldable-container.md)
 
 ---
 

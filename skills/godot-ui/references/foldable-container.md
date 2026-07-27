@@ -4,7 +4,7 @@
 
 `FoldableContainer` is a built-in `Container` node introduced in Godot 4.5, providing accordion-style collapsible sections with a toggle header — eliminating the boilerplate of manually wiring a `Button` to show/hide a child `VBoxContainer`.
 
-### Basic Usage
+## Basic Usage
 
 ```gdscript
 # Build UI dynamically:
@@ -61,7 +61,7 @@ private void OnSectionToggled(bool isFolded)
 }
 ```
 
-### Key Properties
+## Key Properties
 
 | Property | Type | Purpose |
 |----------|------|---------|
@@ -69,7 +69,7 @@ private void OnSectionToggled(bool isFolded)
 | `folded` | `bool` | `true` = content hidden, `false` = content visible |
 | `title_alignment` | `HorizontalAlignment` | Align the title text within the header |
 
-### Signal
+## Signal
 
 | Signal | Signature | When emitted |
 |--------|-----------|--------------|

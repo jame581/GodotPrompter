@@ -88,17 +88,29 @@ canonical_path() {
 }
 
 MENTOR_CARD=""
-STATE_KEY="$(canonical_path "$PROJECT_ROOT")"
-if command -v sha256sum >/dev/null 2>&1; then
-  state_hash="$(printf '%s' "$STATE_KEY" | sha256sum | cut -c1-16)"
-else
-  state_hash="$(printf '%s' "$STATE_KEY" | shasum -a 256 | cut -c1-16)"
-fi
-STATE_FILE="${HOME}/.godot-prompter/state/${state_hash}.json"
-# Match the "mode" key specifically — a loose grep false-positives on
-# {"mode":"normal","last_mode":"mentor"}.
-if [ -f "$STATE_FILE" ] && grep -qE '"mode"[[:space:]]*:[[:space:]]*"mentor"' "$STATE_FILE"; then
-  MENTOR_CARD="$(extract_card "${PLUGIN_ROOT}/skills/godot-mentor/SKILL.md" 'MENTOR-CARD')"
+STATE_FILE=""
+# Everything in this block is best-effort: a sanitized environment with no HOME, or a system
+# with neither sha256sum nor shasum, must never cost the user the session card. Under `set -u`
+# a bare ${HOME} aborts the whole hook, so it is defaulted explicitly.
+if [ -n "${HOME:-}" ]; then
+  state_key="$(canonical_path "$PROJECT_ROOT")"
+  state_hash=""
+  if command -v sha256sum >/dev/null 2>&1; then
+    state_hash="$(printf '%s' "$state_key" | sha256sum 2>/dev/null | cut -c1-16 || true)"
+  elif command -v shasum >/dev/null 2>&1; then
+    state_hash="$(printf '%s' "$state_key" | shasum -a 256 2>/dev/null | cut -c1-16 || true)"
+  fi
+  if [ -n "$state_hash" ]; then
+    STATE_FILE="${HOME}/.godot-prompter/state/${state_hash}.json"
+    # Match the "mode" key specifically — a loose grep false-positives on
+    # {"mode":"normal","last_mode":"mentor"}.
+    if [ -f "$STATE_FILE" ] && grep -qE '"mode"[[:space:]]*:[[:space:]]*"mentor"' "$STATE_FILE"; then
+      MENTOR_CARD="$(extract_card "${PLUGIN_ROOT}/skills/godot-mentor/SKILL.md" 'MENTOR-CARD')"
+      # Name the file in the injected card. After a /clear the agent has the card but NOT the
+      # skill, so without this it cannot find the state file to honour the off-ramp.
+      [ -n "$MENTOR_CARD" ] && MENTOR_CARD="${MENTOR_CARD}"$'\n\n'"Mentor state file for this project: \`${STATE_FILE}\`"
+    fi
+  fi
 fi
 
 # --- 5. Subagent reach: offer the CLAUDE.md section once per project --------------------------

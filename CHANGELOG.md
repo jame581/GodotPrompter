@@ -26,8 +26,13 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 - **Subagent reach** — when a Godot project's `CLAUDE.md` has no `## GodotPrompter` section, the
   agent offers once (never silently) to add one. The SessionStart hook does **not** fire on
   subagent dispatch; CLAUDE.md is what subagents read.
-- **Hook test suite** (`tests/hooks/`, 19 cases) now runs in CI alongside the validator, and
-  `package.json` gains a `scripts` block (`npm run test:hooks`, `npm run validate`).
+- **Hook test suite** (`tests/hooks/`, 22 cases) now runs in CI alongside the validator, and
+  `package.json` gains a `scripts` block (`npm run test:hooks`, `npm run validate`). Coverage
+  includes the polyglot wrapper, a sanitized environment with no `HOME`, and the
+  `.gitattributes` LF pin — the last of which is the assertion that actually holds on a Linux
+  runner, where the working tree is LF regardless.
+- The hook fires on **resume** as well as startup, clear, and compact, so `claude --resume`
+  restores the card and mentor mode rather than starting cold.
 
 ### Changed
 
@@ -51,12 +56,12 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
   | `3d-essentials` | 15813 | 15066 | 59 → 806 |
 
   `physics-system` and `3d-essentials` end higher than the rest: both were already heavily
-  restructured in v1.7.0 (12 and 10 reference files now), so every remaining section but the
+  restructured in v1.7.0 (12 and 9 reference files now), so every remaining section but the
   checklist already links one. Their numbers are close to the floor achievable without removing
   teaching content.
 - **`.gitattributes`** pins `hooks/session-start` and `*.cmd` to LF, and both hook files are
   tracked with the exec bit. With `core.autocrlf=true` they would otherwise check out CRLF and
-  bash would fail on `$''` at every session start on Windows.
+  bash would fail on a carriage return at every session start on Windows.
 - **New validator rules:** `card-marker-missing`, `card-marker-malformed`,
   `card-marker-duplicate`, `card-empty`, `card-oversized`, `card-skill-missing`. Three new
   fixtures extend the v1.12.0 validator self-test.
@@ -67,7 +72,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
   `gdextension`, `gdscript-advanced`, `mobile-development`, `multithreading`.
 
 > **Release notes:** 55 skills. Validator baseline: **0 errors, 16 warnings** (unchanged — all
-> `csharp-parity-accepted` by design). Hook tests: 19/19. Repo-wide minimum stays Godot 4.3+.
+> `csharp-parity-accepted` by design). Hook tests: 22/22. Repo-wide minimum stays Godot 4.3+.
 >
 > **First release shipping executable code.** The hook reads only `project.godot` and its own
 > state file under your home directory, makes no network requests, and writes nothing. Its

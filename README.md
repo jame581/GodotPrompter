@@ -194,7 +194,7 @@ GodotPrompter includes 9 specialized agents:
 
 ## Available Skills
 
-### Core / Process (6 skills)
+### Core / Process (7 skills)
 
 | Skill | Description |
 |-------|-------------|
