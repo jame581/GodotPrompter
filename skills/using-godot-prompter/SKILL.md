@@ -62,36 +62,45 @@ See `references/antigravity-tools.md` for the full tool mapping and SKILL.md fro
 
 ## Coexistence with Other Plugins (e.g., Superpowers)
 
-When another plugin (like Superpowers) is handling workflow (brainstorming, planning, execution), GodotPrompter skills STILL APPLY during implementation. They are not replaced — they are domain-specific guidance that workflow plugins cannot provide.
+<!-- SESSION-CARD-START -->
+**GodotPrompter is active in this Godot project.**
 
-**RULE: Before implementing ANY Godot system, you MUST check for a matching godot-prompter skill and invoke it.**
+Workflow plugins decide *how you work*; GodotPrompter decides *what you build*. Both apply.
 
-This is not optional. Workflow plugins handle HOW you work. GodotPrompter handles WHAT you build. Both are needed.
+**RULE: before implementing any Godot system, invoke the matching `godot-prompter:*` skill.**
+Applies to subagents writing Godot code too.
 
-| Implementing...         | MUST invoke skill                                      |
-|-------------------------|--------------------------------------------------------|
-| Player movement         | `godot-prompter:player-controller`                     |
-| State machine / FSM     | `godot-prompter:state-machine`                         |
-| Signals / EventBus      | `godot-prompter:event-bus`                             |
-| Scene tree structure    | `godot-prompter:scene-organization`                    |
-| UI / HUD                | `godot-prompter:godot-ui`, `godot-prompter:hud-system` |
-| Inventory               | `godot-prompter:inventory-system`                      |
-| Save/Load               | `godot-prompter:save-load`                             |
-| Enemy AI / navigation   | `godot-prompter:ai-navigation`                         |
-| Camera                  | `godot-prompter:camera-system`                         |
-| Audio                   | `godot-prompter:audio-system`                          |
-| Weapons / combat        | `godot-prompter:component-system`                      |
-| Resources / data        | `godot-prompter:resource-pattern`                      |
-| Input handling          | `godot-prompter:input-handling`                        |
-| Animation               | `godot-prompter:animation-system`                      |
-| Testing                 | `godot-prompter:godot-testing`                         |
-| Project scaffolding     | `godot-prompter:godot-project-setup`                   |
-| Shaders / VFX           | `godot-prompter:shader-basics`, `godot-prompter:particles-vfx` |
-| Physics                 | `godot-prompter:physics-system`                        |
-| Multiplayer             | `godot-prompter:multiplayer-basics`                    |
-| Export / deploy         | `godot-prompter:export-pipeline`                       |
+| Building… | Start with |
+|---|---|
+| Movement, input, cameras | `player-controller`, `input-handling`, `camera-system` |
+| Architecture | `state-machine`, `event-bus`, `scene-organization`, `component-system`, `resource-pattern`, `dependency-injection` |
+| Gameplay systems | `inventory-system`, `dialogue-system`, `ability-system`, `save-load` |
+| Enemy AI | `ai-navigation` |
+| UI, HUD, i18n | `godot-ui`, `hud-system`, `responsive-ui`, `localization` |
+| Animation, tweens, audio | `animation-system`, `tween-animation`, `audio-system` |
+| Physics, 2D, 3D | `physics-system`, `2d-essentials`, `3d-essentials` |
+| Shaders, VFX, procgen, math | `shader-basics`, `particles-vfx`, `procedural-generation`, `math-essentials` |
+| Multiplayer | `multiplayer-basics`, `multiplayer-sync`, `dedicated-server` |
+| Mobile, XR, native, threads | `mobile-development`, `xr-development`, `gdextension`, `multithreading` |
+| Editor tools, assets | `addon-development`, `assets-pipeline` |
+| GDScript / C# idioms | `gdscript-patterns`, `gdscript-advanced`, `csharp-godot`, `csharp-signals` |
+| Test, debug, profile, review | `godot-testing`, `godot-debugging`, `godot-optimization`, `godot-code-review` |
+| Setup, design, export | `godot-project-setup`, `godot-brainstorming`, `export-pipeline` |
+| Teaching while building | `godot-mentor` |
+| Addons (if installed) | `limboai`, `beehave`, `popochiu`, `dialogue-manager`, `phantom-camera` |
 
-**For subagents:** If you are a subagent executing a plan task in a Godot project, check this table before writing code. The skill provides Godot-specific patterns, node types, and checklists you cannot derive from general knowledge.
+Full index: invoke `godot-prompter:using-godot-prompter`.
+
+**Red flags — you are rationalizing:**
+
+| Thought | Reality |
+|---|---|
+| "I know how CharacterBody2D works" | Knowing the class ≠ knowing the pattern. Invoke. |
+| "It's a two-line script" | Two-line scripts still pick node types. Invoke. |
+| "The plan says what to build" | The plan says what. The skill says how. Invoke. |
+| "I loaded a Godot skill already" | Different system, different skill. |
+| "The user wants a quick fix" | Quick fixes set architecture. Invoke. |
+<!-- SESSION-CARD-END -->
 
 ## Workflow: From Idea to Working Game
 
@@ -149,6 +158,7 @@ Skills use Claude Code tool names as the canonical reference. Non-Claude platfor
 - `godot-code-review` — GDScript/C# review against Godot best practices
 - `godot-debugging` — Godot-specific debugging techniques
 - `godot-testing` — TDD with GUT and gdUnit4
+- `godot-mentor` — Teaching mode: concept, editor setup, annotated code, verification, one next step
 
 ### Architecture & Patterns
 - `scene-organization` — Scene tree structure, composition patterns
@@ -164,6 +174,7 @@ Skills use Claude Code tool names as the canonical reference. Non-Claude platfor
 - `animation-system` — AnimationPlayer, AnimationTree, blend trees, state machines
 - `tween-animation` — Tween class, easing, chaining, parallel sequences, motion recipes
 - `inventory-system` — Resource-based inventory patterns
+- `ability-system` — Resource-based abilities, cost/cooldown/cast, buffs, stat modifiers, gameplay tags
 - `dialogue-system` — Dialogue trees and patterns
 - `save-load` — Serialization strategies
 - `ai-navigation` — NavigationAgent, behavior trees
@@ -197,9 +208,13 @@ Skills use Claude Code tool names as the canonical reference. Non-Claude platfor
 - `godot-optimization` — Profiler, performance patterns
 - `addon-development` — EditorPlugin, tool scripts
 - `assets-pipeline` — Image compression, 3D scene import, audio formats, resource management
+- `mobile-development` — Android/iOS export and signing, permissions, plugins, IAP, ads, lifecycle
+- `multithreading` — WorkerThreadPool, Thread/Mutex/Semaphore, `call_deferred`, threaded loading
 
 ### Scripting
 - `gdscript-patterns` — Static typing, await/coroutines, lambdas, match, exports, idioms
+- `gdscript-advanced` — Performance idioms, metaprogramming, `@tool` lifecycle, async pitfalls
+- `gdextension` — Native extensions via godot-cpp (C++) or gdext (Rust), binding, building, interop
 - `csharp-godot` — C# conventions, GodotSharp API
 - `csharp-signals` — C# signal patterns
 
