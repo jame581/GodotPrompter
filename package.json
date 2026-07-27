@@ -1,6 +1,6 @@
 {
   "name": "godot-prompter",
-  "version": "1.12.0",
+  "version": "1.13.0",
   "type": "module",
   "main": ".opencode/plugins/godot-prompter.js",
   "description": "Agentic skills framework for Godot 4.x game development — GDScript & C#",
