@@ -4,7 +4,7 @@ This page documents the token cost of every skill and agent in the repository, s
 
 ## What this is
 
-GodotPrompter ships **54 skills** and **9 agents** as Markdown files. When an AI coding assistant (Claude Code, Copilot, Gemini, Cursor, etc.) loads a skill, every byte of the skill's `SKILL.md` enters the model's context. Loading 3-4 skills is normal for a single feature task — without the budget rule that's 20-30k tokens before the user prompt even starts; with it, restructured skills load 50-60% lighter.
+GodotPrompter ships **55 skills** and **9 agents** as Markdown files. When an AI coding assistant (Claude Code, Copilot, Gemini, Cursor, etc.) loads a skill, every byte of the skill's `SKILL.md` enters the model's context. Loading 3-4 skills is normal for a single feature task — without the budget rule that's 20-30k tokens before the user prompt even starts; with it, restructured skills load 50-60% lighter.
 
 To keep skills loadable in combination, v1.7.0 introduced a **16 KB budget** for `SKILL.md` files. Skills that exceed the budget are progressively restructured using the **Pattern X** approach — core SKILL.md (canonical recipe + distinguishing choices + anti-patterns) plus `references/<topic>.md` files that load only when an agent explicitly opens them.
 
@@ -28,54 +28,54 @@ Columns:
 | Kind | Name | Bytes | KB | Est. tokens | Claude | GPT | Status |
 |---|---|---:|---:|---:|---:|---:|---|
 | reference | ability-system/tags-and-conditions.md | 18225 | 17.8 | 4556 | 5118 | 4429 | — |
-| skill | localization | 15864 | 15.5 | 3966 | 4492 | 3880 | ✓ under budget |
-| skill | physics-system | 15853 | 15.5 | 3963 | 4470 | 4064 | ✓ under budget |
-| skill | addon-development | 15843 | 15.5 | 3961 | 4309 | 3735 | ✓ under budget |
-| skill | particles-vfx | 15837 | 15.5 | 3959 | 4483 | 3995 | ✓ under budget |
-| skill | godot-ui | 15826 | 15.5 | 3957 | 4692 | 4108 | ✓ under budget |
-| skill | 3d-essentials | 15813 | 15.4 | 3953 | 4369 | 3922 | ✓ under budget |
-| skill | multiplayer-basics | 15791 | 15.4 | 3948 | 4384 | 3728 | ✓ under budget |
-| skill | event-bus | 15727 | 15.4 | 3932 | 4257 | 3544 | ✓ under budget |
 | skill | phantom-camera | 15713 | 15.3 | 3928 | 4777 | 4332 | ✓ under budget |
 | skill | ai-navigation | 15708 | 15.3 | 3927 | 4300 | 3834 | ✓ under budget |
 | skill | export-pipeline | 15691 | 15.3 | 3923 | 4412 | 3798 | ✓ under budget |
 | skill | csharp-godot | 15649 | 15.3 | 3912 | 4560 | 4022 | ✓ under budget |
 | reference | ability-system/stat-modifiers.md | 15567 | 15.2 | 3892 | 4351 | 3780 | — |
 | skill | animation-system | 15493 | 15.1 | 3873 | 4323 | 3793 | ✓ under budget |
-| skill | gdscript-patterns | 15290 | 14.9 | 3823 | 4458 | 3949 | ✓ under budget |
-| skill | input-handling | 15268 | 14.9 | 3817 | 4262 | 3661 | ✓ under budget |
-| skill | shader-basics | 15030 | 14.7 | 3758 | 4270 | 3733 | ✓ under budget |
+| skill | gdscript-patterns | 15290 | 14.9 | 3823 | 4320 | 3918 | ✓ under budget |
+| skill | input-handling | 15268 | 14.9 | 3817 | 4178 | 3638 | ✓ under budget |
+| skill | 3d-essentials | 15066 | 14.7 | 3767 | 4052 | 3656 | ✓ under budget |
+| skill | shader-basics | 15030 | 14.7 | 3758 | 4152 | 3701 | ✓ under budget |
 | skill | audio-system | 14894 | 14.5 | 3724 | 4113 | 3620 | ✓ under budget |
 | skill | xr-development | 14769 | 14.4 | 3692 | 4039 | 3612 | ✓ under budget |
-| skill | assets-pipeline | 14716 | 14.4 | 3679 | 4130 | 3622 | ✓ under budget |
+| skill | assets-pipeline | 14716 | 14.4 | 3679 | 4002 | 3594 | ✓ under budget |
+| skill | physics-system | 14682 | 14.3 | 3671 | 4073 | 3699 | ✓ under budget |
 | skill | godot-code-review | 14602 | 14.3 | 3651 | 4206 | 3581 | ✓ under budget |
 | skill | state-machine | 14495 | 14.2 | 3624 | 3989 | 3399 | ✓ under budget |
 | skill | godot-brainstorming | 14097 | 13.8 | 3524 | 3826 | 3524 | ✓ under budget |
 | skill | tween-animation | 14094 | 13.8 | 3524 | 4280 | 3552 | ✓ under budget |
 | skill | component-system | 14009 | 13.7 | 3502 | 3662 | 3146 | ✓ under budget |
 | skill | player-controller | 13918 | 13.6 | 3480 | 3801 | 3447 | ✓ under budget |
-| skill | inventory-system | 13915 | 13.6 | 3479 | 3412 | 2995 | ✓ under budget |
+| skill | inventory-system | 13915 | 13.6 | 3479 | 3324 | 2981 | ✓ under budget |
 | skill | dialogue-manager | 13469 | 13.2 | 3367 | 3756 | 3315 | ✓ under budget |
 | skill | math-essentials | 13411 | 13.1 | 3353 | 3911 | 3337 | ✓ under budget |
+| skill | addon-development | 13212 | 12.9 | 3303 | 3515 | 3109 | ✓ under budget |
 | skill | godot-project-setup | 13191 | 12.9 | 3298 | 4032 | 3294 | ✓ under budget |
 | skill | mobile-development | 13118 | 12.8 | 3280 | 3655 | 3188 | ✓ under budget |
 | skill | limboai | 13042 | 12.7 | 3261 | 3976 | 3451 | ✓ under budget |
+| skill | localization | 12947 | 12.6 | 3237 | 3596 | 3175 | ✓ under budget |
+| skill | godot-ui | 12853 | 12.6 | 3213 | 3632 | 3234 | ✓ under budget |
 | reference | save-load/json-saves.md | 12833 | 12.5 | 3208 | 3209 | 2718 | — |
+| skill | using-godot-prompter | 12682 | 12.4 | 3171 | 3564 | 3184 | ✓ under budget |
 | skill | resource-pattern | 12545 | 12.3 | 3136 | 3495 | 3068 | ✓ under budget |
-| skill | using-godot-prompter | 12453 | 12.2 | 3113 | 3423 | 2969 | ✓ under budget |
+| skill | multiplayer-basics | 12352 | 12.1 | 3088 | 3348 | 2901 | ✓ under budget |
 | skill | godot-debugging | 12259 | 12.0 | 3065 | 3215 | 2853 | ✓ under budget |
 | skill | ability-system | 12161 | 11.9 | 3040 | 3175 | 2801 | ✓ under budget |
+| skill | particles-vfx | 12134 | 11.8 | 3034 | 3481 | 3155 | ✓ under budget |
 | skill | godot-optimization | 11865 | 11.6 | 2966 | 3181 | 2824 | ✓ under budget |
 | skill | dedicated-server | 11715 | 11.4 | 2929 | 3067 | 2686 | ✓ under budget |
 | reference | godot-ui/ui-patterns.md | 11670 | 11.4 | 2918 | 3391 | 2867 | — |
+| skill | event-bus | 11638 | 11.4 | 2910 | 2902 | 2536 | ✓ under budget |
 | skill | hud-system | 11548 | 11.3 | 2887 | 3221 | 2757 | ✓ under budget |
 | skill | gdscript-advanced | 11386 | 11.1 | 2847 | 3206 | 2812 | ✓ under budget |
 | skill | dependency-injection | 11334 | 11.1 | 2834 | 2961 | 2540 | ✓ under budget |
 | skill | beehave | 11153 | 10.9 | 2788 | 3070 | 2755 | ✓ under budget |
-| skill | camera-system | 11095 | 10.8 | 2774 | 3246 | 2938 | ✓ under budget |
+| skill | camera-system | 11095 | 10.8 | 2774 | 3197 | 2924 | ✓ under budget |
 | skill | multithreading | 11020 | 10.8 | 2755 | 3062 | 2600 | ✓ under budget |
 | reference | ability-system/ui-binding.md | 10994 | 10.7 | 2749 | 3112 | 2756 | — |
-| skill | dialogue-system | 10989 | 10.7 | 2747 | 2660 | 2274 | ✓ under budget |
+| skill | dialogue-system | 10989 | 10.7 | 2747 | 2575 | 2252 | ✓ under budget |
 | skill | gdextension | 10924 | 10.7 | 2731 | 3212 | 2707 | ✓ under budget |
 | skill | multiplayer-sync | 10659 | 10.4 | 2665 | 2787 | 2534 | ✓ under budget |
 | skill | popochiu | 10598 | 10.3 | 2650 | 3135 | 2758 | ✓ under budget |
@@ -87,10 +87,11 @@ Columns:
 | skill | godot-testing | 9564 | 9.3 | 2391 | 2413 | 2054 | ✓ under budget |
 | skill | responsive-ui | 9432 | 9.2 | 2358 | 2597 | 2314 | ✓ under budget |
 | skill | 2d-essentials | 9393 | 9.2 | 2348 | 2641 | 2396 | ✓ under budget |
+| skill | godot-mentor | 9215 | 9.0 | 2304 | 2526 | 2373 | ✓ under budget |
 | reference | dedicated-server/lobby-management.md | 9121 | 8.9 | 2280 | 2410 | 2067 | — |
 | reference | ai-navigation/chase-attack.md | 8531 | 8.3 | 2133 | 2208 | 1940 | — |
 | reference | dialogue-system/ui-presentation.md | 8498 | 8.3 | 2125 | 1963 | 1704 | — |
-| reference | dialogue-system/dialogue-manager.md | 7812 | 7.6 | 1953 | 2039 | 1731 | — |
+| reference | dialogue-system/dialogue-manager.md | 7812 | 7.6 | 1953 | 2020 | 1725 | — |
 | reference | godot-optimization/cpu-bottlenecks.md | 7642 | 7.5 | 1911 | 2189 | 1879 | — |
 | reference | addon-development/gizmos-deep-dive.md | 7405 | 7.2 | 1851 | 2370 | 2065 | — |
 | reference | procedural-generation/wave-function-collapse.md | 7334 | 7.2 | 1834 | 1965 | 1783 | — |
@@ -121,7 +122,7 @@ Columns:
 | reference | hud-system/interaction-prompts.md | 5451 | 5.3 | 1363 | 1503 | 1315 | — |
 | reference | xr-development/godot-4-5-features.md | 5341 | 5.2 | 1335 | 1419 | 1282 | — |
 | agent | godot-animator | 5335 | 5.2 | 1334 | 1384 | 1270 | — |
-| skill | save-load | 5253 | 5.1 | 1313 | 1290 | 1141 | ✓ under budget |
+| skill | save-load | 5253 | 5.1 | 1313 | 1269 | 1129 | ✓ under budget |
 | reference | state-machine/hierarchical-and-parallel.md | 5241 | 5.1 | 1310 | 1428 | 1197 | — |
 | agent | godot-ui-designer | 5136 | 5.0 | 1284 | 1368 | 1237 | — |
 | reference | dedicated-server/server-config.md | 5002 | 4.9 | 1251 | 1464 | 1291 | — |
@@ -129,7 +130,7 @@ Columns:
 | reference | csharp-signals/custom-signal-patterns.md | 4993 | 4.9 | 1248 | 1299 | 1128 | — |
 | skill | procedural-generation | 4975 | 4.9 | 1244 | 1383 | 1237 | ✓ under budget |
 | reference | 2d-essentials/tilemap.md | 4969 | 4.9 | 1242 | 1401 | 1217 | — |
-| agent | godot-game-dev | 4959 | 4.8 | 1240 | 1404 | 1257 | — |
+| agent | godot-game-dev | 4959 | 4.8 | 1240 | 1377 | 1253 | — |
 | reference | dependency-injection/service-locator.md | 4914 | 4.8 | 1229 | 1270 | 1085 | — |
 | reference | camera-system/transitions.md | 4886 | 4.8 | 1222 | 1381 | 1147 | — |
 | reference | dialogue-system/branching-and-conditions.md | 4871 | 4.8 | 1218 | 1437 | 1185 | — |
@@ -138,9 +139,10 @@ Columns:
 | reference | limboai/hsm.md | 4780 | 4.7 | 1195 | 1518 | 1269 | — |
 | reference | godot-optimization/physics-tuning.md | 4754 | 4.6 | 1189 | 1421 | 1244 | — |
 | reference | popochiu/dialogs.md | 4730 | 4.6 | 1183 | 1379 | 1201 | — |
-| agent | godot-game-architect | 4697 | 4.6 | 1174 | 1221 | 1105 | — |
+| agent | godot-game-architect | 4697 | 4.6 | 1174 | 1199 | 1101 | — |
 | agent | godot-performance-profiler | 4672 | 4.6 | 1168 | 1173 | 1112 | — |
 | reference | procedural-generation/cellular-automata.md | 4655 | 4.5 | 1164 | 1352 | 1291 | — |
+| reference | particles-vfx/performance-and-pitfalls.md | 4609 | 4.5 | 1152 | 1110 | 1033 | — |
 | reference | godot-brainstorming/example-chest.md | 4578 | 4.5 | 1145 | 1360 | 1183 | — |
 | reference | input-handling/mouse.md | 4510 | 4.4 | 1128 | 1262 | 1036 | — |
 | reference | using-godot-prompter/antigravity-tools.md | 4504 | 4.4 | 1126 | 1321 | 1155 | — |
@@ -153,6 +155,7 @@ Columns:
 | reference | player-controller/common-movement-recipes.md | 4257 | 4.2 | 1064 | 1174 | 1049 | — |
 | reference | godot-debugging/systematic-method.md | 4245 | 4.1 | 1061 | 1238 | 1067 | — |
 | reference | shader-basics/compositor-effects.md | 4228 | 4.1 | 1057 | 1132 | 964 | — |
+| reference | multiplayer-basics/enet-setup.md | 4210 | 4.1 | 1053 | 1147 | 973 | — |
 | reference | inventory-system/equipment.md | 4191 | 4.1 | 1048 | 1114 | 978 | — |
 | reference | multiplayer-basics/player-join-flow.md | 4188 | 4.1 | 1047 | 1254 | 1040 | — |
 | reference | multithreading/pitfalls.md | 4182 | 4.1 | 1046 | 1078 | 975 | — |
@@ -180,6 +183,7 @@ Columns:
 | reference | 3d-essentials/lod-and-culling.md | 3404 | 3.3 | 851 | 1101 | 940 | — |
 | reference | physics-system/softbody-recipes.md | 3376 | 3.3 | 844 | 931 | 824 | — |
 | reference | resource-pattern/collections.md | 3375 | 3.3 | 844 | 912 | 767 | — |
+| reference | addon-development/testing-plugins.md | 3363 | 3.3 | 841 | 872 | 767 | — |
 | reference | particles-vfx/attractors-and-collision.md | 3346 | 3.3 | 837 | 1035 | 907 | — |
 | reference | xr-development/controllers-and-input.md | 3293 | 3.2 | 823 | 953 | 823 | — |
 | reference | camera-system/split-screen.md | 3253 | 3.2 | 813 | 950 | 815 | — |
@@ -191,6 +195,7 @@ Columns:
 | reference | multiplayer-sync/interpolation.md | 3169 | 3.1 | 792 | 848 | 760 | — |
 | reference | multiplayer-basics/spawning-networked-objects.md | 3144 | 3.1 | 786 | 926 | 757 | — |
 | reference | 2d-essentials/custom-drawing.md | 3119 | 3.0 | 780 | 1005 | 869 | — |
+| reference | event-bus/typed-signals.md | 3069 | 3.0 | 767 | 906 | 750 | — |
 | reference | mobile-development/iap-and-ads.md | 3050 | 3.0 | 763 | 830 | 691 | — |
 | reference | export-pipeline/distribution-itch-steam.md | 3026 | 3.0 | 757 | 911 | 780 | — |
 | reference | ai-navigation/patrol-patterns.md | 2992 | 2.9 | 748 | 888 | 757 | — |
@@ -224,9 +229,12 @@ Columns:
 | reference | gdscript-advanced/tool-script-recipes.md | 2350 | 2.3 | 588 | 697 | 608 | — |
 | reference | assets-pipeline/runtime-resource-loading.md | 2323 | 2.3 | 581 | 638 | 531 | — |
 | reference | particles-vfx/subemitters.md | 2319 | 2.3 | 580 | 636 | 535 | — |
+| reference | godot-ui/foldable-container.md | 2307 | 2.3 | 577 | 658 | 606 | — |
+| reference | localization/rtl-support.md | 2237 | 2.2 | 559 | 584 | 517 | — |
 | reference | physics-system/area-recipes.md | 2233 | 2.2 | 558 | 695 | 569 | — |
 | reference | 3d-essentials/common-pitfalls.md | 2221 | 2.2 | 555 | 451 | 394 | — |
 | reference | animation-system/sprite-animation.md | 2195 | 2.1 | 549 | 582 | 512 | — |
+| reference | event-bus/anti-patterns.md | 2185 | 2.1 | 546 | 606 | 499 | — |
 | reference | gdextension/debugging-native.md | 2132 | 2.1 | 533 | 567 | 499 | — |
 | reference | resource-pattern/sharing-vs-unique.md | 2122 | 2.1 | 531 | 554 | 495 | — |
 | reference | addon-development/dock-panels.md | 2086 | 2.0 | 522 | 682 | 565 | — |
@@ -241,9 +249,11 @@ Columns:
 | reference | animation-system/common-recipes.md | 1892 | 1.8 | 473 | 591 | 511 | — |
 | reference | resource-pattern/saving-resources.md | 1882 | 1.8 | 471 | 536 | 464 | — |
 | reference | physics-system/staticbody-recipes.md | 1879 | 1.8 | 470 | 560 | 486 | — |
+| reference | physics-system/collision-shapes.md | 1869 | 1.8 | 467 | 532 | 495 | — |
 | reference | responsive-ui/dpi-scaling.md | 1845 | 1.8 | 461 | 599 | 523 | — |
 | reference | gdscript-patterns/export-annotations.md | 1821 | 1.8 | 455 | 624 | 541 | — |
 | reference | gdscript-patterns/variadic-functions.md | 1805 | 1.8 | 451 | 523 | 478 | — |
+| reference | godot-ui/anchors-in-code.md | 1801 | 1.8 | 450 | 617 | 534 | — |
 | reference | particles-vfx/flipbook-animation.md | 1781 | 1.7 | 445 | 512 | 472 | — |
 | reference | animation-system/common-pitfalls.md | 1773 | 1.7 | 443 | 324 | 286 | — |
 | reference | csharp-signals/connecting-gdscript-signals.md | 1770 | 1.7 | 443 | 490 | 411 | — |
@@ -254,18 +264,22 @@ Columns:
 | reference | shader-basics/shader-baker.md | 1624 | 1.6 | 406 | 419 | 368 | — |
 | reference | tween-animation/lifecycle.md | 1569 | 1.5 | 392 | 573 | 422 | — |
 | reference | input-handling/input-buffering.md | 1550 | 1.5 | 388 | 453 | 398 | — |
+| reference | 3d-essentials/godot-4.7-additions.md | 1517 | 1.5 | 379 | 466 | 402 | — |
 | reference | animation-system/ik-solver-comparison.md | 1490 | 1.5 | 373 | 440 | 418 | — |
 | reference | ai-navigation/async-baking.md | 1433 | 1.4 | 358 | 466 | 386 | — |
 | reference | input-handling/event-propagation.md | 1412 | 1.4 | 353 | 410 | 344 | — |
 | reference | mobile-development/crash-debugging.md | 1280 | 1.3 | 320 | 350 | 309 | — |
 | reference | xr-development/passthrough.md | 1265 | 1.2 | 316 | 356 | 300 | — |
 | reference | input-handling/touch.md | 1229 | 1.2 | 307 | 324 | 280 | — |
+| reference | localization/locale-formatting.md | 1205 | 1.2 | 301 | 330 | 298 | — |
 | reference | physics-system/troubleshooting.md | 1185 | 1.2 | 296 | 339 | 309 | — |
 | reference | physics-system/collision-layers.md | 1053 | 1.0 | 263 | 343 | 295 | — |
+| reference | localization/editor-preview.md | 1026 | 1.0 | 257 | 256 | 231 | — |
 | reference | physics-system/interpolation-tuning.md | 990 | 1.0 | 248 | 284 | 247 | — |
 | reference | animation-system/retargeting.md | 838 | 0.8 | 210 | 233 | 211 | — |
 | reference | using-godot-prompter/gemini-tools.md | 742 | 0.7 | 186 | 232 | 206 | — |
 | reference | using-godot-prompter/cursor-tools.md | 734 | 0.7 | 184 | 216 | 191 | — |
+| reference | 3d-essentials/renderer-comparison.md | 732 | 0.7 | 183 | 221 | 203 | — |
 | reference | using-godot-prompter/copilot-tools.md | 712 | 0.7 | 178 | 226 | 209 | — |
 | reference | using-godot-prompter/codex-tools.md | 688 | 0.7 | 172 | 199 | 178 | — |
 | reference | physics-system/jolt-differences.md | 606 | 0.6 | 152 | 174 | 151 | — |

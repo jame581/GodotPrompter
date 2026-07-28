@@ -163,9 +163,16 @@ When publishing a new version (e.g., v1.8.1):
    - `../skillsmith/.claude-plugin/marketplace.json` (or `../../AI/skillsmith/.claude-plugin/marketplace.json`)
    - `../godot-prompter-marketplace/.claude-plugin/marketplace.json`
 4. **Update `CHANGELOG.md`** by adding a `## [1.8.1]` section.
-5. **Validate skills**:
+5. **Validate skills and hooks** — both run in CI on the release tag, so failing here fails the release:
    ```bash
-   node scripts/validate-skills.mjs
+   node scripts/validate-skills.mjs   # must report 0 errors
+   npm run test:hooks                 # must be all-pass
+   ```
+   If you touched `hooks/`, also confirm the scripts are still tracked executable and LF-pinned —
+   `chmod +x` alone is a no-op in this repo because `core.filemode=false`:
+   ```bash
+   git ls-files -s hooks/             # session-start and run-hook.cmd must be 100755
+   git check-attr text eol -- hooks/session-start hooks/run-hook.cmd
    ```
 6. **Commit and tag:**
    ```bash

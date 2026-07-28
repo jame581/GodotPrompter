@@ -46,13 +46,13 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
   | Skill | Before | After | Headroom |
   |---|---:|---:|---:|
-  | `event-bus` | 15727 | 11616 | 145 → 4256 |
+  | `event-bus` | 15727 | 11638 | 145 → 4234 |
   | `particles-vfx` | 15837 | 12134 | 35 → 3738 |
-  | `multiplayer-basics` | 15791 | 12400 | 81 → 3472 |
-  | `godot-ui` | 15826 | 12771 | 46 → 3101 |
-  | `localization` | 15864 | 12913 | 8 → 2959 |
+  | `multiplayer-basics` | 15791 | 12352 | 81 → 3520 |
+  | `godot-ui` | 15826 | 12853 | 46 → 3019 |
+  | `localization` | 15864 | 12947 | 8 → 2925 |
   | `addon-development` | 15843 | 13212 | 29 → 2660 |
-  | `physics-system` | 15853 | 14670 | 19 → 1202 |
+  | `physics-system` | 15853 | 14682 | 19 → 1190 |
   | `3d-essentials` | 15813 | 15066 | 59 → 806 |
 
   `physics-system` and `3d-essentials` end higher than the rest: both were already heavily
