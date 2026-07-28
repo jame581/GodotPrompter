@@ -333,6 +333,12 @@ The validator (`scripts/validate-skills.mjs`) checks every `skills/*/SKILL.md` a
 | `token-budget-exceeded` | `SKILL.md` < 16 KB (references under `skills/<name>/references/` are unrestricted) | error |
 | `token-budget-approaching` | `SKILL.md` ≥ 15.5 KB and < 16 KB — advisory heads-up before the hard budget | warning |
 | `orphan-reference` | Every `references/*.md` file is linked from its parent `SKILL.md` | warning |
+| `card-marker-{missing,malformed,duplicate}` | The hook-injected card regions (`SESSION-CARD` in `using-godot-prompter`, `MENTOR-CARD` in `godot-mentor`) have both markers, in order, appearing exactly once — the hook extracts the *first* region, so a duplicate pair would silently become the injected payload | error |
+| `card-empty` | The card region is non-empty — otherwise the hook would inject nothing while CI stayed green | error |
+| `card-oversized` | The card region is ≤ 3 KB — it is injected on every session start *and* every compaction | error |
+| `card-skill-missing` | Every skill named in `CARD_SPECS` exists, so deleting one fails CI instead of silently skipping its check | error |
+
+Hook behaviour is covered separately by `npm run test:hooks` (22 cases), which also runs on release tags.
 
 Token cost reporting:
 
