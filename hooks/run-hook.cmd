@@ -32,13 +32,21 @@ if exist "C:\Program Files (x86)\Git\bin\bash.exe" (
     exit /b !ERRORLEVEL!
 )
 
-where bash >nul 2>nul
-if !ERRORLEVEL! equ 0 (
-    bash "%HOOK_DIR%%~1" %2 %3 %4 %5 %6 %7 %8 %9
-    exit /b !ERRORLEVEL!
+REM Fall back to a bash on PATH -- but SKIP the WSL launchers. A machine with WSL and no
+REM Git Bash resolves `bash` to C:\Windows\System32\bash.exe (or the WindowsApps shim), which
+REM cannot resolve C:\... paths and would fail noisily instead of degrading quietly.
+for /f "delims=" %%B in ('where bash 2^>nul') do (
+    echo %%B | find /i "\System32\" >nul
+    if errorlevel 1 (
+        echo %%B | find /i "\WindowsApps\" >nul
+        if errorlevel 1 (
+            "%%B" "%HOOK_DIR%%~1" %2 %3 %4 %5 %6 %7 %8 %9
+            exit /b !ERRORLEVEL!
+        )
+    )
 )
 
-REM No bash found - exit silently. The plugin degrades to pre-v1.13.0 behaviour
+REM No usable bash found - exit silently. The plugin degrades to pre-v1.13.0 behaviour
 REM rather than breaking the user's session.
 exit /b 0
 CMDBLOCK
