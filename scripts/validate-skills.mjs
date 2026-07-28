@@ -207,12 +207,16 @@ function validateCard(path, markerName, budgetBytes) {
     record(errors, path, 'card-marker-duplicate', `${markerName} markers appear more than once — the hook extracts the first region only`);
     return;
   }
-  const region = content.slice(si + start.length, ei).trim();
-  if (region.length === 0) {
+  const raw = content.slice(si + start.length, ei);
+  if (raw.trim().length === 0) {
     record(errors, path, 'card-empty', `Region between ${start} and ${end} is empty — the hook would inject nothing`);
     return;
   }
-  const bytes = Buffer.byteLength(region, 'utf8');
+  // Measure what the hook ACTUALLY injects, not a trimmed view of it. hooks/session-start emits
+  // every line strictly between the markers, each with its newline — blank padding lines included.
+  // Trimming here would under-count the payload and let an oversized card past CI.
+  const injected = raw.replace(/^\r?\n/, '');
+  const bytes = Buffer.byteLength(injected, 'utf8');
   if (bytes > budgetBytes) {
     record(errors, path, 'card-oversized', `${markerName} region is ${(bytes / 1024).toFixed(1)} KB (cap: ${budgetBytes / 1024} KB) — it is injected on every session start and compaction`);
   }
