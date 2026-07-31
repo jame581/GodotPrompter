@@ -4,6 +4,39 @@ All notable changes to GodotPrompter will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
+## [Unreleased]
+
+### Fixed
+
+- **SessionStart hook failed on every GitHub Copilot CLI session (Windows).** `hooks/hooks.json`
+  offered only a `command` key, and Copilot executes that key through **PowerShell** on Windows.
+  There, a leading quoted path is parsed as a string expression rather than a command, so
+  `"…/run-hook.cmd" session-start` died at parse time:
+  `ParserError: Unexpected token 'session-start' in expression or statement.` The hook exited 1
+  at every session start and no routing card was ever injected. Copilot's hook schema takes
+  per-shell `bash` and `powershell` keys and prefers them over `command`, so the entry now
+  carries all three — `powershell` with the required call operator (`& "…"`), `bash` and
+  `command` unchanged for Claude Code and every other host. Copilot CLI hook delivery is now
+  **verified end-to-end**, closing the v1.13.0 follow-up that shipped it unconfirmed.
+- **The hook missed Godot projects kept in a subdirectory.** Project detection only walked
+  *upward* from the working directory, so a repo with docs and tooling at the root and the
+  engine project in `source/` (or `game/`, `godot/`, `client/`) was silently skipped whenever the
+  session opened at the repo root — the single most common monorepo layout. Detection now also
+  descends up to three levels, pruning `addons/`, dot-directories, `node_modules/` and build
+  output so a vendored plugin's demo project is never mistaken for yours. The upward walk still
+  runs first and still wins, so a session opened inside a project resolves exactly as before and
+  no mentor state key changes. Costs ~60 ms on a real repo.
+- **The `CLAUDE.md` offer nagged repos with a nested project**, because it probed only the
+  detected project directory. It now also consults the session root — where the `CLAUDE.md` the
+  agent actually loads lives — and names the file it means.
+
+### Changed
+
+- Hook test suite grows to 32 cases, covering descending detection, its depth bound, the
+  `addons/`-and-dotdir prunes, ancestor-beats-descendant precedence, and the PowerShell-safe
+  hook command. `runHook` now scrubs `CLAUDE_PROJECT_DIR` / `COPILOT_PROJECT_DIR` so the suite
+  stays hermetic when it runs under Claude Code or Copilot itself.
+
 ## [1.13.0] - 2026-07-28
 
 ### Added

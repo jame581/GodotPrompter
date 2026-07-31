@@ -13,8 +13,14 @@ set -euo pipefail
 SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
 PLUGIN_ROOT="$(cd "${SCRIPT_DIR}/.." && pwd)"
 
-# --- 1. Locate the Godot project (CWD, then up to 4 ancestors) ------------------------------
-find_godot_project() {
+# --- 1. Locate the Godot project -------------------------------------------------------------
+# Two passes, in this order:
+#   up   — CWD then 4 ancestors, for a session opened inside the game itself
+#   down — up to 3 levels below the session root, for the very common layout where the repo root
+#          holds docs/ and scripts/ and the engine project lives in source/ (or game/, godot/).
+# Up wins: a session opened inside a project must resolve to that project and not to some
+# fixture nested under it, which would also churn the mentor state key.
+find_godot_project_up() {
   local dir="$PWD" depth=0 parent
   while [ "$depth" -le 4 ]; do
     if [ -f "${dir}/project.godot" ]; then
@@ -29,7 +35,46 @@ find_godot_project() {
   return 1
 }
 
-PROJECT_ROOT="$(find_godot_project)" || exit 0
+# Depth is capped and heavy trees are pruned so this stays instant on a large repo — SessionStart
+# blocks the user. addons/ and dot-directories are pruned for correctness too, not just speed:
+# vendored plugins ship demo project.godot files, and picking one would report the wrong engine
+# version and aim mentor state at a directory the user never edits.
+find_godot_project_down() {
+  local root="$1" hit
+  [ -d "$root" ] || return 1
+  # -maxdepth counts the file, so 4 admits a project directory 3 levels down (a/b/c/project.godot).
+  hit="$(find "$root" -maxdepth 4 \
+      \( -name '.*' -o -name 'node_modules' -o -name 'addons' -o -name 'build' \
+         -o -name 'bin' -o -name 'obj' -o -name 'target' -o -name 'export' \) -prune \
+      -o -name 'project.godot' -type f -print 2>/dev/null \
+    | awk -F/ '{ print NF "\t" $0 }' | sort -t"$(printf '\t')" -k1,1n -k2,2 \
+    | head -n 1 | cut -f2-)"
+  [ -n "$hit" ] || return 1
+  printf '%s' "$(dirname "$hit")"
+}
+
+# The host names the session root; it is where CLAUDE.md lives and may sit above CWD.
+SESSION_ROOT="${CLAUDE_PROJECT_DIR:-${COPILOT_PROJECT_DIR:-$PWD}}"
+
+# Hosts hand back a native path ("D:\game"), which never string-equals bash's "/d/game" for the
+# same directory — so without normalizing, the fallback below always rescans the CWD it just
+# searched. Kept separate from SESSION_ROOT, which stays native for display.
+session_root_fs() {
+  if command -v cygpath >/dev/null 2>&1; then
+    cygpath -u "$SESSION_ROOT" 2>/dev/null || printf '%s' "$SESSION_ROOT"
+  else
+    printf '%s' "$SESSION_ROOT"
+  fi
+}
+
+PROJECT_ROOT="$(find_godot_project_up)" || PROJECT_ROOT="$(find_godot_project_down "$PWD")" || true
+if [ -z "${PROJECT_ROOT:-}" ]; then
+  SESSION_ROOT_FS="$(session_root_fs)"
+  if [ "$SESSION_ROOT_FS" != "$PWD" ]; then
+    PROJECT_ROOT="$(find_godot_project_down "$SESSION_ROOT_FS")" || true
+  fi
+fi
+[ -n "${PROJECT_ROOT:-}" ] || exit 0
 
 # --- 2. Extract a marked card region ---------------------------------------------------------
 extract_card() {
@@ -114,9 +159,15 @@ if [ -n "${HOME:-}" ]; then
 fi
 
 # --- 5. Subagent reach: offer the CLAUDE.md section once per project --------------------------
+# When the engine project sits in a subdirectory, the CLAUDE.md the agent actually loads is the
+# one at the session root — so both are consulted, or an already-wired repo gets nagged forever.
+has_godot_prompter_section() {
+  [ -f "${1}/CLAUDE.md" ] && grep -q '^## GodotPrompter' "${1}/CLAUDE.md" 2>/dev/null
+}
+
 CLAUDE_MD_LINE=""
-if [ ! -f "${PROJECT_ROOT}/CLAUDE.md" ] || ! grep -q '^## GodotPrompter' "${PROJECT_ROOT}/CLAUDE.md" 2>/dev/null; then
-  CLAUDE_MD_LINE="This project's CLAUDE.md has no \`## GodotPrompter\` section. Subagents do not receive this card — CLAUDE.md is what they read. Offer once, and only with the user's agreement, to add a short section telling agents to check for a matching \`godot-prompter:*\` skill before implementing any Godot system. Do not add it silently, and do not ask again if declined."
+if ! has_godot_prompter_section "$PROJECT_ROOT" && ! has_godot_prompter_section "$SESSION_ROOT"; then
+  CLAUDE_MD_LINE="This project's CLAUDE.md has no \`## GodotPrompter\` section (\`${SESSION_ROOT}/CLAUDE.md\`). Subagents do not receive this card — CLAUDE.md is what they read. Offer once, and only with the user's agreement, to add a short section telling agents to check for a matching \`godot-prompter:*\` skill before implementing any Godot system. Do not add it silently, and do not ask again if declined."
 fi
 
 # --- 6. Assemble and emit ---------------------------------------------------------------------

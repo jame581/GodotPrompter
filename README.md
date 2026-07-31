@@ -108,16 +108,19 @@ See `.opencode/INSTALL.md` for details.
 ### Automatic activation
 
 GodotPrompter registers a SessionStart hook that injects its skill-routing card when it detects
-a Godot project (`project.godot` within four directories of your working directory). In any
-other repository the hook does nothing at all.
+a Godot project. It looks for `project.godot` up to four directories above your working
+directory **and up to three below it**, so the common monorepo layout — docs and tooling at the
+repo root, the engine project in `source/`, `game/`, or `godot/` — is detected when you open a
+session at the root. Vendored `addons/` and dot-directories are skipped, so a plugin's bundled
+demo project is never mistaken for yours. In any other repository the hook does nothing at all.
 
 The hook reads only your project's `project.godot` and its own state file under your home
 directory, makes no network requests, and writes nothing. If bash is unavailable on Windows it
 exits silently and the plugin behaves exactly as it did before v1.13.0.
 
-Verified on Claude Code. Cursor and Copilot CLI registrations ship but are not yet confirmed
-end-to-end. Codex and Antigravity have no hook mechanism and continue to load the bootstrap
-through `AGENTS.md` / `GEMINI.md`.
+Verified end-to-end on Claude Code and GitHub Copilot CLI. Cursor's registration ships but is
+not yet confirmed. Codex and Antigravity have no hook mechanism and continue to load the
+bootstrap through `AGENTS.md` / `GEMINI.md`.
 
 > The hook covers your session. **Subagents do not receive it** — `SessionStart` does not fire on
 > subagent dispatch. When a Godot project's `CLAUDE.md` has no `## GodotPrompter` section, the

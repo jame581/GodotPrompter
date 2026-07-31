@@ -20,6 +20,11 @@ function runHook(cwd, extraEnv = {}) {
   const env = { ...process.env, CLAUDE_PLUGIN_ROOT: ROOT };
   delete env.CURSOR_PLUGIN_ROOT;
   delete env.COPILOT_CLI;
+  // The suite may itself run under Claude Code or Copilot, both of which export a project dir.
+  // Left in place it would become the hook's SESSION_ROOT and silently steer the CLAUDE.md probe
+  // at this repo instead of the fixture.
+  delete env.CLAUDE_PROJECT_DIR;
+  delete env.COPILOT_PROJECT_DIR;
   Object.assign(env, extraEnv);
   return execFileSync(BASH, [HOOK], { cwd, env, encoding: 'utf8' });
 }
@@ -33,6 +38,16 @@ function makeProject(depth = 0, features = 'PackedStringArray("4.5", "Forward Pl
   let cwd = base;
   for (let i = 0; i < depth; i++) { cwd = join(cwd, `sub${i}`); mkdirSync(cwd); }
   return { base, cwd };
+}
+
+// A repo whose Godot project lives in a SUBDIRECTORY (the common "source/", "game/", "godot/"
+// layout). The session starts at the repo root, so the upward walk alone never sees it.
+function makeNestedProject(subpath, features = 'PackedStringArray("4.5", "Forward Plus")') {
+  const base = mkdtempSync(join(tmpdir(), 'gp-nested-'));
+  const projectDir = join(base, ...subpath.split('/'));
+  mkdirSync(projectDir, { recursive: true });
+  writeFileSync(join(projectDir, 'project.godot'), `config/features=${features}\n`);
+  return { base, projectDir };
 }
 
 function ctxOf(out) { return JSON.parse(out).hookSpecificOutput.additionalContext; }
@@ -73,6 +88,87 @@ test('walks up to depth 4 but no further', () => {
   const tooDeep = makeProject(6);
   assert.equal(runHook(tooDeep.cwd).trim(), '');
   rmSync(tooDeep.base, { recursive: true, force: true });
+});
+
+// --- descending search: the Godot project is a subdirectory of the session root -------------
+// Regression: a repo like ChivalricQuest keeps project.godot in source/ and the session opens at
+// the repo root. The upward-only walk found nothing and the hook exited silently.
+
+test('finds a Godot project one level below the session root', () => {
+  const { base } = makeNestedProject('source');
+  assert.match(ctxOf(runHook(base)), /GodotPrompter is active/);
+  rmSync(base, { recursive: true, force: true });
+});
+
+test('finds a Godot project three levels below the session root', () => {
+  const { base } = makeNestedProject('apps/game/godot');
+  assert.match(ctxOf(runHook(base)), /GodotPrompter is active/);
+  rmSync(base, { recursive: true, force: true });
+});
+
+// Unbounded descent would make SessionStart walk the whole disk on a large repo.
+test('does not descend past three levels', () => {
+  const { base } = makeNestedProject('a/b/c/d');
+  assert.equal(runHook(base).trim(), '');
+  rmSync(base, { recursive: true, force: true });
+});
+
+// Vendored demo projects ship their own project.godot. Picking one would report the wrong engine
+// version and point mentor state at a directory the user never edits.
+test('ignores project.godot inside addons/ and dot-directories', () => {
+  const base = mkdtempSync(join(tmpdir(), 'gp-noise-'));
+  for (const p of ['addons/some_plugin/demo', '.godot/imported', 'node_modules/pkg']) {
+    const d = join(base, ...p.split('/'));
+    mkdirSync(d, { recursive: true });
+    writeFileSync(join(d, 'project.godot'), 'config/features=PackedStringArray("4.2")\n');
+  }
+  assert.equal(runHook(base).trim(), '');
+  rmSync(base, { recursive: true, force: true });
+});
+
+test('prefers the shallowest project when several are present', () => {
+  const { base } = makeNestedProject('game', 'PackedStringArray("4.5", "Forward Plus")');
+  const deep = join(base, 'tools', 'sample', 'fixture');
+  mkdirSync(deep, { recursive: true });
+  writeFileSync(join(deep, 'project.godot'), 'config/features=PackedStringArray("4.2", "Mobile")\n');
+  const ctx = ctxOf(runHook(base));
+  assert.match(ctx, /Godot 4\.5/);
+  assert.doesNotMatch(ctx, /Godot 4\.2/);
+  rmSync(base, { recursive: true, force: true });
+});
+
+// The upward walk must keep winning: a session opened INSIDE a project must resolve to that
+// project, never to a fixture nested under it. This also pins the mentor state key.
+test('prefers an enclosing project over one nested below the cwd', () => {
+  const { base, cwd } = makeProject();
+  const nested = join(cwd, 'tests', 'fixture');
+  mkdirSync(nested, { recursive: true });
+  writeFileSync(join(nested, 'project.godot'), 'config/features=PackedStringArray("4.2", "Mobile")\n');
+  const ctx = ctxOf(runHook(cwd));
+  assert.match(ctx, /Godot 4\.5/);
+  assert.doesNotMatch(ctx, /Godot 4\.2/);
+  rmSync(base, { recursive: true, force: true });
+});
+
+// A session opened in a sibling directory (docs/, scripts/) sees the project through neither the
+// upward walk nor a descent from cwd. The host-supplied session root is the last resort.
+test('falls back to the host session root when cwd sees nothing', () => {
+  const { base } = makeNestedProject('source');
+  const elsewhere = join(base, 'docs');
+  mkdirSync(elsewhere, { recursive: true });
+  assert.equal(runHook(elsewhere).trim(), '', 'precondition: cwd alone must not find it');
+  const ctx = ctxOf(runHook(elsewhere, { CLAUDE_PROJECT_DIR: base }));
+  assert.match(ctx, /GodotPrompter is active/);
+  rmSync(base, { recursive: true, force: true });
+});
+
+// CLAUDE.md is read from the session root, not from the nested project directory — so the offer
+// must consult the session root or it nags on every start of an already-wired repo.
+test('honours a CLAUDE.md at the session root above the nested project', () => {
+  const { base } = makeNestedProject('source');
+  writeFileSync(join(base, 'CLAUDE.md'), '# Game\n\n## GodotPrompter\n\nAlready wired.\n');
+  assert.doesNotMatch(ctxOf(runHook(base)), /CLAUDE\.md has no/);
+  rmSync(base, { recursive: true, force: true });
 });
 
 test('emits Cursor-shaped output when CURSOR_PLUGIN_ROOT is set', () => {
@@ -162,6 +258,44 @@ test('survives a project.godot with no config/features line', () => {
   const { base, cwd } = makeProject(0, '');
   assert.match(ctxOf(runHook(cwd)), /GodotPrompter is active/);
   rmSync(base, { recursive: true, force: true });
+});
+
+// --- Copilot CLI executes the hook command through PowerShell on Windows --------------------
+// Regression: with only a `command` key, Copilot ran `"C:\...\run-hook.cmd" session-start` in
+// PowerShell, where a leading quoted string is an expression, not a command:
+//   ParserError: Unexpected token 'session-start' in expression or statement.
+// The hook died with exit 1 at every session start. Copilot's schema takes per-shell keys
+// (`bash` / `powershell`), and picks them over `command`; Claude Code reads `command`.
+
+function hookEntry() {
+  const cfg = JSON.parse(readFileSync(join(ROOT, 'hooks', 'hooks.json'), 'utf8'));
+  return cfg.hooks.SessionStart[0].hooks[0];
+}
+
+test('hooks.json ships a PowerShell-safe command for Copilot CLI', () => {
+  const entry = hookEntry();
+  assert.ok(entry.powershell, 'hooks.json must carry a powershell key for Copilot on Windows');
+  assert.match(entry.powershell, /^&\s+"/,
+    'PowerShell needs the call operator (&) before a quoted path, or it parses it as a string');
+  assert.match(entry.powershell, /run-hook\.cmd" session-start$/);
+});
+
+test('hooks.json keeps a bash key and a cross-platform command fallback', () => {
+  const entry = hookEntry();
+  assert.ok(entry.bash, 'Copilot on Linux/macOS selects the bash key');
+  assert.doesNotMatch(entry.bash, /^&/, 'a leading & is a syntax error in bash');
+  assert.ok(entry.command, 'Claude Code reads command');
+  assert.doesNotMatch(entry.command, /^&/, 'a leading & is a syntax error in bash and cmd.exe');
+});
+
+// Every key must resolve the plugin root through the host's ${VAR} substitution. Copilot expands
+// ${CLAUDE_PLUGIN_ROOT} before handing the string to PowerShell; a bare $env: form would be
+// evaluated by PowerShell instead and silently resolve to empty under other hosts.
+test('every hook command form references the plugin root the same way', () => {
+  const entry = hookEntry();
+  for (const key of ['command', 'bash', 'powershell']) {
+    assert.match(entry[key], /\$\{CLAUDE_PLUGIN_ROOT\}/, `${key} must use \${CLAUDE_PLUGIN_ROOT}`);
+  }
 });
 
 test('shipped hook scripts contain no CR bytes', () => {
