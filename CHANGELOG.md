@@ -4,7 +4,10 @@ All notable changes to GodotPrompter will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
-## [Unreleased]
+## [1.13.1] - 2026-07-31
+
+Patch release: two reported v1.13.0 hook defects, plus the C# parity triage those releases left
+open. No skill was added or removed — still 55.
 
 ### Fixed
 

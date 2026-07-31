@@ -84,6 +84,11 @@ Skills that document a community addon (`limboai`, `beehave`, `popochiu`, `dialo
    deciding** — v1.12.0 shipped `phantom-camera` as "GDScript-only" on a false assumption and had to
    rewrite it mid-release.
 
+   `GDSCRIPT_ONLY_BY_DESIGN` is **whole-skill**. When only one *section* has no C# counterpart, mark
+   that section instead — `<!-- csharp-parity: n/a — reason -->`, reason mandatory. See the root
+   `CLAUDE.md` for why the two obvious shortcuts (allowlisting the skill, renaming the heading) both
+   hide real gaps in neighbouring sections.
+
 4. **Wire it in**: README's Third-Party Addons table, the `using-godot-prompter` index, the routing lines
    in `agents/godot-game-dev.md` + `agents/godot-game-architect.md`, and a bidirectional cross-ref with
    the core skill it sits next to (e.g. `phantom-camera` ↔ `camera-system`).
@@ -166,7 +171,7 @@ When publishing a new version (e.g., v1.8.1):
 5. **Validate skills and hooks** — both run in CI on the release tag, so failing here fails the release:
    ```bash
    node scripts/validate-skills.mjs   # must report 0 errors
-   npm run test:hooks                 # must be all-pass
+   npm test                           # hooks + validator, must be all-pass
    ```
    If you touched `hooks/`, also confirm the scripts are still tracked executable and LF-pinned —
    `chmod +x` alone is a no-op in this repo because `core.filemode=false`:
@@ -222,8 +227,10 @@ category and defer detail to the skill. **Do not reproduce the marker strings in
 examples**; `card-marker-duplicate` will fail CI, because the hook extracts the first region only
 and a documented example above the real card would silently become the injected payload.
 
-After any change under `hooks/`, run `npm run test:hooks`. Note that `node --test tests/hooks/`
-does not work on Node 24 — a directory argument is imported as a module — so use the npm script.
+After any change under `hooks/`, run `npm run test:hooks`; after any change to
+`scripts/validate-skills.mjs`, run `npm run test:validator`. `npm test` runs both. Note that
+`node --test tests/hooks/` does not work on Node 24 — a directory argument is imported as a
+module — so use the npm scripts.
 
 ### The two hook directories
 

@@ -42,6 +42,11 @@ jobs:
       - name: Run hook tests
         run: npm run test:hooks
 
+      # The parity-exemption marker records an ERROR when its reason is missing, and the validator
+      # exits non-zero on any error — so a malformed marker fails the release tag itself. Gate it.
+      - name: Run validator tests
+        run: npm run test:validator
+
       # Self-test: the fixtures under scripts/fixtures/ are deliberately broken (over budget,
       # bad frontmatter, broken cross-ref). If the validator ever stops catching them, its rules
       # have been silently disabled — fail loudly rather than pass a release that isn't checked.
