@@ -1,5 +1,6 @@
 #!/usr/bin/env node
-// Validates skills/*/SKILL.md and agents/*.md for structure and resolvable cross-references.
+// Validates skills/*/SKILL.md and agents/*.md for structure and resolvable cross-references,
+// plus C#-parity across skills/*/references/*.md.
 import { readdirSync, readFileSync, existsSync, statSync } from 'node:fs';
 import { resolve, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
@@ -95,6 +96,52 @@ function extractCrossRefs(body) {
   return refs;
 }
 
+// --- Section helpers, shared by the SKILL.md and references/*.md parity checks ---
+
+// Blank out heading-shaped lines that occur INSIDE fenced code blocks (GDScript comments start
+// with `#`, so doc-comments look like headings) before any splitting.
+function maskFencedHeadings(body) {
+  let inFence = false;
+  return body.split('\n').map(line => {
+    if (/^```/.test(line)) inFence = !inFence;
+    return inFence && /^#{2,6}\s+/.test(line) ? '__MASKED_FENCE_HEADER__' : line;
+  }).join('\n');
+}
+
+// Split a markdown body into sections at the given heading level (default `## `).
+function splitSections(body, level = 2) {
+  return maskFencedHeadings(body).split(new RegExp(`^#{${level}}\\s+`, 'm')).slice(1);
+}
+
+// SKILL.md always sections at `## `. References are less uniform: most use `## `, but several
+// put everything under a single H1 and section at `### `. Splitting those at H2 yields zero
+// sections, which would silently skip the file — so pick the shallowest level actually present.
+function splitReferenceSections(body) {
+  return /^##\s+/m.test(maskFencedHeadings(body)) ? splitSections(body, 2) : splitSections(body, 3);
+}
+
+const hasGdscript = section => /```gdscript[\s\S]*?```/m.test(section);
+const hasCsharp = section => /```csharp[\s\S]*?```/m.test(section);
+const sectionTitle = section => section.split('\n', 1)[0].slice(0, 60);
+
+// Some reference files are organised BY LANGUAGE rather than by topic — "## GDScript" / "## C#",
+// "## Dash (GDScript)" / "## Dash (C#)", "### State Machine — GDScript" / "### … — C#". There, a
+// GDScript-only section is expected (its C# counterpart is a sibling), so per-section parity
+// fires falsely. Detect that layout and fall back to file-level parity.
+//
+// Deliberately strict about what counts as a language marker: the title must BE the language, or
+// end with it after a bracket or dash separator. A heading that merely MENTIONS C# in prose
+// (e.g. "Connecting without disconnecting in C#") names a topic, not a partition, and must not
+// suppress the check.
+function isLanguagePartitioned(sections) {
+  return sections.some(section => {
+    const title = sectionTitle(section).trim();
+    return /^(C#|GDScript)$/i.test(title)
+      || /\((C#|GDScript)\)$/i.test(title)
+      || /[—–-]\s*(C#|GDScript)$/i.test(title);
+  });
+}
+
 function validateSkill({ name, path }) {
   const content = readFileSync(path, 'utf8');
   const { data, body } = parseFrontmatter(content);
@@ -122,29 +169,19 @@ function validateSkill({ name, path }) {
   }
 
   // Warning: GDScript blocks without paired C# blocks in the same numbered section.
-  // Mask `## ...` lines that occur INSIDE fenced code blocks (e.g., GDScript doc-comments)
-  // before splitting, so they aren't treated as section boundaries.
-  const lines = body.split('\n');
-  let inFence = false;
-  const masked = lines.map(line => {
-    if (/^```/.test(line)) inFence = !inFence;
-    return inFence && /^##\s+/.test(line) ? '__MASKED_FENCE_HEADER__' : line;
-  }).join('\n');
-  const sections = masked.split(/^##\s+/m).slice(1);
+  const sections = splitSections(body);
   // Determine whether this skill is on the gdscript-only-by-design allowlist.
   // The skill name is the parent folder name of SKILL.md.
   const skillName = path.split(/[\\/]/).slice(-2, -1)[0];
   const isGdscriptOnly = GDSCRIPT_ONLY_BY_DESIGN.has(skillName);
 
   for (const section of sections) {
-    const hasGd = /```gdscript[\s\S]*?```/m.test(section);
-    const hasCs = /```csharp[\s\S]*?```/m.test(section);
-    if (hasGd && !hasCs) {
-      const sectionTitle = section.split('\n', 1)[0].slice(0, 60);
+    if (hasGdscript(section) && !hasCsharp(section)) {
+      const title = sectionTitle(section);
       const rule = isGdscriptOnly ? 'csharp-parity-accepted' : 'csharp-parity-missing';
       const msg = isGdscriptOnly
-        ? `Section "${sectionTitle}" is GDScript-only by design (allowlisted skill)`
-        : `Section "${sectionTitle}" has GDScript but no C# block`;
+        ? `Section "${title}" is GDScript-only by design (allowlisted skill)`
+        : `Section "${title}" has GDScript but no C# block`;
       record(warnings, path, rule, msg);
     }
   }
@@ -272,6 +309,63 @@ function validateOrphanReferences() {
   }
 }
 validateOrphanReferences();
+
+// C#-parity check for skills/<name>/references/*.md.
+//
+// Pattern X moves overflow out of SKILL.md into references/, which used to remove that content
+// from parity enforcement entirely: the section left behind in SKILL.md has no code blocks, so
+// `csharp-parity-*` passed vacuously while the GDScript/C# pair lived where nothing looked.
+// Walking references/ closes that hole. Findings carry distinct `-reference` rule codes so they
+// stay filterable from the SKILL.md ones. Warning-level, like the SKILL.md check — never fails CI.
+//
+// Note this is parity only. References remain exempt from the byte budget by design; that is the
+// whole point of moving content into them.
+function validateReferenceParity() {
+  for (const t of targets) {
+    const refsDir = join(t.path.replace(/[\\/]SKILL\.md$/, ''), 'references');
+    if (!existsSync(refsDir)) continue;
+    const isGdscriptOnly = GDSCRIPT_ONLY_BY_DESIGN.has(t.name);
+    const rule = isGdscriptOnly ? 'csharp-parity-accepted-reference' : 'csharp-parity-missing-reference';
+
+    for (const ref of readdirSync(refsDir).filter(n => n.endsWith('.md'))) {
+      const refPath = join(refsDir, ref);
+      const body = readFileSync(refPath, 'utf8');
+      const sections = splitReferenceSections(body);
+
+      // A few references carry no headings below the H1 at all, so there is nothing to section.
+      // Check the file as a whole rather than skipping it.
+      if (sections.length === 0) {
+        if (hasGdscript(body) && !hasCsharp(body)) {
+          record(warnings, refPath, rule, isGdscriptOnly
+            ? 'Unsectioned reference is GDScript-only by design (allowlisted skill)'
+            : 'Unsectioned reference has GDScript but no C# block');
+        }
+        continue;
+      }
+
+      // Organised by language: the C# counterpart is a sibling section, so check the file as a
+      // whole rather than per section.
+      if (isLanguagePartitioned(sections)) {
+        if (sections.some(hasGdscript) && !sections.some(hasCsharp)) {
+          record(warnings, refPath, rule, isGdscriptOnly
+            ? 'Language-partitioned reference is GDScript-only by design (allowlisted skill)'
+            : 'Language-partitioned reference has GDScript sections but no C# section');
+        }
+        continue;
+      }
+
+      for (const section of sections) {
+        if (hasGdscript(section) && !hasCsharp(section)) {
+          const title = sectionTitle(section);
+          record(warnings, refPath, rule, isGdscriptOnly
+            ? `Section "${title}" is GDScript-only by design (allowlisted skill)`
+            : `Section "${title}" has GDScript but no C# block`);
+        }
+      }
+    }
+  }
+}
+validateReferenceParity();
 
 if (existsSync(AGENTS_DIR)) {
   for (const name of readdirSync(AGENTS_DIR).filter(n => n.endsWith('.md'))) {

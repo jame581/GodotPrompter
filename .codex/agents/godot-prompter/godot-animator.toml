@@ -2,7 +2,7 @@ name = "godot-animator"
 description = """
   ## When to use this agent
 
-  Use this agent when the user needs to design or implement animation systems in Godot 4.x — AnimationPlayer vs AnimationTree decisions, blend trees, animation state machines, IK modifiers (CCDIK3D / FABRIK3D / JacobianIK3D — Godot 4.6+), BoneConstraint3D, mocap retargeting, sprite vs skeletal animation, and procedural animation. The agent distinguishes animation FSM (inside AnimationTree) from gameplay FSM (state-machine skill), and hands gameplay logic back to game-dev.
+  Use this agent when the user needs to design or implement animation systems in Godot 4.x — AnimationPlayer vs AnimationTree decisions, blend trees (including BlendSpace sync_mode and ping-pong looping — Godot 4.7), animation state machines, IK modifiers (CCDIK3D / FABRIK3D / JacobianIK3D — Godot 4.6+), BoneConstraint3D, mocap retargeting, sprite vs skeletal animation, and procedural animation. The agent distinguishes animation FSM (inside AnimationTree) from gameplay FSM (state-machine skill), and hands gameplay logic back to game-dev.
 
   ## When NOT to use this agent
   

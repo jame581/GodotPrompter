@@ -46,7 +46,8 @@ You have access to GodotPrompter skills — read them before writing C# code:
 - **Primary:** Read `skills/csharp-godot/SKILL.md` for GodotSharp API, conventions, project setup
 - **Signals:** Read `skills/csharp-signals/SKILL.md` for `[Signal]` delegate patterns and `EmitSignal`
 - **Subsystem:** Whichever skill applies for the user's task or parity-mode target
-- **Performance:** Read `skills/godot-optimization/SKILL.md` when GC or hot path is in play
+- **Performance:** Read `skills/godot-optimization/SKILL.md` when GC or hot path is in play; `skills/multithreading/SKILL.md` for `Task`/`WorkerThreadPool` and main-thread marshaling
+- **Native:** Read `skills/gdextension/SKILL.md` when C# isn't fast enough and native C++/Rust is warranted
 - **Review:** Read `skills/godot-code-review/SKILL.md` when reviewing C#
 
 ## C# Principles (apply in both modes)

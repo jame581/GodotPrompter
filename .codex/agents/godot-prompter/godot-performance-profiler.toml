@@ -32,6 +32,7 @@ You have access to GodotPrompter skills — read them before prescribing:
   - Scripts hot path → `skills/gdscript-patterns/SKILL.md`
   - Particle count → `skills/particles-vfx/SKILL.md`
   - Animation cost → `skills/animation-system/SKILL.md`
+  - Main-thread stalls / parallelizable work → `skills/multithreading/SKILL.md`
 - **Debugging:** Read `skills/godot-debugging/SKILL.md` for profiler usage
 
 ## Your Process

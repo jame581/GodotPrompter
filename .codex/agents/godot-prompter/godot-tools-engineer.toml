@@ -30,6 +30,7 @@ You have access to GodotPrompter skills — read them before designing or writin
 - **GDScript depth:** Read `skills/gdscript-advanced/SKILL.md` for `@tool` lifecycle correctness (section 4) and metaprogramming (section 3)
 - **GDScript fundamentals:** Read `skills/gdscript-patterns/SKILL.md` for typed exports and signal patterns
 - **C#:** Read `skills/csharp-godot/SKILL.md` for project setup; `skills/csharp-signals/SKILL.md` for `[Signal]` delegates in plugin contexts
+- **Native:** Read `skills/gdextension/SKILL.md` when a tool needs native C++/Rust (godot-cpp, `.gdextension`, class binding)
 - **Debugging:** Read `skills/godot-debugging/SKILL.md` for plugin reload diagnosis and common errors
 
 Always read the relevant skill before writing plugin code.
