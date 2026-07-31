@@ -45,7 +45,7 @@ rich_text.text = "النتيجة: [ltr]100/200[/ltr]"
 // Same BBCode from C# — it is markup in the string, not an API difference.
 // BbcodeEnabled must be true or the tag renders literally.
 richText.BbcodeEnabled = true;
-richText.Text = $"النتيجة: [ltr]{score}/{max}[/ltr]";
+richText.Text = "النتيجة: [ltr]100/200[/ltr]";
 ```
 
 ## Reacting to a locale change

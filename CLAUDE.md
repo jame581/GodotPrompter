@@ -63,6 +63,10 @@ When a section genuinely cannot have a C# counterpart, mark that section — nev
 <!-- csharp-parity: n/a — C# is statically typed; there is no untyped alternative to contrast -->
 ```
 
-The reason is **mandatory**; omitting it is an error, because an exemption that cannot say why is indistinguishable from an example nobody wrote. Do **not** reach for the two blunter tools instead: adding the skill to `GDSCRIPT_ONLY_BY_DESIGN` exempts every section in it, and renaming a heading to `"… (GDScript)"` trips the language-partition check and silently downgrades the *entire file* to a file-level check. Both hide real gaps in neighbouring sections.
+It works in both `SKILL.md` and `references/*.md`. The reason is **mandatory**; omitting it is an error (checked on every marker, not only on sections missing C#), because an exemption that cannot say why is indistinguishable from an example nobody wrote. A reason may contain `<` and `>`, and a marker inside a fenced block is ignored, so a file can document the marker without exempting itself.
+
+Do **not** reach for the two blunter tools instead: adding the skill to `GDSCRIPT_ONLY_BY_DESIGN` exempts every section in it, and renaming a heading to `"… (GDScript)"` trips the language-partition check and silently downgrades the *entire file* to a file-level check. Both hide real gaps in neighbouring sections.
+
+Run `npm test` (hooks + validator) after touching `scripts/validate-skills.mjs` — `tests/validator/` covers the marker, including the error path that can fail a release tag.
 
 A fenced ```gdscript block containing only comments is not a code example — it is prose in a fence, and it will be flagged as an unpaired GDScript block. Write it as prose or a bullet list.

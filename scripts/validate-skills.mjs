@@ -137,12 +137,48 @@ const sectionTitle = section => section.split('\n', 1)[0].slice(0, 60);
 //
 // A reason is mandatory — an exemption that cannot say why is indistinguishable from an
 // unwritten example, which is exactly what this check exists to surface.
-const PARITY_EXEMPT_RE = /<!--\s*csharp-parity:\s*n\/a\s*(?:[—–-]\s*)?([^>]*?)\s*-->/i;
+//
+// `[\s\S]*?` (not `[^>]*?`) so a reason may contain `>` — "depth > 4", "<Control> docs". Lazy,
+// terminated by the first `-->`, which is how an HTML comment actually ends. `n\/a\b` is anchored
+// so `n/away` is not read as an exemption with the reason "way".
+const PARITY_EXEMPT_RE = /<!--\s*csharp-parity:\s*n\/a\b\s*(?:[—–-]\s*)?([\s\S]*?)\s*-->/i;
+
+// Blank out fenced blocks entirely before looking for the marker. A reference that DOCUMENTS the
+// marker inside a ```markdown fence would otherwise exempt its own section — the same
+// self-reference trap the card rules guard against with `card-marker-duplicate`.
+function maskFencedBlocks(body) {
+  let inFence = false;
+  return body.split('\n').map(line => {
+    if (/^\s*```/.test(line)) { inFence = !inFence; return ''; }
+    return inFence ? '' : line;
+  }).join('\n');
+}
+
 const parityExemption = section => {
-  const m = section.match(PARITY_EXEMPT_RE);
-  if (!m) return null;
-  return { reason: m[1].trim() };
+  const m = maskFencedBlocks(section).match(PARITY_EXEMPT_RE);
+  return m ? { reason: m[1].trim() } : null;
 };
+
+// Shared by the SKILL.md and references/ parity loops. Returns true when the caller should stop
+// (either the section is legitimately exempt, or the marker was malformed and already reported).
+//
+// The reason check runs for EVERY marker, not only for sections that are missing C# — otherwise a
+// reasonless marker sits undetected on a section that happens to have C# today and only starts
+// failing CI when someone later edits that section.
+function handleParityExemption(section, title, path) {
+  const exempt = parityExemption(section);
+  if (!exempt) return false;
+  if (!exempt.reason) {
+    record(errors, path, 'csharp-parity-exempt-no-reason',
+      `Section "${title}" is marked csharp-parity: n/a with no reason given`);
+    return true;
+  }
+  if (hasGdscript(section) && !hasCsharp(section)) {
+    record(warnings, path, 'csharp-parity-accepted-reference',
+      `Section "${title}" is GDScript-only by design: ${exempt.reason}`);
+  }
+  return true;
+}
 
 // Some reference files are organised BY LANGUAGE rather than by topic — "## GDScript" / "## C#",
 // "## Dash (GDScript)" / "## Dash (C#)", "### State Machine — GDScript" / "### … — C#". There, a
@@ -196,8 +232,11 @@ function validateSkill({ name, path }) {
   const isGdscriptOnly = GDSCRIPT_ONLY_BY_DESIGN.has(skillName);
 
   for (const section of sections) {
+    const title = sectionTitle(section);
+    // Honour the per-section marker here too — CLAUDE.md documents it for skills generally, and
+    // a marker that silently does nothing in SKILL.md is worse than no marker at all.
+    if (handleParityExemption(section, title, path)) continue;
     if (hasGdscript(section) && !hasCsharp(section)) {
-      const title = sectionTitle(section);
       const rule = isGdscriptOnly ? 'csharp-parity-accepted' : 'csharp-parity-missing';
       const msg = isGdscriptOnly
         ? `Section "${title}" is GDScript-only by design (allowlisted skill)`
@@ -375,19 +414,9 @@ function validateReferenceParity() {
       }
 
       for (const section of sections) {
+        const title = sectionTitle(section);
+        if (handleParityExemption(section, title, refPath)) continue;
         if (hasGdscript(section) && !hasCsharp(section)) {
-          const title = sectionTitle(section);
-          const exempt = parityExemption(section);
-          if (exempt) {
-            if (!exempt.reason) {
-              record(errors, refPath, 'csharp-parity-exempt-no-reason',
-                `Section "${title}" is marked csharp-parity: n/a with no reason given`);
-              continue;
-            }
-            record(warnings, refPath, 'csharp-parity-accepted-reference',
-              `Section "${title}" is GDScript-only by design: ${exempt.reason}`);
-            continue;
-          }
           record(warnings, refPath, rule, isGdscriptOnly
             ? `Section "${title}" is GDScript-only by design (allowlisted skill)`
             : `Section "${title}" has GDScript but no C# block`);

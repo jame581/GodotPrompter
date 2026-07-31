@@ -162,6 +162,54 @@ test('falls back to the host session root when cwd sees nothing', () => {
   rmSync(base, { recursive: true, force: true });
 });
 
+// `find` tests the starting directory against the prune list too, so a session opened in a
+// directory whose own name is pruned (build/, target/, any dot-dir) found nothing at all.
+test('finds a project when the session root itself has a pruned name', () => {
+  for (const rootName of ['build', 'target', '.tools']) {
+    const base = mkdtempSync(join(tmpdir(), 'gp-pruned-'));
+    const root = join(base, rootName);
+    mkdirSync(join(root, 'src'), { recursive: true });
+    writeFileSync(join(root, 'src', 'project.godot'), 'config/features=PackedStringArray("4.5")\n');
+    assert.match(ctxOf(runHook(root)), /GodotPrompter is active/, `root named "${rootName}" was pruned`);
+    rmSync(base, { recursive: true, force: true });
+  }
+});
+
+// The session-root fallback must still see a project.godot sitting directly at that root —
+// -mindepth 1 skips depth 0, so the root is checked explicitly before the descent.
+test('finds a project sitting directly at the host session root', () => {
+  const { base, cwd } = makeProject();
+  const unrelated = mkdtempSync(join(tmpdir(), 'gp-elsewhere-'));
+  const ctx = ctxOf(runHook(unrelated, { CLAUDE_PROJECT_DIR: base }));
+  assert.match(ctx, /GodotPrompter is active/);
+  rmSync(unrelated, { recursive: true, force: true });
+  rmSync(base, { recursive: true, force: true });
+  assert.ok(cwd);
+});
+
+// Regression: the offer named ${SESSION_ROOT}/CLAUDE.md unconditionally. With no host env var
+// SESSION_ROOT falls back to cwd, so a session opened deep inside a project pointed the agent at
+// a subdirectory that the host never loads a CLAUDE.md from.
+test('names the project CLAUDE.md when the session opened inside the project', () => {
+  const { base } = makeNestedProject('source');
+  const deep = join(base, 'source', 'scripts', 'deep');
+  mkdirSync(deep, { recursive: true });
+  const ctx = ctxOf(runHook(deep));
+  assert.match(ctx, /CLAUDE\.md has no/);
+  assert.doesNotMatch(ctx, /scripts[\\/]deep[\\/]CLAUDE\.md/,
+    'must not aim the offer at a subdirectory of the project');
+  rmSync(base, { recursive: true, force: true });
+});
+
+// The mirror case: the session root really is above the project, so it IS the right file to name.
+test('names the session-root CLAUDE.md when the project is nested below it', () => {
+  const { base } = makeNestedProject('source');
+  const ctx = ctxOf(runHook(base, { CLAUDE_PROJECT_DIR: base }));
+  assert.match(ctx, /CLAUDE\.md has no/);
+  assert.doesNotMatch(ctx, /source[\\/]CLAUDE\.md/, 'should name the session root, not the project dir');
+  rmSync(base, { recursive: true, force: true });
+});
+
 // CLAUDE.md is read from the session root, not from the nested project directory — so the offer
 // must consult the session root or it nags on every start of an already-wired repo.
 test('honours a CLAUDE.md at the session root above the nested project', () => {

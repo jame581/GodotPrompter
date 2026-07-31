@@ -47,8 +47,9 @@ using Godot;
 
 public partial class CombatEventData : Resource
 {
-    [Export] public int AttackerId   { get; set; }
-    [Export] public int TargetId     { get; set; }
+    // long, not int — instance IDs are 64-bit (see the producer below).
+    [Export] public long AttackerId  { get; set; }
+    [Export] public long TargetId    { get; set; }
     [Export] public int DamageAmount { get; set; }
     [Export] public string DamageType { get; set; } = "physical";
     [Export] public bool IsCritical  { get; set; }
@@ -62,8 +63,11 @@ public void FireCombatHit(Node target, int damageAmount, string damageType, bool
 {
     var data = new CombatEventData
     {
-        AttackerId   = (int)GetInstanceId(),
-        TargetId     = (int)target.GetInstanceId(),
+        // GetInstanceId() returns ulong and Godot packs a validator into the high bits, so real
+        // IDs exceed int.MaxValue. Casting to int silently drops that and InstanceFromId() on the
+        // result will not resolve the object.
+        AttackerId   = (long)GetInstanceId(),
+        TargetId     = (long)target.GetInstanceId(),
         DamageAmount = damageAmount,
         DamageType   = damageType,
         IsCritical   = isCritical,
@@ -106,8 +110,8 @@ func _on_combat_hit(data: Dictionary) -> void:
 // Producer
 _eventBus.EmitSignal(EventBus.SignalName.CombatHit, new Godot.Collections.Dictionary
 {
-    ["attacker_id"]   = (int)GetInstanceId(),
-    ["target_id"]     = (int)target.GetInstanceId(),
+    ["attacker_id"]   = (long)GetInstanceId(),
+    ["target_id"]     = (long)target.GetInstanceId(),
     ["damage_amount"] = 25,
     ["is_critical"]   = true,
 });
@@ -117,7 +121,7 @@ _eventBus.EmitSignal(EventBus.SignalName.CombatHit, new Godot.Collections.Dictio
 private void OnCombatHit(Godot.Collections.Dictionary data)
 {
     if (data.TryGetValue("is_critical", out var critical) && critical.AsBool())
-        ShowCriticalText(data["target_id"].AsInt32(), data["damage_amount"].AsInt32());
+        ShowCriticalText(data["target_id"].AsInt64(), data["damage_amount"].AsInt32());
 }
 ```
 

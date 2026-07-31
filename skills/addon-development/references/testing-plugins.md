@@ -10,11 +10,20 @@ The fastest way to reload plugin code without restarting Godot:
 2. Alternatively, run this from **Editor → Execute Script** or the editor console:
 
 ```gdscript
-var plugin_name := "my_plugin"
-ProjectSettings.set_setting("editor_plugins/enabled", [])
-ProjectSettings.save()
-# Re-enable via the Plugins dialog.
+# EditorScript — run with File → Run in the script editor.
+@tool
+extends EditorScript
+
+func _run() -> void:
+    var plugin_name := "my_plugin"
+    # Disable then re-enable to force a clean reload cycle.
+    EditorInterface.set_plugin_enabled(plugin_name, false)
+    EditorInterface.set_plugin_enabled(plugin_name, true)
+    print("Plugin %s reloaded." % plugin_name)
 ```
+
+> Do **not** reload by writing `editor_plugins/enabled` through `ProjectSettings` — that key holds
+> *every* enabled plugin, so overwriting it disables all of them and re-enables none.
 
 For quicker iteration, save the plugin script — Godot hot-reloads `@tool` scripts automatically. Complex changes (new class registrations, dock changes) require a full disable/enable cycle.
 

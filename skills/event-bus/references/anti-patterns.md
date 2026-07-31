@@ -29,8 +29,12 @@ private void OnRequestPlayerPosition()
     _eventBus.EmitSignal(EventBus.SignalName.PlayerPositionResponse, GlobalPosition);
 }
 
-// GOOD — a parent can access its child directly.
-Vector2 playerPos = GetNode<Node2D>("Player").GlobalPosition;
+// GOOD — a parent can access its child directly. Read it in _Ready() or later; as a field
+// initializer it would run before the node is in the tree.
+public override void _Ready()
+{
+    Vector2 playerPos = GetNode<Node2D>("Player").GlobalPosition;
+}
 ```
 
 ## Side effects in handlers that emit further signals
@@ -54,7 +58,8 @@ func _on_player_died() -> void:
 
 ```csharp
 // BAD — the handler emits another signal, which triggers another handler, and so on.
-private void OnPlayerDied()
+// (One handler per class in real code; named apart here so the block compiles as written.)
+private void OnPlayerDied_Bad()
 {
     SaveHighScore();                                              // side effect
     _eventBus.EmitSignal(EventBus.SignalName.HighScoreSaved);     // triggers yet another chain
@@ -63,8 +68,8 @@ private void OnPlayerDied()
 // GOOD — each handler does one thing.
 private void OnPlayerDied() => ShowDeathScreen();
 
-// A dedicated GameManager owns multi-step reactions:
-private void OnPlayerDied()
+// A dedicated GameManager owns the multi-step reaction instead:
+private void OnPlayerDied_InGameManager()
 {
     SaveHighScore();
     GetTree().ReloadCurrentScene();

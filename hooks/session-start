@@ -42,10 +42,23 @@ find_godot_project_up() {
 find_godot_project_down() {
   local root="$1" hit
   [ -d "$root" ] || return 1
+
+  # The root itself, before the pruned descent: `find` tests the starting directory against the
+  # prune list too, so a project living in a directory legitimately named build/, bin/, target/
+  # or any dot-directory would prune its own root and find nothing. -mindepth 1 below stops that
+  # for the descent; this line covers the root.
+  if [ -f "${root}/project.godot" ]; then
+    printf '%s' "$root"
+    return 0
+  fi
+
   # -maxdepth counts the file, so 4 admits a project directory 3 levels down (a/b/c/project.godot).
-  hit="$(find "$root" -maxdepth 4 \
-      \( -name '.*' -o -name 'node_modules' -o -name 'addons' -o -name 'build' \
-         -o -name 'bin' -o -name 'obj' -o -name 'target' -o -name 'export' \) -prune \
+  # `head -n 1` can make `sort` die on SIGPIPE, which under `pipefail` fails the whole pipeline —
+  # harmless only because every caller guards this function with `|| …`. Keep it that way.
+  hit="$(find "$root" -mindepth 1 -maxdepth 4 \
+      \( -name '.*' -o -name 'node_modules' -o -name 'addons' -o -name 'build' -o -name 'builds' \
+         -o -name 'bin' -o -name 'obj' -o -name 'target' -o -name 'export' -o -name 'vendor' \
+         -o -name 'third_party' -o -name 'examples' -o -name 'samples' -o -name 'demo' \) -prune \
       -o -name 'project.godot' -type f -print 2>/dev/null \
     | awk -F/ '{ print NF "\t" $0 }' | sort -t"$(printf '\t')" -k1,1n -k2,2 \
     | head -n 1 | cut -f2-)"
@@ -67,12 +80,11 @@ session_root_fs() {
   fi
 }
 
+SESSION_ROOT_FS="$(session_root_fs)"
+
 PROJECT_ROOT="$(find_godot_project_up)" || PROJECT_ROOT="$(find_godot_project_down "$PWD")" || true
-if [ -z "${PROJECT_ROOT:-}" ]; then
-  SESSION_ROOT_FS="$(session_root_fs)"
-  if [ "$SESSION_ROOT_FS" != "$PWD" ]; then
-    PROJECT_ROOT="$(find_godot_project_down "$SESSION_ROOT_FS")" || true
-  fi
+if [ -z "${PROJECT_ROOT:-}" ] && [ "$SESSION_ROOT_FS" != "$PWD" ]; then
+  PROJECT_ROOT="$(find_godot_project_down "$SESSION_ROOT_FS")" || true
 fi
 [ -n "${PROJECT_ROOT:-}" ] || exit 0
 
@@ -165,9 +177,22 @@ has_godot_prompter_section() {
   [ -f "${1}/CLAUDE.md" ] && grep -q '^## GodotPrompter' "${1}/CLAUDE.md" 2>/dev/null
 }
 
+is_ancestor_or_same() {  # $1 = candidate ancestor, $2 = candidate descendant
+  [ "$1" = "$2" ] || [ "${2#"$1"/}" != "$2" ]
+}
+
+# Which CLAUDE.md the offer should NAME. The session root is right only when it sits at or above
+# the project — the nested-project case this fallback exists for. When the session was opened
+# *inside* the project instead, the session root is some subdirectory of it, and naming that path
+# would aim the offer at a file the host never loads.
+CLAUDE_MD_DIR="$PROJECT_ROOT"
+if is_ancestor_or_same "$SESSION_ROOT_FS" "$PROJECT_ROOT"; then
+  CLAUDE_MD_DIR="$SESSION_ROOT"
+fi
+
 CLAUDE_MD_LINE=""
-if ! has_godot_prompter_section "$PROJECT_ROOT" && ! has_godot_prompter_section "$SESSION_ROOT"; then
-  CLAUDE_MD_LINE="This project's CLAUDE.md has no \`## GodotPrompter\` section (\`${SESSION_ROOT}/CLAUDE.md\`). Subagents do not receive this card — CLAUDE.md is what they read. Offer once, and only with the user's agreement, to add a short section telling agents to check for a matching \`godot-prompter:*\` skill before implementing any Godot system. Do not add it silently, and do not ask again if declined."
+if ! has_godot_prompter_section "$PROJECT_ROOT" && ! has_godot_prompter_section "$CLAUDE_MD_DIR"; then
+  CLAUDE_MD_LINE="This project's CLAUDE.md has no \`## GodotPrompter\` section (\`${CLAUDE_MD_DIR}/CLAUDE.md\`). Subagents do not receive this card — CLAUDE.md is what they read. Offer once, and only with the user's agreement, to add a short section telling agents to check for a matching \`godot-prompter:*\` skill before implementing any Godot system. Do not add it silently, and do not ask again if declined."
 fi
 
 # --- 6. Assemble and emit ---------------------------------------------------------------------

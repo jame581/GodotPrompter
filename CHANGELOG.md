@@ -28,8 +28,13 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
   no mentor state key changes. Costs ~60 ms on a real repo.
 - **The `CLAUDE.md` offer nagged repos with a nested project**, because it probed only the
   detected project directory. It now also consults the session root — where the `CLAUDE.md` the
-  agent actually loads lives — and names the file it means.
-
+  agent actually loads lives — and names the file it means. It names the *project* CLAUDE.md when
+  the session was opened inside the project instead, so the offer is never aimed at a
+  subdirectory the host loads nothing from.
+- **A project in a directory named `build/`, `target/`, `bin/` or any dot-directory was invisible.**
+  `find` evaluates the prune list against its own starting directory, so opening a session at such
+  a root pruned it before descending. Fixed with `-mindepth 1` plus an explicit check of the root
+  itself.
 - **`localization` documented a deprecated enum.** The `rtl-support` property table listed
   `LAYOUT_DIRECTION_LOCALE`, deprecated in favour of `LAYOUT_DIRECTION_APPLICATION_LOCALE`
   (with `LAYOUT_DIRECTION_SYSTEM_LOCALE` for the OS-derived variant). Verified against the
@@ -59,10 +64,15 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
   plugins, JavaClassWrapper). Left open deliberately: the docs confirm C# *is* supported there,
   so exempting them would be wrong, but the examples cannot be verified without a Gradle build
   and a device. Validator baseline **0 errors / 53 warnings** (was 65).
-- Hook test suite grows to 32 cases, covering descending detection, its depth bound, the
-  `addons/`-and-dotdir prunes, ancestor-beats-descendant precedence, and the PowerShell-safe
-  hook command. `runHook` now scrubs `CLAUDE_PROJECT_DIR` / `COPILOT_PROJECT_DIR` so the suite
-  stays hermetic when it runs under Claude Code or Copilot itself.
+- Hook test suite grows to 37 cases, covering descending detection, its depth bound, the
+  `addons/`-and-dotdir prunes, pruned-name session roots, ancestor-beats-descendant precedence,
+  which `CLAUDE.md` the offer names, and the PowerShell-safe hook command. `runHook` now scrubs
+  `CLAUDE_PROJECT_DIR` / `COPILOT_PROJECT_DIR` so the suite stays hermetic when it runs under
+  Claude Code or Copilot itself.
+- **New `tests/validator/` suite** (8 cases) drives the real validator over fixture skills to
+  cover the parity-exemption marker — including its error path, which exits non-zero and can fail
+  a release tag. `npm test` now runs hooks and validator together; `npm run test:validator` runs
+  it alone. The validator previously had no automated coverage at all.
 
 ## [1.13.0] - 2026-07-28
 
