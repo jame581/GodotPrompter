@@ -208,7 +208,9 @@ float[] velocities = new float[256];
 
 ### Static Typing Benefits
 
-Static typing enables the GDScript VM to emit more efficient bytecode and catches errors at parse time rather than runtime.
+<!-- csharp-parity: n/a — C# is statically typed by definition; there is no untyped alternative to contrast against, so this optimisation does not exist there. -->
+
+Static typing enables the GDScript VM to emit more efficient bytecode and catches errors at parse time rather than runtime. **This one is GDScript-only** — C# has no dynamic counterpart to trade away, so it starts where the "RIGHT" example below ends.
 
 ```gdscript
 # Untyped — every operation goes through dynamic dispatch
@@ -248,3 +250,36 @@ const IconTexture: Texture2D = preload("res://icon.svg")
 func _ready() -> void:
     $Sprite2D.texture = IconTexture
 ```
+
+**C#:**
+
+```csharp
+// C# has NO preload — it is a GDScript parse-time construct with no C# equivalent.
+// GD.Load<T>() is always a runtime lookup, so the cost has to be moved by hand.
+
+// BEST — [Export] the resource and assign it in the editor. Loaded with the scene,
+// zero runtime lookups, and a designer can swap it without touching code.
+[Export] private PackedScene _bulletScene;
+[Export] private AudioStream _hitSound;
+
+// GOOD — static readonly, resolved once on first use of the type instead of per call.
+private static readonly Texture2D IconTexture = GD.Load<Texture2D>("res://icon.svg");
+
+public override void _Ready()
+{
+    GetNode<Sprite2D>("Sprite2D").Texture = IconTexture;
+}
+
+// For dynamic paths, GD.Load is the right tool — just never in a per-frame method.
+private Texture2D LoadSkin(string skinName) => GD.Load<Texture2D>($"res://skins/{skinName}.png");
+
+// WRONG — a runtime resolution every single frame.
+public override void _Process(double delta)
+{
+    GetNode<Sprite2D>("Sprite2D").Texture = GD.Load<Texture2D>("res://icon.svg");
+}
+```
+
+> The engine caches loaded resources, so a repeated `GD.Load` is a cache lookup rather than a
+> disk read — but it still costs a path resolution and a Variant round-trip every call. `[Export]`
+> removes both.

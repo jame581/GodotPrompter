@@ -18,6 +18,27 @@ ProjectSettings.save()
 
 For quicker iteration, save the plugin script — Godot hot-reloads `@tool` scripts automatically. Complex changes (new class registrations, dock changes) require a full disable/enable cycle.
 
+**C#** has a dedicated editor API for the same disable/enable cycle, so you do not have to go through `ProjectSettings`:
+
+```csharp
+#if TOOLS
+[Tool]
+public partial class PluginReloader : EditorScript
+{
+    public override void _Run()
+    {
+        var pluginName = "my_plugin";
+        // Disable then re-enable to force a clean reload cycle.
+        EditorInterface.Singleton.SetPluginEnabled(pluginName, false);
+        EditorInterface.Singleton.SetPluginEnabled(pluginName, true);
+        GD.Print($"Plugin {pluginName} reloaded.");
+    }
+}
+#endif
+```
+
+> **C# plugin reload caveat:** unlike GDScript, C# plugins require recompilation. After editing C# plugin source the editor must rebuild the assembly before re-enabling. If the plugin fails to load with `Could not find type "Plugin"`, the C# project failed to compile — check the **MSBuild Panel** at the bottom of the editor for compilation errors.
+
 ## Debugging with print
 
 `print()` and `push_error()` / `push_warning()` output to the Godot **Output** panel and the OS console when Godot is launched from a terminal.
@@ -37,25 +58,6 @@ public override void _EnterTree()
     GD.Print("[my_plugin] _EnterTree called");      // Output panel
     GD.PushWarning("[my_plugin] something unexpected");
     GD.PushError("[my_plugin] something failed");   // also shown as red in Output
-}
-#endif
-```
-
-> **C# plugin reload caveat:** Unlike GDScript, C# plugins require recompilation. After editing C# plugin source, the editor must rebuild the assembly before re-enabling. If the plugin fails to load with `Could not find type "Plugin"`, the C# project failed to compile — check the **MSBuild Panel** at the bottom of the editor for compilation errors. Programmatic plugin reload from a `[Tool]` script:
-
-```csharp
-#if TOOLS
-[Tool]
-public partial class PluginReloader : EditorScript
-{
-    public override void _Run()
-    {
-        var pluginName = "my_plugin";
-        // Disable then re-enable to force a clean reload cycle.
-        EditorInterface.Singleton.SetPluginEnabled(pluginName, false);
-        EditorInterface.Singleton.SetPluginEnabled(pluginName, true);
-        GD.Print($"Plugin {pluginName} reloaded.");
-    }
 }
 #endif
 ```

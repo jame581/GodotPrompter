@@ -12,12 +12,7 @@ Every distinct mesh, sprite, or canvas item that cannot be batched with its neig
 
 Wrap sibling nodes inside a `CanvasGroup` so Godot batches them into a single draw call. This is most effective for HUD elements, tile layers, and groups of sprites that share the same texture.
 
-```gdscript
-# In the scene tree, add a CanvasGroup parent node.
-# CanvasGroup batches all children into one draw call automatically.
-# No code is required — the node type itself enables batching.
-# Ensure children share the same texture and blend mode for maximum benefit.
-```
+**This is a scene-tree change, not a code change** — and therefore identical in GDScript and C#. Add a `CanvasGroup` node in the editor and reparent the sprites under it; the node type alone enables batching.
 
 Constraints for batching to occur:
 - Children must share the same texture (use a texture atlas).

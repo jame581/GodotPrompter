@@ -17,6 +17,22 @@ func _on_request_player_position() -> void:
 var player_pos: Vector2 = $Player.global_position
 ```
 
+```csharp
+// BAD — a request/response round-trip through the bus to reach your own child.
+public override void _Ready()
+{
+    _eventBus.RequestPlayerPosition += OnRequestPlayerPosition;
+}
+
+private void OnRequestPlayerPosition()
+{
+    _eventBus.EmitSignal(EventBus.SignalName.PlayerPositionResponse, GlobalPosition);
+}
+
+// GOOD — a parent can access its child directly.
+Vector2 playerPos = GetNode<Node2D>("Player").GlobalPosition;
+```
+
 ## Side effects in handlers that emit further signals
 
 ```gdscript
@@ -36,6 +52,25 @@ func _on_player_died() -> void:
     get_tree().reload_current_scene()
 ```
 
+```csharp
+// BAD — the handler emits another signal, which triggers another handler, and so on.
+private void OnPlayerDied()
+{
+    SaveHighScore();                                              // side effect
+    _eventBus.EmitSignal(EventBus.SignalName.HighScoreSaved);     // triggers yet another chain
+}
+
+// GOOD — each handler does one thing.
+private void OnPlayerDied() => ShowDeathScreen();
+
+// A dedicated GameManager owns multi-step reactions:
+private void OnPlayerDied()
+{
+    SaveHighScore();
+    GetTree().ReloadCurrentScene();
+}
+```
+
 ## Circular event chains
 
 ```gdscript
@@ -48,6 +83,24 @@ func _on_health_changed(current: int, maximum: int) -> void:
 func _on_health_changed(current: int, maximum: int) -> void:
     _current = current
     _update_display()
+```
+
+```csharp
+// BAD — the handler re-emits the very signal it handles: unbounded recursion until
+// the stack overflows. Easier to write in C#, because `+=` gives no hint that the
+// handler and the emitter are the same object.
+private void OnHealthChanged(int current, int maximum)
+{
+    _current = current;
+    _eventBus.EmitSignal(EventBus.SignalName.HealthChanged, _current, maximum); // infinite loop
+}
+
+// GOOD — update internal state only; the original emitter owns the signal.
+private void OnHealthChanged(int current, int maximum)
+{
+    _current = current;
+    UpdateDisplay();
+}
 ```
 
 ## Connecting without disconnecting in C#

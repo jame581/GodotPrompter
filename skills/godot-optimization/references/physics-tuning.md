@@ -32,6 +32,32 @@ func _ready() -> void:
     collision_mask  = (1 << 1) | (1 << 2)  # checks layers 2 and 3
 ```
 
+```csharp
+// Same bit arithmetic; the properties are PascalCase and typed uint.
+public override void _Ready()
+{
+    CollisionLayer = 1 << 3;              // this body is on layer 4 (Projectiles)
+    CollisionMask  = (1 << 1) | (1 << 2); // checks layers 2 and 3
+}
+
+// Prefer named flags over bare shifts once you have more than a handful of layers.
+[System.Flags]
+private enum Layers : uint
+{
+    Player      = 1 << 0,
+    Enemies     = 1 << 1,
+    Environment = 1 << 2,
+    Projectiles = 1 << 3,
+    Sensors     = 1 << 4,
+}
+
+private void ConfigureBullet()
+{
+    CollisionLayer = (uint)Layers.Projectiles;
+    CollisionMask  = (uint)(Layers.Enemies | Layers.Environment);
+}
+```
+
 ### Simplified Collision Shapes
 
 Mesh colliders (`ConcavePolygonShape3D`) are extremely expensive. Replace with primitives wherever possible.
@@ -44,16 +70,11 @@ Mesh colliders (`ConcavePolygonShape3D`) are extremely expensive. Replace with p
 | `ConvexPolygonShape3D` | Moderate | Irregular convex geometry |
 | `ConcavePolygonShape3D` | Expensive | Static-only complex terrain (never on moving bodies) |
 
-```gdscript
-# WRONG — mesh collider on a moving character body
-# CollisionShape3D with ConcavePolygonShape3D on CharacterBody3D
+**Shape choice is an Inspector decision, not a code one** — the guidance is identical in GDScript and C#:
 
-# RIGHT — capsule approximates the character with minimal cost
-# CollisionShape3D with CapsuleShape3D
-
-# For static terrain that must be exact: ConcavePolygonShape3D is acceptable
-# on StaticBody3D only, and only if the mesh is not overly dense.
-```
+- **Wrong:** `ConcavePolygonShape3D` on a moving `CharacterBody3D`.
+- **Right:** `CapsuleShape3D` — approximates a character at minimal cost.
+- **Acceptable:** `ConcavePolygonShape3D` on a `StaticBody3D` only, and only if the mesh is not overly dense.
 
 ### Physics Tick Rate Tuning
 

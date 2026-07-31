@@ -56,3 +56,13 @@ Before merging skill changes:
 3. Run agent integration tests from `tests/agent-integration/TEST_PLAN.md` for significant changes
 
 `node scripts/validate-skills.mjs` already enforces frontmatter, cross-references, and the size budget — run it rather than checking those by hand. It also checks C# parity inside `references/*.md` (`csharp-parity-*-reference`), so Pattern X moves stay enforced. Files that section **by language** (`## C#`, `## Dash (C#)`, `### … — C#`) are checked file-level instead of per-section; a heading that merely mentions C# in prose is not a partition.
+
+When a section genuinely cannot have a C# counterpart, mark that section — never the whole skill:
+
+```markdown
+<!-- csharp-parity: n/a — C# is statically typed; there is no untyped alternative to contrast -->
+```
+
+The reason is **mandatory**; omitting it is an error, because an exemption that cannot say why is indistinguishable from an example nobody wrote. Do **not** reach for the two blunter tools instead: adding the skill to `GDSCRIPT_ONLY_BY_DESIGN` exempts every section in it, and renaming a heading to `"… (GDScript)"` trips the language-partition check and silently downgrades the *entire file* to a file-level check. Both hide real gaps in neighbouring sections.
+
+A fenced ```gdscript block containing only comments is not a code example — it is prose in a fence, and it will be flagged as an unpaired GDScript block. Write it as prose or a bullet list.

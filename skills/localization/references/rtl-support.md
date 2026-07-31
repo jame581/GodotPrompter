@@ -14,11 +14,23 @@ control.layout_direction = Control.LAYOUT_DIRECTION_RTL
 # Internationalization → Rendering → Text Direction → RTL
 ```
 
+```csharp
+// On any Control node — note the enum is nested, not a flat constant.
+control.LayoutDirection = Control.LayoutDirectionEnum.Rtl;
+
+// Usually better than hard-coding Rtl: derive it from the app's own locale.
+// (LayoutDirectionEnum.Locale is DEPRECATED — it is an alias for this one.)
+control.LayoutDirection = Control.LayoutDirectionEnum.ApplicationLocale;
+
+// The Project Settings route is identical:
+// Internationalization → Rendering → Text Direction → RTL
+```
+
 ## Per-Control Settings
 
 | Property | Purpose |
 |----------|---------|
-| `layout_direction` | `LTR`, `RTL`, `LOCALE` (auto from current locale), `INHERITED` |
+| `layout_direction` | `INHERITED`, `APPLICATION_LOCALE` (auto, from the loaded translation), `LTR`, `RTL`, `SYSTEM_LOCALE` (auto, from the OS). `LOCALE` is **deprecated** — it is an alias for `APPLICATION_LOCALE` |
 | `text_direction` | On Label/RichTextLabel: override text direction |
 | `structured_text_type` | Handles special structures (URLs, paths, email) that shouldn't fully reverse |
 
@@ -27,6 +39,13 @@ control.layout_direction = Control.LAYOUT_DIRECTION_RTL
 ```gdscript
 # Force LTR for a number or URL inside RTL text
 rich_text.text = "النتيجة: [ltr]100/200[/ltr]"
+```
+
+```csharp
+// Same BBCode from C# — it is markup in the string, not an API difference.
+// BbcodeEnabled must be true or the tag renders literally.
+richText.BbcodeEnabled = true;
+richText.Text = $"النتيجة: [ltr]{score}/{max}[/ltr]";
 ```
 
 ## Reacting to a locale change
@@ -79,16 +98,6 @@ public partial class LocaleAwarePanel : Control
         LayoutDirection = isRtl
             ? Control.LayoutDirectionEnum.Rtl
             : Control.LayoutDirectionEnum.Ltr;
-    }
-}
-
-// RichTextLabel mixed-direction — same BBCode as GDScript, assigned in C#.
-public partial class ScoreLabel : RichTextLabel
-{
-    public void SetArabicScore(int score, int max)
-    {
-        BbcodeEnabled = true;
-        Text = $"النتيجة: [ltr]{score}/{max}[/ltr]";
     }
 }
 ```

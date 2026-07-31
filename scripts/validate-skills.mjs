@@ -124,6 +124,26 @@ const hasGdscript = section => /```gdscript[\s\S]*?```/m.test(section);
 const hasCsharp = section => /```csharp[\s\S]*?```/m.test(section);
 const sectionTitle = section => section.split('\n', 1)[0].slice(0, 60);
 
+// Section-level parity exemption:  <!-- csharp-parity: n/a — why -->
+//
+// GDSCRIPT_ONLY_BY_DESIGN is skill-level, which is too coarse for a file that is mostly
+// translatable but holds one section that genuinely cannot have a C# counterpart — "Static
+// Typing Benefits" has no C# analogue because C# is statically typed by definition, yet
+// `preload vs load` two headings down is a real gap worth reporting.
+//
+// The obvious workaround is worse than the problem: renaming a heading to "… (GDScript)" makes
+// isLanguagePartitioned() true for the WHOLE file, silently downgrading every other section in
+// it to a file-level check. Hence an explicit marker, scoped to the section it sits in.
+//
+// A reason is mandatory — an exemption that cannot say why is indistinguishable from an
+// unwritten example, which is exactly what this check exists to surface.
+const PARITY_EXEMPT_RE = /<!--\s*csharp-parity:\s*n\/a\s*(?:[—–-]\s*)?([^>]*?)\s*-->/i;
+const parityExemption = section => {
+  const m = section.match(PARITY_EXEMPT_RE);
+  if (!m) return null;
+  return { reason: m[1].trim() };
+};
+
 // Some reference files are organised BY LANGUAGE rather than by topic — "## GDScript" / "## C#",
 // "## Dash (GDScript)" / "## Dash (C#)", "### State Machine — GDScript" / "### … — C#". There, a
 // GDScript-only section is expected (its C# counterpart is a sibling), so per-section parity
@@ -357,6 +377,17 @@ function validateReferenceParity() {
       for (const section of sections) {
         if (hasGdscript(section) && !hasCsharp(section)) {
           const title = sectionTitle(section);
+          const exempt = parityExemption(section);
+          if (exempt) {
+            if (!exempt.reason) {
+              record(errors, refPath, 'csharp-parity-exempt-no-reason',
+                `Section "${title}" is marked csharp-parity: n/a with no reason given`);
+              continue;
+            }
+            record(warnings, refPath, 'csharp-parity-accepted-reference',
+              `Section "${title}" is GDScript-only by design: ${exempt.reason}`);
+            continue;
+          }
           record(warnings, refPath, rule, isGdscriptOnly
             ? `Section "${title}" is GDScript-only by design (allowlisted skill)`
             : `Section "${title}" has GDScript but no C# block`);

@@ -30,8 +30,35 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
   detected project directory. It now also consults the session root — where the `CLAUDE.md` the
   agent actually loads lives — and names the file it means.
 
+- **`localization` documented a deprecated enum.** The `rtl-support` property table listed
+  `LAYOUT_DIRECTION_LOCALE`, deprecated in favour of `LAYOUT_DIRECTION_APPLICATION_LOCALE`
+  (with `LAYOUT_DIRECTION_SYSTEM_LOCALE` for the OS-derived variant). Verified against the
+  `Control` class reference. Pre-existing, and against the repo's own "no deprecated methods"
+  rule — found while closing C# parity.
+
+### Added
+
+- **C# examples for 8 previously GDScript-only reference sections** — the attack-combo recipe,
+  all three `event-bus` anti-patterns, the Dictionary signal payload, `preload vs load`,
+  collision layers/masks, and enabling RTL. The `preload vs load` gap was the most consequential:
+  **C# has no `preload`**, and nothing in the skill said so; it now documents `[Export]` and
+  `static readonly` as the two ways to move that cost off the hot path.
+- **Section-level C#-parity exemption** — `<!-- csharp-parity: n/a — reason -->` marks a single
+  section as having no C# counterpart, with a **mandatory** reason (omitting it is an error).
+  `GDSCRIPT_ONLY_BY_DESIGN` remains skill-level and was too coarse: `godot-optimization` holds
+  one untranslatable section ("Static Typing Benefits" — C# is statically typed by definition)
+  two headings above a real gap.
+
 ### Changed
 
+- **Four reference sections restructured rather than given new C#.** `addon-development`'s C#
+  plugin-reload example already existed but sat under *"Debugging with print"*; it now lives
+  under *"Reloading a plugin in the editor"*. Two ```gdscript fences in `godot-optimization`
+  contained only comments — prose in a code fence — and are now written as prose.
+- Reference C# parity: **16 gaps → 2**, both in `mobile-development/plugins.md` (Android v2
+  plugins, JavaClassWrapper). Left open deliberately: the docs confirm C# *is* supported there,
+  so exempting them would be wrong, but the examples cannot be verified without a Gradle build
+  and a device. Validator baseline **0 errors / 53 warnings** (was 65).
 - Hook test suite grows to 32 cases, covering descending detection, its depth bound, the
   `addons/`-and-dotdir prunes, ancestor-beats-descendant precedence, and the PowerShell-safe
   hook command. `runHook` now scrubs `CLAUDE_PROJECT_DIR` / `COPILOT_PROJECT_DIR` so the suite

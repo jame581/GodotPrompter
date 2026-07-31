@@ -4,7 +4,11 @@ Back to [Mobile Development](../SKILL.md).
 
 ## Android: GodotGooglePlayBilling (Godot 4.2+, requires Gradle)
 
+<!-- csharp-parity: n/a — the plugin is reached through a dynamic Engine singleton whose members are resolved at runtime; a C# port would be untyped Call()/Connect() string soup, and no first-party C# binding or example exists to verify it against. -->
+
 The first-party **`GodotGooglePlayBilling`** plugin wraps the Play Billing Library. **Godot 4.2+ and the custom Gradle build are required.** (The official docs are GDScript-only.)
+
+> **C# note:** there is no first-party C# binding. The plugin is a dynamic Engine singleton, so from C# every call goes through `Call("query_product_details", …)` and every signal through `Connect("on_purchase_updated", …)` — untyped and unverified against a real build. Wrap it once behind a typed C# service interface and keep the string-based calls in that one file.
 
 Lifecycle: construct a `BillingClient`, connect its signals, then call `start_connection()`. Query helpers: `is_ready()`, `get_connection_state()` (`ConnectionState{DISCONNECTED, CONNECTING, CONNECTED, CLOSED}`).
 

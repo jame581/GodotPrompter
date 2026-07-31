@@ -65,3 +65,57 @@ func _on_animation_finished(anim_name: StringName) -> void:
         _reset_combo()
         anim_player.play("idle")
 ```
+
+```csharp
+public partial class Player : CharacterBody2D
+{
+    private AnimationPlayer _animPlayer;
+    private int _comboStep;
+    private bool _comboWindow;
+
+    public override void _Ready()
+    {
+        _animPlayer = GetNode<AnimationPlayer>("AnimationPlayer");
+        _animPlayer.AnimationFinished += OnAnimationFinished;
+    }
+
+    public override void _UnhandledInput(InputEvent @event)
+    {
+        if (!@event.IsActionPressed("attack"))
+            return;
+
+        if (_comboStep == 0)
+        {
+            _comboStep = 1;
+            _animPlayer.Play("attack_1");
+        }
+        else if (_comboWindow)
+        {
+            _comboStep++;
+            _comboWindow = false;
+            if (_comboStep <= 3)
+                _animPlayer.Play($"attack_{_comboStep}");
+            else
+                ResetCombo();
+        }
+    }
+
+    // Called by the Call Method track. Must be public — the track resolves it by name.
+    public void OpenComboWindow() => _comboWindow = true;
+
+    private void ResetCombo()
+    {
+        _comboStep = 0;
+        _comboWindow = false;
+    }
+
+    private void OnAnimationFinished(StringName animName)
+    {
+        if (animName.ToString().StartsWith("attack"))
+        {
+            ResetCombo();
+            _animPlayer.Play("idle");
+        }
+    }
+}
+```

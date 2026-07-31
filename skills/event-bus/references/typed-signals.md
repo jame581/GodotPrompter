@@ -99,6 +99,29 @@ func _on_combat_hit(data: Dictionary) -> void:
         _show_critical_text(data["target_id"], data["damage_amount"])
 ```
 
-The C# equivalent uses `Godot.Collections.Dictionary` in place of the Resource type and `data["key"].AsInt32()` / `.AsString()` to read values — no compile-time safety.
+```csharp
+// In EventBus.cs:
+// [Signal] public delegate void CombatHitEventHandler(Godot.Collections.Dictionary data);
+
+// Producer
+_eventBus.EmitSignal(EventBus.SignalName.CombatHit, new Godot.Collections.Dictionary
+{
+    ["attacker_id"]   = (int)GetInstanceId(),
+    ["target_id"]     = (int)target.GetInstanceId(),
+    ["damage_amount"] = 25,
+    ["is_critical"]   = true,
+});
+
+// Consumer — every read is an unchecked Variant cast; a renamed key fails at runtime,
+// and a wrong .AsX() silently returns default rather than throwing.
+private void OnCombatHit(Godot.Collections.Dictionary data)
+{
+    if (data.TryGetValue("is_critical", out var critical) && critical.AsBool())
+        ShowCriticalText(data["target_id"].AsInt32(), data["damage_amount"].AsInt32());
+}
+```
+
+C# loses more here than GDScript does: the Resource form above gives compile-time checking and
+IntelliSense, while this one is untyped both ways across the marshalling boundary.
 
 **Prefer Resources** for structured, reusable payloads with more than 2–3 fields. **Use Dictionary** only when prototyping or the shape changes frequently.
