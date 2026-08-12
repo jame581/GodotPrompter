@@ -70,6 +70,13 @@ Workflow plugins decide *how you work*; GodotPrompter decides *what you build*. 
 **RULE: before implementing any Godot system, invoke the matching `godot-prompter:*` skill.**
 Applies to subagents writing Godot code too.
 
+| Situation | Start with |
+|---|---|
+| New system, or the requirements are unclear | `godot-brainstorming` — design first, then build |
+| Known change, explicit ask, bug fix | the domain skill below — build |
+
+**Then report before you build:** name the pattern you picked, the alternative you rejected, and why. Skills carry trade-offs — surface them. The choice is the developer's.
+
 | Building… | Start with |
 |---|---|
 | Movement, input, cameras | `player-controller`, `input-handling`, `camera-system` |
@@ -99,7 +106,9 @@ Full index: invoke `godot-prompter:using-godot-prompter`.
 | "It's a two-line script" | Two-line scripts still pick node types. Invoke. |
 | "The plan says what to build" | The plan says what. The skill says how. Invoke. |
 | "I loaded a Godot skill already" | Different system, different skill. |
-| "The user wants a quick fix" | Quick fixes set architecture. Invoke. |
+| "The user wants a quick fix" | Quick fixes set architecture. Invoke — then say what you picked. |
+| "The skill shows one pattern, so it's settled" | Skills carry trade-offs. Surface them; don't decide alone. |
+| "I'll explain it once it works" | A choice reported after the code is a fait accompli, not a choice. |
 <!-- SESSION-CARD-END -->
 
 ## Workflow: From Idea to Working Game
