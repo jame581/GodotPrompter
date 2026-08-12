@@ -6,7 +6,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [1.13.2] - 2026-08-12
 
-Patch release: one reported defect, three fixes. The SessionStart hook asked repositories that
+Patch release: one reported defect, four fixes. The SessionStart hook asked repositories that
 had already documented GodotPrompter to document it again, at every single session start. No
 skill was added or removed — still 55.
 
@@ -36,10 +36,12 @@ skill was added or removed — still 55.
   `~/.godot-prompter/state/` file — the same per-project state mentor mode uses, merged rather
   than clobbered — and the hook suppresses the offer from the next session on. Nothing is written
   into the game repository.
-- **The state file path was named in a spelling agents cannot write to.** Under Git Bash `$HOME`
-  is `/c/Users/you`, so the mentor off-ramp and the new decline instruction both handed the agent
-  a path that every non-bash tool fails on. The hook now canonicalizes it (`C:/Users/you/…`),
-  matching the form already required of the project path used for the state key.
+- **Paths were named in spellings agents cannot write to.** Under Git Bash `$HOME` is
+  `/c/Users/you`, so the mentor off-ramp and the new decline instruction both handed the agent a
+  path that every non-bash tool fails on; the instructions file was named the same way, or worse
+  as the mixed `D:\game/CLAUDE.md` when the host supplied a native session root. Both are now
+  canonicalized (`C:/Users/you/…`), matching the form already required of the project path the
+  state key is hashed from.
 
 ## [1.13.1] - 2026-07-31
 

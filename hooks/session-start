@@ -241,7 +241,11 @@ if [ -z "$OFFER_DECLINED" ] \
    && ! has_godot_prompter_section "$PROJECT_ROOT" \
    && ! has_godot_prompter_section "$INSTRUCTIONS_DIR"; then
   offer_file="$(offer_target_file "$INSTRUCTIONS_DIR")"
-  OFFER_LINE="No agent instructions file in this project carries a \`## GodotPrompter\` section (\`CLAUDE.md\`, \`AGENTS.md\`, \`GEMINI.md\`, \`.github/copilot-instructions.md\` and the rule directories were all checked). Subagents do not receive this card — that file is what they read. Offer once, and only with the user's agreement, to add a short section telling agents to check for a matching \`godot-prompter:*\` skill before implementing any Godot system; add it to \`${INSTRUCTIONS_DIR}/${offer_file}\`. Do not add it silently."
+  # Canonical, for the same reason STATE_FILE is: this path is one the agent WRITES. Both spellings
+  # that reach here are wrong to hand over as-is — PROJECT_ROOT is bash's ("/c/Users/you/game"), and
+  # a native SESSION_ROOT concatenated with a filename yields the mixed "D:\game/CLAUDE.md".
+  offer_path="$(canonical_path "$INSTRUCTIONS_DIR")/${offer_file}"
+  OFFER_LINE="No agent instructions file in this project carries a \`## GodotPrompter\` section (\`CLAUDE.md\`, \`AGENTS.md\`, \`GEMINI.md\`, \`.github/copilot-instructions.md\` and the rule directories were all checked). Subagents do not receive this card — that file is what they read. Offer once, and only with the user's agreement, to add a short section telling agents to check for a matching \`godot-prompter:*\` skill before implementing any Godot system; add it to \`${offer_path}\`. Do not add it silently."
   # Claude Code reads CLAUDE.md only. Say so where it matters, and nowhere else — on Copilot or
   # Cursor the remark would be noise about a file the host never opens.
   if [ "$offer_file" != 'CLAUDE.md' ] && [ -n "${CLAUDE_PLUGIN_ROOT:-}" ] \
