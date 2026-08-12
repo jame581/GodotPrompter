@@ -25,9 +25,11 @@ skill was added or removed — still 55.
   root. The same widening landed in `godot-brainstorming`, whose Step 4 injection had the
   identical single-filename check, and in the `godot-project-setup` checklist.
 - **The offer named a file the repository does not maintain.** When there is genuinely no section
-  anywhere, the offer now names the instructions file the repo already keeps — `AGENTS.md` or
-  `GEMINI.md` when there is no `CLAUDE.md` — instead of asking every project to start a second
-  one. On Claude Code, which loads `CLAUDE.md` only, the agent may point out that a one-line
+  anywhere, the offer now names whichever instructions file the repo already keeps —
+  `.claude/CLAUDE.md`, `AGENTS.md`, `GEMINI.md` or `.github/copilot-instructions.md` when there is
+  no root `CLAUDE.md` — instead of asking every project to start a second one. `CLAUDE.local.md`
+  is detected but never offered as the target: it is personal and gitignored, so a team-shared
+  routing rule does not belong in it. On Claude Code, which loads `CLAUDE.md` only, the agent may point out that a one-line
   `CLAUDE.md` containing `@AGENTS.md` would load it here too; that is a suggestion, never an
   assumption, and the remark is omitted on hosts where it is irrelevant.
 - **"Offer once" was unenforceable.** `SessionStart` fires again on every start, resume, `/clear`

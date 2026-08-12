@@ -438,6 +438,32 @@ test('names CLAUDE.md when the repo has one, even alongside AGENTS.md', () => {
   rmSync(base, { recursive: true, force: true });
 });
 
+// The detection set and the target set have to agree, or the fix just moves #15 to another host:
+// a Copilot-only repo keeping .github/copilot-instructions.md, or one keeping .claude/CLAUDE.md,
+// was still told to start a root CLAUDE.md it does not maintain.
+test('names whichever instructions file the repo actually keeps', () => {
+  for (const file of ['.github/copilot-instructions.md', '.claude/CLAUDE.md', 'GEMINI.md']) {
+    const { base, cwd } = makeProject();
+    const target = join(base, ...file.split('/'));
+    mkdirSync(dirname(target), { recursive: true });
+    writeFileSync(target, '# Game\n\nNo section here yet.\n');
+    const offerLine = ctxOf(runHook(cwd)).split('\n').find(l => OFFER.test(l));
+    assert.ok(offerLine, 'expected an offer line');
+    assert.ok(offerLine.includes(`${canonicalPath(base)}/${file}`),
+      `expected the offer to name ${file}, got: ${offerLine}`);
+    rmSync(base, { recursive: true, force: true });
+  }
+});
+
+// Claude Code does load .claude/CLAUDE.md, so the "@import it" remark would be a false claim.
+test('omits the @import remark when the target is a CLAUDE.md location', () => {
+  const { base, cwd } = makeProject();
+  mkdirSync(join(base, '.claude'));
+  writeFileSync(join(base, '.claude', 'CLAUDE.md'), '# Game\n');
+  assert.doesNotMatch(ctxOf(runHook(cwd)), /Claude Code itself loads/);
+  rmSync(base, { recursive: true, force: true });
+});
+
 test('names CLAUDE.md when the project has no instructions file at all', () => {
   const { base, cwd } = makeProject();
   const offerLine = ctxOf(runHook(cwd)).split('\n').find(l => OFFER.test(l));
