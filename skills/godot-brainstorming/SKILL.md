@@ -35,7 +35,7 @@ Present the design section by section (scene tree, signal map, data flow). Ask "
 
 After the design is approved:
 
-1. **Inject CLAUDE.md** — Add the GodotPrompter integration section to the project's CLAUDE.md (see CLAUDE.md Injection section below). This ensures all subagents and future sessions know to use GodotPrompter skills. Skip if the `## GodotPrompter` section already exists.
+1. **Inject the agent instructions section** — Add the GodotPrompter integration section to the file this project already uses for agent instructions (see Agent Instructions Injection below). This ensures all subagents and future sessions know to use GodotPrompter skills. Skip if a `## GodotPrompter` section already exists in any of them.
 
 2. **Create implementation plan** — If a planning skill is available (e.g., `superpowers:writing-plans`), use it. If not, break the design into ordered tasks yourself and save to `docs/godot-prompter/plans/` in the user's project.
 
@@ -237,11 +237,15 @@ See [references/example-chest.md](references/example-chest.md) for a fully worke
 
 ---
 
-## CLAUDE.md Injection
+## Agent Instructions Injection
 
-When preparing for implementation (Step 4), add the following section to the project's CLAUDE.md. Check for an existing `## GodotPrompter` heading first — if present, skip.
+When preparing for implementation (Step 4), add the following section to the file this project uses for agent instructions. Check for an existing `## GodotPrompter` heading in **all** of `CLAUDE.md`, `CLAUDE.local.md`, `.claude/CLAUDE.md`, `AGENTS.md`, `GEMINI.md`, `.github/copilot-instructions.md`, and the `.claude/rules/` and `.cursor/rules/` directories — if it is present anywhere, skip.
 
-If CLAUDE.md does not exist, create it with a project overview header and this section.
+Write it to the file the project already maintains, not to a second one:
+
+- `CLAUDE.md` exists → add it there.
+- Only `AGENTS.md` or `GEMINI.md` exists → add it there, so the repo stays agent-agnostic. Claude Code reads `CLAUDE.md` only, so if the user wants it loaded there too, a one-line `CLAUDE.md` containing `@AGENTS.md` does that — offer it, do not assume it.
+- Nothing exists → create `CLAUDE.md` with a project overview header and this section.
 
 > ## GodotPrompter
 >

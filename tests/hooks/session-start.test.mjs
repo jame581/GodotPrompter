@@ -52,6 +52,10 @@ function makeNestedProject(subpath, features = 'PackedStringArray("4.5", "Forwar
 
 function ctxOf(out) { return JSON.parse(out).hookSpecificOutput.additionalContext; }
 
+// The one clause every shape of the instructions-section offer carries. Matching on it rather
+// than on a file name keeps these tests honest now that the offer names AGENTS.md too.
+const OFFER = /Subagents do not receive this card/;
+
 test('emits nothing outside a Godot project', () => {
   const dir = mkdtempSync(join(tmpdir(), 'gp-empty-'));
   assert.equal(runHook(dir).trim(), '');
@@ -195,7 +199,7 @@ test('names the project CLAUDE.md when the session opened inside the project', (
   const deep = join(base, 'source', 'scripts', 'deep');
   mkdirSync(deep, { recursive: true });
   const ctx = ctxOf(runHook(deep));
-  assert.match(ctx, /CLAUDE\.md has no/);
+  assert.match(ctx, OFFER);
   assert.doesNotMatch(ctx, /scripts[\\/]deep[\\/]CLAUDE\.md/,
     'must not aim the offer at a subdirectory of the project');
   rmSync(base, { recursive: true, force: true });
@@ -205,7 +209,7 @@ test('names the project CLAUDE.md when the session opened inside the project', (
 test('names the session-root CLAUDE.md when the project is nested below it', () => {
   const { base } = makeNestedProject('source');
   const ctx = ctxOf(runHook(base, { CLAUDE_PROJECT_DIR: base }));
-  assert.match(ctx, /CLAUDE\.md has no/);
+  assert.match(ctx, OFFER);
   assert.doesNotMatch(ctx, /source[\\/]CLAUDE\.md/, 'should name the session root, not the project dir');
   rmSync(base, { recursive: true, force: true });
 });
@@ -215,7 +219,7 @@ test('names the session-root CLAUDE.md when the project is nested below it', () 
 test('honours a CLAUDE.md at the session root above the nested project', () => {
   const { base } = makeNestedProject('source');
   writeFileSync(join(base, 'CLAUDE.md'), '# Game\n\n## GodotPrompter\n\nAlready wired.\n');
-  assert.doesNotMatch(ctxOf(runHook(base)), /CLAUDE\.md has no/);
+  assert.doesNotMatch(ctxOf(runHook(base)), OFFER);
   rmSync(base, { recursive: true, force: true });
 });
 
@@ -365,18 +369,102 @@ test('.gitattributes pins the hook scripts to LF', () => {
   }
 });
 
-// --- subagent reach: the CLAUDE.md offer -----------------------------------------------------
+// --- subagent reach: the instructions-section offer -------------------------------------------
 
-test('offers the CLAUDE.md section when the project has none', () => {
+test('offers the section when no instructions file has one', () => {
   const { base, cwd } = makeProject();
-  assert.match(ctxOf(runHook(cwd)), /CLAUDE\.md has no/);
+  assert.match(ctxOf(runHook(cwd)), OFFER);
   rmSync(base, { recursive: true, force: true });
 });
 
 test('stays quiet when CLAUDE.md already has the GodotPrompter section', () => {
   const { base, cwd } = makeProject();
   writeFileSync(join(base, 'CLAUDE.md'), '# Game\n\n## GodotPrompter\n\nAlready wired.\n');
-  assert.doesNotMatch(ctxOf(runHook(cwd)), /CLAUDE\.md has no/);
+  assert.doesNotMatch(ctxOf(runHook(cwd)), OFFER);
+  rmSync(base, { recursive: true, force: true });
+});
+
+// Issue #15: a repo that keeps agent instructions in AGENTS.md (Codex, Copilot, Cursor,
+// OpenCode) is documented. Probing CLAUDE.md alone nagged it at every single session start.
+test('stays quiet when another agent instructions file has the section', () => {
+  for (const file of ['AGENTS.md', 'GEMINI.md', '.github/copilot-instructions.md',
+                      '.claude/CLAUDE.md', 'CLAUDE.local.md', '.cursor/rules/godot.md']) {
+    const { base, cwd } = makeProject();
+    const target = join(base, ...file.split('/'));
+    mkdirSync(dirname(target), { recursive: true });
+    writeFileSync(target, '# Game\n\n## GodotPrompter\n\nAlready wired.\n');
+    assert.doesNotMatch(ctxOf(runHook(cwd)), OFFER, `${file} was not honoured`);
+    rmSync(base, { recursive: true, force: true });
+  }
+});
+
+test('honours an AGENTS.md at the session root above the nested project', () => {
+  const { base } = makeNestedProject('source');
+  writeFileSync(join(base, 'AGENTS.md'), '# Game\n\n## GodotPrompter\n\nAlready wired.\n');
+  assert.doesNotMatch(ctxOf(runHook(base)), OFFER);
+  rmSync(base, { recursive: true, force: true });
+});
+
+// A near-miss must not silence the offer: the heading has to be the real one.
+test('does not accept a passing mention of GodotPrompter as the section', () => {
+  const { base, cwd } = makeProject();
+  writeFileSync(join(base, 'AGENTS.md'), '# Game\n\nWe use GodotPrompter here.\n');
+  assert.match(ctxOf(runHook(cwd)), OFFER);
+  rmSync(base, { recursive: true, force: true });
+});
+
+// Where the offer points: the file the repo already maintains, not a CLAUDE.md it chose not to
+// have. With no instructions file at all, CLAUDE.md stays the default.
+test('names AGENTS.md when the repo keeps its instructions there', () => {
+  const { base, cwd } = makeProject();
+  writeFileSync(join(base, 'AGENTS.md'), '# Game\n\nNo section here yet.\n');
+  const offerLine = ctxOf(runHook(cwd)).split('\n').find(l => OFFER.test(l));
+  assert.ok(offerLine, 'expected an offer line');
+  assert.match(offerLine, /AGENTS\.md/);
+  assert.doesNotMatch(offerLine, /add it to `[^`]*CLAUDE\.md`/);
+  rmSync(base, { recursive: true, force: true });
+});
+
+test('names CLAUDE.md when the repo has one, even alongside AGENTS.md', () => {
+  const { base, cwd } = makeProject();
+  writeFileSync(join(base, 'AGENTS.md'), '# Game\n');
+  writeFileSync(join(base, 'CLAUDE.md'), '# Game\n');
+  const offerLine = ctxOf(runHook(cwd)).split('\n').find(l => OFFER.test(l));
+  assert.ok(offerLine, 'expected an offer line');
+  assert.match(offerLine, /CLAUDE\.md/);
+  rmSync(base, { recursive: true, force: true });
+});
+
+test('names CLAUDE.md when the project has no instructions file at all', () => {
+  const { base, cwd } = makeProject();
+  const offerLine = ctxOf(runHook(cwd)).split('\n').find(l => OFFER.test(l));
+  assert.ok(offerLine, 'expected an offer line');
+  assert.match(offerLine, /CLAUDE\.md/);
+  rmSync(base, { recursive: true, force: true });
+});
+
+// "Offer once" was unenforceable: SessionStart fires on every start, resume, clear and compact,
+// and nothing recorded the refusal — so a user who said no was asked again forever.
+test('suppresses the offer when the state file records a decline', () => {
+  const { base, cwd } = makeProject();
+  const sf = stateFileFor(base);
+  mkdirSync(dirname(sf), { recursive: true });
+  writeFileSync(sf, JSON.stringify({ project: base, section_offer: 'declined' }));
+  try {
+    assert.doesNotMatch(ctxOf(runHook(cwd)), OFFER);
+  } finally {
+    rmSync(sf, { force: true });
+    rmSync(base, { recursive: true, force: true });
+  }
+});
+
+test('tells the agent where to record a decline', () => {
+  const { base, cwd } = makeProject();
+  const offerLine = ctxOf(runHook(cwd)).split('\n').find(l => OFFER.test(l));
+  assert.ok(offerLine, 'expected an offer line');
+  assert.match(offerLine, /section_offer/);
+  assert.ok(offerLine.includes(canonicalPath(stateFileFor(base))),
+    'must name the state file to write, in a spelling the agent can write to');
   rmSync(base, { recursive: true, force: true });
 });
 
@@ -405,7 +493,9 @@ test('injects the mentor contract when state enables mentor mode', () => {
     // The off-ramp tells the agent to set mode:normal in "the state file". After a /clear the
     // agent has the card but not the skill, so the card must name the path.
     assert.match(ctx, /Mentor state file for this project:/);
-    assert.ok(ctx.includes('.godot-prompter'), 'card must name the state file path');
+    // Named in a spelling the agent can actually write to. Under Git Bash $HOME is "/c/Users/you",
+    // which every non-bash tool the agent might reach for fails on.
+    assert.ok(ctx.includes(canonicalPath(sf)), `card must name ${canonicalPath(sf)}`);
   } finally {
     rmSync(sf, { force: true });
     rmSync(base, { recursive: true, force: true });

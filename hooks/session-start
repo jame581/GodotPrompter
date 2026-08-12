@@ -158,7 +158,9 @@ if [ -n "${HOME:-}" ]; then
     state_hash="$(printf '%s' "$state_key" | shasum -a 256 2>/dev/null | cut -c1-16 || true)"
   fi
   if [ -n "$state_hash" ]; then
-    STATE_FILE="${HOME}/.godot-prompter/state/${state_hash}.json"
+    # Canonical HOME, not the raw one: the agent is told to WRITE this path, and under Git Bash
+    # $HOME is "/c/Users/you" — a spelling every non-bash tool the agent might reach for fails on.
+    STATE_FILE="$(canonical_path "$HOME")/.godot-prompter/state/${state_hash}.json"
     # Match the "mode" key specifically — a loose grep false-positives on
     # {"mode":"normal","last_mode":"mentor"}.
     if [ -f "$STATE_FILE" ] && grep -qE '"mode"[[:space:]]*:[[:space:]]*"mentor"' "$STATE_FILE"; then
@@ -170,29 +172,87 @@ if [ -n "${HOME:-}" ]; then
   fi
 fi
 
-# --- 5. Subagent reach: offer the CLAUDE.md section once per project --------------------------
-# When the engine project sits in a subdirectory, the CLAUDE.md the agent actually loads is the
-# one at the session root — so both are consulted, or an already-wired repo gets nagged forever.
+# --- 5. Subagent reach: offer the instructions section once per project ------------------------
+# Every file a supported host loads as project instructions counts as wired, not CLAUDE.md alone:
+# a repo that keeps its instructions in AGENTS.md (Codex, Copilot, Cursor, OpenCode) or GEMINI.md
+# (Antigravity) has already documented the rule, and probing one filename nagged it at every
+# session start forever.
+INSTRUCTION_FILES=(CLAUDE.md CLAUDE.local.md .claude/CLAUDE.md AGENTS.md GEMINI.md
+                   .github/copilot-instructions.md)
+INSTRUCTION_DIRS=(.claude/rules .cursor/rules)
+
+# When the engine project sits in a subdirectory, the instructions the agent actually loads are
+# the ones at the session root — so both are consulted, or an already-wired repo gets nagged.
 has_godot_prompter_section() {
-  [ -f "${1}/CLAUDE.md" ] && grep -q '^## GodotPrompter' "${1}/CLAUDE.md" 2>/dev/null
+  local dir="$1" f d
+  for f in "${INSTRUCTION_FILES[@]}"; do
+    if [ -f "${dir}/${f}" ] && grep -q '^## GodotPrompter' "${dir}/${f}" 2>/dev/null; then
+      return 0
+    fi
+  done
+  # Rule directories hold one topic per file; the section may be in any of them.
+  for d in "${INSTRUCTION_DIRS[@]}"; do
+    if [ -d "${dir}/${d}" ] && grep -rqs '^## GodotPrompter' "${dir}/${d}" 2>/dev/null; then
+      return 0
+    fi
+  done
+  return 1
 }
 
 is_ancestor_or_same() {  # $1 = candidate ancestor, $2 = candidate descendant
   [ "$1" = "$2" ] || [ "${2#"$1"/}" != "$2" ]
 }
 
-# Which CLAUDE.md the offer should NAME. The session root is right only when it sits at or above
-# the project — the nested-project case this fallback exists for. When the session was opened
-# *inside* the project instead, the session root is some subdirectory of it, and naming that path
-# would aim the offer at a file the host never loads.
-CLAUDE_MD_DIR="$PROJECT_ROOT"
+# Which file the offer should NAME. A repo that has an AGENTS.md and no CLAUDE.md keeps its
+# instructions agent-agnostic on purpose — naming CLAUDE.md there asks the user to start a second
+# instructions file they deliberately do not maintain.
+offer_target_file() {
+  local dir="$1" f
+  if [ ! -f "${dir}/CLAUDE.md" ] && [ ! -f "${dir}/.claude/CLAUDE.md" ]; then
+    for f in AGENTS.md GEMINI.md; do
+      if [ -f "${dir}/${f}" ]; then
+        printf '%s' "$f"
+        return 0
+      fi
+    done
+  fi
+  printf 'CLAUDE.md'
+}
+
+# The session root is right only when it sits at or above the project — the nested-project case
+# this fallback exists for. When the session was opened *inside* the project instead, the session
+# root is some subdirectory of it, and naming that path would aim the offer at a file the host
+# never loads.
+INSTRUCTIONS_DIR="$PROJECT_ROOT"
 if is_ancestor_or_same "$SESSION_ROOT_FS" "$PROJECT_ROOT"; then
-  CLAUDE_MD_DIR="$SESSION_ROOT"
+  INSTRUCTIONS_DIR="$SESSION_ROOT"
 fi
 
-CLAUDE_MD_LINE=""
-if ! has_godot_prompter_section "$PROJECT_ROOT" && ! has_godot_prompter_section "$CLAUDE_MD_DIR"; then
-  CLAUDE_MD_LINE="This project's CLAUDE.md has no \`## GodotPrompter\` section (\`${CLAUDE_MD_DIR}/CLAUDE.md\`). Subagents do not receive this card — CLAUDE.md is what they read. Offer once, and only with the user's agreement, to add a short section telling agents to check for a matching \`godot-prompter:*\` skill before implementing any Godot system. Do not add it silently, and do not ask again if declined."
+# A refusal has to survive the session, or "offer once" is unenforceable: SessionStart fires again
+# on every start, resume, /clear and compaction, and the agent has no memory of last time.
+OFFER_DECLINED=""
+if [ -n "$STATE_FILE" ] && [ -f "$STATE_FILE" ] \
+   && grep -qE '"section_offer"[[:space:]]*:[[:space:]]*"declined"' "$STATE_FILE"; then
+  OFFER_DECLINED=1
+fi
+
+OFFER_LINE=""
+if [ -z "$OFFER_DECLINED" ] \
+   && ! has_godot_prompter_section "$PROJECT_ROOT" \
+   && ! has_godot_prompter_section "$INSTRUCTIONS_DIR"; then
+  offer_file="$(offer_target_file "$INSTRUCTIONS_DIR")"
+  OFFER_LINE="No agent instructions file in this project carries a \`## GodotPrompter\` section (\`CLAUDE.md\`, \`AGENTS.md\`, \`GEMINI.md\`, \`.github/copilot-instructions.md\` and the rule directories were all checked). Subagents do not receive this card — that file is what they read. Offer once, and only with the user's agreement, to add a short section telling agents to check for a matching \`godot-prompter:*\` skill before implementing any Godot system; add it to \`${INSTRUCTIONS_DIR}/${offer_file}\`. Do not add it silently."
+  # Claude Code reads CLAUDE.md only. Say so where it matters, and nowhere else — on Copilot or
+  # Cursor the remark would be noise about a file the host never opens.
+  if [ "$offer_file" != 'CLAUDE.md' ] && [ -n "${CLAUDE_PLUGIN_ROOT:-}" ] \
+     && [ -z "${CURSOR_PLUGIN_ROOT:-}" ] && [ -z "${COPILOT_CLI:-}" ]; then
+    OFFER_LINE="${OFFER_LINE} Claude Code itself loads \`CLAUDE.md\`, not \`${offer_file}\` — mention that a one-line \`CLAUDE.md\` containing \`@${offer_file}\` makes this repo's instructions load here too, but only add it if the user asks."
+  fi
+  if [ -n "$STATE_FILE" ]; then
+    OFFER_LINE="${OFFER_LINE} If the user declines, do not ask again — merge \`\"section_offer\": \"declined\"\` into \`${STATE_FILE}\` (create the file and its directory if absent, and keep any existing keys), which suppresses this offer from the next session on."
+  else
+    OFFER_LINE="${OFFER_LINE} Do not ask again if declined."
+  fi
 fi
 
 # --- 6. Assemble and emit ---------------------------------------------------------------------
@@ -209,7 +269,7 @@ escape_for_json() {
 payload="${SESSION_CARD}"
 [ -n "$VERSION_LINE" ]    && payload="${payload}"$'\n\n'"${VERSION_LINE}"
 [ -n "$MENTOR_CARD" ]     && payload="${payload}"$'\n\n'"${MENTOR_CARD}"
-[ -n "$CLAUDE_MD_LINE" ]  && payload="${payload}"$'\n\n'"${CLAUDE_MD_LINE}"
+[ -n "$OFFER_LINE" ]      && payload="${payload}"$'\n\n'"${OFFER_LINE}"
 
 context="<GODOT-PROJECT-CONTEXT>\n$(escape_for_json "$payload")\n</GODOT-PROJECT-CONTEXT>"
 

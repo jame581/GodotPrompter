@@ -97,6 +97,7 @@ file lands where the hook looks before relying on it.
 | `mode` | `mentor` \| `normal` | Whether the five beats apply |
 | `level` | `beginner` \| `intermediate` | How much of Beat 1 and Beat 2 to spell out |
 | `language` | `gdscript` \| `csharp` | Which example leads |
+| `section_offer` | `declined` | Set when the user refuses the `## GodotPrompter` instructions section, so the hook stops offering it |
 
 **Why not in the project?** A teaching level is a per-*developer* preference. In-repo it would
 be committed by default (Godot's `.gitignore` does not cover it), conflict on every pull between
@@ -111,8 +112,9 @@ existing state file rather than clobbering unrelated keys.
 
 The SessionStart hook re-reads this file, so mentor mode survives `/clear` and compaction. It
 does **not** reach subagents — `SessionStart` does not fire on subagent dispatch; a
-`## GodotPrompter` section in the project's `CLAUDE.md` is what subagents read. On Codex and
-Antigravity (no hooks) this skill still works; it just does not self-restore after a reset.
+`## GodotPrompter` section in the project's agent instructions file (`CLAUDE.md`, or `AGENTS.md` /
+`GEMINI.md` in an agent-agnostic repo) is what subagents read. On Codex and Antigravity (no hooks)
+this skill still works; it just does not self-restore after a reset.
 
 ## 4. Calibrating depth
 
