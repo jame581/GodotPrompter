@@ -284,6 +284,9 @@ test('handles a version-only features array', () => {
 });
 
 // A sanitized environment must cost the mentor lookup, never the session card.
+// Meaningful on Linux/macOS only: Git Bash repopulates HOME from USERPROFILE, so on Windows this
+// exercises the ordinary path. It is CI (Ubuntu) that makes it a real test — do not trust a local
+// pass as evidence the HOME-less branch works.
 test('still emits the session card when HOME is unset', () => {
   const { base, cwd } = makeProject();
   const env = { ...process.env, CLAUDE_PLUGIN_ROOT: ROOT };
@@ -440,6 +443,43 @@ test('names CLAUDE.md when the project has no instructions file at all', () => {
   const offerLine = ctxOf(runHook(cwd)).split('\n').find(l => OFFER.test(l));
   assert.ok(offerLine, 'expected an offer line');
   assert.match(offerLine, /CLAUDE\.md/);
+  rmSync(base, { recursive: true, force: true });
+});
+
+// The agent is told to WRITE this path. Under Git Bash the project root is "/c/Users/you/game"
+// and a native session root concatenates into "D:\game/CLAUDE.md" — neither is writable by the
+// Node-based tools the agent reaches for.
+test('names the file to write in a canonical path spelling', () => {
+  const { base, cwd } = makeProject();
+  const offerLine = ctxOf(runHook(cwd)).split('\n').find(l => OFFER.test(l));
+  assert.ok(offerLine, 'expected an offer line');
+  assert.ok(offerLine.includes(`${canonicalPath(base)}/CLAUDE.md`),
+    `expected ${canonicalPath(base)}/CLAUDE.md in: ${offerLine}`);
+  rmSync(base, { recursive: true, force: true });
+});
+
+// The #15 shape as it actually arrives on Windows: the host hands back a native path and the
+// instructions live at the session root, above the nested project.
+test('honours a session-root AGENTS.md given a native host project dir', () => {
+  const { base } = makeNestedProject('source');
+  writeFileSync(join(base, 'AGENTS.md'), '# Game\n\n## GodotPrompter\n\nAlready wired.\n');
+  const elsewhere = join(base, 'docs');
+  mkdirSync(elsewhere, { recursive: true });
+  assert.doesNotMatch(ctxOf(runHook(elsewhere, { CLAUDE_PROJECT_DIR: base })), OFFER);
+  rmSync(base, { recursive: true, force: true });
+});
+
+// Claude Code loads CLAUDE.md, not AGENTS.md. The remark is true only there; on Cursor and
+// Copilot it would be noise about a file the host never opens. Most fragile of the new branches.
+test('adds the @AGENTS.md remark on Claude Code only', () => {
+  const { base, cwd } = makeProject();
+  writeFileSync(join(base, 'AGENTS.md'), '# Game\n\nNo section here yet.\n');
+  const remark = /containing `@AGENTS\.md`/;
+  assert.match(ctxOf(runHook(cwd)), remark, 'missing on Claude Code');
+  const cursor = JSON.parse(runHook(cwd, { CURSOR_PLUGIN_ROOT: ROOT })).additional_context;
+  assert.doesNotMatch(cursor, remark, 'leaked into Cursor output');
+  const copilot = JSON.parse(runHook(cwd, { COPILOT_CLI: '1' })).additionalContext;
+  assert.doesNotMatch(copilot, remark, 'leaked into Copilot output');
   rmSync(base, { recursive: true, force: true });
 });
 

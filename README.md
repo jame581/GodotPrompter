@@ -126,10 +126,11 @@ bootstrap through `AGENTS.md` / `GEMINI.md`.
 > subagent dispatch. When none of a Godot project's agent instructions files has a
 > `## GodotPrompter` section, the agent offers once to add one, since that is what subagents read.
 > `CLAUDE.md`, `AGENTS.md`, `GEMINI.md`, `.github/copilot-instructions.md` and the `.claude/rules/`
-> and `.cursor/rules/` directories all count, and the offer names the file your repo already keeps
-> — an agent-agnostic project is never asked to start a `CLAUDE.md` it does not want. It never adds
-> the section silently, and a refusal is remembered in `~/.godot-prompter/state/` so you are asked
-> once, not at every session start.
+> and `.cursor/rules/` directories all count — whichever agent they belong to — and the offer names
+> the file your repo already keeps, so an agent-agnostic project is never asked to start a
+> `CLAUDE.md` it does not want. It never adds the section silently, and a refusal is remembered in
+> `~/.godot-prompter/state/` so you are asked once, not at every session start. Changed your mind?
+> Just ask the agent to add the section; nothing has to be un-set by hand.
 
 ### Mentor mode
 
