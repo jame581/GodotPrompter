@@ -203,19 +203,21 @@ is_ancestor_or_same() {  # $1 = candidate ancestor, $2 = candidate descendant
   [ "$1" = "$2" ] || [ "${2#"$1"/}" != "$2" ]
 }
 
-# Which file the offer should NAME. A repo that has an AGENTS.md and no CLAUDE.md keeps its
-# instructions agent-agnostic on purpose — naming CLAUDE.md there asks the user to start a second
-# instructions file they deliberately do not maintain.
+# Which file the offer should NAME, most preferred first — whichever of these the repo already
+# keeps. Naming a file it does not keep asks the user to start a second instructions file they
+# deliberately do not maintain, which is #15 again, just aimed at a different host.
+# CLAUDE.local.md is detected but never a target: it is personal and gitignored, so a team-shared
+# routing rule does not belong there. `CLAUDE.md` is also the fallback when the repo keeps none.
+OFFER_TARGETS=(CLAUDE.md .claude/CLAUDE.md AGENTS.md GEMINI.md .github/copilot-instructions.md)
+
 offer_target_file() {
   local dir="$1" f
-  if [ ! -f "${dir}/CLAUDE.md" ] && [ ! -f "${dir}/.claude/CLAUDE.md" ]; then
-    for f in AGENTS.md GEMINI.md; do
-      if [ -f "${dir}/${f}" ]; then
-        printf '%s' "$f"
-        return 0
-      fi
-    done
-  fi
+  for f in "${OFFER_TARGETS[@]}"; do
+    if [ -f "${dir}/${f}" ]; then
+      printf '%s' "$f"
+      return 0
+    fi
+  done
   printf 'CLAUDE.md'
 }
 
@@ -246,12 +248,18 @@ if [ -z "$OFFER_DECLINED" ] \
   # a native SESSION_ROOT concatenated with a filename yields the mixed "D:\game/CLAUDE.md".
   offer_path="$(canonical_path "$INSTRUCTIONS_DIR")/${offer_file}"
   OFFER_LINE="No agent instructions file in this project carries a \`## GodotPrompter\` section (\`CLAUDE.md\`, \`AGENTS.md\`, \`GEMINI.md\`, \`.github/copilot-instructions.md\` and the rule directories were all checked). Subagents do not receive this card — that file is what they read. Offer once, and only with the user's agreement, to add a short section telling agents to check for a matching \`godot-prompter:*\` skill before implementing any Godot system; add it to \`${offer_path}\`. Do not add it silently."
-  # Claude Code reads CLAUDE.md only. Say so where it matters, and nowhere else — on Copilot or
-  # Cursor the remark would be noise about a file the host never opens.
-  if [ "$offer_file" != 'CLAUDE.md' ] && [ -n "${CLAUDE_PLUGIN_ROOT:-}" ] \
-     && [ -z "${CURSOR_PLUGIN_ROOT:-}" ] && [ -z "${COPILOT_CLI:-}" ]; then
-    OFFER_LINE="${OFFER_LINE} Claude Code itself loads \`CLAUDE.md\`, not \`${offer_file}\` — mention that a one-line \`CLAUDE.md\` containing \`@${offer_file}\` makes this repo's instructions load here too, but only add it if the user asks."
-  fi
+  # Claude Code loads the two CLAUDE.md locations and nothing else. Say so only when the target is
+  # neither of them, and only on Claude Code — on Copilot or Cursor the remark would be noise about
+  # a file the host never opens.
+  case "$offer_file" in
+    CLAUDE.md|.claude/CLAUDE.md) ;;
+    *)
+      if [ -n "${CLAUDE_PLUGIN_ROOT:-}" ] && [ -z "${CURSOR_PLUGIN_ROOT:-}" ] \
+         && [ -z "${COPILOT_CLI:-}" ]; then
+        OFFER_LINE="${OFFER_LINE} Claude Code itself loads \`CLAUDE.md\`, not \`${offer_file}\` — mention that a one-line \`CLAUDE.md\` containing \`@${offer_file}\` makes this repo's instructions load here too, but only add it if the user asks."
+      fi
+      ;;
+  esac
   if [ -n "$STATE_FILE" ]; then
     OFFER_LINE="${OFFER_LINE} If the user declines, do not ask again — merge \`\"section_offer\": \"declined\"\` into \`${STATE_FILE}\` (create the file and its directory if absent, and keep any existing keys), which suppresses this offer from the next session on."
   else
