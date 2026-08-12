@@ -358,9 +358,9 @@ with no `save-load` invocation is a FAIL.
 
 ---
 
-### Test 5.6: Subagent reach via CLAUDE.md
+### Test 5.6: Subagent reach via the agent instructions file
 
-**Setup:** Godot project whose `CLAUDE.md` has no `## GodotPrompter` section.
+**Setup:** Godot project whose instructions files have no `## GodotPrompter` section.
 
 **Prompt:** "build me an inventory system" — then let the agent dispatch subagents.
 
@@ -371,7 +371,26 @@ with no `save-load` invocation is a FAIL.
   matching skill
 
 **Pass criteria:** this is the only test covering subagents. The SessionStart hook does not reach
-them; CLAUDE.md is the mechanism.
+them; the instructions file is the mechanism.
+
+---
+
+### Test 5.6b: The offer respects an agent-agnostic repo (#15)
+
+**Setup:** Godot project with an `AGENTS.md` and no `CLAUDE.md`.
+
+**Variant A** — `AGENTS.md` already contains a `## GodotPrompter` section.
+
+**Expected:** no offer at all, on this session or any later one.
+
+**Variant B** — `AGENTS.md` has no such section. Decline the offer, then restart the session.
+
+**Expected:**
+- The offer names `AGENTS.md`, not a `CLAUDE.md` the repo does not keep
+- On Claude Code it may mention that a `CLAUDE.md` containing `@AGENTS.md` would load it here too,
+  as a suggestion only
+- After the refusal, `~/.godot-prompter/state/<hash>.json` carries `"section_offer": "declined"`,
+  any mentor keys in it survive, and the restarted session does not ask again
 
 ---
 

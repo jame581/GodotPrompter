@@ -4,6 +4,43 @@ All notable changes to GodotPrompter will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
+## [1.13.2] - 2026-08-12
+
+Patch release: one reported defect, three fixes. The SessionStart hook asked repositories that
+had already documented GodotPrompter to document it again, at every single session start. No
+skill was added or removed — still 55.
+
+### Fixed
+
+- **The hook nagged agent-agnostic repositories at every session start**
+  ([#15](https://github.com/jame581/GodotPrompter/issues/15)). The offer to add a
+  `## GodotPrompter` section — the mechanism that reaches subagents, which the SessionStart card
+  does not — probed `CLAUDE.md` and nothing else. A project that keeps its agent instructions in
+  `AGENTS.md` (Codex, Copilot CLI, Cursor, OpenCode) or `GEMINI.md` (Antigravity) was therefore
+  invisible to the check: the user had already written the section, and was asked to write it
+  again on every start, resume, `/clear` and compaction, into a file they deliberately do not
+  keep. The probe now reads every file a supported host loads — `CLAUDE.md`, `CLAUDE.local.md`,
+  `.claude/CLAUDE.md`, `AGENTS.md`, `GEMINI.md`, `.github/copilot-instructions.md` — plus the
+  `.claude/rules/` and `.cursor/rules/` directories, at both the project root and the session
+  root. The same widening landed in `godot-brainstorming`, whose Step 4 injection had the
+  identical single-filename check, and in the `godot-project-setup` checklist.
+- **The offer named a file the repository does not maintain.** When there is genuinely no section
+  anywhere, the offer now names the instructions file the repo already keeps — `AGENTS.md` or
+  `GEMINI.md` when there is no `CLAUDE.md` — instead of asking every project to start a second
+  one. On Claude Code, which loads `CLAUDE.md` only, the agent may point out that a one-line
+  `CLAUDE.md` containing `@AGENTS.md` would load it here too; that is a suggestion, never an
+  assumption, and the remark is omitted on hosts where it is irrelevant.
+- **"Offer once" was unenforceable.** `SessionStart` fires again on every start, resume, `/clear`
+  and compaction, and nothing recorded a refusal, so a user who declined was asked again forever.
+  A decline is now written as `"section_offer": "declined"` in the project's
+  `~/.godot-prompter/state/` file — the same per-project state mentor mode uses, merged rather
+  than clobbered — and the hook suppresses the offer from the next session on. Nothing is written
+  into the game repository.
+- **The state file path was named in a spelling agents cannot write to.** Under Git Bash `$HOME`
+  is `/c/Users/you`, so the mentor off-ramp and the new decline instruction both handed the agent
+  a path that every non-bash tool fails on. The hook now canonicalizes it (`C:/Users/you/…`),
+  matching the form already required of the project path used for the state key.
+
 ## [1.13.1] - 2026-07-31
 
 Patch release: two reported v1.13.0 hook defects, plus the C# parity triage those releases left

@@ -123,8 +123,13 @@ not yet confirmed. Codex and Antigravity have no hook mechanism and continue to 
 bootstrap through `AGENTS.md` / `GEMINI.md`.
 
 > The hook covers your session. **Subagents do not receive it** — `SessionStart` does not fire on
-> subagent dispatch. When a Godot project's `CLAUDE.md` has no `## GodotPrompter` section, the
-> agent offers once to add one, since that is what subagents read. It never adds it silently.
+> subagent dispatch. When none of a Godot project's agent instructions files has a
+> `## GodotPrompter` section, the agent offers once to add one, since that is what subagents read.
+> `CLAUDE.md`, `AGENTS.md`, `GEMINI.md`, `.github/copilot-instructions.md` and the `.claude/rules/`
+> and `.cursor/rules/` directories all count, and the offer names the file your repo already keeps
+> — an agent-agnostic project is never asked to start a `CLAUDE.md` it does not want. It never adds
+> the section silently, and a refusal is remembered in `~/.godot-prompter/state/` so you are asked
+> once, not at every session start.
 
 ### Mentor mode
 
