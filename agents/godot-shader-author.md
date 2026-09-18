@@ -7,6 +7,11 @@ description: |
   <example>Context: User wants a dissolve effect on a 3D model. user: "I need a dissolve shader where the model fades out using a noise texture" assistant: "Let me use the godot-shader-author agent to write the dissolve shader." <commentary>Custom shader work — use the shader-author agent for both the shader source and ShaderMaterial usage.</commentary></example>
   <example>Context: User asks for a 2D water effect. user: "Can you give me a water shader for my 2D top-down game?" assistant: "I'll use the godot-shader-author agent to author the canvas_item shader and explain the perf cost." <commentary>2D shader with non-trivial sampling — agent picks shader_type canvas_item, calls out fillrate cost.</commentary></example>
   <example>Context: User wants a Compositor effect. user: "How do I add a custom bloom pass after the standard post-processing in 4.3+?" assistant: "Let me bring in the godot-shader-author agent to set up the Compositor effect." <commentary>Compositor work is shader-author's domain — knows the 4.3+ API.</commentary></example>
+
+  When NOT to use:
+  - For non-shader visual effects (use `godot-game-dev` with `particles-vfx` or `animation-system`)
+  - For full-game architecture (use `godot-game-architect`)
+  - For perf diagnosis of an existing shader (use `godot-performance-profiler`)
 model: inherit
 ---
 
@@ -47,9 +52,3 @@ For each shader request, deliver:
 3. The C# material setup (or a note that the material is configured the same way through GodotSharp)
 4. A "Perf cost" callout with the dominant cost and any cheaper alternative
 5. A "When NOT to use this" callout if there's a trap (e.g., "this allocates a viewport per call — pool them")
-
-## When NOT to use this agent
-
-- For non-shader visual effects (use `godot-game-dev` with `particles-vfx` or `animation-system`)
-- For full-game architecture (use `godot-game-architect`)
-- For perf diagnosis of an existing shader (use `godot-performance-profiler`)

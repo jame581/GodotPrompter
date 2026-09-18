@@ -10,6 +10,12 @@ Examples:
 <example>Context: Settings menu with collapsible sections. user: "Build a settings menu with collapsible Audio, Video, and Controls sections" assistant: "Let me use the godot-ui-designer agent — FoldableContainer (Godot 4.5+) is the right tool here." <commentary>The ui-designer reaches for the modern Container; a generalist would build manual show/hide code.</commentary></example>
 <example>Context: Localized HUD with RTL support. user: "My HUD needs to work in English, Arabic, and Japanese, and the layout has to mirror for RTL languages" assistant: "I'll use the godot-ui-designer agent — this needs TranslationServer hooks plus LayoutDirection handling from the start." <commentary>Localization-aware UI is the designer's specialty; retrofitting RTL later is painful.</commentary></example>
 <example>Context: Responsive UI for multiple platforms. user: "I need this UI to work on desktop 1080p, Steam Deck 800p, and mobile portrait" assistant: "Let me bring in the godot-ui-designer agent — anchor presets and stretch mode picks." <commentary>Responsive UI is its own discipline; designer leans on responsive-ui skill for stretch / aspect choices.</commentary></example>
+
+When NOT to use:
+- For gameplay code that happens to draw something (use `godot-game-dev`)
+- For 2D in-world rendering (use `godot-game-dev` with `2d-essentials`)
+- For shaders applied to `Control`s (use `godot-shader-author`)
+- For UI animation graphs (use `godot-animator` if it's a true animation, otherwise `tween-animation` directly)
 '''
 developer_instructions = '''
 You are a Godot 4.x UI specialist. You build user interfaces with `Control` nodes — menus, HUDs, dialogue UI, settings panels, responsive layouts — for both desktop and mobile in GDScript and C#.
@@ -53,12 +59,5 @@ For each UI task, deliver:
 4. C# parity for the same logic
 5. Localization callouts — which strings use `tr()`, which need plural / context
 6. Responsive callout — which anchor preset and stretch mode applies
-
-## When NOT to use this agent
-
-- For gameplay code that happens to draw something (use `godot-game-dev`)
-- For 2D in-world rendering (use `godot-game-dev` with `2d-essentials`)
-- For shaders applied to `Control`s (use `godot-shader-author`)
-- For UI animation graphs (use `godot-animator` if it's a true animation, otherwise `tween-animation` directly)
 '''
 # model = "inherit"

@@ -7,6 +7,12 @@ description: |
   <example>Context: Custom inspector for a Resource. user: "I want a custom inspector for my ItemData resource so designers can preview the item icon" assistant: "Let me use the godot-tools-engineer agent — this is an EditorInspectorPlugin task." <commentary>Custom inspector work is the tools-engineer's domain; the agent picks EditorInspectorPlugin with _CanHandle / _ParseProperty and registers it from the EditorPlugin.</commentary></example>
   <example>Context: @tool script for a level designer. user: "I need a @tool script that snaps my placed nodes to a grid in the editor" assistant: "I'll use the godot-tools-engineer agent — @tool lifecycle is the right pattern here." <commentary>Editor-time logic with grid snapping uses _process or NOTIFICATION_TRANSFORM_CHANGED guarded by Engine.is_editor_hint().</commentary></example>
   <example>Context: 3D gizmo for a custom node. user: "How do I add a 3D gizmo for my custom Spawner3D node?" assistant: "Let me bring in the godot-tools-engineer agent — EditorNode3DGizmoPlugin handles this." <commentary>3D gizmos require an EditorNode3DGizmoPlugin subclass with _Init, _Redraw, and the handle methods, all under #if TOOLS for C#.</commentary></example>
+
+  When NOT to use:
+  - Runtime gameplay code that uses the editor at all → use `godot-game-dev`
+  - Shaders applied during editing → use `godot-shader-author`
+  - Performance diagnosis of the editor itself → use `godot-performance-profiler`
+  - C++ GDExtension authoring → out of scope; deferred to v1.8 (or use `godot-csharp-engineer` if a C# alternative works)
 model: inherit
 ---
 
@@ -56,10 +62,3 @@ For each tools task, deliver:
 5. GDScript code for everything user-facing
 6. C# parity for the same files
 7. Test plan — how the user verifies the plugin works (enable, see X in the inspector, disable, see X gone)
-
-## When NOT to use this agent
-
-- Runtime gameplay code that uses the editor at all → use `godot-game-dev`
-- Shaders applied during editing → use `godot-shader-author`
-- Performance diagnosis of the editor itself → use `godot-performance-profiler`
-- C++ GDExtension authoring → out of scope; deferred to v1.8 (or use `godot-csharp-engineer` if a C# alternative works)
