@@ -1,0 +1,51 @@
+name: Validate
+
+# The checks release.yml runs on a tag, run on every PR and every push to master.
+# release.yml is tag-triggered, so before this workflow the only check on a PR was the
+# plugin scan: a broken validator rule or a failing hook test reached a reviewer with
+# nothing to show it, and surfaced only when someone cut a release.
+
+on:
+  push:
+    branches: [master]
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  validate:
+    name: Validate skills and hooks
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
+        with:
+          node-version: '26'
+          package-manager-cache: false
+
+      # No install step: the scripts and tests are stdlib-only. The tokenizers in
+      # optionalDependencies are needed by count-tokens.mjs alone, which does not run here.
+
+      - name: Run skill validator
+        run: node scripts/validate-skills.mjs
+
+      # `npm test` rather than the individual suites on purpose: it chains whatever this
+      # branch defines, so a suite added to package.json is covered here without editing
+      # this file. Today that is test:hooks and test:validator.
+      - name: Run test suites
+        run: npm test
+
+      # Self-test: the fixtures under scripts/fixtures/ are deliberately broken (over budget,
+      # bad frontmatter, broken cross-ref). If the validator ever stops catching them, its rules
+      # have been silently disabled — fail loudly rather than report a green PR that isn't checked.
+      - name: Validator self-test (fixtures must fail)
+        run: |
+          if node scripts/validate-skills.mjs --include-fixtures; then
+            echo "::error::Validator passed on the broken fixtures — its rules are not being enforced."
+            exit 1
+          fi
+          echo "Validator correctly rejected the fixtures."
