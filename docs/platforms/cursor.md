@@ -26,7 +26,7 @@ Repository-based path:
 
 ## Current status
 
-- Cursor hook registration ships in `/home/runner/work/GodotPrompter/GodotPrompter/hooks/hooks-cursor.json`
+- Cursor hook registration ships in `hooks/hooks-cursor.json`
 - The repo has automated tests for Cursor-shaped hook output
 - End-to-end installed-plugin confirmation is still pending
 
@@ -69,8 +69,8 @@ section, but `AGENTS.md` also works for cross-host repos.
 ### Routing works only when you name a skill directly
 
 - Re-run the open-ended routing checks from
-  `/home/runner/work/GodotPrompter/GodotPrompter/tests/agent-integration/host-smoke-matrix.json`
-- Record failures in `/home/runner/work/GodotPrompter/GodotPrompter/tests/agent-integration/RESULTS.md`
+  `tests/agent-integration/host-smoke-matrix.json`
+- Record failures in `tests/agent-integration/RESULTS.md`
 
 ### A nested Godot project is missed
 

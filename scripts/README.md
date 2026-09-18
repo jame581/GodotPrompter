@@ -73,3 +73,12 @@ If `MARKETPLACE_TOKEN` is not set, the marketplace step logs a warning and is sk
 ### Setting up MARKETPLACE_TOKEN
 
 Create a fine-grained PAT with `pull_requests:write` and `contents:write` scoped to `jame581/skillsmith` and `jame581/godot-prompter-marketplace`. Add it as the repo secret `MARKETPLACE_TOKEN` under Settings → Secrets and variables → Actions.
+
+## lib/frontmatter.mjs
+
+Shared YAML frontmatter parser used by `sync-codex-agents.mjs` and `generate-skill-index.mjs`.
+Unlike the presence-checking parser inside `validate-skills.mjs`, these two write their output to
+disk, so block scalars must round-trip verbatim — blank lines are paragraph breaks and relative
+indentation is Markdown list nesting. `tests/validator/frontmatter.test.mjs` pins that behaviour;
+the generators' own `--check` tests compare generated output against generated output and cannot
+catch a parser that silently drops content.

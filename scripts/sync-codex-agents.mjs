@@ -2,6 +2,7 @@
 import { mkdirSync, readFileSync, readdirSync, statSync, writeFileSync, existsSync, rmSync } from 'node:fs';
 import { join, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
+import { parseFrontmatter } from './lib/frontmatter.mjs';
 
 const ROOT = resolve(fileURLToPath(new URL('..', import.meta.url)));
 const AGENTS_DIR = join(ROOT, 'agents');
@@ -9,35 +10,6 @@ const CODEX_DIR = join(ROOT, '.codex', 'agents', 'godot-prompter');
 const args = new Set(process.argv.slice(2));
 const writeMode = args.has('--write');
 const checkMode = args.has('--check') || !writeMode;
-
-function parseFrontmatter(content) {
-  const match = content.match(/^---\r?\n([\s\S]*?)\r?\n---\r?\n?([\s\S]*)$/);
-  if (!match) throw new Error('Missing YAML frontmatter');
-  const lines = match[1].split(/\r?\n/);
-  const data = {};
-  let currentKey = null;
-  let block = [];
-  for (const line of lines) {
-    const blockStart = line.match(/^([a-zA-Z_-]+):\s*\|\s*$/);
-    const flat = line.match(/^([a-zA-Z_-]+):\s*(.*)$/);
-    if (blockStart) {
-      if (currentKey) data[currentKey] = block.join('\n').trimEnd();
-      currentKey = blockStart[1];
-      block = [];
-    } else if (currentKey && /^\s+/.test(line)) {
-      block.push(line.replace(/^\s+/, ''));
-    } else if (flat) {
-      if (currentKey) {
-        data[currentKey] = block.join('\n').trimEnd();
-        currentKey = null;
-        block = [];
-      }
-      data[flat[1]] = flat[2].trim();
-    }
-  }
-  if (currentKey) data[currentKey] = block.join('\n').trimEnd();
-  return { data, body: match[2].replace(/^\n/, '') };
-}
 
 function encodeTomlMultiline(text) {
   if (text.includes("'''")) {

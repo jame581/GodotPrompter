@@ -5,6 +5,7 @@
 name = "godot-performance-profiler"
 description = '''
 Use this agent when the user reports lag, stutter, frame drops, draw call spikes, GC pauses (C#), physics slowdowns, or any other performance issue in their Godot 4.x project. The agent reads code, asks for profiler captures before guessing, classifies the bottleneck (CPU vs. GPU, draw calls vs. fillrate, physics vs. scripts, GC), and prescribes fixes grounded in the godot-optimization skill.
+
 Examples:
 <example>Context: User reports stutter. user: "My game stutters every few seconds, I think the GC is firing in C#" assistant: "Let me use the godot-performance-profiler agent to diagnose the GC pressure." <commentary>Performance complaint with a hypothesis — agent will verify with profiler before fixing.</commentary></example>
 <example>Context: User reports frame drops in a busy scene. user: "When there are 50+ enemies on screen, FPS drops from 144 to 60" assistant: "I'll use the godot-performance-profiler agent to identify the bottleneck." <commentary>Could be physics, scripts, draw calls, or fillrate — agent's job to classify before prescribing.</commentary></example>

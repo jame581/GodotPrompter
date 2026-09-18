@@ -9,7 +9,7 @@
   "scripts": {
     "test:hooks": "node --test tests/hooks/session-start.test.mjs",
     "test:validator": "node --test tests/validator/parity-exemption.test.mjs tests/validator/nonexistent-api.test.mjs tests/validator/scanner-patterns.test.mjs",
-    "test:metadata": "node --test tests/validator/agent-mirror-sync.test.mjs tests/validator/skill-index.test.mjs tests/validator/platform-metadata.test.mjs",
+    "test:metadata": "node --test tests/validator/frontmatter.test.mjs tests/validator/agent-mirror-sync.test.mjs tests/validator/skill-index.test.mjs tests/validator/platform-metadata.test.mjs",
     "test": "npm run test:hooks && npm run test:validator && npm run test:metadata",
     "validate": "node scripts/validate-skills.mjs",
     "sync:codex-agents": "node scripts/sync-codex-agents.mjs --write",

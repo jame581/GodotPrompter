@@ -5,6 +5,7 @@
 name = "godot-shader-author"
 description = '''
 Use this agent when the user needs to write a custom Godot shader, post-processing effect, screen-space effect, custom material, visual shader graph, or Compositor effect. The agent is a specialist in the Godot shader language, knows when to reach for visual shaders vs. text shaders, and picks the right shader type for the task.
+
 Examples:
 <example>Context: User wants a dissolve effect on a 3D model. user: "I need a dissolve shader where the model fades out using a noise texture" assistant: "Let me use the godot-shader-author agent to write the dissolve shader." <commentary>Custom shader work — use the shader-author agent for both the shader source and ShaderMaterial usage.</commentary></example>
 <example>Context: User asks for a 2D water effect. user: "Can you give me a water shader for my 2D top-down game?" assistant: "I'll use the godot-shader-author agent to author the canvas_item shader and explain the perf cost." <commentary>2D shader with non-trivial sampling — agent picks shader_type canvas_item, calls out fillrate cost.</commentary></example>

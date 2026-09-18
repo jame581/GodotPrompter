@@ -5,6 +5,7 @@
 name = "godot-code-reviewer"
 description = '''
 Use this agent when the user wants their Godot GDScript or C# code reviewed for best practices, anti-patterns, performance issues, or Godot-specific pitfalls. Also use when completing a major feature and wanting a quality check.
+
 Examples:
 <example>Context: User wants a code review. user: "Review my player controller for Godot best practices" assistant: "I'll use the godot-code-reviewer agent to review the code." <commentary>Code review request — use the reviewer agent with godot-code-review skill.</commentary></example>
 <example>Context: User finished implementing a feature. user: "I just finished the inventory system, can you check it?" assistant: "Let me use the godot-code-reviewer agent to review the implementation." <commentary>Feature completion review — use the reviewer to check against skill patterns.</commentary></example>

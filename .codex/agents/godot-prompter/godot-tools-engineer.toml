@@ -5,6 +5,7 @@
 name = "godot-tools-engineer"
 description = '''
 Use this agent for Godot 4.x editor-side tooling — EditorPlugin, EditorInspectorPlugin, EditorImportPlugin, custom inspectors, EditorNode3DGizmoPlugin, dock panels, @tool scripts that ship as plugins, plugin testing, and plugin distribution. Works in both GDScript and C# (with #if TOOLS guards). GDExtension (C++ native modules) is explicitly out of scope and handled by a different agent.
+
 Examples:
 <example>Context: Custom inspector for a Resource. user: "I want a custom inspector for my ItemData resource so designers can preview the item icon" assistant: "Let me use the godot-tools-engineer agent — this is an EditorInspectorPlugin task." <commentary>Custom inspector work is the tools-engineer's domain; the agent picks EditorInspectorPlugin with _CanHandle / _ParseProperty and registers it from the EditorPlugin.</commentary></example>
 <example>Context: @tool script for a level designer. user: "I need a @tool script that snaps my placed nodes to a grid in the editor" assistant: "I'll use the godot-tools-engineer agent — @tool lifecycle is the right pattern here." <commentary>Editor-time logic with grid snapping uses _process or NOTIFICATION_TRANSFORM_CHANGED guarded by Engine.is_editor_hint().</commentary></example>

@@ -50,12 +50,11 @@ function makeNestedProject(subpath, features = 'PackedStringArray("4.5", "Forwar
   return { base, projectDir };
 }
 
-function ctxOf(out) {
-  const parsed = JSON.parse(out);
-  return parsed.hookSpecificOutput?.additionalContext
-    ?? parsed.additionalContext
-    ?? parsed.additional_context;
-}
+// runHook() forces the Claude Code host env, so the hook must emit the nested Claude shape here.
+// Accepting the Cursor/Copilot shapes as fallbacks would let a shape regression pass unnoticed —
+// Claude Code ignores a bare `additionalContext`, so the card would silently never load. The other
+// two shapes have their own dedicated assertions below.
+function ctxOf(out) { return JSON.parse(out).hookSpecificOutput.additionalContext; }
 
 // The one clause every shape of the instructions-section offer carries. Matching on it rather
 // than on a file name keeps these tests honest now that the offer names AGENTS.md too.

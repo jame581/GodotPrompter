@@ -74,4 +74,4 @@ Run these after install or after a release that adds new skills:
 
 - Update the installed plugin: `copilot plugin update godot-prompter`
 - Re-run the post-release discoverability smoke check from
-  `/home/runner/work/GodotPrompter/GodotPrompter/tests/agent-integration/host-smoke-matrix.json`
+  `tests/agent-integration/host-smoke-matrix.json`

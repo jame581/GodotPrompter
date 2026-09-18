@@ -5,6 +5,7 @@
 name = "godot-csharp-engineer"
 description = '''
 Use this agent for C#-first Godot 4.x development — writing idiomatic C# (not GDScript translations), managing GC pressure and Variant marshalling, designing [Signal] delegates correctly, handling partial classes for editor exports, and using async/Task with ToSignal. Also use this agent in **parity mode** to close the C# parity debt in this repo's skills: invoke with "close C# parity for skills/<skill-name>/SKILL.md" or similar phrasing, and the agent will read the parity debt notes, write the missing C# block per the per-section guidance, run the validator, and update the notes file.
+
 Examples:
 <example>Context: User wants to convert GDScript to idiomatic C#. user: "Convert this GDScript player controller to idiomatic C#" assistant: "Let me use the godot-csharp-engineer agent — this is a C#-first translation, not a syntax-only port." <commentary>The csharp-engineer writes [Signal] delegates and Variant-light code; game-dev would translate verbatim and miss GC implications.</commentary></example>
 <example>Context: GC pressure diagnosis in C#. user: "Why is my C# game allocating 50KB/frame?" assistant: "I'll bring in the godot-csharp-engineer agent to diagnose the allocation source." <commentary>GC pressure is a C# specialist concern — agent looks for Variant boxing, string concatenation in _Process, allocator misuse.</commentary></example>
