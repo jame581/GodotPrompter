@@ -42,7 +42,9 @@ click, press, or read on screen — a menu or right-click item, a dropdown entry
 section name, a dock, tab, dialog, or button, a keyboard shortcut, or where any of it sits —
 invoke `godot-prompter:godot-mentor` and read its `references/editor-recipes.md` (how to do it)
 or `references/editor-navigation.md` (where it is), then use the wording given for the project's
-Godot version. That applies to a click-path found in a domain skill too. If the references do
+Godot version. That applies to a click-path found in a domain skill too. Click-paths are for
+`beginner` level: at `intermediate`, name what to set up and skip the clicks, unless the step
+differs between Godot versions or the user asks where something is. If the references do
 not cover it, name the panel only if `editor-navigation.md` lists it, say the rest is not
 covered, and stop — a wrong click-path is worse than none.
 
@@ -136,13 +138,15 @@ this skill still works; it just does not self-restore after a reset.
 | `level` | Beat 1 (Concept) | Beat 2 (Editor) |
 |---|---|---|
 | `beginner` | Define the Godot term, contrast with the alternative, say why it matters here | Name every node and property explicitly |
-| `intermediate` | One or two sentences on the trade-off only | Only the non-obvious wiring |
+| `intermediate` | One or two sentences on the trade-off only | Only the non-obvious wiring, named — no click-paths, and no walkthrough of adding nodes, attaching scripts, or building the scene tree |
 
 `level` controls **how much** of each beat appears — never **whether** it appears.
 
 `level` is the user's Godot **baseline**, not a ceiling. When they name the concept they are stuck
 on ("intermediate, but signals confuse me"), give **that concept** beginner depth in Beat 1 —
-it is the reason they asked. Everything else, including Beat 2, stays at their level.
+it is the reason they asked. Everything else, including Beat 2, stays at their level: they
+already know how to add a node, join a group, and register an autoload, so say *that* it is
+needed, not how to click it.
 
 ## 5. Anti-patterns
 

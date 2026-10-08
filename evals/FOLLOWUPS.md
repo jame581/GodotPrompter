@@ -80,6 +80,35 @@ mode was undisturbed by the new routing.
   until then, case 01's `beat-why` figures from before this reword are not comparable to figures
   after it.
 
+### v1.15.0 re-baseline — 2026-10-08 (`results/2026-10-08T16-30-11-748Z`, then `results/2026-10-08T21-22-39-612Z`)
+
+First full mentor runs since the Editor beat was relaxed to reference click-paths. Both clean
+(0 errors/timeouts), negatives Δ 0 in both.
+
+| Case | Before: with | without | Δ | After: with | without | Δ |
+|---|---|---|---|---|---|---|
+| 01-teach-double-dash | 0.96 | 0.60 | +0.36 | 0.98 | 0.64 | +0.33 |
+| 02-guide-health-bar | 1.00 | 0.69 | +0.31 | 1.00 | 0.60 | +0.40 |
+| 03-understand-signals | 0.80 | 0.62 | +0.18 | 0.93 | 0.67 | +0.27 |
+| 04-learning-3d-pickup | 0.87 | 0.58 | +0.29 | 0.98 | 0.56 | +0.42 |
+| 05-csharp-learner-save | 0.98 | 0.82 | +0.16 | 1.00 | 0.92 | +0.08 |
+| Mean Δ / cost | | | +0.18 / $12.15 | | | +0.21 / $11.76 |
+
+The eval stores votes, not reasons; causes below come from re-asking a Sonnet judge to explain
+each failing verdict (`claude -p --model sonnet`, rubric + answer).
+
+| Before-run failure | Cause | Change |
+|---|---|---|
+| `no-menu-paths` 9/15 with-arm (13/15 without) | Judge called the 4.7 **Select Script/Scene** autoload button invented; two verdicts flipped on re-ask | Grader checks existence only for the places it lists and accepts button, field, and dialog names inside them |
+| 03 `signal-concept` 0/3 | Intermediate user got click-by-click group, autoload, and signal-dock steps — the click-path relaxation ignored `level` | `godot-mentor` card and §4: click-paths are beginner-level; intermediate names the setup |
+| 04 `area3d-pickup` 1/3 | Answers said "you don't need to change any collision layers"; `physics-system` §4 never tied `body_entered` to mask/layer | `physics-system` §4 names `monitoring` and mask-includes-layer |
+| 01 `no-scope-creep` 2/3 | Judge counted the one-air-dash limit as an extra mechanic, against the skill's own scope rule | Grader: limits that stop a feature breaking in play are part of it |
+
+After-run with-arm failures, each 1/3: 01 `beat-why` (split vote), 03 `signal-concept` (passed on
+re-ask — noise), 03 `beat-one-next`, 04 `no-menu-paths` (real: the answer left a visible
+self-correction, "Click **3D Scene**? No:", in a step). `no-menu-paths` after: 14/15 with-arm.
+`no-menu-paths` and `no-scope-creep` figures from before this entry are not comparable to after.
+
 ### Root causes (measured before editing)
 
 | # | Root cause | Change |
@@ -119,7 +148,7 @@ mode was undisturbed by the new routing.
   and menu items that do not exist. It cannot read the reference files, so it judges against
   the menu, dock, and panel names listed in its own prompt, not against the references
   themselves; a wrong item under a real menu can pass. Positions pass when attached to a named control, because the editor references themselves give such positions. Figures for this grader before and after
-  are not comparable. **Pending:** a full mentor run to re-baseline it — not run during v1.15.0.
+  are not comparable. Re-baselined and loosened again on 2026-10-08 — see the v1.15.0 re-baseline entry.
 - Graders read `last_message`; if the answer is split across messages (follow-up 4) the run scores
   low even though the user saw the lesson. Do NOT switch to `trace` — regexes would match the
   SKILL.md text itself.
