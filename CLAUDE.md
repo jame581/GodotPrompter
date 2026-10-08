@@ -17,7 +17,7 @@ This is a **documentation/skills repository**. There is no application build/lin
 ## Conventions
 
 - Skills use Claude Code tool names as the canonical reference
-- Tool mapping files live in `skills/using-godot-prompter/references/` (Antigravity, Codex, Copilot, Cursor); OpenCode's is in `.opencode/`, Grok Build has none
+- Tool mapping files live in `skills/using-godot-prompter/references/` (Antigravity, Codex, Copilot, Cursor, plus the legacy `gemini-tools.md`); OpenCode's is in `.opencode/`, Grok Build has none
 - GDScript follows the [Godot style guide](https://docs.godotengine.org/en/stable/tutorials/scripting/gdscript/gdscript_styleguide.html) — snake_case functions/variables, PascalCase classes
 - C# follows [Godot C# conventions](https://docs.godotengine.org/en/stable/tutorials/scripting/c_sharp/c_sharp_style_guide.html) — PascalCase methods matching the Godot API
 - Target Godot 4.3+ minimum — no deprecated methods
@@ -27,7 +27,8 @@ This is a **documentation/skills repository**. There is no application build/lin
 The layout is self-evident from `ls`; these constraints are not:
 
 - **SKILL.md size:** keep under 16 KB. `validate-skills.mjs` errors at ≥ 16 KB (fails CI) and warns at ≥ 15.5 KB. Overflow goes in `references/` as load-on-demand deep dives (Pattern X).
-- **Two hook directories:** `hooks/` (root) ships to plugin users — the SessionStart routing card. `scripts/hooks/` is repo development tooling wired via `.claude/settings.json`, which runs `validate-skill-on-edit.mjs` after every Edit/Write. Never merge them.
+- **Two hook directories:** `hooks/` (root) ships to plugin users — the SessionStart routing card. `scripts/hooks/` is repo development tooling wired via `.claude/settings.json`: `validate-skill-on-edit.mjs` re-validates after an Edit/Write of `skills/*/SKILL.md` or `agents/*.md` only, and surfaces errors, not warnings — after editing a `references/*.md`, run the validator yourself. Never merge them.
+- **No dependencies or lockfile in the repo root.** A lockfile beside the root `package.json` makes Claude Code run a package install at plugin install, which Anthropic's plugin directory holds. Tokenizer dependencies live in `scripts/` (`npm ci --prefix scripts`). The plugin scan's two medium missing-lockfile findings are accepted — do not "fix" them.
 - **Card regions:** `using-godot-prompter` (`SESSION-CARD`) and `godot-mentor` (`MENTOR-CARD`) contain marker-delimited regions the hook injects verbatim. `validate-skills.mjs` enforces markers, uniqueness, non-emptiness, and a 3 KB cap. Edit the region, never a copy — and never paste the marker strings into a fenced example, which trips `card-marker-duplicate`.
 - **The hook does not reach subagents.** `SessionStart` fires on startup/resume/clear/compact only. A `## GodotPrompter` section in the project's agent instructions file is what subagents read. The offer to add one probes every file a supported host loads (`CLAUDE.md`, `AGENTS.md`, `GEMINI.md`, `.github/copilot-instructions.md`, the rules directories) and is suppressed for good by `"section_offer": "declined"` in the project's `~/.godot-prompter/state/` file — probing one filename nagged agent-agnostic repos forever (#15). The probe is deliberately host-agnostic: a section in *any* of those files silences the offer on *every* host, trading a subagent that may stay uninstructed on a host that does not read that file against nagging a repo that has already documented the rule.
 - **Hook changes require `npm run test:hooks`.** `node --test tests/hooks/` does *not* work on Node 24 or later (still true on 26, which CI uses) — a directory argument is imported as a module.
@@ -51,7 +52,7 @@ Before merging skill changes:
 
 `node scripts/validate-skills.mjs` already enforces frontmatter, cross-references, the size budget, and C# parity — run it rather than checking those by hand. For parity exemptions (`csharp-parity: n/a` markers) see **authoring-godot-prompter-skills**.
 
-Run `npm test` (hooks + validator + generated-metadata checks) after touching `scripts/validate-skills.mjs` — `tests/validator/` covers the parity marker, including the error path that can fail a release tag.
+Run `npm test` (hooks + validator + generated-metadata checks) after touching `scripts/validate-skills.mjs` — `tests/validator/` covers the parity marker, including the error path that can fail a release tag. CI also runs `node scripts/validate-skills.mjs --include-fixtures` and requires it to *fail*: `scripts/fixtures/` holds deliberately broken skills, so never repair them, and add one when adding a rule.
 
 `evals/` holds `claude plugin eval` suites — mentor cases `0*`, grill cases `grill-*`; `--case` selects one. A full mentor run is ~50 min and ~$15; the judge must stay `--judge-model sonnet` because the agent runs on Opus and must never self-judge.
 `evals/results/` is gitignored, so baselines and results live in `evals/FOLLOWUPS.md` and `evals/GRILL.md` instead.
