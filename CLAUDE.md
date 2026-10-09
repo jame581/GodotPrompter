@@ -54,5 +54,5 @@ Before merging skill changes:
 
 Run `npm test` (hooks + validator + generated-metadata checks) after touching `scripts/validate-skills.mjs` — `tests/validator/` covers the parity marker, including the error path that can fail a release tag. CI also runs `node scripts/validate-skills.mjs --include-fixtures` and requires it to *fail*: `scripts/fixtures/` holds deliberately broken skills, so never repair them, and add one when adding a rule.
 
-`evals/` holds `claude plugin eval` suites — mentor cases `0*`, grill cases `grill-*`; `--case` selects one. A full mentor run is ~50 min and ~$15; the judge must stay `--judge-model sonnet` because the agent runs on Opus and must never self-judge.
+`evals/` holds `claude plugin eval` suites — mentor cases `0*`, grill cases `grill-*`; `--case` selects one. The `*-in-project` cases stage a `project.godot` so the SessionStart card is injected — the only cases that measure the card — and need `--scaffold`; without it they silently run in an empty workspace. A full mentor run is ~50 min and ~$15; the judge must stay `--judge-model sonnet` because the agent runs on Opus and must never self-judge.
 `evals/results/` is gitignored, so baselines and results live in `evals/FOLLOWUPS.md` and `evals/GRILL.md` instead.

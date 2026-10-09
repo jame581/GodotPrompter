@@ -1,0 +1,12 @@
+schema_version: "1.0"
+name: grill-05-plain-request-in-project
+description: grill-04's plain request, run inside a scaffolded Godot project so the SessionStart card is injected. Needs --scaffold; without it the workspace is empty and this is grill-04 again.
+runs: 3
+context:
+  scaffold_script: scaffold.sh
+execution:
+  max_turns: 12
+  timeout_seconds: 600
+  allowed_tools: [Skill, Read, Glob, Grep]
+  prompt: |
+    Add a basic inventory system to my Godot 4 game.

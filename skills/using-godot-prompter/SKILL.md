@@ -74,6 +74,7 @@ Applies to subagents writing Godot code too.
 |---|---|
 | New system, or the requirements are unclear | `godot-grill` — settle decisions, then design and build |
 | Known change, explicit ask, bug fix | the domain skill below — build |
+| You have questions for the developer first | `godot-grill` — it sets how to ask |
 
 **Then report before you build:** name the pattern you picked, the alternative you rejected, and why. Skills carry trade-offs — surface them. The choice is the developer's.
 

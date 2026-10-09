@@ -94,6 +94,52 @@ $3.41, 736 s.
   grill effect. grill-04's with-arm failures asked "GDScript or C#?" and for the project path
   with no recommendation.
 
+## grill-05-plain-request-in-project — 2026-10-09
+
+grill-04's prompt and graders, run inside a scaffolded Godot project: `case.yaml` names a
+`context.scaffold_script` that writes a minimal `project.godot` and a `CLAUDE.md`, so the
+SessionStart hook injects the card. **This is the first case that measures the card.** It needs
+`--scaffold`; without the flag the workspace is empty and the case is grill-04 again.
+
+```
+claude plugin eval . --case "grill-05*" --scaffold --ablation with-without --judge-model sonnet --no-publish
+```
+
+About 10 min and $2.50-3.00 per run. Five card wordings, with-arm pass counts:
+
+| Card | Run | With | Without | `bounded-or-builds` | `no-fact-questions` |
+|---|---|---|---|---|---|
+| v1.15.0, unchanged | `results/2026-10-09T07-41-58-992Z` | 0.78 | 1.00 | 2/3 | 3/3 |
+| + "number the questions (5 at most) and give each your recommended answer" | `results/2026-10-09T07-52-17-933Z` | 0.78 | 0.78 | 3/3 | 1/3 |
+| + "Ask only what the developer alone can decide: a few numbered questions, each with your recommended answer" | `results/2026-10-09T08-04-29-116Z` | 0.56 | 1.00 | 2/3 | 1/3 |
+| + "Questions to ask first? Invoke `godot-grill` and ask them its way." (5 runs) | `results/2026-10-09T08-49-39-816Z` | 0.73 | 1.00 | 4/5 | 3/5 |
+| + routing-table row "You have questions for the developer first → `godot-grill` — it sets how to ask" (5 runs) | `results/2026-10-09T12-30-13-678Z` | 0.67 | 0.73 | 4/5 | 2/5 |
+
+Neither of the first two wordings was kept. The first made every question carry a
+recommendation but "5 at most" became a target, and two of three answers then asked an
+implementation choice ("an `Inventory` node on the player, or an autoload?"). The second did not
+stop that and one run asked six. With three runs per arm, one flipped verdict moves the score by
+0.11-0.22, so these differences are within noise.
+
+- The fourth wording routes instead of formatting: `trigger-grill` fired 2/5, and both of those
+  runs scored 1.00 with a textbook round (scope first, every question with a ➡️). The three
+  runs where it did not fire behaved like the unchanged card.
+- The fifth wording moves the same rule into the routing table. It fired 2/5 again, both at
+  1.00, so placement did not raise the rate: across both routing wordings `godot-grill` fired
+  4/10 and those four runs all scored 1.00. In the runs where it does not fire, the answer
+  frames itself as "here is my design, confirm it" rather than as having questions, and then
+  appends its own. **The table row is the wording kept in the card.**
+- `grill-06-neg-bugfix-in-project` (grill-03's bug report in a scaffolded 4.3 project, same run):
+  with 1.00, without 1.00, `trigger-grill` 0/5, `no-questions` 5/5 — the row does not send a bug
+  fix to the grill.
+- `trigger-grill` read "Skill called 0x" in all nine with-arm runs of the first three wordings: with the card injected, the
+  gate row ("New system, or the requirements are unclear") still does not route a plain request
+  to `godot-grill`. Every with-arm answer proposed a design and asked questions on its own.
+- The without arm passes `bounded-or-builds` by writing 7-10 KB of code on its own assumptions,
+  so a negative Δ here does not mean the plugin made the answer worse.
+- The scaffolded `CLAUDE.md` carries a `## GodotPrompter` section to silence the hook's
+  section offer; the without arm reads it too and remarks that the skill is not installed.
+
 ## Limitations
 
 - **grill-02 exercises nothing about the skill.** `trigger-grill` reads "Skill called 0x" in both
@@ -115,7 +161,7 @@ $3.41, 736 s.
   temp directory, so the SessionStart hook finds no `project.godot` and injects nothing: the agent
   picks skills from their `description` frontmatter alone. In a real Godot project the card's gate
   row ("New system, or the requirements are unclear") is what routes work to `godot-grill`, and no
-  eval can exercise it. Author decision (2026-09-20): keep routing as the card's job and leave the
+  eval could exercise it until grill-05 (above), which scaffolds a project. Author decision (2026-09-20): keep routing as the card's job and leave the
   description as it is — widening it to self-trigger would reach hook-less hosts but risks exactly
   the over-triggering this release set out to avoid. The card path is covered only by `TEST_PLAN`
   Test 6.4, which runs inside a real project; Tests 6.1 and 6.2 fire from an explicit grill
