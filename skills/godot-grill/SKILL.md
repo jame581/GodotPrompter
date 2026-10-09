@@ -73,6 +73,8 @@ in one message, numbered, each with a recommended answer:
 ```
 
 Then stop and wait. A question whose prerequisite is still open belongs to a later round.
+Everything you ask is in the numbered list: no closing "also, what genre…?" after it. Anything
+worth asking gets a number and a ➡️; anything else waits for the next round.
 
 **Round 1 is small and settles scope first** — scope prunes the most tree. A "throwaway slice"
 answer commonly ends the session at round 2.
@@ -130,6 +132,7 @@ message instead.
 | One question at a time | Order fixed in advance; questions arrive before their prerequisites; more turns | Ask the whole frontier |
 | Asking a fact | Spends the user's attention on the model's job | Look it up, decide, record |
 | A question with no recommendation | The user answers in a vacuum; rounds slow down | Every question gets ➡️ |
+| A trailing question outside the numbered list | It has no recommendation and is easy to miss when answering by number | Number it, or hold it for the next round |
 | Grilling a bug fix or an explicit ask | The over-correction this skill must not become | Route to the domain skill |
 | Re-asking a recorded decision | Feels like amnesia; wastes the record | Read where the project keeps decision records first |
 | Coding after the last answer | Skips the shared-understanding check | Confirm, then hand off |

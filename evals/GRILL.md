@@ -73,6 +73,27 @@ Ruling: not a grill effect — `trigger-grill` reads "Skill called 0x" in all th
 so the skill never fired for this prompt in either arm; the Δ is base-model run-to-run variance
 (one without-arm run failed both graders unanimously), not `godot-grill`'s doing.
 
+## v1.15.0 full run — 2026-10-08 (`results/2026-10-08T22-54-11-736Z`)
+
+First full grill run since the Green run. Clean (0 errors/timeouts), 24 runs, mean Δ +0.20,
+$3.41, 736 s.
+
+| Case | With | Without | Δ | Notes |
+|---|---|---|---|---|
+| grill-01-new-system | 0.92 | 0.33 | +0.58 | trigger-grill 3/3; `numbered-recommended` 2/3 |
+| grill-02-skip-questions | 0.89 | 0.89 | 0.00 | trigger-grill 0/3; `assumptions-stated` failed once in each arm |
+| grill-03-neg-bugfix | 1.00 | 1.00 | 0.00 | trigger-grill 0/3 — desired, does not fire |
+| grill-04-plain-request | 0.56 | 0.33 | +0.22 | trigger-grill 0/3; `bounded-or-builds` 1/3 with, 0/3 without |
+
+- grill-01's one `numbered-recommended` failure is real: after four numbered questions with
+  recommendations, the round ended on an unnumbered fifth ("Also, in a sentence: what genre…")
+  with no recommendation. `godot-grill` §3 now says everything asked is in the numbered list;
+  grill-01-only re-run (`results/2026-10-09T07-28-28-215Z`): with **1.00**, without 0.42,
+  Δ +0.58, all graders 3/3, $0.81.
+- grill-02 and grill-04 still never fire the skill, so the Rulings above stand: their Δ is not a
+  grill effect. grill-04's with-arm failures asked "GDScript or C#?" and for the project path
+  with no recommendation.
+
 ## Limitations
 
 - **grill-02 exercises nothing about the skill.** `trigger-grill` reads "Skill called 0x" in both
