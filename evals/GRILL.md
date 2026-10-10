@@ -140,6 +140,33 @@ stop that and one run asked six. With three runs per arm, one flipped verdict mo
 - The scaffolded `CLAUDE.md` carries a `## GodotPrompter` section to silence the hook's
   section offer; the without arm reads it too and remarks that the skill is not installed.
 
+## Report rule reworked — 2026-10-09 (`results/2026-10-09T18-17-43-794Z`)
+
+The routing row was dropped and the "report before you build" rule itself now ends: "A report
+states; it never ends on your own questions. Need an answer or a go-ahead first? Invoke
+`godot-grill`." Three in-project cases, 5 runs per arm, clean (0 errors), $8.01, 608 s
+(`--case "*-in-project" --scaffold --runs 5 -j 3`).
+
+| Case | With | Without | `trigger-grill` | Notes |
+|---|---|---|---|---|
+| grill-05-plain-request-in-project | 0.87 | 0.87 | **4/5** | the four fired runs all 1.00; the fifth dumped code with no report |
+| grill-06-neg-bugfix-in-project | 1.00 | 1.00 | 0/5 | bug fixed, `no-questions` 5/5 |
+| grill-07-skip-questions-in-project | 0.80 | 0.87 | 0/5 | `no-questions` 5/5; `assumptions-stated` 2/5 with, 3/5 without |
+
+- grill-05 fire rate by card wording: unchanged 0/3, trailing sentence 2/5, table row 2/5, this
+  rule 4/5. Stopping the report from carrying its own questions is what moved it.
+- grill-07 is grill-02's "skip the questions" prompt in a scaffolded project: the rule does not
+  override an explicit off-ramp. It has no baseline on the old card, so its `assumptions-stated`
+  figure cannot be attributed to this change; with-arm answers list decisions under headings such
+  as "What I picked and what I rejected", which the judge does not always count as assumptions.
+- **`bounded-or-builds` was tightened after this run started** (grill-04 and grill-05): path (b)
+  now requires an explicit list or table of the choices made on the user's behalf; choices implicit
+  in the code or a "how it works" summary do not count. The old wording passed 3 of 5 no-plugin
+  answers that dumped 5-10 KB of code and never listed an assumption. Re-judging this run's ten
+  grill-05 answers under the new wording (`claude -p --model sonnet`, one vote each): with 4/5,
+  without **0/5** — about 0.87 vs 0.33. Figures for this grader before and after are not
+  comparable; the next full run records the first real ones.
+
 ## Limitations
 
 - **grill-02 exercises nothing about the skill.** `trigger-grill` reads "Skill called 0x" in both
