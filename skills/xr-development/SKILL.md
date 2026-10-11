@@ -138,7 +138,7 @@ For headsets that support it (Quest 2+, Vision Pro), set `OpenXRInterface.enviro
 
 ## 8. Godot 4.5+ XR Features
 
-Godot 4.5 adds a D3D12 OpenXR backend on Windows (Quest Link / SteamVR alternative to Vulkan), foveated rendering on the Mobile Vulkan renderer, Application SpaceWarp frame synthesis for Quest/Pico, OpenXR Render Models for platform-native controller meshes, and native visionOS export via the Apple Embedded preset. All are enabled through Project Settings or the Godot OpenXR Vendors plugin — no engine-level code changes.
+Godot 4.5 adds a D3D12 OpenXR backend on Windows (Quest Link / SteamVR alternative to Vulkan), foveated rendering on the Mobile Vulkan renderer, Application SpaceWarp frame synthesis for Quest/Pico, OpenXR Render Models for platform-native controller meshes, and windowed visionOS export via a dedicated visionOS preset. All are core Project Settings except SpaceWarp, which needs the Godot OpenXR Vendors plugin — no engine-level code changes.
 
 > See [references/godot-4-5-features.md](references/godot-4-5-features.md) for enabling steps, GDScript + C# render-model snippets, and per-feature caveats.
 
@@ -148,15 +148,15 @@ Godot 4.5 adds a D3D12 OpenXR backend on Windows (Quest Link / SteamVR alternati
 
 ### OpenXR 1.1 Support (Godot 4.6+)
 
-Godot 4.6 ships with native OpenXR 1.1 runtime support. Devices and runtimes that implement OpenXR 1.1 automatically unlock 1.1 features (improved compositor layers, updated interaction profiles, etc.) without any project-level change. No API change is required — the engine negotiates the spec version with the runtime at startup.
+Godot 4.6 requests OpenXR 1.1 from the runtime, unlocking 1.1 features (promoted interaction profiles and paths, etc.) without any project-level change, and falls back to 1.0 if the runtime rejects it.
 
-> **Note:** OpenXR 1.1 was introduced in Godot 4.6 (beta as of this writing). API behaviour may evolve before the stable release — see https://godotengine.org/article/dev-snapshot-godot-4-6-beta-1/ for current details.
+> **Note:** To force a version, set `xr/openxr/target_api_version` (e.g. `1.0.48`; empty by default).
 
 ---
 
 ### Spatial Entities — Anchors, Plane Tracking, Marker Tracking (Godot 4.6+)
 
-Godot 4.6 stabilises the **XR Spatial Entities** extension, enabling:
+Godot 4.6 adds the OpenXR **Spatial Entities** extensions (experimental API), enabling:
 
 - **Spatial anchors** — persist virtual object positions across sessions (`OpenXRSpatialAnchorCapability`, `OpenXRAnchorTracker`, `XRAnchor3D`)
 - **Plane detection** — detect floor, wall, and ceiling surfaces from the environment scan
@@ -165,7 +165,8 @@ Godot 4.6 stabilises the **XR Spatial Entities** extension, enabling:
 **Basic spatial anchor usage:**
 
 ```gdscript
-# Requires the spatial anchors capability: Project Settings > XR > OpenXR > Extensions > Spatial Entity.
+# Under XR > OpenXR > Extensions > Spatial Entity enable: Enabled, Enable Spatial Anchors, and
+# Enable Builtin Anchor Detection (the default RID() context needs it). All are off by default.
 extends XROrigin3D
 
 func place_anchor_at(local_transform: Transform3D) -> XRAnchor3D:
@@ -211,7 +212,7 @@ public partial class SpatialAnchorManager : XROrigin3D
 }
 ```
 
-To keep an anchor across sessions, call `persist_anchor(tracker, RID(), callback)` and store `tracker.uuid` with your own data; persisted anchors come back as `XRServer.TRACKER_ANCHOR` trackers on the next launch. See the [OpenXR spatial entities tutorial](https://docs.godotengine.org/en/stable/tutorials/xr/openxr_spatial_entities.html).
+To keep an anchor across sessions, turn on **Enable Persistent Anchors**, check `is_spatial_persistence_supported()`, then call `persist_anchor(tracker, RID(), callback)` and store `tracker.uuid` with your own data; persisted anchors come back as `XRServer.TRACKER_ANCHOR` trackers on the next launch. See the [OpenXR spatial entities tutorial](https://docs.godotengine.org/en/stable/tutorials/xr/openxr_spatial_entities.html).
 
 > **Note:** The spatial entities classes arrived in Godot 4.6 and `OpenXRSpatialAnchorCapability` is still marked experimental — its API may change. There is no `XRSpatialAnchor` class; the scene node is `XRAnchor3D`.
 
@@ -299,10 +300,10 @@ GetNode<OpenXRCompositionLayerQuad>("OpenXRCompositionLayerQuad").EyeVisibility 
 - [ ] VSync is disabled (XR runtime handles frame timing)
 - [ ] Quest export uses Mobile renderer, arm64 architecture, API level 29+
 - [ ] On Windows Quest Link / SteamVR builds, consider D3D12 backend if Vulkan drivers are problematic (Godot 4.5+)
-- [ ] Foveated rendering enabled via OpenXR Vendors plugin for standalone Quest/Pico targets (Godot 4.5+)
+- [ ] Foveated rendering enabled via `xr/openxr/foveation_level` on the Mobile renderer for standalone Quest/Pico targets (Godot 4.5+)
 - [ ] Application SpaceWarp evaluated for performance budget on Meta Quest / Pico targets (Godot 4.5+)
-- [ ] OpenXR Render Models used for controller visuals instead of bundled meshes where supported (Godot 4.5+)
-- [ ] visionOS export uses the Apple Embedded preset with visionOS SDK target (Godot 4.5+)
+- [ ] `OpenXRRenderModelManager` + `xr/openxr/extensions/render_model` used for controller visuals where supported (Godot 4.5+)
+- [ ] visionOS export uses the dedicated visionOS preset; windowed apps only through 4.7 (Godot 4.5+)
 - [ ] Spatial anchors are created with `OpenXRSpatialAnchorCapability` and shown with `XRAnchor3D`, with the spatial entities extension enabled (Godot 4.6+)
 - [ ] Headset on/off handled via `OpenXRInterface.user_presence_changed` — pause/mute when the user is away (Godot 4.7+)
 - [ ] Foveation defaults reviewed — `xr/openxr/foveation_eye_tracked` and `xr/openxr/foveation_with_subsampled_images` are on by default; disable subsampled images if you rely on FXAA/glow (Godot 4.7+)

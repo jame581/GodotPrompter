@@ -108,7 +108,7 @@ Starter templates: `m4gr3d/Godot-Android-Plugin-Template`, `m4gr3d/GDExtension-A
 
 ## JavaClassWrapper & AndroidRuntime (Godot 4.4+)
 
-**Godot 4.4+ only** — the biggest version gate in mobile development. These let you call Android APIs with **no plugin** at all.
+**Godot 4.4+** — the biggest version gate in mobile development (`AndroidRuntime` is new in 4.4; `JavaClassWrapper.wrap()` existed earlier but is only practical from 4.4). These let you call Android APIs with **no plugin** at all.
 
 `JavaClassWrapper.wrap("<java.class>")` returns a wrapper you call directly:
 

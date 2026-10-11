@@ -138,7 +138,7 @@ private void OnPermResult(string permission, bool granted)
 
 ## 4. Calling Android APIs (JavaClassWrapper) — Godot 4.4+
 
-**Godot 4.4+ only.** `JavaClassWrapper.wrap("<java.class>")` calls Java/Kotlin classes with no plugin; the `AndroidRuntime` singleton (`Engine.get_singleton("AndroidRuntime")`) exposes `getActivity()`, `getApplicationContext()`, and `createRunnableFromGodotCallable(callable)`.
+**Godot 4.4+.** `JavaClassWrapper.wrap("<java.class>")` (present earlier, but only practical from 4.4) calls Java/Kotlin classes with no plugin; the `AndroidRuntime` singleton, new in 4.4, (`Engine.get_singleton("AndroidRuntime")`) exposes `getActivity()`, `getApplicationContext()`, and `createRunnableFromGodotCallable(callable)`.
 
 The simpler cross-platform alternative needs no 4.4: `Input.vibrate_handheld(duration_ms, amplitude)` (requires the `VIBRATE` permission; iOS needs iOS 13+). See [Plugins](references/plugins.md) for the full JavaClassWrapper/AndroidRuntime API, Toast/Intent recipes, and inner-class syntax.
 
