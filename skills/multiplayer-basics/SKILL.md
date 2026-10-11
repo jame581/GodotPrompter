@@ -67,7 +67,7 @@ Full server and client implementations with every signal handler, in GDScript an
 
 ```gdscript
 # chat.gd
-extends Node
+extends Node2D
 
 # Any peer can call; server validates then broadcasts to all peers.
 @rpc("any_peer", "reliable")

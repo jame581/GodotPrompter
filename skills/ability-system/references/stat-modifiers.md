@@ -61,7 +61,7 @@ public partial class StatModifier : Resource
     [Export] public string StatName  { get; set; } = "";
     [Export] public ModOp Operation  { get; set; } = ModOp.Add; // serializes as "operation" (snake_case of the property name) — matches the GDScript field
     [Export] public float Value      { get; set; } = 0.0f;
-    [Export] public StringName Source { get; set; } = StringName.Empty;
+    [Export] public StringName Source { get; set; } = "";
 }
 ```
 

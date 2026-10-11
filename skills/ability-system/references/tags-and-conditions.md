@@ -320,7 +320,7 @@ public partial class Effect : Resource
     [Export] public float  TickInterval  { get; set; } = 0.0f;
 
     /// <summary>If the target has this tag, the effect is blocked. Empty means never immune.</summary>
-    [Export] public StringName ImmunityTag { get; set; } = StringName.Empty;
+    [Export] public StringName ImmunityTag { get; set; } = "";
 
     public virtual void OnApply(Node target)  { }
     public virtual void OnTick(Node target)   { }
@@ -344,7 +344,7 @@ public partial class EffectHolder : Node
     public void ApplyEffect(Effect effect)
     {
         // --- Immunity check ---
-        if (effect.ImmunityTag != StringName.Empty)
+        if (!effect.ImmunityTag.IsEmpty)
         {
             var tags = GetTags();
             if (tags != null && tags.HasTag(effect.ImmunityTag))

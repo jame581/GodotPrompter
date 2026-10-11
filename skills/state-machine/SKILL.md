@@ -149,7 +149,7 @@ public partial class SimpleEnemy : CharacterBody2D
         }
         else if (GD.Randf() < 0.005f)
         {
-            _patrolTarget = GlobalPosition + new Vector2(GD.RandRange(-PatrolRange, PatrolRange), 0f);
+            _patrolTarget = GlobalPosition + new Vector2((float)GD.RandRange(-PatrolRange, PatrolRange), 0f);
             _currentState = State.Patrol;
         }
     }

@@ -18,9 +18,9 @@ var ranged_int: int = randi_range(1, 6)   # 1 to 6 (inclusive)
 
 ```csharp
 float f = GD.Randf();
-int i = GD.Randi();
-float ranged = GD.RandfRange(1.0f, 10.0f);
-int rangedInt = GD.RandiRange(1, 6);
+uint i = GD.Randi();                               // 32-bit unsigned
+float ranged = (float)GD.RandRange(1.0, 10.0);     // double overload: 1.0 to 10.0
+int rangedInt = GD.RandRange(1, 6);                // int overload: 1 to 6 (inclusive)
 ```
 
 ### RandomNumberGenerator (Seeded)

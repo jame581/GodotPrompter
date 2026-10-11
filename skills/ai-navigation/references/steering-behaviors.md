@@ -108,7 +108,7 @@ public partial class SteeringEnemy : CharacterBody2D
     {
         float circleDistance = 60f;
         float circleRadius = 30f;
-        _wanderAngle += GD.RandRange(-WanderAngleChange, WanderAngleChange);
+        _wanderAngle += (float)GD.RandRange(-WanderAngleChange, WanderAngleChange);
         Vector2 circleCenter = Velocity.Normalized() * circleDistance;
         if (circleCenter == Vector2.Zero)
             circleCenter = Vector2.Right * circleDistance;

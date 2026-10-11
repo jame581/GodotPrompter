@@ -28,7 +28,7 @@ func _on_enemy_died() -> void:
 
 ```csharp
 // Add a counter to catch intermittent bugs
-private long _frameOfCrash = 0;
+private ulong _frameOfCrash = 0;
 
 public override void _Process(double delta)
 {

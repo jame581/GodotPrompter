@@ -43,7 +43,7 @@ ProjectSettings.set_setting("display/window/stretch/mode", "canvas_items")
 
 ```csharp
 // Read current viewport size
-Vector2I viewportSize = GetViewport().GetVisibleRect().Size;
+Vector2 viewportSize = GetViewport().GetVisibleRect().Size;
 
 // Change a project setting at runtime (takes effect next frame)
 ProjectSettings.SetSetting("display/window/stretch/mode", "canvas_items");

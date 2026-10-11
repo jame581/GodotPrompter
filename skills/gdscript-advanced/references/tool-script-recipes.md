@@ -34,12 +34,13 @@ func _rebuild_mesh() -> void:
     var arrays: Array = []
     arrays.resize(Mesh.ARRAY_MAX)
     var verts: PackedVector3Array = PackedVector3Array()
-    for i in segments:
+    # Godot 4 has no line-loop primitive: emit segments + 1 vertices so the strip closes.
+    for i in segments + 1:
         var angle := i * TAU / segments
         verts.append(Vector3(cos(angle) * radius, 0, sin(angle) * radius))
     arrays[Mesh.ARRAY_VERTEX] = verts
     var array_mesh := ArrayMesh.new()
-    array_mesh.add_surface_from_arrays(Mesh.PRIMITIVE_LINE_LOOP, arrays)
+    array_mesh.add_surface_from_arrays(Mesh.PRIMITIVE_LINE_STRIP, arrays)
     mesh = array_mesh
 ```
 

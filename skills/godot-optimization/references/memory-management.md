@@ -14,13 +14,13 @@ Reference for `skills/godot-optimization/SKILL.md` — runtime memory monitoring
 # Query engine memory monitors via Performance singleton
 func _print_memory_stats() -> void:
     var static_mem  := Performance.get_monitor(Performance.MEMORY_STATIC)
-    var dynamic_mem := Performance.get_monitor(Performance.MEMORY_DYNAMIC)
+    var peak_mem    := Performance.get_monitor(Performance.MEMORY_STATIC_MAX)
     var video_ram   := Performance.get_monitor(Performance.RENDER_VIDEO_MEM_USED)
     var obj_count   := Performance.get_monitor(Performance.OBJECT_COUNT)
     var node_count  := Performance.get_monitor(Performance.OBJECT_NODE_COUNT)
 
     print("Static RAM : %.2f MB" % (static_mem   / 1_048_576.0))
-    print("Dynamic RAM: %.2f MB" % (dynamic_mem  / 1_048_576.0))
+    print("Peak RAM   : %.2f MB" % (peak_mem     / 1_048_576.0))
     print("Video RAM  : %.2f MB" % (video_ram    / 1_048_576.0))
     print("Objects    : %d" % obj_count)
     print("Nodes      : %d" % node_count)
@@ -33,13 +33,13 @@ func _print_memory_stats() -> void:
 private void PrintMemoryStats()
 {
     double staticMem = Performance.GetMonitor(Performance.Monitor.MemoryStatic);
-    double dynamicMem = Performance.GetMonitor(Performance.Monitor.MemoryDynamic);
+    double peakMem = Performance.GetMonitor(Performance.Monitor.MemoryStaticMax);
     double videoRam = Performance.GetMonitor(Performance.Monitor.RenderVideoMemUsed);
     double objCount = Performance.GetMonitor(Performance.Monitor.ObjectCount);
     double nodeCount = Performance.GetMonitor(Performance.Monitor.ObjectNodeCount);
 
     GD.Print($"Static RAM : {staticMem / 1_048_576.0:F2} MB");
-    GD.Print($"Dynamic RAM: {dynamicMem / 1_048_576.0:F2} MB");
+    GD.Print($"Peak RAM   : {peakMem / 1_048_576.0:F2} MB");
     GD.Print($"Video RAM  : {videoRam / 1_048_576.0:F2} MB");
     GD.Print($"Objects    : {objCount:F0}");
     GD.Print($"Nodes      : {nodeCount:F0}");

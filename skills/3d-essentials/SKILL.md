@@ -211,5 +211,5 @@ Quick symptom → cause → fix table covering black scenes, dark objects withou
 - [ ] Projects using LightmapGI/VoxelGI/SDFGI take advantage of automatic specular occlusion by upgrading to Godot 4.5+ (no API change required)
 - [ ] Hero assets with complex surface detail use bent normal maps in the StandardMaterial3D Bent Normal slot for improved indirect lighting (Godot 4.5+)
 - [ ] After upgrading to Godot 4.6, glow settings are re-tuned if appearance has changed (glow now runs before tonemapping)
-- [ ] AgX `tonemap_white` and `tonemap_contrast` are adjusted when using AgX tonemapper for precise look control (Godot 4.6+)
+- [ ] AgX `tonemap_agx_white` and `tonemap_agx_contrast` are adjusted when using AgX tonemapper for precise look control (Godot 4.6+)
 - [ ] After upgrading to Godot 4.7, volumetric fog and sky reflections are re-checked (fog blending and the `roughness_layers` default changed)

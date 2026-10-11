@@ -122,6 +122,7 @@ func _on_perm_result(permission: String, granted: bool):
 ### C# Equivalent
 
 ```csharp
+// Contains() on string[] needs: using System.Linq;
 public override void _Ready()
 {
     if (!OS.GetGrantedPermissions().Contains("android.permission.POST_NOTIFICATIONS"))

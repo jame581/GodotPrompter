@@ -26,9 +26,9 @@ print("_run_expensive_operation took: %d µs" % elapsed)
 
 ```csharp
 // Profile a specific block manually
-long start = Time.GetTicksUsec();
+ulong start = Time.GetTicksUsec();
 RunExpensiveOperation();
-long elapsed = Time.GetTicksUsec() - start;
+ulong elapsed = Time.GetTicksUsec() - start;
 GD.Print($"RunExpensiveOperation took: {elapsed} µs");
 ```
 

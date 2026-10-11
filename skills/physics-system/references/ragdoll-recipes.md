@@ -60,7 +60,7 @@ public void EnableRagdoll()
 
 public void EnablePartialRagdoll()
 {
-    _sim.PhysicalBonesStartSimulation(new StringName[] { "LeftArm", "RightArm" });
+    _sim.PhysicalBonesStartSimulation(new Godot.Collections.Array<StringName> { "LeftArm", "RightArm" });
 }
 ```
 

@@ -12,11 +12,11 @@ The `@abstract` annotation prevents a class from being instantiated directly and
 > **Note:** This skill is GDScript-specific by design. For C# patterns, see **csharp-godot** and **csharp-signals**.
 
 ```gdscript
-# base_enemy.gd — abstract base class; cannot be instantiated directly
+# base_enemy.gd — abstract base class; cannot be instantiated directly.
+# The class-level @abstract goes before class_name / extends.
+@abstract
 class_name BaseEnemy
 extends CharacterBody2D
-
-@abstract
 
 ## Subclasses must implement this to define their attack behavior.
 @abstract func perform_attack() -> void
