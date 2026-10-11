@@ -167,6 +167,25 @@ states; it never ends on your own questions. Need an answer or a go-ahead first?
   without **0/5** — about 0.87 vs 0.33. Figures for this grader before and after are not
   comparable; the next full run records the first real ones.
 
+## Pre-release regression — 2026-10-11 (`results/2026-10-11T19-20-09-278Z`)
+
+All seven grill cases, 3 runs per arm, `--scaffold -j 3`. Clean, mean Δ +0.12, $10.28, 764 s.
+First full run under the tightened `bounded-or-builds`.
+
+| Case | With | Without | Δ | `trigger-grill` | Notes |
+|---|---|---|---|---|---|
+| grill-01-new-system | 0.92 | 0.50 | +0.42 | 3/3 | `numbered-recommended` 2/3 |
+| grill-02-skip-questions | 1.00 | 0.78 | +0.22 | 0/3 | |
+| grill-03-neg-bugfix | 1.00 | 1.00 | 0.00 | 0/3 | |
+| grill-04-plain-request | 0.33 | 0.22 | +0.11 | 0/3 | `bounded-or-builds` 0/3 in the with arm: no card in an empty workspace, and the grader no longer passes unlisted assumptions |
+| grill-05-plain-request-in-project | 0.56 | 0.33 | +0.22 | 2/3 | one fired run 1.00; one fired run failed `bounded-or-builds`; the unfired run dumped code |
+| grill-06-neg-bugfix-in-project | 1.00 | 1.00 | 0.00 | 0/3 | |
+| grill-07-skip-questions-in-project | 0.89 | 1.00 | -0.11 | 0/3 | `no-questions` 3/3; `assumptions-stated` 2/3 |
+
+grill-05 fired 2/3 here against 4/5 in the previous run; with three runs that is within noise,
+and the fire rate across both runs is 6/8. A plain request inside a project is still the weakest
+path: when the grill does not fire the answer is a code dump with no report.
+
 ## Limitations
 
 - **grill-02 exercises nothing about the skill.** `trigger-grill` reads "Skill called 0x" in both

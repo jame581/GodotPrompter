@@ -109,6 +109,13 @@ re-ask — noise), 03 `beat-one-next`, 04 `no-menu-paths` (real: the answer left
 self-correction, "Click **3D Scene**? No:", in a step). `no-menu-paths` after: 14/15 with-arm.
 `no-menu-paths` and `no-scope-creep` figures from before this entry are not comparable to after.
 
+### Pre-release regression — 2026-10-11 (`results/2026-10-11T19-07-13-423Z`)
+
+Run after the session-card rule change and the skill audits (about 45 skill files corrected).
+Clean (0 errors), mean **Δ +0.21**, $16.13, 775 s at `-j 3`. With-arm: 01 **1.00**, 02 1.00,
+03 0.96, 04 **1.00**, 05 1.00; negatives Δ 0. The only with-arm grader failure in 15 runs was
+03 `signal-concept` 1/3. `no-menu-paths`, `no-scope-creep`, `area3d-pickup` and `beat-why` all 3/3.
+
 ### Root causes (measured before editing)
 
 | # | Root cause | Change |

@@ -97,3 +97,28 @@ Skill corrections made while checking facts for these cases and the C# one:
 `docs/superpowers/notes/2026-07-05-godot-4.7-deltas.md` still carries the fog mistake; it is a
 dated research note and was left as written. The corrected C# examples follow the `SignalAwaiter`
 source but have not been compiled in a Godot project.
+
+## Pre-release regression — 2026-10-11 (`results/2026-10-11T19-32-54-199Z`)
+
+All 14 `skill-*` cases after the skill audits. Clean, mean Δ +0.24, $21.72, 1591 s at `-j 3`.
+Every skill fired 3/3.
+
+| Case | With | Without | Δ |
+|---|---|---|---|
+| skill-15-volumetric-fog-blending | 1.00 | 0.00 | +1.00 |
+| skill-13-blendspace-sync-mode | 1.00 | 0.33 | +0.67 |
+| skill-14-richtext-image-unit | 1.00 | 0.33 | +0.67 |
+| skill-12-input-device-ids | 1.00 | 0.60 | +0.40 |
+| skill-09-phantom-camera | 0.89 | 0.56 | +0.33 |
+| skill-10-godot-47-changes | 1.00 | 0.86 | +0.14 |
+| skill-01-state-machine | 1.00 | 0.87 | +0.13 |
+| skill-02-save-load | 0.89 | 0.83 | +0.06 |
+| skill-04-code-review | 0.93 | 1.00 | -0.07 |
+| skill-05, -06, -07, -08, -11 | 1.00 | 1.00 | 0.00 |
+
+- skill-02 `save-format` failed 2/3 in the with arm: the answers chose JSON without naming the
+  format they rejected. `save-load` §1 now asks for the rejected strategy and the deciding
+  factor, as `state-machine` does; re-run (`results/` of 2026-10-11, skill-02 only) 3/3 in both arms.
+- skill-05-limboai came out at ceiling this time (the bare model used the `updated` signal in
+  all three runs); it was +0.11 before. Treat it as borderline.
+- skill-04's -0.07 is one `review-actionable` vote split in one run; the case is a routing check.
