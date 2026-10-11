@@ -6,7 +6,7 @@ Reference for `skills/animation-system/SKILL.md` — full GDScript and C# recipe
 
 ---
 
-## Recipe: Two-bone arm reach with influence blending (CCDIK3D)
+## Recipe: Arm reach with influence blending (CCDIK3D)
 
 A character reaches for a moving target (a pickup, a held weapon's grip, a button) and blends the IK influence in / out based on distance. The IK modifier is added in the scene editor under the `Skeleton3D`; the script just drives `influence`.
 
@@ -139,7 +139,7 @@ public partial class FootIK : Node3D
 
 **Verification:** Place the character on a slope or staircase. Both feet should plant on the ground polygons rather than floating or clipping. Toggle `FABRIK3D.influence` between 0 and 1 to compare.
 
-**Perf cost:** One raycast and one `FABRIK3D` per leg every frame. Two-leg humanoid → 2 raycasts + 2 IK solves. For background NPCs, gate this behind a distance check or run on `_physics_process` at 30 Hz instead of `_process`. For exactly-2-bone humanoid legs, `TwoBoneIK3D` is a closed-form (non-iterative) solve and the cheaper choice; it also needs a pole node (`set_pole_node`) to fix the knee direction.
+**Perf cost:** One raycast and one `FABRIK3D` per leg every frame. Two-leg humanoid → 2 raycasts + 2 IK solves. For background NPCs, gate this behind a distance check or run on `_physics_process` at 30 Hz instead of `_process`. For exactly-2-bone humanoid legs, `TwoBoneIK3D` is a closed-form (non-iterative) solve; it also needs a pole node (`set_pole_node`) to fix the knee direction.
 
 ## Basic setup — FABRIK arm IK
 

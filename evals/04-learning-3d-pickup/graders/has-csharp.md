@@ -4,4 +4,4 @@ target: last_message
 match: contains
 flags: i
 ---
-```(csharp|cs|c#)\b
+```(csharp\b|cs\b|c#)

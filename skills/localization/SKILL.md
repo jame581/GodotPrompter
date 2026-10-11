@@ -162,7 +162,7 @@ var collected_text: String = tr("ITEM_COLLECTED") % item_name
 # Pluralization (Godot 4.x)
 var count := 5
 var msg: String = tr_n("ONE_ENEMY", "MANY_ENEMIES", count)
-# Requires PO files with plural forms
+# Needs plural forms in the translation: PO, or CSV `?plural` rows on Godot 4.6+ (§10)
 ```
 
 ### C#

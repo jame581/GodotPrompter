@@ -95,8 +95,8 @@ Skill corrections made while checking facts for these cases and the C# one:
 | `csharp-signals` description | fired 1/3 on a C#/GDScript signal question | trigger phrases added; 3/3 (`results/2026-10-11` re-run of skill-11) |
 
 `docs/superpowers/notes/2026-07-05-godot-4.7-deltas.md` still carries the fog mistake; it is a
-dated research note and was left as written. The corrected C# examples follow the `SignalAwaiter`
-source but have not been compiled in a Godot project.
+dated research note and was left as written. The corrected C# examples were later compiled against
+`Godot.NET.Sdk` 4.3.0 and 4.7.2 (see the audit note); nothing was run inside a game.
 
 ## Pre-release regression — 2026-10-11 (`results/2026-10-11T19-32-54-199Z`)
 

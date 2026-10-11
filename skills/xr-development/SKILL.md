@@ -77,7 +77,7 @@ public partial class XRMain : Node3D
 
 ## 3. Hand Tracking
 
-When the headset supports hand tracking (Quest 2+, Vision Pro), `XRController3D` nodes can be configured to track hand joints. Sample finger positions for gesture detection, or bind to standard select / grip events when the user pinches.
+When the headset supports hand tracking (Quest 2+, Pico 4, some SteamVR setups), `XRController3D` nodes can be configured to track hand joints. Sample finger positions for gesture detection, or bind to standard select / grip events when the user pinches.
 
 > See [references/hand-tracking.md](references/hand-tracking.md) for hand-tracking node setup, joint sampling, and gesture-driven interactions.
 
@@ -101,7 +101,7 @@ For UI in VR, render a `Control` tree to a `SubViewport`, map its texture onto a
 
 ## 6. Passthrough (Mixed Reality)
 
-For headsets that support it (Quest 2+, Vision Pro), set `OpenXRInterface.environment_blend_mode = XR_ENVIRONMENT_BLEND_MODE_ALPHA_BLEND` and clear the `WorldEnvironment` background to transparent. The user sees the real world with virtual content composited on top.
+For headsets that support it (Quest 2+, Pico 4), set `OpenXRInterface.environment_blend_mode = XR_ENVIRONMENT_BLEND_MODE_ALPHA_BLEND` and clear the `WorldEnvironment` background to transparent. The user sees the real world with virtual content composited on top.
 
 > See [references/passthrough.md](references/passthrough.md) for the full enabling steps and Quest-specific notes.
 
@@ -167,6 +167,7 @@ Godot 4.6 adds the OpenXR **Spatial Entities** extensions (experimental API), en
 ```gdscript
 # Under XR > OpenXR > Extensions > Spatial Entity enable: Enabled, Enable Spatial Anchors, and
 # Enable Builtin Anchor Detection (the default RID() context needs it). All are off by default.
+# The capability is a singleton only while OpenXR is enabled; without it this script will not parse.
 extends XROrigin3D
 
 func place_anchor_at(local_transform: Transform3D) -> XRAnchor3D:
@@ -269,7 +270,7 @@ GetNode<OpenXRCompositionLayerQuad>("OpenXRCompositionLayerQuad").EyeVisibility 
 
 `OpenXRSpatialAnchorCapability.create_new_anchor()` gains an optional `next` parameter — full signature: `create_new_anchor(transform: Transform3D, spatial_context: RID = RID(), next: OpenXRStructureBase = null) -> OpenXRAnchorTracker`. `next` must be a valid next object for the `XrSpatialAnchorCreateInfoEXT` chain, letting vendor-specific create-info structs be appended when creating an anchor. Existing calls are unaffected (compatible change, [GH-118128](https://github.com/godotengine/godot/pull/118128)).
 
-> **Note:** `OpenXRSpatialAnchorCapability` is still marked experimental — the class may change in future versions. For typical anchor placement, keep using the node-based workflow from Section 9.
+> **Note:** `OpenXRSpatialAnchorCapability` is still marked experimental — the class may change in future versions. Section 9 shows typical anchor placement.
 
 ---
 

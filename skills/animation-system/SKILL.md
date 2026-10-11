@@ -295,7 +295,7 @@ Pick by chain: `TwoBoneIK3D` for exactly-two-bone limbs (needs a pole node), `FA
 
 > See [references/ik-solver-comparison.md](references/ik-solver-comparison.md) for the full solver comparison table and selection guidance.
 
-> See [references/ik-recipes.md](references/ik-recipes.md) for the full GDScript and C# recipes — two-bone arm reach with influence blending (CCDIK3D), foot placement on uneven terrain (FABRIK3D + raycast), and basic FABRIK arm IK setup.
+> See [references/ik-recipes.md](references/ik-recipes.md) for the full GDScript and C# recipes — arm reach with influence blending (CCDIK3D), foot placement on uneven terrain (FABRIK3D + raycast), and basic FABRIK arm IK setup.
 
 ---
 

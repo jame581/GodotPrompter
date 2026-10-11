@@ -1,11 +1,15 @@
 # godot-grill eval — baseline and results
 
-Suite: 4 cases for `godot-grill` — 1 should-fire, 2 guard against over-triggering, and grill-04
-measures an ordinary un-grill-phrased request (neither).
+Suite: 7 cases for `godot-grill`. grill-01 should fire; grill-02 and grill-03 guard against
+over-triggering; grill-04 measures an ordinary un-grill-phrased request. grill-05 to grill-07
+repeat 04, 03 and 02 inside a scaffolded Godot project, so the SessionStart card is injected.
 
 ```
-claude plugin eval . --case "grill-*" --ablation with-without --judge-model sonnet --no-publish
+claude plugin eval . --case "grill-*" --scaffold --ablation with-without --judge-model sonnet --no-publish
 ```
+
+`--scaffold` is required: without it grill-05 to grill-07 run in an empty workspace and silently
+repeat grill-04, grill-03 and grill-02.
 
 **`trigger-grill` is an unscored indicator.** It carries no weight in any case score (the harness
 marks it `scored: false`, with-arm only), so every Δ in every table below is computed *excluding*
@@ -203,7 +207,7 @@ path: when the grill does not fire the answer is a code dump with no report.
   grills" from "already builds confidently with stated assumptions," which is the behaviour
   `godot-grill` exists to replace. This measurement says nothing about whether the base model
   already grills.
-- **The suite measures description-only routing, never the card.** Eval runs start in an empty
+- **grill-01 to grill-04 measure description-only routing, never the card** (grill-05 to grill-07 do measure it). Eval runs start in an empty
   temp directory, so the SessionStart hook finds no `project.godot` and injects nothing: the agent
   picks skills from their `description` frontmatter alone. In a real Godot project the card's gate
   row ("New system, or the requirements are unclear") is what routes work to `godot-grill`, and no

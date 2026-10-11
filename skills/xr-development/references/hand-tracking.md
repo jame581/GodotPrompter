@@ -59,7 +59,7 @@ public partial class XRHandTrackingOrigin : XROrigin3D
 }
 ```
 
-> **Note:** Hand tracking availability depends on the XR headset. Meta Quest, Apple Vision Pro, and some SteamVR setups support it. Always fall back to controller input.
+> **Note:** Hand tracking availability depends on the XR headset. Meta Quest, Pico, and some SteamVR setups support it; Apple Vision Pro is not an OpenXR target in Godot. Always fall back to controller input.
 
 ---
 

@@ -71,6 +71,6 @@ In both cases the next emission calls into a disposed object and throws `ObjectD
 
 Automatic disconnection is fully reliable when the emitter is freed before its receivers, so a project that always frees emitters first never meets either case.
 
-**Rule:** every `+=` on a custom `[Signal]`, and every capturing lambda, gets a matching `-=`: `_EnterTree()` with `_ExitTree()`, or `_Ready()` with `Dispose()`.
+**Rule:** every `+=` on a custom `[Signal]`, and every capturing lambda, gets a matching `-=` in `_ExitTree()`. Connect in `_Ready()`, or in `_EnterTree()` for a node that can leave and re-enter the tree.
 
 ---

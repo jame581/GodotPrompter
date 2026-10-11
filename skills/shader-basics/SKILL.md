@@ -285,7 +285,7 @@ The project setting is read at startup only. To switch at runtime set `get_viewp
 
 ## 11. Shader Baker — Export-time Pre-compilation (Godot 4.5+)
 
-The Shader Baker pre-compiles all project shaders for the target platform at export time, eliminating the stutter players experience the first time a new material renders in-game — especially severe on macOS/Apple Silicon (Metal) and Windows (D3D12), where shader translation is expensive. Enable it per export preset for release builds; leave it off for development builds to keep exports fast. It operates at the Godot export pipeline level — see the **export-pipeline** skill for export preset configuration.
+The Shader Baker converts project shaders to the target driver's format at export time, which shortens first-launch load — most on macOS/iOS (Metal) and Windows (D3D12), where that conversion is slow. It does not remove pipeline-compilation stutter the first time a material renders, works only on the Forward+ and Mobile renderers, and bakes only for drivers the exporting machine's OS supports. Enable it per export preset for release builds; leave it off for development.
 
 > See [references/shader-baker.md](references/shader-baker.md) for enabling steps and the with/without comparison.
 
@@ -321,4 +321,4 @@ The Shader Baker pre-compiles all project shaders for the target platform at exp
 - [ ] Complex shaders are profiled with the Godot profiler to check GPU frame time
 - [ ] Stencil effects use two-pass materials (write pass first, read pass second) with correct render priority (Godot 4.5+)
 - [ ] SMAA is preferred over FXAA for desktop builds (sharper edges, slightly higher cost) — set in Project Settings → Rendering → Anti Aliasing (Godot 4.5+)
-- [ ] Shader Baker is enabled in all release export presets to eliminate first-use compilation stutters (Godot 4.5+)
+- [ ] Shader Baker is enabled in release presets for D3D12 and Metal targets to shorten first-launch load (Forward+/Mobile only; Godot 4.5+)

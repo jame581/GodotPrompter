@@ -35,7 +35,7 @@ private void EnablePassthrough()
 }
 ```
 
-> **Passthrough support:** Meta Quest 3/Pro, Apple Vision Pro, Varjo XR-4. Not all headsets support it.
+> **Passthrough support:** Meta Quest 3/Pro, Pico 4, Varjo XR-4. Not all headsets support it. Apple Vision Pro is not an OpenXR target in Godot (see Section 8).
 
 ---
 

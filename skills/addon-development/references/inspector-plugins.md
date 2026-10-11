@@ -311,8 +311,7 @@ public partial class ItemResourcePicker : EditorResourcePicker
 {
     public ItemResourcePicker()
     {
-        BaseType = "ItemData";
-        EditableWarning = "Editing this Resource affects all scenes that reference it.";
+        BaseType = "ItemData";   // restrict the picker to ItemData and subclasses
     }
 }
 

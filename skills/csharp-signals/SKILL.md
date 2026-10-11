@@ -157,13 +157,13 @@ public override void _ExitTree()
 
 ### Connecting in `_Ready()`
 
-Always connect inside `_Ready()`. The node's references are resolved and the scene tree is available at that point. Connecting in the constructor or field initializers may fail because Godot node infrastructure is not yet initialised.
+Connect inside `_Ready()` — or `_EnterTree()` for a node that is removed and re-added, since `_Ready()` runs only once. The node's references are resolved and the scene tree is available at that point. Connecting in the constructor or field initializers may fail because Godot node infrastructure is not yet initialised.
 
 ---
 
 ## 4. Disconnecting Signals
 
-When a `GodotObject` is freed, Godot disconnects its connections, for emitters and receivers alike. Two cases are **not** cleaned up when the receiver is freed while the emitter lives on: a `+=` on a **custom `[Signal]`**, and a **lambda that captures a variable**. In both, the next emission reaches a disposed object and throws `ObjectDisposedException`, so disconnect with `-=` yourself. Pair `_EnterTree()` with `_ExitTree()` if the node can leave and re-enter the tree (`_Ready()` runs only once), or connect in `_Ready()` and disconnect in `Dispose()`.
+When a `GodotObject` is freed, Godot disconnects its connections, for emitters and receivers alike. Two cases are **not** cleaned up when the receiver is freed while the emitter lives on: a `+=` on a **custom `[Signal]`**, and a **lambda that captures a variable**. In both, the next emission reaches a disposed object and throws `ObjectDisposedException`, so disconnect with `-=` yourself in `_ExitTree()`. For a node that can leave and re-enter the tree, connect in `_EnterTree()` instead of `_Ready()`, which runs only once.
 
 > See [references/disconnecting.md](references/disconnecting.md) for the `-=` cleanup pattern, the two cases Godot does not clean up, and a SafeDisconnect helper.
 

@@ -120,7 +120,7 @@ send_chat_message.rpc_id(target_peer_id, "Hello!")
 // Chat.cs
 using Godot;
 
-public partial class Chat : Node
+public partial class Chat : Node2D
 {
     // Any peer can call; executes on the server only.
     [Rpc(MultiplayerApi.RpcMode.AnyPeer, TransferMode = MultiplayerPeer.TransferModeEnum.Reliable)]

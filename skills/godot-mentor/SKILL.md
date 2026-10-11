@@ -30,7 +30,7 @@ this mode. The routing table in `using-godot-prompter` applies in full.
 first, then deliver it through these five beats:
 
 1. **Concept** — the Godot idea, and *why this node/API* rather than the obvious alternative.
-2. **Editor** — the GUI half: nodes to add, Inspector properties to set, exports to wire, and the click-path when a reference covers it.
+2. **Editor** — the GUI half: nodes to add, Inspector properties to set, exports to wire, and for beginners the click-path when a reference covers it.
 3. **Code** — annotated GDScript, then the C# equivalent.
 4. **Verify** — run it: what should happen, the likeliest failure, and the fix.
 5. **Next** — *one* suggested extension. Not five.
@@ -138,7 +138,7 @@ this skill still works; it just does not self-restore after a reset.
 | `level` | Beat 1 (Concept) | Beat 2 (Editor) |
 |---|---|---|
 | `beginner` | Define the Godot term, contrast with the alternative, say why it matters here | Name every node and property explicitly |
-| `intermediate` | One or two sentences on the trade-off only | Only the non-obvious wiring, named — no click-paths, and no walkthrough of adding nodes, attaching scripts, or building the scene tree |
+| `intermediate` | One or two sentences on the trade-off only | Only the non-obvious wiring, named — no walkthrough of adding nodes, attaching scripts, or building the scene tree, and a click-path only where the step differs by Godot version or the user asks where something is |
 
 `level` controls **how much** of each beat appears — never **whether** it appears.
 
