@@ -161,7 +161,7 @@ Three layers: depth/height fog set on `WorldEnvironment.environment` (cheap, all
 
 > See [references/fog-recipes.md](references/fog-recipes.md) for the full GDScript and C# recipes — depth/height fog setup, volumetric fog parameters and performance notes, and FogVolume placement.
 
-> ⚠️ **Changed in Godot 4.7:** Volumetric fog is now blended using transmittance instead of opacity, so existing volumetric fog can look different after upgrading. Enable the project setting `rendering/environment/fog/use_legacy_blending` (default `false`) to restore the previous behavior. See [GH-119414](https://github.com/godotengine/godot/pull/119414).
+> ⚠️ **Changed in Godot 4.7:** New project setting `rendering/environment/fog/use_legacy_blending` (default `false`) restores the volumetric fog blending of Godot 4.5 and earlier ([GH-119414](https://github.com/godotengine/godot/pull/119414); also on the 4.6 branch). The blending itself changed in **4.6**, which made it more physically accurate, so fog tuned on 4.5 looks brighter after upgrading ([GH-112494](https://github.com/godotengine/godot/pull/112494)). Enable the setting to get the old look back exactly; otherwise lower the fog density or the lights' Volumetric Fog Energy.
 
 ## 7. Decals
 

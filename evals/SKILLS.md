@@ -11,7 +11,7 @@ claude plugin eval . --case "skill-*" -j 3 --ablation with-without --judge-model
 
 Roughly $1.30-$3.40 a case (runs: 3), so a case per skill across the whole plugin would cost
 over $100 a run. Cases carry a tag: `--tag discriminating` selects the ones that separate the
-arms (about $12 a run), `--tag ceiling` the ones both arms pass, kept as routing checks.
+arms (nine cases, about $17 a run), `--tag ceiling` the ones both arms pass, kept as routing checks.
 
 ## Pilot — v1.15.0 + branch fixes, 2026-10-09 (`results/2026-10-09T18-30-04-722Z`)
 
@@ -68,3 +68,32 @@ clean, about $14 together.
 | `godot-code-review` fired 1/3 on "Review this GDScript…" | description lists trigger phrases and says a pasted snippet counts | `trigger-skill` 1/3 → **3/3** |
 | skill-04 at ceiling | harder script, five planted issues, must include the dropped coroutine after `queue_free()` | still 3/3 in both arms — a routing check only |
 | skill-01 `fsm-correct` flipped on whether an inherited hook counts | one condition; inherited hooks count | re-judged 11/12 pass across both arms — stable, no longer separates them |
+
+## Godot 4.7 change cases — 2026-10-11 (`results/2026-10-11T00-16-31-153Z`)
+
+Four more cases built on "Changed in Godot 4.7" callouts, each fact checked against the engine
+source and the 4.6 / 4.7 migration guides before running. Clean run, $4.50, 270 s, mean **Δ +0.69**.
+
+| Case | Skill | With | Without | Δ | What the bare model missed (0/3 each) |
+|---|---|---|---|---|---|
+| skill-12-input-device-ids | `input-handling` | 1.00 | 0.60 | +0.40 | keyboard/mouse device IDs are 16 and 32, no longer 0 |
+| skill-13-blendspace-sync-mode | `animation-system` | 1.00 | 0.33 | +0.67 | bool `sync` replaced by the `sync_mode` enum; `SYNC_MODE_INDEPENDENT` |
+| skill-14-richtext-image-unit | `godot-ui` | 1.00 | 0.33 | +0.67 | `width_unit` / `height_unit` and `IMAGE_UNIT_EM` |
+| skill-15-volumetric-fog-blending | `3d-essentials` | 1.00 | 0.00 | +1.00 | the blending change and `use_legacy_blending` |
+
+Every skill fired 3/3. With skill-10 (+0.24) that is five version-change cases, all positive; the
+five mainstream and addon cases average about +0.05. Recency is what this plugin measurably adds.
+
+Skill corrections made while checking facts for these cases and the C# one:
+
+| Skill | Was | Is |
+|---|---|---|
+| `3d-essentials` (and `references/fog-recipes.md`) | fog blending "changed in 4.7" | the blending changed in **4.6** (GH-112494); 4.7 added `use_legacy_blending` (GH-119414) |
+| `csharp-signals` | omitting `EventHandler` "compiles without error" | compile error GD0201 |
+| `csharp-signals` `references/awaiting-signals.md` | `ToSignal(...).AsTask()`; resolves to `Godot.Collections.Array` | no `AsTask()` exists — wrap the await in an `async Task` method; resolves to `Variant[]` |
+| `csharp-signals`, `event-bus` | "C# must disconnect explicitly", causes a memory leak | Godot disconnects on free except custom `[Signal]`s and capturing lambdas; the failure is `ObjectDisposedException` |
+| `csharp-signals` description | fired 1/3 on a C#/GDScript signal question | trigger phrases added; 3/3 (`results/2026-10-11` re-run of skill-11) |
+
+`docs/superpowers/notes/2026-07-05-godot-4.7-deltas.md` still carries the fog mistake; it is a
+dated research note and was left as written. The corrected C# examples follow the `SignalAwaiter`
+source but have not been compiled in a Godot project.
