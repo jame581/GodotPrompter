@@ -25,7 +25,7 @@ Preset fields: **Release / Release User / Release Password** (keystore and key p
 
 A **custom Gradle build** (*Project → Install the Gradle Build template*) is **required for v2 plugins and IAP** (Godot 4.2+). Since Godot 4.7 the **Use Gradle Build** export option is no longer marked experimental ([GH-119172](https://github.com/godotengine/godot/pull/119172)) — treat it as the standard path when you need plugins or IAP.
 
-> ⚠️ **Changed in Godot 4.7:** Deprecated Google Play OBB expansion-file support was removed from the Android export. Projects still relying on APK expansion files must migrate to Play Asset Delivery or PCK patching. See [GH-118283](https://github.com/godotengine/godot/pull/118283).
+> ⚠️ **Changed in Godot 4.7:** Deprecated Google Play OBB expansion-file support (the `apk_expansion/*` export options) was removed from the Android export. Projects still relying on APK expansion files should move to Android App Bundles with Play Asset Delivery, or install the separate [Godot OBB plugin](https://github.com/m4gr3d/godot-obb-plugin) that now holds the old logic. See [GH-118283](https://github.com/godotengine/godot/pull/118283).
 
 ---
 
@@ -281,5 +281,5 @@ C# Android/iOS export is **Godot 4.2+ but experimental**. **Android C# export re
 - [ ] UI anchored inside `get_display_safe_area()`; notch/cutout handled
 - [ ] Mobile/Compatibility renderer + ETC2/ASTC compression enabled
 - [ ] C# projects: verified .NET 9+ for Android export
-- [ ] Play OBB/APK expansion files migrated to Play Asset Delivery or PCK patching (removed in Godot 4.7)
+- [ ] Play OBB/APK expansion files moved to App Bundles with Play Asset Delivery, or the Godot OBB plugin installed (built-in support removed in Godot 4.7)
 - [ ] PiP (Android): aspect ratio + auto-enter configured; HUD reacts to the PIP_MODE notifications (Godot 4.7+)

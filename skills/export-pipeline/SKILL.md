@@ -85,7 +85,7 @@ ssh_remote_deploy/cleanup_script="#!/usr/bin/env bash\nkill $(pgrep -x -f \"{tem
 
 > Godot regenerates `export_presets.cfg` on every editor save. Do not hand-edit it while the editor is open.
 
-> ⚠️ **Changed in Godot 4.7:** The "runnable" flag moved out of export presets — `runnable=` (shown in the example above for 4.3–4.6) is no longer a per-preset property in `export_presets.cfg`; the editor now tracks which preset is runnable separately. Don't be surprised when the line disappears from the file after saving in a 4.7 editor. See [GH-114930](https://github.com/godotengine/godot/pull/114930).
+> ⚠️ **Changed in Godot 4.7:** The "runnable" flag moved out of export presets — `runnable=` (shown in the example above for 4.3–4.6) is no longer a per-preset property in `export_presets.cfg`; a 4.7 editor writes a top-level `[runnable_presets]` section (platform name → preset name) in the same file, and still reads the legacy key. Don't be surprised when the line disappears from the file after saving in a 4.7 editor. See [GH-114930](https://github.com/godotengine/godot/pull/114930).
 
 > **Godot 4.7+:** Sparse PCK exports (patch packs) support encrypting the file index, complementing the existing `encrypt_pck` / `encrypt_directory` preset options. ([GH-113920](https://github.com/godotengine/godot/pull/113920))
 

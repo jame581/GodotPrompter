@@ -335,9 +335,9 @@ public partial class ItemPreviewGenerator : EditorResourcePreviewGenerator
         return item.Icon;
     }
 
-    public override bool _GenerateSmallPreview()
+    public override bool _GenerateSmallPreviewAutomatically()
     {
-        return true; // also generate the small preview shown in lists
+        return true; // derive the small list preview from the texture _Generate returns
     }
 }
 #endif

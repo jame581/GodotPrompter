@@ -131,7 +131,7 @@ Configure global rendering — sky background, tonemapping, glow, SSR, SSAO/SSIL
 
 > **Godot 4.7+:** `display/window/hdr/request_hdr_output` (default `false`, promoted to a basic project setting) requests HDR display output for the main window and editor where supported, auto-switching between HDR and SDR as screens or system settings change; it forces `Viewport.use_hdr_2d` on for the main viewport (other `SubViewport`s must enable it themselves). Read only at startup — toggle `Window.hdr_output_requested` at runtime.
 
-> ⚠️ **Changed in Godot 4.7:** The `rendering/reflections/sky_reflections/roughness_layers` default changed from `7` to `8`, altering sky-reflection roughness mip distribution for projects that left it at the default. Set it back to `7` to keep the 4.6 output. See the [4.7 migration guide](https://docs.godotengine.org/en/latest/tutorials/migrating/upgrading_to_godot_4.7.html).
+> ⚠️ **Changed in Godot 4.7:** The `rendering/reflections/sky_reflections/roughness_layers` default is `8` again. Only 4.6.0 and 4.6.1 used `7`; the revert ([GH-116154](https://github.com/godotengine/godot/pull/116154)) shipped in 4.7 and was backported to 4.6.2. Only projects upgrading from 4.6.0 or 4.6.1 with the setting at its default see different sky reflections — set it to `7` to keep that look. See the [4.7 migration guide](https://docs.godotengine.org/en/latest/tutorials/migrating/upgrading_to_godot_4.7.html).
 
 ## 5. Global Illumination
 

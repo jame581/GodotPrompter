@@ -56,7 +56,7 @@ func _release() -> void:
 public partial class XRGrabController : XRController3D
 {
     private RigidBody3D _heldObject = null;
-    private Generic6DOFJoint3D _grabJoint = null;
+    private Generic6DofJoint3D _grabJoint = null;
 
     [Export] public Area3D GrabArea { get; set; }
 
@@ -85,7 +85,7 @@ public partial class XRGrabController : XRController3D
             if (body is RigidBody3D rigidBody)
             {
                 _heldObject = rigidBody;
-                _grabJoint = new Generic6DOFJoint3D();
+                _grabJoint = new Generic6DofJoint3D();
                 AddChild(_grabJoint);
                 _grabJoint.NodeA = GetPath();
                 _grabJoint.NodeB = _heldObject.GetPath();

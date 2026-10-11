@@ -21,7 +21,7 @@ Reach for GDScript or C# for almost all game logic. Choose GDExtension only when
 
 Contrast with **C++ modules**, which are compiled *into* the engine and therefore require shipping a custom engine binary. GDExtension's key advantage is that it runs against a **stock** Godot — you distribute just a shared library. It is "more complicated to use than GDScript and C#," so don't reach for it by default.
 
-> ⚠️ **Changed in Godot 4.7:** Custom text servers are no longer a GDExtension use case — TextServer GDExtension build support was removed, so a custom `TextServer` must be compiled into the engine as a C++ module. See [GH-117056](https://github.com/godotengine/godot/pull/117056).
+> ⚠️ **Changed in Godot 4.7:** The engine's built-in text servers (`text_server_adv`, `text_server_fb`) can no longer be built as GDExtensions — their `gdextension_build/` scripts were removed. Writing your own text server as a GDExtension by subclassing `TextServerExtension` is unaffected. See [GH-117056](https://github.com/godotengine/godot/pull/117056).
 
 ---
 
@@ -108,7 +108,7 @@ The patterns:
 - **`PROPERTY_HINT_RANGE`** with `"0,20,0.01"` turns the Inspector field into a slider (min, max, step).
 - **`ADD_SIGNAL(MethodInfo("name", PropertyInfo(...), ...))`** — declares a signal with typed arguments; emit it from code with `emit_signal("position_changed", this, new_pos)`.
 
-> ⚠️ **Changed in Godot 4.7:** The GDExtension interface functions `object_cast_to` and `classdb_get_class_tag` are deprecated in favor of `is_class`-based casts. Binding libraries (godot-cpp, gdext) handle this internally — but native code that calls these interface functions directly should migrate its cast paths. See [GH-119254](https://github.com/godotengine/godot/pull/119254).
+> ⚠️ **Changed in Godot 4.7:** The GDExtension interface functions `object_cast_to` and `classdb_get_class_tag` are deprecated in favor of `is_class`-based casts. Binding libraries such as godot-cpp handle this internally — but native code that calls these interface functions directly should migrate its cast paths. See [GH-119254](https://github.com/godotengine/godot/pull/119254).
 
 ---
 

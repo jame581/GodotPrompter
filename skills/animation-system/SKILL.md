@@ -261,7 +261,7 @@ Procedurally rotates a bone to look at a world-space target. Ideal for head trac
 
 > See [references/skeleton-modifiers.md](references/skeleton-modifiers.md) for the full GDScript and C# example with angle limits and influence blending.
 
-> ⚠️ **Changed in Godot 4.7:** `LookAtModifier3D.relative` now defaults to `false` (was `true`) — the rotation is applied relative to the rest pose by default instead of the current pose. Set `relative = true` to restore the 4.6 behavior. See the [4.7 migration guide](https://docs.godotengine.org/en/latest/tutorials/migrating/upgrading_to_godot_4.7.html).
+> ⚠️ **Changed in Godot 4.7:** `LookAtModifier3D.relative` now defaults to `false` — the rotation is applied relative to the rest pose instead of the current pose. The default was `true` only in 4.6.0; the change was also backported to 4.6.1, so projects coming from 4.6.1 or later see no difference. Set `relative = true` to restore the 4.6.0 behavior. See the [4.7 migration guide](https://docs.godotengine.org/en/latest/tutorials/migrating/upgrading_to_godot_4.7.html).
 
 ### BoneConstraint3D (Godot 4.5+)
 
