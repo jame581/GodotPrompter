@@ -125,9 +125,9 @@ Prefer `shadow_normal_bias` over `shadow_bias` against acne; keep `directional_s
 
 ## 4. Environment & Post-Processing
 
-Configure global rendering — sky background, tonemapping, glow, SSR, SSAO/SSIL/SDFGI, depth-of-field — through a `WorldEnvironment` node holding an `Environment` resource. Pick a tonemap (`Linear`, `Reinhard`, `Filmic`, `ACES`, or `AgX`) on the Environment resource. Forward+ enables SSAO, SSIL, SSR, and SDFGI; mobile/compatibility renderers omit these.
+Configure global rendering — sky background, tonemapping, glow, SSR, SSAO/SSIL/SDFGI, depth-of-field — through a `WorldEnvironment` node holding an `Environment` resource. Pick a tonemap (`Linear`, `Reinhard`, `Filmic`, `ACES`, or `AgX`) on the Environment resource. Forward+ enables SSAO, SSIL, SSR, and SDFGI; the Mobile renderer omits them, and Compatibility has only SSAO (since 4.6).
 
-> See [references/environment-and-post.md](references/environment-and-post.md) for the full setup recipes (sky options, tonemap modes, all post-processing effects, the 4.6+ glow-before-tonemapping pipeline change, AgX `tonemap_white` / `tonemap_contrast` controls, and the 4.6+ SSR quality upgrade).
+> See [references/environment-and-post.md](references/environment-and-post.md) for the full setup recipes (sky options, tonemap modes, all post-processing effects, the 4.6+ glow blend and default changes, AgX `tonemap_agx_white` / `tonemap_agx_contrast` controls, and the 4.6+ SSR quality upgrade).
 
 > **Godot 4.7+:** `display/window/hdr/request_hdr_output` (default `false`, promoted to a basic project setting) requests HDR display output for the main window and editor where supported, auto-switching between HDR and SDR as screens or system settings change; it forces `Viewport.use_hdr_2d` on for the main viewport (other `SubViewport`s must enable it themselves). Read only at startup — toggle `Window.hdr_output_requested` at runtime.
 
@@ -141,7 +141,7 @@ Five GI options trade quality for cost: none (ambient only) → ReflectionProbe 
 
 ### Specular Occlusion from Ambient Light (Godot 4.5+)
 
-Godot 4.5+ automatically computes specular occlusion from the ambient light probe when **LightmapGI**, **VoxelGI**, or **SDFGI** is active. Prevents unrealistically bright speculars in areas that receive little indirect light (under eaves, inside crevices, in corners). No API change — re-bake after upgrading to see the improvement on metallic / low-roughness surfaces. ReflectionProbe alone does not provide specular occlusion.
+Godot 4.5+ dims indirect specular (sky, ReflectionProbe, GI reflections) by the brightness of the ambient light reaching each pixel, in all three renderers. This prevents unrealistically bright reflections in areas that receive little indirect light (under eaves, in crevices and corners). It is on by default and needs no re-bake: turn it off globally with `rendering/reflections/specular_occlusion/enabled`, or per shader with `render_mode specular_occlusion_disabled`.
 
 ### Bent Normal Maps (Godot 4.5+)
 
@@ -208,8 +208,8 @@ Quick symptom → cause → fix table covering black scenes, dark objects withou
 - [ ] Occlusion culling is enabled and baked for scenes with heavy occlusion (indoor, urban)
 - [ ] MultiMeshInstance3D is used for instanced geometry (grass, trees, props) instead of individual nodes
 - [ ] Renderer matches target platform (Forward+ desktop, Mobile mobile, Compatibility web)
-- [ ] Projects using LightmapGI/VoxelGI/SDFGI take advantage of automatic specular occlusion by upgrading to Godot 4.5+ (no API change required)
+- [ ] Specular occlusion (on by default since Godot 4.5) is left enabled, or disabled deliberately via `rendering/reflections/specular_occlusion/enabled` where reflections look too dim
 - [ ] Hero assets with complex surface detail use bent normal maps in the StandardMaterial3D Bent Normal slot for improved indirect lighting (Godot 4.5+)
-- [ ] After upgrading to Godot 4.6, glow settings are re-tuned if appearance has changed (glow now runs before tonemapping)
+- [ ] After upgrading to Godot 4.6, glow settings are re-tuned if appearance has changed (default blend mode is now Screen and glow is blended before tonemapping)
 - [ ] AgX `tonemap_agx_white` and `tonemap_agx_contrast` are adjusted when using AgX tonemapper for precise look control (Godot 4.6+)
 - [ ] After upgrading to Godot 4.7, volumetric fog and sky reflections are re-checked (fog blending and the `roughness_layers` default changed)

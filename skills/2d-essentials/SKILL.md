@@ -84,7 +84,7 @@ Vector2 screenPos = GetViewport().GetScreenTransform() * GetGlobalTransformWithC
 
 ## 2. TileMap System
 
-`TileMapLayer` (Godot 4.5+) is the modern API — one tilemap = one node = one layer. Drive painting with a `TileSet` resource (atlas + properties + physics + custom data). Use **terrain autotiling** for biome-aware tile selection, **scene collection tiles** for placing scene instances on tiles.
+`TileMapLayer` (Godot 4.3+) is the modern API — one tilemap = one node = one layer. Drive painting with a `TileSet` resource (atlas + properties + physics + custom data). Use **terrain autotiling** for biome-aware tile selection, **scene collection tiles** for placing scene instances on tiles.
 
 > See [references/tilemap.md](references/tilemap.md) for full TileSet setup, atlas / physics / terrain configuration, custom data on tiles, scene collection tiles, and the 4.5+ tile-collision-bump auto-merge fix.
 
@@ -92,7 +92,7 @@ Vector2 screenPos = GetViewport().GetScreenTransform() * GetGlobalTransformWithC
 
 ## 3. Parallax Scrolling
 
-`Parallax2D` (Godot 4.4+) replaces the older `ParallaxBackground`/`ParallaxLayer` pair. Set `scroll_scale` per layer (0 = static, 1 = follows camera 1:1, fractional values for depth). Add `repeat_size` for infinite tiling.
+`Parallax2D` (Godot 4.3+) replaces the older `ParallaxBackground`/`ParallaxLayer` pair. Set `scroll_scale` per layer (0 = static, 1 = follows camera 1:1, fractional values for depth). Add `repeat_size` for infinite tiling.
 
 > See [references/parallax.md](references/parallax.md) for `Parallax2D` setup, side-scroller layer example, infinite repeat, split-screen parallax, common mistakes.
 

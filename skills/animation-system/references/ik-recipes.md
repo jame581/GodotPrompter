@@ -139,7 +139,7 @@ public partial class FootIK : Node3D
 
 **Verification:** Place the character on a slope or staircase. Both feet should plant on the ground polygons rather than floating or clipping. Toggle `FABRIK3D.influence` between 0 and 1 to compare.
 
-**Perf cost:** One raycast and one `FABRIK3D` per leg every frame. Two-leg humanoid → 2 raycasts + 2 IK solves. For background NPCs, gate this behind a distance check or run on `_physics_process` at 30 Hz instead of `_process`. For exactly-2-bone humanoid legs, `TwoBoneIK3D` solves in roughly half the time of `FABRIK3D`.
+**Perf cost:** One raycast and one `FABRIK3D` per leg every frame. Two-leg humanoid → 2 raycasts + 2 IK solves. For background NPCs, gate this behind a distance check or run on `_physics_process` at 30 Hz instead of `_process`. For exactly-2-bone humanoid legs, `TwoBoneIK3D` is a closed-form (non-iterative) solve and the cheaper choice; it also needs a pole node (`set_pole_node`) to fix the knee direction.
 
 ## Basic setup — FABRIK arm IK
 
@@ -177,6 +177,6 @@ public override void _Ready()
 }
 ```
 
-> **Note:** `IKModifier3D` solvers are configured per setting index: set `setting_count`, then `set_root_bone_name(i, …)`, `set_end_bone_name(i, …)` and `set_target_node(i, …)` (`TwoBoneIK3D` also takes `set_middle_bone_name` and `set_pole_node`). The C# class names are `Fabrik3D`, `Ccdik3D`, `JacobianIK3D`, `TwoBoneIK3D` and `SplineIK3D`.
+> **Note:** `IKModifier3D` solvers are configured per setting index: set `setting_count`, then `set_root_bone_name(i, …)`, `set_end_bone_name(i, …)` and `set_target_node(i, …)` (`TwoBoneIK3D` also takes `set_middle_bone_name` and `set_pole_node`; `SplineIK3D` has no target node and takes `set_path_3d(i, …)` instead). The C# class names are `Fabrik3D`, `Ccdik3D`, `JacobianIK3D`, `TwoBoneIK3D` and `SplineIK3D`.
 
-> **When to use:** `IKModifier3D` subclasses replace custom IK scripts and third-party IK plugins. Use `TwoBoneIK3D` for leg/arm IK (fastest, exact), `FABRIK3D` for longer chains and natural-looking reach, `CCDIK3D` for tentacles or tails.
+> **When to use:** `IKModifier3D` subclasses replace custom IK scripts and third-party IK plugins. Use `TwoBoneIK3D` for leg/arm IK (exact; needs a pole node), `FABRIK3D` for longer unconstrained chains, `CCDIK3D` when joints have limits, `SplineIK3D` for tails that follow a path.

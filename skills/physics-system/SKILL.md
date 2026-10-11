@@ -22,7 +22,7 @@ Four collision-object types (the last three extend `PhysicsBody2D`/`3D`):
 | `RigidBody2D/3D` | Physics engine | Crates, projectiles, debris, ragdolls |
 | `CharacterBody2D/3D` | Code | Players, enemies, NPCs (see **player-controller**) |
 
-Every collision object needs at least one `CollisionShape2D`/`3D` (or `CollisionPolygon2D`/`3D`) child. **Jolt Physics is the default 3D engine since 4.4** (non-experimental from 4.6) — see Section 8. 2D always uses GodotPhysics.
+Every collision object needs at least one `CollisionShape2D`/`3D` (or `CollisionPolygon2D`/`3D`) child. **Jolt Physics is built in since 4.4 (experimental, opt-in) and is the default 3D engine for projects created in 4.6+** — see Section 8; existing projects keep GodotPhysics until switched. 2D always uses GodotPhysics.
 
 > **Critical rule:** NEVER scale collision shapes or physics bodies via `scale`. Use the shape's own size parameters (radius, extents, height) — scaling breaks collision accuracy.
 
@@ -137,7 +137,7 @@ The `intersect_ray` result dictionary contains `position`, `normal`, `collider`,
 
 ## 8. Jolt Physics
 
-Jolt is a built-in alternative physics engine, the **default for new 3D projects** since Godot 4.4. **(Godot 4.6+)** Jolt is no longer marked experimental and is the confirmed stable default for all new 3D projects.
+Jolt is a built-in alternative physics engine, available since Godot 4.4 as an experimental opt-in. **(Godot 4.6+)** Jolt is no longer marked experimental and is the default for newly created 3D projects; projects upgraded from earlier versions keep `DEFAULT` (GodotPhysics3D) until changed.
 
 ### Enabling Jolt
 

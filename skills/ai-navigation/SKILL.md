@@ -46,9 +46,9 @@ GetNode<NavigationRegion2D>("NavigationRegion2D").BakeNavigationPolygon();
 GetNode<NavigationRegion3D>("NavigationRegion3D").BakeNavigationMesh();
 ```
 
-### Async Navigation Baking (Godot 4.4+)
+### Async Navigation Baking
 
-Navigation baking can cause frame drops on large maps. Godot 4.4 supports baking on a background thread: pass `true` to `bake_navigation_polygon(true)` (2D) or `bake_navigation_mesh(true)` (3D) and connect the region's `bake_finished` signal (use `CONNECT_ONE_SHOT`) to know when the mesh is ready.
+Navigation baking can cause frame drops on large maps, so regions bake on a background thread by default: `bake_navigation_polygon()` (2D) and `bake_navigation_mesh()` (3D) take `on_thread = true` unless you pass `false`. Connect the region's `bake_finished` signal (use `CONNECT_ONE_SHOT`) to know when the mesh is ready. Threaded baking is unavailable on Web builds without thread support.
 
 > See [references/async-baking.md](references/async-baking.md) for the full GDScript and C# background-thread bake examples (2D and 3D).
 
@@ -243,15 +243,16 @@ Combines NavigationAgent2D with a state machine. See the **state-machine** skill
 
 Prior to Godot 4.5, `NavigationServer2D` was a thin frontend that delegated all work to the 3D navigation server internally. Godot 4.5 splits them into fully independent servers. The change is **transparent** — no API changes and no code migration is required — but it brings two practical benefits:
 
-- **Performance:** 2D pathfinding no longer competes with 3D navigation for server resources. Large 2D scenes with many agents see lower CPU overhead.
-- **Smaller exports for 2D-only games:** The 3D navigation server can be stripped from 2D-only export templates, reducing binary size.
+- **Independence:** 2D navigation no longer runs through the 3D server — 2D maps, regions and agents are handled by their own implementation.
+- **Smaller exports for 2D-only games:** custom export templates can be compiled without the 3D navigation server (`disable_navigation_3d=yes`), reducing binary size.
 
 ```gdscript
 # No code change needed — NavigationServer2D calls work identically.
 # The split is internal; you continue using NavigationServer2D as before.
 
 # Example: query a path directly via the server (unchanged API).
-func get_path_to(target: Vector2) -> PackedVector2Array:
+# Not named get_path_to: that is Node.get_path_to(node) and cannot be overridden with another signature.
+func find_path_to(target: Vector2) -> PackedVector2Array:
     var map: RID = get_world_2d().get_navigation_map()
     return NavigationServer2D.map_get_path(
         map,
@@ -263,14 +264,14 @@ func get_path_to(target: Vector2) -> PackedVector2Array:
 
 ```csharp
 // No code change needed — NavigationServer2D calls work identically.
-public PackedVector2Array GetPathTo(Vector2 target)
+public Vector2[] FindPathTo(Vector2 target)
 {
-    var map = GetWorld2D().GetNavigationMap();
+    Rid map = GetWorld2D().NavigationMap;
     return NavigationServer2D.MapGetPath(map, GlobalPosition, target, true);
 }
 ```
 
-> **2D-only projects:** In **Project Settings → Modules**, you can disable the `NavigationServer3D` module to reduce export size. This is only safe if no 3D navigation nodes (`NavigationRegion3D`, `NavigationAgent3D`) are used anywhere in the project.
+> **2D-only projects:** Stock export templates still include 3D navigation. To drop it, compile custom export templates with the `disable_navigation_3d=yes` SCons option (Godot 4.5+). This is only safe if no 3D navigation nodes (`NavigationRegion3D`, `NavigationAgent3D`) are used anywhere in the project.
 
 ---
 
@@ -285,7 +286,7 @@ public PackedVector2Array GetPathTo(Vector2 target)
 | **Wrong navigation layer** | Agent ignores some regions or finds no path | Confirm `navigation_layers` bitmask matches between the NavigationRegion and the NavigationAgent |
 | **Target set before NavigationServer is ready** | Path is empty on the first frame | Defer `target_position` assignment to `_ready()` or await `NavigationServer2D.map_changed` |
 | **Gravity ignored in 3D** | Agent floats or sinks into the floor | Always accumulate `velocity.y` from gravity separately; only zero out X/Z from the nav direction |
-| **Baking causes frame drop** | Synchronous bake on large maps blocks the main thread | Use async baking: `bake_navigation_mesh(true)` (Godot 4.4+); connect `bake_finished` signal |
+| **Baking causes frame drop** | Bake forced onto the main thread (`on_thread = false`), or parsing a very large scene | Keep the default threaded bake (`bake_navigation_mesh()`); connect `bake_finished` and never block waiting for it |
 
 > ⚠️ **Changed in Godot 4.7:** `NavigationServer3D.map_get_closest_point_normal(map, to_point)` now returns a normalized vector ([GH-119022](https://github.com/godotengine/godot/pull/119022)) — previously the returned surface normal could be unnormalized. Code that compensated by calling `normalized()` on the result keeps working; code that relied on the unnormalized magnitude breaks.
 
@@ -303,5 +304,5 @@ public PackedVector2Array GetPathTo(Vector2 target)
 - [ ] Path target updated via a throttle timer rather than every frame when following a moving player
 - [ ] `agent_radius` small enough to fit through the narrowest passage in the level
 - [ ] Gravity applied independently of horizontal nav velocity (3D only)
-- [ ] Large or dynamic maps use async baking (`bake_navigation_mesh(true)`) to avoid frame drops (Godot 4.4+)
-- [ ] 2D-only projects on Godot 4.5+ can disable `NavigationServer3D` in Project Settings to reduce export size
+- [ ] Large or dynamic maps keep the default threaded bake (`bake_navigation_mesh()`, `on_thread = true`) and wait for `bake_finished`
+- [ ] 2D-only projects on Godot 4.5+ can build custom export templates with `disable_navigation_3d=yes` to reduce export size

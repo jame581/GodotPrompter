@@ -6,9 +6,9 @@ Godot 4.5 adds a live locale preview to the editor — see how your UI looks in 
 
 ## How to Use
 
-1. Open **Project → Project Settings → Internationalization**.
-2. Find the **Preview Language** dropdown.
-3. Select a locale from the list of registered translations (e.g., `ja`, `cs`, `ar`).
+1. Open a scene in the **2D** editor and click **View** in the viewport toolbar.
+2. Open the **Preview Translation** submenu.
+3. Select a locale from the list of loaded translations (e.g., `ja`, `cs`, `ar`).
 4. The editor viewport updates immediately to reflect the selected locale.
 
 ## Benefits
@@ -18,4 +18,4 @@ Godot 4.5 adds a live locale preview to the editor — see how your UI looks in 
 - Confirm Control nodes with text properties use `tr()` keys (untranslated keys show as-is in non-English preview).
 - Faster translation QA — iterate directly in the editor.
 
-> Reset to the default locale via the blank or `en` entry in the **Preview Language** dropdown. The preview is editor-only and doesn't affect exported builds.
+> Reset by choosing **None** in the **Preview Translation** submenu. The preview is editor-only and doesn't affect exported builds.

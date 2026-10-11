@@ -144,44 +144,48 @@ Full GDScript + C# construction, the key-properties table, and the toggle signal
 
 ## 9. Stacked Label Effects (Godot 4.5+)
 
-Godot 4.5 lets `Label` and `RichTextLabel` layer multiple text effects simultaneously — e.g., stacking two outline effects at different widths/colors, or combining a shadow with a glow. Previously, multiple outline layers required duplicating and manually layering Label nodes.
+Godot 4.5 lets a `Label` layer several outlines and shadows through its `LabelSettings` resource — e.g. two outlines at different widths/colors plus a soft drop shadow. The stack lives on `LabelSettings` (configured per index), not on theme overrides, and `RichTextLabel` has no equivalent. Previously, multiple outline layers required duplicating and manually layering Label nodes.
 
 ```gdscript
-# Configure via Theme Overrides → Constants in the inspector, or add_theme_* overrides at runtime.
+# Stacked effects live on LabelSettings and are configured per index.
 func apply_stacked_outlines(label: Label) -> void:
-    # Outer outline — wide, dark
-    label.add_theme_constant_override("outline_size", 6)
-    label.add_theme_color_override("font_outline_color", Color(0.0, 0.0, 0.0, 0.9))
+    var settings := LabelSettings.new()
+    settings.outline_size = 4                  # base (inner) outline
+    settings.outline_color = Color.BLACK
 
-    # Shadow (second layered effect)
-    label.add_theme_constant_override("shadow_offset_x", 2)
-    label.add_theme_constant_override("shadow_offset_y", 2)
-    label.add_theme_color_override("font_shadow_color", Color(0.0, 0.0, 0.0, 0.5))
+    settings.add_stacked_outline()             # stacked outline 0, drawn outside the base one
+    settings.set_stacked_outline_size(0, 8)
+    settings.set_stacked_outline_color(0, Color.GOLD)
+
+    settings.add_stacked_shadow()              # stacked shadow 0
+    settings.set_stacked_shadow_offset(0, Vector2(3, 3))
+    settings.set_stacked_shadow_color(0, Color(0.0, 0.0, 0.0, 0.5))
+    settings.set_stacked_shadow_outline_size(0, 2)
+
+    label.label_settings = settings            # takes priority over theme properties
 ```
 
 ```csharp
 public void ApplyStackedOutlines(Label label)
 {
-    // Outer outline — wide, dark
-    label.AddThemeConstantOverride("outline_size", 6);
-    label.AddThemeColorOverride("font_outline_color", new Color(0f, 0f, 0f, 0.9f));
+    var settings = new LabelSettings { OutlineSize = 4, OutlineColor = Colors.Black };
 
-    // Shadow (second layered effect)
-    label.AddThemeConstantOverride("shadow_offset_x", 2);
-    label.AddThemeConstantOverride("shadow_offset_y", 2);
-    label.AddThemeColorOverride("font_shadow_color", new Color(0f, 0f, 0f, 0.5f));
+    settings.AddStackedOutline();
+    settings.SetStackedOutlineSize(0, 8);
+    settings.SetStackedOutlineColor(0, Colors.Gold);
+
+    settings.AddStackedShadow();
+    settings.SetStackedShadowOffset(0, new Vector2(3, 3));
+    settings.SetStackedShadowColor(0, new Color(0f, 0f, 0f, 0.5f));
+    settings.SetStackedShadowOutlineSize(0, 2);
+
+    label.LabelSettings = settings;
 }
 ```
 
-For `RichTextLabel`, stacked effects can also be applied via BBCode combined with theme overrides:
+`RichTextLabel` cannot stack effects; it takes one outline per text run through BBCode: `[outline_size=4][outline_color=#000000]Level Up![/outline_color][/outline_size]`.
 
-```gdscript
-# Multiple outline-style effects via BBCode + theme
-$RichTextLabel.text = "[outline size=4 color=#000000]Level Up![/outline]"
-# Additional layers via theme overrides, as above.
-```
-
-> **Editor workflow:** Configure stacked effects via **Theme Editor → Label → Constants**, or add multiple `FontFile`-style outline passes in the Font resource. The runtime API (`add_theme_*_override`) above covers dynamic scenarios.
+> **Editor workflow:** Create a `LabelSettings` resource in the Label's **Label Settings** property and add entries to its stacked outline and stacked shadow lists. The per-index calls above cover dynamic scenarios.
 
 ---
 
@@ -202,4 +206,4 @@ $RichTextLabel.text = "[outline size=4 color=#000000]Level Up![/outline]"
 - [ ] Signals connected in `_ready()` (or via the editor); no polling of UI state in `_process`
 - [ ] Tab order in `TabContainer` matches logical reading / navigation order
 - [ ] Accordion-style collapsible panels use `FoldableContainer` instead of manual Button + VBoxContainer wiring (Godot 4.5+)
-- [ ] Multiple outline/shadow layers on `Label`/`RichTextLabel` use stacked theme overrides instead of duplicated nodes (Godot 4.5+)
+- [ ] Multiple outline/shadow layers on a `Label` use `LabelSettings` stacked outlines/shadows instead of duplicated nodes (Godot 4.5+)

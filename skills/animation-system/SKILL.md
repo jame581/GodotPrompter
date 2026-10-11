@@ -271,13 +271,13 @@ Procedurally rotates a bone to look at a world-space target. Ideal for head trac
 
 ### SpringBoneSimulator3D (Godot 4.4+)
 
-Simulates spring physics on bones — hair, capes, tails, antennas bounce and sway procedurally. Add as child of `Skeleton3D`, configure spring chains (root bone, end bone, stiffness, damping, gravity, drag) in the Inspector.
+Simulates spring physics on bones — hair, capes, tails, antennas bounce and sway procedurally. Add as child of `Skeleton3D`, configure spring chains (root bone, end bone, radius, stiffness, drag, gravity) in the Inspector.
 
 > See [references/skeleton-modifiers.md](references/skeleton-modifiers.md) for property reference table and recommended starting values per use-case (hair, antennas, capes).
 
 ### Animation Markers (Godot 4.4+)
 
-Markers define named points/regions within an animation clip — use them for subregion loops, section-based playback, and audio-synced events without splitting clips. Right-click the timeline → **Add Marker** → name it (e.g., `hit_frame`, `loop_start`). Read `anim_player.current_animation_position` and compare to marker times in code, or feed markers to AudioStreamInteractive for sync.
+Markers define named points/regions within an animation clip — use them for subregion loops, section-based playback, and audio-synced events without splitting clips. Right-click the animation timeline → **Insert Marker...** → name it (e.g., `hit_frame`, `loop_start`). Play a region with `anim_player.play_section_with_markers(&"attack", &"loop_start", &"loop_end")`, or compare `animation.get_marker_time(&"hit_frame")` with `anim_player.current_animation_position`.
 
 ### Animation Retargeting (Godot 4.3+)
 
@@ -289,9 +289,9 @@ Godot 4.3 retargets animations from one skeleton to another during `.glb`/`.gltf
 
 ## 7. IKModifier3D — Solver Comparison (Godot 4.6+)
 
-Godot 4.6 adds `IKModifier3D`, a base class for skeletal IK solvers, with eight subclasses covering the most common algorithms. These are `SkeletonModifier3D` children of `Skeleton3D` and work alongside other modifiers (e.g., `LookAtModifier3D`).
+Godot 4.6 adds `IKModifier3D`, a base class for skeletal IK solvers, with five ready-to-use solvers: `TwoBoneIK3D`, `CCDIK3D`, `FABRIK3D`, `JacobianIK3D` and `SplineIK3D`. These are `SkeletonModifier3D` children of `Skeleton3D` and work alongside other modifiers (e.g., `LookAtModifier3D`).
 
-Pick the cheapest solver that fits the chain: `TwoBoneIK3D` for exactly-two-bone limbs (the common humanoid case), `CCDIK3D` for short non-2-bone chains, `FABRIK3D` for longer or variable-length chains, and `JacobianIK3D` only when rig accuracy matters more than CPU cost.
+Pick by chain: `TwoBoneIK3D` for exactly-two-bone limbs (needs a pole node), `FABRIK3D` for simple chains without joint limits, `CCDIK3D` when joints have limits, `SplineIK3D` to follow a `Path3D`, and `JacobianIK3D` for smooth organic motion with slower tracking.
 
 > See [references/ik-solver-comparison.md](references/ik-solver-comparison.md) for the full solver comparison table and selection guidance.
 
@@ -330,4 +330,4 @@ Quick symptom → cause → fix table covering animation snapping instead of ble
 - [ ] Hair, capes, and tails use `SpringBoneSimulator3D` instead of custom physics scripts (Godot 4.4+)
 - [ ] Shared animation libraries use retargeting with `SkeletonProfileHumanoid` (Godot 4.3+)
 - [ ] Bone-to-bone aim/copy constraints use `AimModifier3D` / `CopyTransformModifier3D` instead of manual bone transform code (Godot 4.5+)
-- [ ] Arm/leg IK uses `IKModifier3D` subclasses (`TwoBoneIK3D` for two-bone limbs, `FABRIK3D` for longer chains) rather than custom IK scripts (Godot 4.6+)
+- [ ] Arm/leg IK uses `IKModifier3D` subclasses (`TwoBoneIK3D` with a pole node for two-bone limbs, `FABRIK3D` or `CCDIK3D` for longer chains) rather than custom IK scripts (Godot 4.6+)

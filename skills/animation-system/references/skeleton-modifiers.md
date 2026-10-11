@@ -23,8 +23,9 @@ func _ready() -> void:
     look_at.bone_name = "Head"
     look_at.target_node = $"../LookTarget".get_path()
     look_at.use_angle_limitation = true
-    look_at.symmetry_limitation = deg_to_rad(70.0)
-    look_at.primary_limit_angle = deg_to_rad(45.0)
+    look_at.symmetry_limitation = true                  # same limit on both sides
+    look_at.primary_limit_angle = deg_to_rad(70.0)
+    look_at.secondary_limit_angle = deg_to_rad(45.0)
 
 func stop_looking() -> void:
     look_at.influence = 0.0  # blend back to animation
@@ -35,18 +36,20 @@ _lookAt = GetNode<LookAtModifier3D>("Skeleton3D/LookAtModifier3D");
 _lookAt.BoneName = "Head";
 _lookAt.TargetNode = GetNode("../LookTarget").GetPath();
 _lookAt.UseAngleLimitation = true;
-_lookAt.SymmetryLimitation = Mathf.DegToRad(70f);
+_lookAt.SymmetryLimitation = true;
+_lookAt.PrimaryLimitAngle = Mathf.DegToRad(70f);
+_lookAt.SecondaryLimitAngle = Mathf.DegToRad(45f);
 ```
 
 ## SpringBoneSimulator3D (Godot 4.4+)
 
-Simulates spring physics on bones — hair, capes, tails, antennas bounce and sway procedurally. Add `SpringBoneSimulator3D` as child of `Skeleton3D`, configure spring chains in the Inspector (root bone, end bone, stiffness, damping, gravity, drag).
+Simulates spring physics on bones — hair, capes, tails, antennas bounce and sway procedurally. Add `SpringBoneSimulator3D` as child of `Skeleton3D`, configure spring chains in the Inspector (root bone, end bone, radius, stiffness, drag, gravity).
 
-| Property    | Effect                                                   |
-|-------------|----------------------------------------------------------|
-| `Stiffness` | How strongly the bone returns to rest (higher = stiffer) |
-| `Damping`   | How quickly oscillations settle (higher = less bouncy)   |
-| `Gravity`   | Downward pull on the chain                               |
-| `Drag`      | Air resistance (slows movement)                          |
+| Setting (`settings/<i>/…`) | Effect |
+|---|---|
+| `stiffness/value` | How fast the chain recovers its original pose (default 1.0; 0 = never returns) |
+| `drag/value`      | Suppresses wiggling — higher = less bouncy (default 0.4) |
+| `gravity/value`   | Constant pull along `gravity/direction` (default 0; non-zero keeps the pose offset) |
+| `radius/value`    | Joint radius used against `SpringBoneCollision3D` children |
 
-> **Tip:** Start with Stiffness 5.0, Damping 0.5, Gravity 1.0 for hair. Increase Stiffness to 15+ for stiff antennas.
+> **Tip:** Defaults are Stiffness 1.0, Drag 0.4, Gravity 0. Raise Stiffness for stiff antennas, raise Drag to calm bouncy hair; each value's `damping_curve` scales it along the chain. From code use the indexed setters: `set_stiffness(i, v)`, `set_drag(i, v)`, `set_gravity(i, v)`.

@@ -251,15 +251,15 @@ render_mode blend_add;             // Additive blending
 
 ## 9. Stencil Buffer Effects (Godot 4.5+)
 
-Godot 4.5 exposes stencil write/read in spatial and canvas_item shaders via `stencil_write_mode`, `stencil_read_mode`, `stencil_value`, etc. across all rendering backends. Enables portals, X-ray vision, outline masks, and holes-in-geometry effects that previously required compositor-level work.
+Godot 4.5 exposes stencil write/read in spatial shaders via the `stencil_mode` statement (`stencil_mode write, 1;` / `stencil_mode read, compare_equal, 1;`) and on `StandardMaterial3D` (Stencil: Outline / X-Ray / Custom), across all rendering backends. canvas_item shaders have no stencil modes. Enables portals, X-ray vision, outline masks, and holes-in-geometry effects that previously required compositor-level work.
 
-> See [references/stencil-buffer.md](references/stencil-buffer.md) for render-mode reference and the X-ray vision portal worked example.
+> See [references/stencil-buffer.md](references/stencil-buffer.md) for the `stencil_mode` reference and the X-ray vision portal worked example.
 
 ---
 
 ## 10. SMAA Antialiasing (Godot 4.5+)
 
-Sub-pixel Morphological Antialiasing (SMAA 1x) is a built-in post-processing AA mode added in Godot 4.5. It produces sharper, more temporally stable results than FXAA and is less costly than MSAA for deferred-heavy scenes.
+Sub-pixel Morphological Antialiasing (SMAA 1x) is a built-in post-processing AA mode added in Godot 4.5. It produces clearer results than FXAA at a slightly higher performance cost, and is much cheaper than MSAA.
 
 ### Enabling SMAA
 
@@ -273,13 +273,13 @@ SMAA can be combined with MSAA (for geometry edge aliasing) or used standalone. 
 |---------|-----------|----------|----------|
 | Disabled | N/A | None | None |
 | FXAA | Low (blurry) | Very low | Low |
-| **SMAA** | High | Low | Very low |
+| **SMAA** | High | Low (slightly above FXAA) | Very low |
 | TAA | Medium (slight blur) | Medium | Possible |
 | MSAA 4x | High | High | None |
 
-> **When to use SMAA:** Prefer SMAA over FXAA for most desktop projects — it delivers noticeably sharper text and thin edges with a similar performance profile. Combine SMAA + MSAA 2x for best quality at moderate cost.
+> **When to use SMAA:** Prefer SMAA over FXAA for most desktop projects — it delivers noticeably sharper text and thin edges for a slightly higher cost. Combine SMAA + MSAA 2x for best quality at moderate cost.
 
-This is an editor/export setting only — no runtime API is needed.
+The project setting is read at startup only. To switch at runtime set `get_viewport().screen_space_aa = Viewport.SCREEN_SPACE_AA_SMAA` (C#: `GetViewport().ScreenSpaceAA = Viewport.ScreenSpaceAAEnum.Smaa`). Forward+ and Mobile only — not Compatibility.
 
 ---
 
@@ -320,5 +320,5 @@ The Shader Baker pre-compiles all project shaders for the target platform at exp
 - [ ] Screen-reading shaders use `hint_screen_texture` on a `sampler2D` uniform (Godot 4.x approach)
 - [ ] Complex shaders are profiled with the Godot profiler to check GPU frame time
 - [ ] Stencil effects use two-pass materials (write pass first, read pass second) with correct render priority (Godot 4.5+)
-- [ ] SMAA is preferred over FXAA for desktop builds (sharper edges, similar cost) — set in Project Settings → Rendering → Anti Aliasing (Godot 4.5+)
+- [ ] SMAA is preferred over FXAA for desktop builds (sharper edges, slightly higher cost) — set in Project Settings → Rendering → Anti Aliasing (Godot 4.5+)
 - [ ] Shader Baker is enabled in all release export presets to eliminate first-use compilation stutters (Godot 4.5+)
