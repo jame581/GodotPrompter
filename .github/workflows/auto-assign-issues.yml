@@ -1,0 +1,29 @@
+name: Auto-assign issues
+
+# A new issue arrives unassigned, and an unassigned issue notifies nobody who is not
+# already watching the repository. Assigning the owner on open sends the notification.
+# Done here rather than with `assignees:` in the issue forms so that issues opened
+# through the API or the CLI, which skip the forms, are covered as well.
+
+on:
+  issues:
+    types: [opened]
+
+permissions:
+  issues: write
+
+jobs:
+  assign:
+    name: Assign the repository owner
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      # Only the issue number and the owner login reach the shell, both through env —
+      # never the title or body, which the reporter controls.
+      - name: Assign owner
+        env:
+          GH_TOKEN: ${{ github.token }}
+          GH_REPO: ${{ github.repository }}
+          ISSUE_NUMBER: ${{ github.event.issue.number }}
+          OWNER: ${{ github.repository_owner }}
+        run: gh issue edit "$ISSUE_NUMBER" --add-assignee "$OWNER"
