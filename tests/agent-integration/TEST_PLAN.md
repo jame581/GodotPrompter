@@ -337,7 +337,7 @@ that is absent from them is fabricated, even if it happens to be correct.
 
 ---
 
-### Test 5.2b: Click-paths are for beginner level (after v1.15.0)
+### Test 5.2b: Click-paths are for beginner level (v1.15.1)
 
 **Setup:** mentor mode active with `"level": "intermediate"` in the state file.
 
@@ -506,7 +506,7 @@ fails.
 
 ---
 
-### Test 6.5: A report never ends on its own questions (after v1.15.0)
+### Test 6.5: A report never ends on its own questions (v1.15.1)
 
 **Setup:** as 6.4.
 
@@ -522,7 +522,7 @@ un-numbered or recommendation-less questions is a FAIL.
 
 ---
 
-### Test 6.6: The grill sentence stays scoped to design decisions (after v1.15.0)
+### Test 6.6: The grill sentence stays scoped to design decisions (v1.15.1)
 
 **Setup:** as 6.4, with a player script that has a bug whose fix depends on one missing fact.
 

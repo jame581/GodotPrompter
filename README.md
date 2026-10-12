@@ -56,7 +56,7 @@ grok plugin enable godot-prompter
 Pin to a release:
 
 ```bash
-grok plugin install jame581/GodotPrompter@v1.15.0 --trust
+grok plugin install jame581/GodotPrompter@v1.15.1 --trust
 grok plugin enable godot-prompter
 ```
 
@@ -328,7 +328,7 @@ These skills cover community addons with pinned versions — LimboAI v1.8.0, Bee
 
 ## Validation
 
-Quality is enforced by an automated validator that runs on every release tag. Human-readable run:
+Quality is enforced by an automated validator that runs on every pull request, every push to `master`, and every release tag. Human-readable run:
 
 ```bash
 node scripts/validate-skills.mjs           # exit 1 on errors, 0 otherwise
@@ -368,7 +368,9 @@ Produces a per-skill / per-agent table (bytes, KB, estimated tokens, Claude / GP
 
 CI gate: `.github/workflows/release.yml` runs the version-consistency check, `node scripts/validate-skills.mjs`, the hook tests, the validator tests, the metadata tests, and the broken-fixture self-test on every `v*.*.*` push. The release is blocked if any of those fail or any of `package.json` / `.claude-plugin/plugin.json` / `.claude-plugin/marketplace.json` / `.cursor-plugin/plugin.json` / `plugin.json` drifts from the tag.
 
-**Current baseline:** 0 errors, 53 warnings on `node scripts/validate-skills.mjs` in this repository state. Most are intentional `csharp-parity-accepted` warnings for GDScript-only content; two are outstanding `csharp-parity-missing-reference` warnings in `skills/mobile-development/references/plugins.md`. Every `SKILL.md` is **under** the 16 KB budget — since v1.12.0 that is a validator **error**, not a warning, so an over-budget skill fails the release.
+**Current baseline:** 0 errors, 51 warnings on `node scripts/validate-skills.mjs` in this repository state. All 51 are intentional `csharp-parity-accepted` warnings for GDScript-only content. Every `SKILL.md` is **under** the 16 KB budget — since v1.12.0 that is a validator **error**, not a warning, so an over-budget skill fails the release.
+
+Behaviour is measured with `claude plugin eval` suites in [`evals/`](evals/) — mentor mode, `godot-grill`, the session card, and a set of domain skills — each run with and without the plugin; results are recorded in `evals/FOLLOWUPS.md`, `evals/GRILL.md` and `evals/SKILLS.md`. Since v1.15.1 every code example has also been parsed (GDScript) or compiled (C#) against Godot 4.7.2.
 
 A manual agent-integration test plan covering full workflows (skill discovery, cross-reference navigation, end-to-end feature implementation) lives in [`tests/agent-integration/TEST_PLAN.md`](tests/agent-integration/TEST_PLAN.md) for spot-checks against new agent versions or platforms. Cross-host release smoke coverage is tracked in [`tests/agent-integration/host-smoke-matrix.json`](tests/agent-integration/host-smoke-matrix.json).
 
