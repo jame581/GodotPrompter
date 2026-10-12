@@ -4,6 +4,90 @@ All notable changes to GodotPrompter will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
+## [1.15.1] - 2026-10-12
+
+A correction release. Every code example and every statement tied to a Godot version was checked
+against the engine: GDScript parsed with Godot 4.7.2, C# compiled against `Godot.NET.Sdk` 4.7.2,
+version claims compared across the 4.3 to 4.7 release tags. About 75 claims and 35 examples were
+wrong and are fixed. Nothing was run inside a game, and prose not tied to a version was not
+audited. The record is `docs/superpowers/notes/2026-10-11-godot-4.7-callout-audit.md`.
+
+### Changed
+
+- **A report no longer ends on its own questions.** The session card's "report before you build"
+  rule now ends: "A design decision needs the developer's answer or go-ahead first? Invoke
+  `godot-grill`." On a plain feature request in a Godot project the grill now starts in about 4 of
+  5 runs (0 of 3 before) and asks numbered questions with a recommendation each, instead of a
+  design proposal followed by loose questions. It does not start for a bug report or after "skip
+  the questions".
+- **Mentor mode keeps click-paths to beginner level.** At `intermediate` it names what to set up
+  and gives a click-path only where the step differs between Godot versions or the user asks
+  where something is.
+- **`godot-grill` puts every question in the numbered list**, each with a recommendation; nothing
+  is asked after it.
+- **`state-machine` and `save-load` name the approach they rejected** and the factor that decided
+  it.
+- **`godot-code-review` and `csharp-signals` are picked more reliably.** Their descriptions list
+  trigger phrases; each started in 1 of 3 eval runs before and 3 of 3 after.
+
+### Fixed
+
+Features that were described with an API that does not exist:
+
+- **`animation-system`** — bone constraints and IK solvers are configured per setting index
+  (`setting_count`, `set_apply_bone_name(i, …)`, `set_root_bone_name(i, …)`), not through flat
+  properties. `LookAtModifier3D.symmetry_limitation` is a bool; `SpringBoneSimulator3D` has no
+  damping property; there are five IK solvers, and the comparison table now follows the engine's
+  class reference.
+- **`xr-development`** — there is no `XRSpatialAnchor` class: anchors use
+  `OpenXRSpatialAnchorCapability`, `OpenXRAnchorTracker` and `XRAnchor3D`. Foveation and render
+  models are core Project Settings, not OpenXR Vendors plugin options. visionOS has its own
+  export preset, supports windowed apps only, and has no OpenXR.
+- **`godot-ui`** — stacked label effects live on `LabelSettings`, set per index.
+- **`shader-basics`** — stencil uses the `stencil_mode` statement in spatial shaders; the example
+  shaders did not compile.
+- **`localization`** — CSV plurals use a `?plural` column with continuation rows and work for any
+  number of plural forms; the editor preview is under **View → Preview Translation**.
+- **`audio-system`** — runtime WAV loading is `AudioStreamWAV.load_from_file()`.
+- **`csharp-signals`** — `SignalAwaiter` has no `AsTask()`; a `[Signal]` delegate without the
+  `EventHandler` suffix is compile error GD0201; Godot disconnects connections when an object is
+  freed, except custom signals and capturing lambdas.
+- **`export-pipeline`, `shader-basics`** — the Shader Baker shortens first-launch load but does
+  not remove pipeline stutter, enlarges the PCK, does nothing on the Compatibility renderer, and
+  cannot bake D3D12 or Metal from a Linux machine.
+
+Wrong versions:
+
+- Volumetric fog blending changed in 4.6; 4.7 added the setting that restores the old look.
+- `roughness_layers` was 7 only in 4.6.0 and 4.6.1; `LookAtModifier3D.relative` was `true` only in
+  4.6.0.
+- Jolt became the default for new projects in 4.6, not 4.4.
+- `TileMapLayer` and `Parallax2D` are 4.3; static variables are 4.1; threaded navigation baking is
+  the default and predates 4.3.
+
+Also corrected: specular occlusion, the 4.6 glow and screen-space reflection changes, SMAA, the
+renderer support table, abstract-class rules, the 2D navigation server split, custom text servers
+as GDExtensions, the Android OBB replacement, font hinting on upgrade, and about 25 C# and 10
+GDScript examples with wrong constant, enum, method or type names. The full tables are in the
+audit note.
+
+### Added
+
+- **Eval cases that measure the session card.** `grill-05` to `grill-07` scaffold a
+  `project.godot` so the SessionStart hook injects the card; they need `--scaffold`.
+- **Eval cases for domain skills.** `skill-01` to `skill-15` (no 03), tagged `discriminating` or
+  `ceiling`. The plugin's measurable gain is on Godot 4.7 changes: five cases score 1.00 with the
+  plugin and 0.00 to 0.86 without. Results are in `evals/SKILLS.md`.
+- **Manual tests 5.2b, 6.5 and 6.6** for the three behaviour changes. Not yet run.
+
+### Known limits
+
+- The new manual tests and the rest of `tests/agent-integration/TEST_PLAN.md` were not run.
+- 93 of 495 C# blocks could not be checked down to method bodies.
+- `animation-system`, `xr-development` and `3d-essentials` are within 240 bytes of the 15,872-byte
+  size warning; their next content change needs a section moved to `references/` first.
+- Open items are in `docs/superpowers/notes/2026-10-05-v1.15.0-followups.md` §7.
+
 ## [1.15.0] - 2026-10-06
 
 "Editor Beat". Mentor mode can now tell a learner where to click, from references checked
