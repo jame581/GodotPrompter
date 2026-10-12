@@ -68,7 +68,7 @@ func _is_peer_in_range(peer_id: int) -> bool:
 public override void _Ready()
 {
     var sync = GetNode<MultiplayerSynchronizer>("MultiplayerSynchronizer");
-    sync.AddVisibilityFilter(Callable.From<int>(IsPeerInRange));
+    sync.AddVisibilityFilter(Callable.From<int, bool>(IsPeerInRange));
 }
 
 private bool IsPeerInRange(int peerId)

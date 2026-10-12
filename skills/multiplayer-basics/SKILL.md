@@ -67,7 +67,7 @@ Full server and client implementations with every signal handler, in GDScript an
 
 ```gdscript
 # chat.gd
-extends Node
+extends Node2D
 
 # Any peer can call; server validates then broadcasts to all peers.
 @rpc("any_peer", "reliable")
@@ -120,7 +120,7 @@ send_chat_message.rpc_id(target_peer_id, "Hello!")
 // Chat.cs
 using Godot;
 
-public partial class Chat : Node
+public partial class Chat : Node2D
 {
     // Any peer can call; executes on the server only.
     [Rpc(MultiplayerApi.RpcMode.AnyPeer, TransferMode = MultiplayerPeer.TransferModeEnum.Reliable)]

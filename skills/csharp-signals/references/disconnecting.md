@@ -1,6 +1,6 @@
 # Disconnecting Signals (C#)
 
-Reference for `skills/csharp-signals/SKILL.md` — why C# MUST disconnect (unlike GDScript), `-=` operator + `_ExitTree`, SafeDisconnect helper.
+Reference for `skills/csharp-signals/SKILL.md` — what Godot disconnects for you, the two cases it does not, `-=` operator + `_ExitTree`, SafeDisconnect helper.
 
 > ← Back to [SKILL.md](../SKILL.md)
 
@@ -9,7 +9,7 @@ Reference for `skills/csharp-signals/SKILL.md` — why C# MUST disconnect (unlik
 
 ### The `-=` operator and `_ExitTree()` cleanup
 
-**C# delegates are not garbage-collected automatically when a node is freed.** If you do not disconnect, the signal source holds a delegate reference to the freed node, causing memory leaks and `ObjectDisposedException` or `InvalidOperationException` on the next emission.
+`Player`'s signals below are custom `[Signal]`s, one of the two cases Godot does not disconnect when the receiver is freed (see the last section). Without the `-=`, the next emission after the HUD is freed reaches a disposed object and throws `ObjectDisposedException`.
 
 ```csharp
 using Godot;
@@ -26,8 +26,9 @@ public partial class HudLayer : CanvasLayer
         _player.ItemCollected += OnItemCollected;
     }
 
-    // _ExitTree is called before the node is removed from the tree.
-    // This is the correct place to disconnect — _player is still valid here.
+    // _ExitTree is called when the node leaves the tree, including when it is freed.
+    // If this node can leave and re-enter the tree, connect in _EnterTree instead:
+    // _Ready runs only once, so the connections would not come back.
     public override void _ExitTree()
     {
         // Mirror every += from _Ready() with a -=.
@@ -57,15 +58,19 @@ public override void _ExitTree()
 }
 ```
 
-### Why C# MUST disconnect (unlike GDScript)
+### What Godot disconnects for you, and what it does not
 
-In GDScript, signals use Godot's internal reference system, which automatically invalidates connections when a node is freed. In C#, the `+=` operator creates a standard .NET multicast delegate, held by the emitting object. Godot's object lifetime system does not reach into .NET delegate lists. The result:
+When any `GodotObject` is freed, Godot disconnects every connection associated with it, for signal emitters and for signal receivers. A built-in signal connected to a method of the receiver (`button.Pressed += OnPressed`) needs no manual cleanup.
 
-- The emitter keeps the subscriber alive longer than expected (memory leak).
-- When the emitter fires the signal, the delegate invocation reaches a freed Godot node and throws.
-- The bug is often silent in debug builds with `IsInstanceValid` guards, but crashes in release builds.
+Automatic disconnection does **not** happen when the receiver is freed while the emitter is still alive, in two cases:
 
-**Rule:** every `+=` in `_Ready()` must have a matching `-=` in `_ExitTree()`.
+- **The signal is a custom `[Signal]`** connected with `+=`.
+- **The handler is a lambda that captures a variable.** Godot uses `Delegate.Target` to tell which instance a delegate belongs to; a capturing lambda's target is a compiler-generated closure object, not the node. `Callable.From` with `Connect` has the same limit.
+
+In both cases the next emission calls into a disposed object and throws `ObjectDisposedException`. Keep a reference to the delegate and pass it to `-=`.
+
+Automatic disconnection is fully reliable when the emitter is freed before its receivers, so a project that always frees emitters first never meets either case.
+
+**Rule:** every `+=` on a custom `[Signal]`, and every capturing lambda, gets a matching `-=` in `_ExitTree()`. Connect in `_Ready()`, or in `_EnterTree()` for a node that can leave and re-enter the tree.
 
 ---
-

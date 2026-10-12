@@ -285,7 +285,7 @@ Load large resources without freezing the game with the `ResourceLoader.load_thr
 | Import settings lost after reclone | `.import` files not committed to VCS | Always commit `.import` files; only `.godot/` goes in .gitignore |
 | Threaded load freezes game | Checking status every frame with `load()` | Use `ResourceLoader.load_threaded_request/get_status` pattern |
 
-> ⚠️ **Changed in Godot 4.7:** The font import `hinting` default changed from `1` (Light) to `3` (Light (Except Pixel Fonts)) — pixel-style fonts now auto-disable hinting on import, so their rendering can change after upgrading. Set `hinting` back to `1` (Light) in the Import dock per font to keep the 4.6 look. See the [4.7 migration guide](https://docs.godotengine.org/en/latest/tutorials/migrating/upgrading_to_godot_4.7.html).
+> ⚠️ **Changed in Godot 4.7:** The font import `hinting` default changed from `1` (Light) to `3` (Light (Except Pixel Fonts)) — newly imported pixel-style fonts now auto-disable hinting. Fonts already imported keep the `hinting=1` stored in their `.import` file; only new fonts, or ones whose `.import` is regenerated, pick up the new default. Set `hinting` to `1` (Light) in the Import dock to match 4.6. See the [4.7 migration guide](https://docs.godotengine.org/en/latest/tutorials/migrating/upgrading_to_godot_4.7.html).
 
 ---
 

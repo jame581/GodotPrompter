@@ -12,11 +12,11 @@ The `@abstract` annotation prevents a class from being instantiated directly and
 > **Note:** This skill is GDScript-specific by design. For C# patterns, see **csharp-godot** and **csharp-signals**.
 
 ```gdscript
-# base_enemy.gd — abstract base class; cannot be instantiated directly
+# base_enemy.gd — abstract base class; cannot be instantiated directly.
+# The class-level @abstract goes before class_name / extends.
+@abstract
 class_name BaseEnemy
 extends CharacterBody2D
-
-@abstract
 
 ## Subclasses must implement this to define their attack behavior.
 @abstract func perform_attack() -> void
@@ -67,9 +67,9 @@ func get_display_name() -> String:
     return "Ranged Enemy"
 ```
 
-> **Instantiation guard:** GDScript raises an error at runtime if you call `BaseEnemy.new()` directly. The `@abstract` annotation on the class is the guard — no constructor override needed.
+> **Instantiation guard:** `BaseEnemy.new()` is rejected when the script is parsed (`Cannot construct abstract class "BaseEnemy"`). The check is static — a dynamic `load("res://base_enemy.gd").new()` is not caught (observed on 4.7.2), so don't rely on it as a runtime guard.
 
-> **Partial abstraction:** Only the methods annotated `@abstract` are required by subclasses. A class can be `@abstract` without any abstract methods (to signal "don't instantiate this directly") or can have abstract methods without the class-level annotation (each method still enforces implementation).
+> **Partial abstraction:** Only the methods annotated `@abstract` are required by subclasses. A class can be `@abstract` without any abstract methods (to signal "don't instantiate this directly"), but not the reverse: a class with an `@abstract` method — its own or an unimplemented inherited one — must itself be marked `@abstract`, or the script fails to parse.
 
 ---
 

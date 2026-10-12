@@ -311,8 +311,7 @@ public partial class ItemResourcePicker : EditorResourcePicker
 {
     public ItemResourcePicker()
     {
-        BaseType = "ItemData";
-        EditableWarning = "Editing this Resource affects all scenes that reference it.";
+        BaseType = "ItemData";   // restrict the picker to ItemData and subclasses
     }
 }
 
@@ -335,9 +334,9 @@ public partial class ItemPreviewGenerator : EditorResourcePreviewGenerator
         return item.Icon;
     }
 
-    public override bool _GenerateSmallPreview()
+    public override bool _GenerateSmallPreviewAutomatically()
     {
-        return true; // also generate the small preview shown in lists
+        return true; // derive the small list preview from the texture _Generate returns
     }
 }
 #endif

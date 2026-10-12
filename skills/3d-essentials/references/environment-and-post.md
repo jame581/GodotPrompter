@@ -44,7 +44,7 @@ func setup_environment() -> void:
     env.background_mode = Environment.BG_SKY
 
     # Tonemap
-    env.tonemap_mode = Environment.TONE_MAP_FILMIC
+    env.tonemap_mode = Environment.TONE_MAPPER_FILMIC
     env.tonemap_exposure = 1.0
 
     # Ambient light from sky
@@ -95,49 +95,49 @@ Configure these on the Environment resource — no shader code needed:
 | Effect    | Description                              | Renderer Support         |
 |-----------|------------------------------------------|--------------------------|
 | Glow      | Bloom/glow on bright surfaces            | All                      |
-| SSAO      | Screen-space ambient occlusion           | Forward+ only            |
+| SSAO      | Screen-space ambient occlusion           | Forward+; Compatibility since 4.6 |
 | SSIL      | Screen-space indirect lighting           | Forward+ only            |
 | SSR       | Screen-space reflections                 | Forward+ only            |
 | SDFGI     | Real-time GI for large scenes            | Forward+ only            |
-| DOF       | Depth of field blur (via CameraAttributes) | All                   |
+| DOF       | Depth of field blur (via CameraAttributes) | Forward+, Mobile      |
 | Fog       | Depth and height fog                     | All                      |
 | Adjustments | Brightness, contrast, saturation, color correction | All          |
-| Auto Exposure | Adaptive exposure (via CameraAttributes) | Forward+, Mobile     |
+| Auto Exposure | Adaptive exposure (via CameraAttributes) | Forward+ only        |
 
 ### Glow Pipeline and AgX Controls (Godot 4.6+)
 
-Godot 4.6 changes the order of the post-processing pipeline: **Glow now runs before tonemapping** (previously it ran after). This is physically more correct — glow should operate on HDR values before they are tone-mapped to LDR. The result is that bright emissive surfaces produce more natural-looking bloom.
+Godot 4.6 blends glow into the scene **before tonemapping** for the Additive, Screen and Replace modes (Mix already was; Soft Light is still blended after). The default `glow_blend_mode` also changed from Soft Light to **Screen**, with `glow_intensity` dropping from `0.8` to `0.3` and new `glow_levels` defaults ([GH-110671](https://github.com/godotengine/godot/pull/110671)). Blending on HDR values makes bright emissive surfaces bloom more naturally.
 
-**Upgrade impact:** Projects upgrading from 4.5 to 4.6 may notice a visible change in glow appearance. If your glow looks more intense or differently colored after upgrading, re-tune `glow_intensity`, `glow_bloom`, and `glow_hdr_threshold` on your Environment resource.
+**Upgrade impact:** Projects upgrading from 4.5 to 4.6 may notice a visible change in glow appearance. If your glow looks more intense or differently colored after upgrading, re-tune `glow_blend_mode` (set it back to Soft Light for the old look), `glow_intensity`, the `glow_levels/*` values, and `glow_hdr_threshold` on your Environment resource. On the Mobile renderer the glow effect was rewritten and looks different regardless.
 
 Godot 4.6 also adds two new controls to the **AgX** tonemapper:
 
 | Property | Description |
 |----------|-------------|
-| `tonemap_white` | White point — the luminance at which the scene clips to pure white |
-| `tonemap_contrast` | Contrast of the AgX sigmoid curve |
+| `tonemap_agx_white` | White reference for AgX (default `16.29`) — higher values keep more highlight detail |
+| `tonemap_agx_contrast` | Contrast of the AgX curve (default `1.25`) — higher makes darks darker and brights brighter |
 
 ```gdscript
 var env: Environment = $WorldEnvironment.environment
-env.tonemap_mode = Environment.TONE_MAP_AGX
-# New AgX controls (Godot 4.6+)
-env.tonemap_white = 1.0       # default; increase for brighter highlights
-env.tonemap_contrast = 1.0    # default; increase for more contrast
+env.tonemap_mode = Environment.TONE_MAPPER_AGX
+# New AgX controls (Godot 4.6+) — separate from tonemap_white, which the other tonemappers use
+env.tonemap_agx_white = 16.29     # default; raise to keep more highlight detail
+env.tonemap_agx_contrast = 1.25   # default; raise for more contrast
 ```
 
 ```csharp
 var env = GetNode<WorldEnvironment>("WorldEnvironment").Environment;
 env.TonemapMode = Godot.Environment.ToneMapper.Agx;
 // New AgX controls (Godot 4.6+)
-env.TonemapWhite = 1.0f;
-env.TonemapContrast = 1.0f;
+env.TonemapAgxWhite = 16.29f;
+env.TonemapAgxContrast = 1.25f;
 ```
 
-> **When to use AgX:** AgX maintains hue as brightness increases, which avoids the "neon burn" artefact common with ACES on saturated emissives. The new `white` and `contrast` controls let you match a specific look reference.
+> **When to use AgX:** AgX maintains hue as brightness increases, which avoids the "neon burn" artefact common with ACES on saturated emissives. The new `tonemap_agx_white` and `tonemap_agx_contrast` controls let you match a specific look reference.
 
 ### Screen-Space Reflections — Quality Upgrade (Godot 4.6+)
 
-SSR in Godot 4.6 has been redesigned for higher quality at reduced GPU cost. The WorldEnvironment SSR settings (`ssr_enabled`, `ssr_max_steps`, `ssr_fade_in`, `ssr_fade_out`, `ssr_depth_tolerance`) remain unchanged — the improvement is automatic for all existing projects that upgrade to 4.6.
+SSR in Godot 4.6 has been redesigned for higher quality at reduced GPU cost. The Environment SSR properties keep their names (`ssr_enabled`, `ssr_max_steps`, `ssr_fade_in`, `ssr_fade_out`, `ssr_depth_tolerance`), but the `ssr_depth_tolerance` default rose from `0.2` to `0.5`, and the project setting `rendering/environment/screen_space_reflection/roughness_quality` was replaced by `…/screen_space_reflection/half_size` (default `true`; set `false` for full-resolution reflections).
 
 If you previously disabled SSR due to performance concerns, it is worth re-enabling after upgrading to 4.6 and re-profiling.
 

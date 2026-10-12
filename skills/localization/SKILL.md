@@ -162,7 +162,7 @@ var collected_text: String = tr("ITEM_COLLECTED") % item_name
 # Pluralization (Godot 4.x)
 var count := 5
 var msg: String = tr_n("ONE_ENEMY", "MANY_ENEMIES", count)
-# Requires PO files with plural forms
+# Needs plural forms in the translation: PO, or CSV `?plural` rows on Godot 4.6+ (§10)
 ```
 
 ### C#
@@ -308,14 +308,14 @@ ITEM_SWORD_DESC          # Inventory item description
 | Label shows key after scene change | Translation resource not loaded yet | Register translations in Project Settings (not at runtime) |
 | RTL text renders LTR | `layout_direction` not set | Set to `RTL` or `LOCALE` on root Control |
 | Font doesn't display characters | Missing Unicode range in font | Import a font covering the target script (Noto Sans recommended) |
-| Pluralization doesn't work with CSV | CSV doesn't support plural forms | Use PO format for languages with complex plural rules |
+| Pluralization doesn't work with CSV | Before Godot 4.6 CSV has no plural forms; on 4.6+ the `?plural` column or continuation rows are missing | On 4.6+ add a `?plural` column (§10); before 4.6 use PO |
 | `%s` in translation shows literal `%s` | Using `tr()` result as key instead of formatting it | Use `tr("KEY") % value`, not `tr("KEY" % value)` |
 
 ---
 
 ## 9. Editor Locale Preview (Godot 4.5+)
 
-Godot 4.5 adds a **Preview Language** dropdown under Project Settings → Internationalization: the editor viewport re-renders in any registered locale, so you catch overflow from longer translations and verify RTL layout without entering Play mode. Editor-only — it does not affect exported builds.
+Godot 4.5 adds a **Preview Translation** submenu to the 2D editor's **View** menu: the editor viewport re-renders in any loaded locale, so you catch overflow from longer translations and verify RTL layout without entering Play mode. Editor-only — it does not affect exported builds.
 
 Steps and QA benefits: [references/editor-preview.md](references/editor-preview.md)
 
@@ -323,7 +323,7 @@ Steps and QA benefits: [references/editor-preview.md](references/editor-preview.
 
 ## 10. CSV Plural and Context Support (Godot 4.6+)
 
-Godot 4.6 extends CSV translation with three optional header columns — `?context`, `?plural`, `?pluralrule` — bringing context disambiguation and simple one/other plurals (previously PO-only) to CSV. Languages with 3+ plural forms (Russian, Polish, Arabic) still need PO format with full `msgstr[n]` plural arrays.
+Godot 4.6 extends CSV translation with two optional header columns — `?context` and `?plural` — plus an optional `?pluralrule` row, bringing context disambiguation and plurals (previously PO-only) to CSV. Extra plural forms go on continuation rows with an empty key, so languages with 3+ forms (Russian, Polish, Arabic) work too. Automatic Control translation skips these rows — call `tr()` / `tr_n()` yourself.
 
 Column reference, example CSV, and `tr()` / `tr_n()` usage (GDScript + C#): [references/csv-plural-context.md](references/csv-plural-context.md).
 
@@ -340,7 +340,7 @@ Column reference, example CSV, and `tr()` / `tr_n()` usage (GDScript + C#): [ref
 - [ ] Format strings (`%s`, `%d`) are applied AFTER `tr()`, not before
 - [ ] Translation keys follow a consistent naming convention
 - [ ] UI layout adapts to longer/shorter text in different languages (no hardcoded widths)
-- [ ] PO format is used for languages with complex plural rules
-- [ ] Editor Locale Preview (Internationalization → Preview Language) used for translation QA instead of test runs (Godot 4.5+)
+- [ ] Plural forms are provided for every target language — PO, or CSV `?plural` rows on Godot 4.6+
+- [ ] Editor Locale Preview (2D editor View → Preview Translation) used for translation QA instead of test runs (Godot 4.5+)
 - [ ] CSV `?context` column used when the same key has different meanings in different UI contexts (Godot 4.6+)
-- [ ] CSV `?plural` / `?pluralrule` columns used for simple one/other plurals; PO format used for 3+ plural forms (Godot 4.6+)
+- [ ] CSV plurals use a `?plural` column with one continuation row per extra plural form (`?pluralrule` row only to override a locale's rule) (Godot 4.6+)

@@ -111,7 +111,7 @@ Place entire scenes as tiles (e.g. doors, chests, spawn points with AudioStreamP
 ### Tile Collision Bumps
 
 Characters snagging on edges between adjacent tile colliders is a common issue:
-- `TileMapLayer` groups tiles into physics quadrants via **Rendering Quadrant Size** (default 16) which helps reduce edge snagging
+- Since Godot 4.5, `TileMapLayer` merges the collision shapes of similar tiles inside each physics quadrant — **Physics Quadrant Size** (`physics_quadrant_size`, default 16) — which removes most edge snagging. Before 4.5 every tile had its own shape.
 - For persistent issues, manually merge adjacent collision polygons into single `StaticBody2D` shapes
 - Using `CharacterBody2D` with `floor_snap_length > 0` also reduces edge catching
 

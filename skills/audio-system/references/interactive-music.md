@@ -150,24 +150,27 @@ The same option is available in the Inspector's transition editor.
 
 ### Runtime WAV Loading (Godot 4.4+)
 
-Godot 4.4 allows loading WAV files at runtime from user directories (mods, user-generated content):
+Godot 4.4 adds `AudioStreamWAV.load_from_file()` / `load_from_buffer()` — static loaders that parse a WAV file at runtime (mods, user-generated content):
 
 ```gdscript
 func load_wav_from_path(path: String) -> AudioStreamWAV:
-    var file := FileAccess.open(path, FileAccess.READ)
-    if not file:
-        push_error("Cannot open audio file: %s" % path)
-        return null
-
-    var wav := AudioStreamWAV.new()
-    wav.data = file.get_buffer(file.get_length())
-    wav.format = AudioStreamWAV.FORMAT_16_BITS
-    wav.mix_rate = 44100
-    wav.stereo = false
+    var wav := AudioStreamWAV.load_from_file(path)
+    if wav == null:
+        push_error("Cannot load WAV file: %s" % path)
     return wav
 ```
 
-> **Warning:** Runtime-loaded audio bypasses Godot's import system. You must set `format`, `mix_rate`, and `stereo` manually to match the actual file. Incorrect values produce garbled audio.
+```csharp
+public AudioStreamWav LoadWavFromPath(string path)
+{
+    AudioStreamWav wav = AudioStreamWav.LoadFromFile(path);
+    if (wav == null)
+        GD.PushError($"Cannot load WAV file: {path}");
+    return wav;
+}
+```
+
+> **Note:** The loader reads the format, sample rate and channel count from the WAV header. Its optional second argument is a Dictionary whose keys match the `ResourceImporterWAV` import options.
 
 ---
 

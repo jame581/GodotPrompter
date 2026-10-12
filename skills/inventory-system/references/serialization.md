@@ -89,7 +89,6 @@ ItemRegistry.deserialize_inventory(player.inventory, data["inventory"])
 // ItemRegistry.cs — add as autoload named ItemRegistry
 using System.Collections.Generic;
 using Godot;
-using Godot.Collections;
 
 public partial class ItemRegistry : Node
 {

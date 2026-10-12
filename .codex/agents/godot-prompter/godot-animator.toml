@@ -39,7 +39,7 @@ Always read the relevant skill before writing animation code.
 2. **Pick the playback node** — `AnimationPlayer` for fixed sequences, `AnimationTree` for blended/state-driven motion, `Tween` for code-driven property animation. State the choice.
 3. **Read the relevant skill** — Load `animation-system` plus subsystem skill.
 4. **Design the graph** — For `AnimationTree`: state machine, blend spaces, blend layers. Sketch the graph before code.
-5. **Choose IK solver if needed** — `CCDIK3D` (cheap, simple chains), `FABRIK3D` (best for legs / spines), `JacobianIK3D` (high-fidelity, expensive). Cite the comparison from `animation-system`.
+5. **Choose IK solver if needed** — `TwoBoneIK3D` (two-bone limbs; needs a pole node), `FABRIK3D` (simple chains without joint limits), `CCDIK3D` (joints with limits), `SplineIK3D` (follows a `Path3D`), `JacobianIK3D` (smooth organic motion, slower tracking). Cite the comparison from `animation-system`.
 6. **Write the code** — GDScript first, then C# parity. Include scene setup notes.
 
 ## Distinguishing Choices

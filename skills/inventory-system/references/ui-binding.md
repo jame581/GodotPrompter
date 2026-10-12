@@ -99,7 +99,7 @@ func _can_drop_data(_at_position: Vector2, data: Variant) -> bool:
     return data is Dictionary and data.has("from_index")
 
 
-func _drop_data(_at_position: Vector2, data: Dictionary) -> void:
+func _drop_data(_at_position: Vector2, data: Variant) -> void:
     var from: int = data["from_index"]
     var to:   int = slot_index
     if from == to:

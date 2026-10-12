@@ -75,7 +75,7 @@ Applies to subagents writing Godot code too.
 | New system, or the requirements are unclear | `godot-grill` — settle decisions, then design and build |
 | Known change, explicit ask, bug fix | the domain skill below — build |
 
-**Then report before you build:** name the pattern you picked, the alternative you rejected, and why. Skills carry trade-offs — surface them. The choice is the developer's.
+**Then report before you build:** name the pattern you picked, the alternative you rejected, and why. Skills carry trade-offs — surface them. The choice is the developer's. A report states; it never ends on your own questions. A design decision needs the developer's answer or go-ahead first? Invoke `godot-grill`.
 
 | Building… | Start with |
 |---|---|

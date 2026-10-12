@@ -1,0 +1,12 @@
+schema_version: "1.0"
+name: grill-06-neg-bugfix-in-project
+description: grill-03's bug report, run inside a scaffolded Godot project so the SessionStart card is injected. Guards the card's routing rows against sending a bug fix to godot-grill. Needs --scaffold; without it the workspace is empty and this is grill-03 again.
+runs: 3
+context:
+  scaffold_script: scaffold.sh
+execution:
+  max_turns: 12
+  timeout_seconds: 300
+  allowed_tools: [Skill, Read, Glob, Grep]
+  prompt: |
+    I ported my player from Godot 3 to Godot 4.3 and `velocity = move_and_slide(velocity)` now errors. What's wrong?

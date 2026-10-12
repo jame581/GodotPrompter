@@ -113,7 +113,7 @@ public partial class EventBus : Node
 
 ## 4. Connecting to Events
 
-Consumers connect in `_ready()`. In C#, always disconnect in `_ExitTree()` to avoid dangling delegates and memory leaks.
+Consumers connect in `_ready()`. In C#, always disconnect in `_ExitTree()`: the bus outlives its consumers and its signals are custom, a case Godot does not disconnect when the consumer is freed, so the next emit would throw `ObjectDisposedException`.
 
 ### GDScript
 

@@ -25,7 +25,7 @@ This skill assumes you already know typed parameters, `@onready`, `await`, `matc
 
 ## 2. Performance idioms
 
-**Static vars and methods** (Godot 4.4+) avoid per-instance overhead:
+**Static vars and methods** (static vars since Godot 4.1) avoid per-instance overhead:
 
 ```gdscript
 class_name Tally extends Node
@@ -57,11 +57,11 @@ for i in 1000:
     positions[i] = Vector3(i, 0, 0)
 ```
 
-**Typed Dictionary access** — typed dicts (Godot 4.4+) skip the Variant unbox per read:
+**Typed Dictionary access** — typed dicts (Godot 4.4+) validate key and value types on write and give the analyzer static types for reads (values are still stored as Variant):
 
 ```gdscript
 var stats: Dictionary[String, int] = {}
-stats["hp"] = 100  # no boxing
+stats["hp"] = 100  # type-checked; stats["hp"] is statically an int
 ```
 
 **`is_instance_valid` vs `null` check** — `is_instance_valid()` does an engine-side lookup; `!= null` is a pointer compare. Prefer `!= null` after `@onready` assignment; reserve `is_instance_valid()` for nodes that may be `queue_free`'d while a reference is held.

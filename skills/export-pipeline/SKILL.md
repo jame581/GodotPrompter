@@ -85,7 +85,7 @@ ssh_remote_deploy/cleanup_script="#!/usr/bin/env bash\nkill $(pgrep -x -f \"{tem
 
 > Godot regenerates `export_presets.cfg` on every editor save. Do not hand-edit it while the editor is open.
 
-> ⚠️ **Changed in Godot 4.7:** The "runnable" flag moved out of export presets — `runnable=` (shown in the example above for 4.3–4.6) is no longer a per-preset property in `export_presets.cfg`; the editor now tracks which preset is runnable separately. Don't be surprised when the line disappears from the file after saving in a 4.7 editor. See [GH-114930](https://github.com/godotengine/godot/pull/114930).
+> ⚠️ **Changed in Godot 4.7:** The "runnable" flag moved out of export presets — `runnable=` (shown in the example above for 4.3–4.6) is no longer a per-preset property in `export_presets.cfg`; a 4.7 editor writes a top-level `[runnable_presets]` section (platform name → preset name) in the same file, and still reads the legacy key. Don't be surprised when the line disappears from the file after saving in a 4.7 editor. See [GH-114930](https://github.com/godotengine/godot/pull/114930).
 
 > **Godot 4.7+:** Sparse PCK exports (patch packs) support encrypting the file index, complementing the existing `encrypt_pck` / `encrypt_directory` preset options. ([GH-113920](https://github.com/godotengine/godot/pull/113920))
 
@@ -192,26 +192,26 @@ See [references/distribution-itch-steam.md](references/distribution-itch-steam.m
 
 ## 7. Shader Baker (Godot 4.5+)
 
-Godot 4.5 introduces the **Shader Baker**, an export-time tool that pre-compiles shaders for the target platform. Without it, shaders compile at runtime on first use, causing visible hitches when new materials are first rendered in-game. The Shader Baker eliminates this stutter by doing the work at export time.
+Godot 4.5 introduces the **Shader Baker**, an export-time tool that pre-compiles shaders for the target platform. It mainly shortens first-launch load time, most on Direct3D 12 and Metal where shader conversion is slow. It does not remove pipeline-compilation stutter, which still needs pipeline precompilation.
 
 ### Enabling
 
-In **Project → Export**, open a preset and locate the **Shader Baker** section. Enable it and configure target backends (Vulkan, D3D12, Metal, GLES3) as needed.
+In **Project → Export**, open a preset and locate the **Shader Baker** section. Tick **Enabled** (`shader_baker/enabled`, off by default). There is no backend picker: it bakes for the target platform's `rendering/rendering_device/driver` setting, on the Forward+ and Mobile renderers only.
 
-> The Shader Baker increases export build time but has no effect on game download size or runtime memory. The pre-compiled cache is embedded in the `.pck` file.
+> The Shader Baker makes exports slightly slower and the PCK a few megabytes larger. The baked shaders are embedded in the `.pck` file.
 
 ### Impact by Platform
 
 | Platform | Backend | Benefit |
 |----------|---------|---------|
-| macOS / Apple Silicon | Metal | Up to 20x load time reduction on complex shader graphs |
-| Windows | D3D12 | Eliminates D3D12 pipeline state compilation stalls |
-| Mobile (Android/iOS) | GLES3 | Faster first-render on mid-range hardware |
-| Linux / Windows | Vulkan | Moderate improvement; Vulkan caches vary by driver |
+| macOS / iOS | Metal | Largest gain — skips the slow SPIR-V → Metal shader conversion at first load |
+| Windows | D3D12 | Large gain — skips SPIR-V → DXIL conversion; pipeline creation still happens at runtime |
+| Android (Mobile renderer) | Vulkan | Shorter first load; no effect on the Compatibility (GLES3) renderer |
+| Linux / Windows | Vulkan | Smaller improvement — Vulkan consumes SPIR-V directly |
 
 ### CI Workflow Note
 
-The Shader Baker runs automatically when exporting via the editor GUI or CLI (`--export-release`). No extra steps are needed in CI — it is controlled by the preset configuration, not a separate CLI flag.
+The Shader Baker runs automatically when exporting via the editor GUI or CLI (`--export-release`). It is controlled by the preset, not a separate CLI flag. Caveat: the editor can only bake for drivers its own OS supports — a Linux runner bakes Vulkan only, so D3D12 presets need a Windows runner and Metal presets a macOS runner.
 
 ```bash
 # Shader Baker runs as part of normal export (no extra flag needed).
@@ -234,7 +234,7 @@ Before Godot 4.5, modifying `.exe` metadata (version info, icon, copyright, comp
 | `application/product_name` | Product name |
 | `application/file_description` | Description |
 | `application/copyright` | Legal copyright |
-| `application/icon` | `.ico` file embedded as the executable icon |
+| `application/icon` | Icon image (ICO, PNG, WebP or SVG) converted and embedded as the executable icon |
 
 ### Setup
 
@@ -262,5 +262,5 @@ Before Godot 4.5, modifying `.exe` metadata (version info, icon, copyright, comp
 - [ ] itch.io channels follow the naming convention (windows, linux, macos, web, android)
 - [ ] Butler API key stored as a CI secret, not hardcoded
 - [ ] Steam depot configs are kept out of public repositories
-- [ ] Shader Baker enabled in export presets for macOS, D3D12, and mobile targets (Godot 4.5+)
+- [ ] Shader Baker enabled for D3D12 and Metal targets (Forward+/Mobile only), exported from a Windows / macOS host respectively (Godot 4.5+)
 - [ ] Windows `.exe` metadata (version, icon, company name) set in the export preset — rcedit no longer required (Godot 4.5+)

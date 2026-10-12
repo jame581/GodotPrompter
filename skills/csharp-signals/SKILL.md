@@ -1,6 +1,6 @@
 ---
 name: csharp-signals
-description: Use when implementing signals in C# — [Signal] delegates, EmitSignal patterns, async signal awaiting, and event-driven architecture
+description: Use when implementing signals in C# — [Signal] delegates, EmitSignal patterns, async signal awaiting, and event-driven architecture. Triggers on declaring, emitting, connecting, or awaiting a signal from a C# script, and on a signal crossing between C# and GDScript in either direction.
 ---
 
 # Signals in C# (Godot 4.x)
@@ -40,7 +40,7 @@ public partial class Player : CharacterBody2D
 | `ItemCollectedEventHandler`     | `ItemCollected`     |
 | `PlayerSpawnedEventHandler`     | `PlayerSpawned`     |
 
-Omitting the `EventHandler` suffix compiles without error but registers no Godot signal — the signal will not appear in the editor and `EmitSignal` will throw at runtime.
+Omitting the `EventHandler` suffix is a compile error: the source generator reports GD0201, "The name of the delegate must end with 'EventHandler'".
 
 **Parameter type constraints:** Signal parameters must be Godot-marshallable types: `int`, `float`, `bool`, `string`, `Vector2`, `Vector3`, `Color`, `GodotObject` subclasses, `GodotDictionary`, `GodotArray`. Plain C# classes, structs, and generics are not allowed as parameters.
 
@@ -157,15 +157,15 @@ public override void _ExitTree()
 
 ### Connecting in `_Ready()`
 
-Always connect inside `_Ready()`. The node's references are resolved and the scene tree is available at that point. Connecting in the constructor or field initializers may fail because Godot node infrastructure is not yet initialised.
+Connect inside `_Ready()` — or `_EnterTree()` for a node that is removed and re-added, since `_Ready()` runs only once. The node's references are resolved and the scene tree is available at that point. Connecting in the constructor or field initializers may fail because Godot node infrastructure is not yet initialised.
 
 ---
 
 ## 4. Disconnecting Signals
 
-Unlike GDScript (which auto-cleans on `queue_free`), **C# must disconnect explicitly** in `_ExitTree()` — otherwise the listener delegate keeps the GodotObject alive past disposal, causing leaks. Use `signal -= handler` mirroring how you `+= handler` in `_Ready()`.
+When a `GodotObject` is freed, Godot disconnects its connections, for emitters and receivers alike. Two cases are **not** cleaned up when the receiver is freed while the emitter lives on: a `+=` on a **custom `[Signal]`**, and a **lambda that captures a variable**. In both, the next emission reaches a disposed object and throws `ObjectDisposedException`, so disconnect with `-=` yourself in `_ExitTree()`. For a node that can leave and re-enter the tree, connect in `_EnterTree()` instead of `_Ready()`, which runs only once.
 
-> See [references/disconnecting.md](references/disconnecting.md) for the `-=` cleanup pattern, why C# differs from GDScript, and a SafeDisconnect helper.
+> See [references/disconnecting.md](references/disconnecting.md) for the `-=` cleanup pattern, the two cases Godot does not clean up, and a SafeDisconnect helper.
 
 ---
 
@@ -197,10 +197,10 @@ When the signal is declared in a GDScript node and the listener is C#, use `node
 
 | Mistake | Symptom | Fix |
 |---|---|---|
-| Forgetting `EventHandler` suffix on the delegate | Compiles fine; signal does not appear in editor; `EmitSignal` fails at runtime with "signal not found" | Rename to `XxxEventHandler` |
+| Forgetting `EventHandler` suffix on the delegate | Build fails with GD0201: the delegate name must end with 'EventHandler' | Rename to `XxxEventHandler` |
 | Wrong parameter types or count in `EmitSignal` | Runtime error in debug build: "Signal parameter mismatch" | Match `EmitSignal` args exactly to the delegate signature |
 | Connecting to a freed object | `ObjectDisposedException` or silent crash on next signal emission | Guard with `IsInstanceValid` before connecting; store reference safely |
-| Not disconnecting in `_ExitTree()` | Memory leak; crash on next signal emission after node is freed | Add `_ExitTree()` override with matching `-=` for every `+=` |
+| Not disconnecting a custom `[Signal]` or a capturing lambda | `ObjectDisposedException` on the next emission after the receiver is freed; built-in signals with a method handler are cleaned up automatically | Add a matching `-=` in `_ExitTree()` (or `Dispose()`) for those two cases |
 | Passing wrong argument count to `EmitSignal` | Debug-build error: "Expected N arguments, got M" | Count signal delegate parameters and match exactly |
 | Using static C# events for cross-language signals | GDScript cannot observe the event; no error, just silent non-delivery | Use Godot `[Signal]` for any signal GDScript must receive |
 | Double-connecting the same handler | Handler fires twice per emission; subtle logic bugs | Check if already connected, or use `ConnectFlags.OneShot`; never call `+=` twice for the same method |
@@ -214,7 +214,7 @@ When the signal is declared in a GDScript node and the listener is C#, use `node
 - [ ] `EmitSignal` uses `SignalName.XxxName` constants (not raw strings)
 - [ ] `EmitSignal` argument count and types match the delegate signature exactly
 - [ ] All `+=` connections are in `_Ready()` (not in constructors or field initializers)
-- [ ] Every `+=` has a matching `-=` in `_ExitTree()`
+- [ ] Every `+=` on a custom `[Signal]`, and every capturing lambda, has a matching `-=`
 - [ ] `IsInstanceValid` guards are in place where the signal source may be freed before the subscriber
 - [ ] Lambdas stored in fields if disconnection is needed later
 - [ ] `async` signal awaits are not blocking `_Ready()` directly; deferred if necessary

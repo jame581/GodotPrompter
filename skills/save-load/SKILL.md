@@ -20,6 +20,8 @@ Choose the right serialization strategy for your data type. All examples target 
 | Resource .tres    | Editor-integrated data          | Yes      | Yes            | **NOT secure — never load untrusted files** |
 | Resource .res     | Fast binary data                | No       | Yes            | **NOT secure — never load untrusted files** |
 
+When you recommend a strategy, name the one you rejected and the factor that decided it — "JSON, not Resource files, because saves are user-writable and loading a Resource can run code". A format picked without a named alternative cannot be overruled.
+
 > **Security warning:** Loading `.tres` or `.res` files executes arbitrary GDScript embedded in the resource. Never load Resource files from untrusted sources (user-uploaded files, downloaded mods). Use ConfigFile or JSON for user-generated save data.
 
 ---

@@ -189,7 +189,7 @@ A particle can spawn another particle scene at lifecycle events (birth, collisio
 
 > See [references/subemitters.md](references/subemitters.md) for trigger modes, scene setup, GDScript and C# (v1.6.0 parity), and limitations.
 
-> ⚠️ **Changed in Godot 4.7:** Subemitter velocity inheritance was reworked ([GH-118062](https://github.com/godotengine/godot/pull/118062)). With `sub_emitter_keep_velocity = true` (default `false`), subemitted particles inherit the parent particle's velocity when they spawn. Subemitter effects authored on earlier versions may look different after upgrading — re-check initial velocity and spread on affected systems.
+> **Note:** With `sub_emitter_keep_velocity = true` (default `false`), subemitted particles inherit the parent particle's velocity when they spawn. This is unchanged in 4.7: a regression in 4.7 dev builds that broke the inheritance was fixed before 4.7 stable ([GH-118062](https://github.com/godotengine/godot/pull/118062)), so nothing needs migrating from 4.6.
 
 ---
 

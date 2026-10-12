@@ -32,7 +32,8 @@ parent_mat.sub_emitter_keep_velocity = true
 
 # Assign child particle system as sub-emitter
 $ParentParticles.process_material = parent_mat
-parent_mat.sub_emitter_node = $ChildParticles.get_path()
+# The link to the child system lives on the particles node, not the material.
+$ParentParticles.sub_emitter = $ParentParticles.get_path_to($ChildParticles)
 ```
 
 ```csharp
@@ -49,7 +50,8 @@ public partial class Explosion : GpuParticles3D
             SubEmitterKeepVelocity = true,
         };
         ProcessMaterial = parentMat;
-        parentMat.SubEmitterNode = ChildParticles.GetPath();
+        // The link to the child system lives on the particles node, not the material.
+        SubEmitter = GetPathTo(ChildParticles);
     }
 }
 ```

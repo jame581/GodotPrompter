@@ -35,13 +35,12 @@ Character (CharacterBody3D)
 func _ready() -> void:
     var aim := AimModifier3D.new()
     skeleton.add_child(aim)
-    aim.bone_name = "RightArm"           # bone that aims
-    aim.target_bone_name = "RightHand"   # bone it aims toward
-    aim.primary_rotation_axis = Vector3.RIGHT  # axis to rotate around
-
-    # Limit how far the bone can rotate
-    aim.use_angle_limitation = true
-    aim.symmetry_limitation = deg_to_rad(90.0)
+    # A constraint holds a list of settings; each one pairs a bone with a reference.
+    aim.setting_count = 1
+    aim.set_apply_bone_name(0, "RightArm")       # bone that aims
+    aim.set_reference_bone_name(0, "RightHand")  # bone it aims toward
+    aim.set_forward_axis(0, SkeletonModifier3D.BONE_AXIS_PLUS_Y)  # bone axis pointed at the reference
+    aim.set_amount(0, 1.0)                        # 0.0-1.0 blend of this setting
 ```
 
 ```csharp
@@ -50,11 +49,11 @@ public override void _Ready()
     var skeleton = GetNode<Skeleton3D>("Skeleton3D");
     var aim = new AimModifier3D();
     skeleton.AddChild(aim);
-    aim.BoneName = "RightArm";
-    aim.TargetBoneName = "RightHand";
-    aim.PrimaryRotationAxis = Vector3.Right;
-    aim.UseAngleLimitation = true;
-    aim.SymmetryLimitation = Mathf.DegToRad(90f);
+    aim.SettingCount = 1;
+    aim.SetApplyBoneName(0, "RightArm");
+    aim.SetReferenceBoneName(0, "RightHand");
+    aim.SetForwardAxis(0, SkeletonModifier3D.BoneAxis.PlusY);
+    aim.SetAmount(0, 1.0f);
 }
 ```
 
@@ -64,23 +63,25 @@ public override void _Ready()
 func _ready() -> void:
     var copy := CopyTransformModifier3D.new()
     skeleton.add_child(copy)
-    copy.bone_name = "LeftArm"        # bone receiving the transform
-    copy.source_bone_name = "RightArm"  # bone being copied
-    copy.copy_position = false
-    copy.copy_rotation = true
-    copy.copy_scale = false
+    copy.setting_count = 1
+    copy.set_apply_bone_name(0, "LeftArm")       # bone receiving the transform
+    copy.set_reference_bone_name(0, "RightArm")  # bone being copied
+    copy.set_copy_position(0, false)
+    copy.set_copy_rotation(0, true)
+    copy.set_copy_scale(0, false)
 ```
 
 ```csharp
 var copy = new CopyTransformModifier3D();
 skeleton.AddChild(copy);
-copy.BoneName = "LeftArm";
-copy.SourceBoneName = "RightArm";
-copy.CopyPosition = false;
-copy.CopyRotation = true;
-copy.CopyScale = false;
+copy.SettingCount = 1;
+copy.SetApplyBoneName(0, "LeftArm");
+copy.SetReferenceBoneName(0, "RightArm");
+copy.SetCopyPosition(0, false);
+copy.SetCopyRotation(0, true);
+copy.SetCopyScale(0, false);
 ```
 
-> **Note:** API property names were finalized at Godot 4.5 release. If property names differ in your Godot version, verify via the built-in Inspector on the modifier node. See [PR #100984](https://github.com/godotengine/godot/pull/100984) for the authoritative property list.
+> **Note:** Constraints are configured per setting index, not through flat properties: set `setting_count`, then call `set_apply_bone_name(i, …)`, `set_reference_bone_name(i, …)` and the subclass setters. In the Inspector the same values appear under **Settings > 0**. Angle limits belong to `LookAtModifier3D`, not `AimModifier3D`.
 
 > **When to use:** Prefer `BoneConstraint3D` subclasses over manual bone transform manipulation in `_process()` — they integrate with the modifier pipeline and respect the animation blend stack.

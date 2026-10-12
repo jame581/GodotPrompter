@@ -1,6 +1,6 @@
 ---
 name: godot-code-review
-description: Use when reviewing GDScript or C# Godot code — checklist of best practices, common anti-patterns, and Godot-specific pitfalls
+description: Use when reviewing GDScript or C# Godot code — checklist of best practices, common anti-patterns, and Godot-specific pitfalls. Triggers on "review this script", "check my code", "any issues with this", "what's wrong with this code", including a short pasted snippet.
 ---
 
 # Godot Code Review

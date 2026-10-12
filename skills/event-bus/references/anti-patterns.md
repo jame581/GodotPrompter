@@ -112,11 +112,11 @@ private void OnHealthChanged(int current, int maximum)
 
 ```csharp
 // BAD — node is freed but EventBus still holds a reference to the delegate.
-// The next emission raises an InvalidOperationException or silently leaks memory.
+// The next emission calls into a disposed object and throws ObjectDisposedException.
 public override void _Ready()
 {
     GetNode<EventBus>("/root/EventBus").PlayerDied += OnPlayerDied;
-    // No _ExitTree() override — memory leak.
+    // No _ExitTree() override — a custom signal is not disconnected when this node is freed.
 }
 
 // GOOD — always pair Connect with Disconnect in C#.

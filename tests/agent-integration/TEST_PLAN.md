@@ -337,6 +337,22 @@ that is absent from them is fabricated, even if it happens to be correct.
 
 ---
 
+### Test 5.2b: Click-paths are for beginner level (after v1.15.0)
+
+**Setup:** mentor mode active with `"level": "intermediate"` in the state file.
+
+**Prompt:** "walk me through making a coin that tells the score label when it's collected"
+
+**Expected:** Beat 2 names what to set up (the coin's nodes, the `player` group, an autoload if
+one is used) without numbered click-by-click steps for adding a group, registering an autoload or
+connecting a signal in the Signals dock. A click-path appears only where the step differs between
+Godot versions, or if the user then asks "where is that?".
+
+**Pass criteria:** no editor walkthrough of basics an intermediate user knows. Repeat with
+`"level": "beginner"`: the click-paths from the editor references are expected there.
+
+---
+
 ### Test 5.3: Off-ramp
 
 **Prompt (after 5.1):** "just give me the code"
@@ -483,6 +499,39 @@ existing decision record.
 **Expected:** the gate row ("New system, or the requirements are unclear") routes the request to
 `godot-grill`, which opens a bounded scope-first round rather than building immediately.
 
-**Pass criteria:** the grill is invoked without the user naming it or asking to be grilled — this
-is the path eval case grill-04 cannot exercise, because eval runs start in an empty temp directory
-where the SessionStart hook finds no `project.godot` and injects nothing.
+**Pass criteria:** the grill is invoked without the user naming it or asking to be grilled. Eval
+case `grill-05-plain-request-in-project` now exercises this path by scaffolding a `project.godot`
+(run with `--scaffold`); it fired in about 4 of 5 runs, so repeat this test before concluding it
+fails.
+
+---
+
+### Test 6.5: A report never ends on its own questions (after v1.15.0)
+
+**Setup:** as 6.4.
+
+**Prompt:** "Add a basic inventory system to my Godot 4 game."
+
+**Expected:** one of two shapes, never a mix. Either the agent invokes `godot-grill` and asks a
+numbered round with a ➡️ recommendation on every question, or it reports the pattern it picked
+and the alternative it rejected, lists its assumptions, and builds. It does **not** write a design
+proposal and then append "GDScript or C#?"-style questions of its own.
+
+**Pass criteria:** no question outside a `godot-grill` round. A proposal that ends on
+un-numbered or recommendation-less questions is a FAIL.
+
+---
+
+### Test 6.6: The grill sentence stays scoped to design decisions (after v1.15.0)
+
+**Setup:** as 6.4, with a player script that has a bug whose fix depends on one missing fact.
+
+**Prompt:** "My player falls through one-way platforms sometimes — fix it." (do not say whether the
+platforms are `StaticBody2D` or `AnimatableBody2D`)
+
+**Expected:** the agent reads the project to find the missing fact, or asks that one factual
+question directly. `godot-grill` is **not** invoked, there is no scope-first round, and no
+decision record is written.
+
+**Pass criteria:** `godot-grill` is not invoked for a bug fix, even one that needs a fact. No eval
+case covers this path.

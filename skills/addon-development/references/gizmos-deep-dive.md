@@ -181,7 +181,7 @@ public partial class SpawnerGizmoPlugin : EditorNode3DGizmoPlugin
 
         // Wire to UndoRedo so the change is undoable.
         // Get the editor's undo/redo manager via EditorInterface (Godot 4.x pattern).
-        var undoRedo = EditorInterface.Singleton.GetEditorUndoRedoManager();
+        var undoRedo = EditorInterface.Singleton.GetEditorUndoRedo();
         undoRedo.CreateAction("Set Spawner Radius");
         undoRedo.AddDoProperty(spawner, "spawn_radius", spawner.SpawnRadius);
         undoRedo.AddUndoProperty(spawner, "spawn_radius", restore);

@@ -248,7 +248,7 @@
     {
       "name": "csharp-signals",
       "title": "Signals in C# (Godot 4.x)",
-      "description": "Use when implementing signals in C# — [Signal] delegates, EmitSignal patterns, async signal awaiting, and event-driven architecture",
+      "description": "Use when implementing signals in C# — [Signal] delegates, EmitSignal patterns, async signal awaiting, and event-driven architecture. Triggers on declaring, emitting, connecting, or awaiting a signal from a C# script, and on a signal crossing between C# and GDScript in either direction.",
       "relatedSkills": [
         "csharp-godot",
         "event-bus",
@@ -445,7 +445,7 @@
     {
       "name": "godot-code-review",
       "title": "Godot Code Review",
-      "description": "Use when reviewing GDScript or C# Godot code — checklist of best practices, common anti-patterns, and Godot-specific pitfalls",
+      "description": "Use when reviewing GDScript or C# Godot code — checklist of best practices, common anti-patterns, and Godot-specific pitfalls. Triggers on \"review this script\", \"check my code\", \"any issues with this\", \"what's wrong with this code\", including a short pasted snippet.",
       "relatedSkills": [
         "godot-testing",
         "scene-organization",

@@ -21,6 +21,8 @@ Choose the right FSM pattern for your complexity level. All examples target Godo
 | Node-Based     | Medium     | Characters with complex behavior      |
 | Resource-Based | High       | Data-driven or editor-configurable AI |
 
+When you recommend one, name the approach you rejected and the factor that decided it (state count, independent concerns, designer editing) — "node-based, not an enum with `match`, because seven states with their own enter/exit logic outgrow one script". A pick with no named alternative cannot be overruled.
+
 ---
 
 ## 2. Approach 1: Enum-Based (Simplest)
@@ -147,7 +149,7 @@ public partial class SimpleEnemy : CharacterBody2D
         }
         else if (GD.Randf() < 0.005f)
         {
-            _patrolTarget = GlobalPosition + new Vector2(GD.RandRange(-PatrolRange, PatrolRange), 0f);
+            _patrolTarget = GlobalPosition + new Vector2((float)GD.RandRange(-PatrolRange, PatrolRange), 0f);
             _currentState = State.Patrol;
         }
     }
@@ -483,6 +485,7 @@ Fewer than 5 states?
 ## 7. Implementation Checklist
 
 - [ ] Chose the approach that matches actual complexity (enum / node / resource)
+- [ ] Named the approach rejected and the deciding factor
 - [ ] Every state has explicit `enter()` and `exit()` methods (or equivalent)
 - [ ] All transitions are named explicitly — no implicit fallthrough between states
 - [ ] Animations are started in `enter()` and cleaned up in `exit()` where needed

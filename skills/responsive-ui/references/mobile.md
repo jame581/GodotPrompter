@@ -129,9 +129,9 @@ DisplayServer.screen_set_orientation(DisplayServer.SCREEN_SENSOR)
 **C#:**
 
 ```csharp
-DisplayServer.ScreenSetOrientation(DisplayServer.ScreenOrientationEnum.Landscape);
-DisplayServer.ScreenSetOrientation(DisplayServer.ScreenOrientationEnum.Portrait);
-DisplayServer.ScreenSetOrientation(DisplayServer.ScreenOrientationEnum.Sensor);
+DisplayServer.ScreenSetOrientation(DisplayServer.ScreenOrientation.Landscape);
+DisplayServer.ScreenSetOrientation(DisplayServer.ScreenOrientation.Portrait);
+DisplayServer.ScreenSetOrientation(DisplayServer.ScreenOrientation.Sensor);
 ```
 
 ### Virtual Keyboard
