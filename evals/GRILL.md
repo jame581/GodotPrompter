@@ -190,6 +190,25 @@ grill-05 fired 2/3 here against 4/5 in the previous run; with three runs that is
 and the fire rate across both runs is 6/8. A plain request inside a project is still the weakest
 path: when the grill does not fire the answer is a code dump with no report.
 
+## Card sentence scoped after review — 2026-10-12
+
+A code review pointed out that "Need an answer or a go-ahead first? Invoke `godot-grill`" has no
+carve-out: read literally it covers a bug fix missing one fact, a brainstorming check-in, or
+another plugin's approval step. Two scoped wordings, in-project cases, 5 runs per arm:
+
+| Card sentence | Run | grill-05 fired | grill-05 with | grill-06 fired | grill-07 `no-questions` |
+|---|---|---|---|---|---|
+| "Need an answer or a go-ahead first?" (unscoped) | two earlier runs | 6/8 | 0.87, 0.56 | 0/8 | 8/8 |
+| "Open design decisions needing the developer's answer first?" | `results/2026-10-11T20-35-16-725Z` | 2/5 | 0.60 | 0/5 | invalid — session limit |
+| "A design decision needs the developer's answer or go-ahead first?" | `results/2026-10-12T04-52-39-540Z` | **4/5** | 0.87 | 0/5 | 5/5 |
+
+The third wording is the one kept. Dropping "go-ahead" halved the fire rate: when the grill does
+not fire, the agent sees itself as asking for a go-ahead on a design, not as having open
+decisions, so the sentence has to name that. All four fired runs passed both scored graders.
+grill-07's `assumptions-stated` was 2/5 with and 3/5 without, as in the earlier run — not a card
+effect. What this still does not measure: a bug fix that is missing one fact, and a workflow
+plugin's own approval gate.
+
 ## Limitations
 
 - **grill-02 exercises nothing about the skill.** `trigger-grill` reads "Skill called 0x" in both
