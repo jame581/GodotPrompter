@@ -186,7 +186,7 @@ Set the version in `application/config/version` and read it at runtime with `Pro
 
 **Steam** requires three pieces: the Steamworks SDK (non-redistributable, keep out of public repos), the [GodotSteam](https://godotsteam.com/) addon for engine bindings, and depot configurations driven by `steamcmd +run_app_build app_build.vdf`. Steam integration is outside the export pipeline itself.
 
-See [references/distribution-itch-steam.md](references/distribution-itch-steam.md) for full butler install instructions, channel naming table, the `deploy-itch` GitHub Actions job, and the Steam component breakdown.
+See [references/distribution-itch-steam.md](references/distribution-itch-steam.md) for full butler install instructions, channel naming table, the `deploy-itch` GitHub Actions job, and the Steam component breakdown. For the release side — the 21-day app-fee wait, the two-week Coming Soon minimum, review times, store asset sizes, demo and Next Fest deadlines, and discount rules — see [references/steam-release-planning.md](references/steam-release-planning.md).
 
 ---
 
@@ -262,5 +262,6 @@ Before Godot 4.5, modifying `.exe` metadata (version info, icon, copyright, comp
 - [ ] itch.io channels follow the naming convention (windows, linux, macos, web, android)
 - [ ] Butler API key stored as a CI secret, not hardcoded
 - [ ] Steam depot configs are kept out of public repositories
+- [ ] Steam launch date checked against the fixed lead times (21-day fee wait, two-week Coming Soon, 7-business-day reviews)
 - [ ] Shader Baker enabled for D3D12 and Metal targets (Forward+/Mobile only), exported from a Windows / macOS host respectively (Godot 4.5+)
 - [ ] Windows `.exe` metadata (version, icon, company name) set in the export preset — rcedit no longer required (Godot 4.5+)
