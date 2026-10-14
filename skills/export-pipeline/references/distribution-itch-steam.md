@@ -82,4 +82,4 @@ For Steam distribution you need three components working together:
 - **GodotSteam addon**: [GodotSteam](https://godotsteam.com/) is a community addon that wraps the Steamworks C++ SDK for use in GDScript and C#. It provides `Steam.init()`, achievements, stats, UGC, and networking. Install it as a Godot plugin; follow the GodotSteam docs for the exact version matching your Godot and Steamworks SDK versions.
 - **Depot configuration**: In Steamworks Partner, define one depot per platform (Windows, Linux, macOS). Each depot maps to a set of files from your export output. The `steamcmd` CLI uploads depots to Steam using `app_build` scripts. Builds are staged in a local `content/` folder and pushed with `steamcmd +run_app_build app_build.vdf`.
 
-Steam integration is outside the scope of the export pipeline itself — refer to the GodotSteam documentation and Steamworks SDK guides for full setup.
+Steam integration is outside the scope of the export pipeline itself — refer to the GodotSteam documentation and Steamworks SDK guides for full setup. For release deadlines, store assets, demo and Next Fest rules, see [steam-release-planning.md](steam-release-planning.md).
