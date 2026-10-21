@@ -4,7 +4,8 @@
 
 | Feature | Forward+ | Mobile | Compatibility |
 |---|---|---|---|
-| SSAO / SSIL / SSR / Volumetric Fog / SDFGI / VoxelGI | Yes | No | No |
+| SSIL / SSR / Volumetric Fog / SDFGI / VoxelGI | Yes | No | No |
+| SSAO | Yes | No | 4.6+ |
 | LightmapGI / Glow / Bloom | Yes | Yes | Yes |
 | Max Omni+Spot per mesh | 512 clustered | 8+8 | 8+8 (adjustable) |
 | Target | Desktop/Console | Mobile/Mid-range | Low-end/WebGL |

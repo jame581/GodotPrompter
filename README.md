@@ -2,7 +2,7 @@
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 [![Godot 4.x](https://img.shields.io/badge/Godot-4.3+-blue.svg)](https://godotengine.org)
-[![Skills: 56](https://img.shields.io/badge/Skills-56-green.svg)](#available-skills)
+[![Skills: 59](https://img.shields.io/badge/Skills-59-green.svg)](#available-skills)
 
 Agentic skills framework for Godot 4.x game development. Gives AI coding agents domain-specific expertise for GDScript and C# projects.
 
@@ -12,7 +12,7 @@ Inspired by and built on top of the [Superpowers](https://github.com/obra/superp
 
 GodotPrompter is a plugin that provides **skills** — structured domain knowledge that AI agents load on demand. When you ask your agent to "add a state machine" or "set up multiplayer", it loads the relevant GodotPrompter skill and follows Godot-specific best practices instead of relying on generic knowledge.
 
-**56 skills** covering project setup, architecture, gameplay systems, input handling, physics, 2D/3D systems, animation, shaders, audio, UI, multiplayer, localization, procedural generation, XR/VR, native extensions, multithreading, mobile shipping, optimization, GDScript / C# patterns, a teaching mode, and third-party addons (LimboAI, Beehave, Popochiu, Dialogue Manager, Phantom Camera). All targeting Godot 4.3+ with both GDScript and C# examples — newer features from Godot 4.5, 4.6, and 4.7 (variadic functions, abstract classes, stencil buffers, AreaLight3D, VirtualJoystick, OpenXR Spatial Entities, and more) are included as annotated additive sections.
+**59 skills** covering project setup, architecture, gameplay systems, input handling, physics, 2D/3D systems, animation, shaders, audio, UI, multiplayer, web services, localization, procedural generation, XR/VR, native extensions, multithreading, mobile and web shipping, rendering pipeline, optimization, GDScript / C# patterns, a teaching mode, and third-party addons (LimboAI, Beehave, Popochiu, Dialogue Manager, Phantom Camera). All targeting Godot 4.3+ with both GDScript and C# examples — newer features from Godot 4.5, 4.6, and 4.7 (variadic functions, abstract classes, stencil buffers, AreaLight3D, VirtualJoystick, OpenXR Spatial Entities, and more) are included as annotated additive sections.
 
 **v1.7.0 introduces a 16 KB token budget** for `SKILL.md` files (validator-enforced) and the new **`gdscript-advanced`** skill for production-grade GDScript depth (performance idioms, metaprogramming, `@tool` lifecycle, profiler-driven idioms).
 
@@ -267,22 +267,24 @@ The generated machine-readable skill catalog lives in [`skills/index.json`](skil
 | `responsive-ui` | Multi-resolution scaling, aspect ratios, DPI, mobile adaptation |
 | `hud-system` | Health bars, score displays, minimap, damage numbers, notifications |
 
-### Multiplayer (3 skills)
+### Multiplayer & Web Services (4 skills)
 
 | Skill | Description |
 |-------|-------------|
 | `multiplayer-basics` | MultiplayerAPI, ENet/WebSocket, RPCs, authority model |
 | `multiplayer-sync` | MultiplayerSynchronizer, interpolation, prediction, lag compensation |
 | `dedicated-server` | Headless export, server architecture, lobby management |
+| `web-services` | HTTPRequest, REST/JSON API clients, downloads, TLS, WebSocket clients |
 
-### Rendering & Visual (2 skills)
+### Rendering & Visual (3 skills)
 
 | Skill | Description |
 |-------|-------------|
+| `rendering-pipeline` | Renderer per platform, lighting strategy, AA, FSR/resolution scaling, SubViewports, graphics settings |
 | `shader-basics` | Godot shader language, visual shaders, common recipes, post-processing |
 | `particles-vfx` | GPUParticles2D/3D, process materials, subemitters, trails, attractors, collision |
 
-### Build & Deploy (5 skills)
+### Build & Deploy (6 skills)
 
 | Skill | Description |
 |-------|-------------|
@@ -291,6 +293,7 @@ The generated machine-readable skill catalog lives in [`skills/index.json`](skil
 | `addon-development` | EditorPlugin, @tool scripts, custom inspectors, dock panels |
 | `assets-pipeline` | Image compression, 3D scene import, audio formats, resource management |
 | `mobile-development` | Android/iOS export, signing, lifecycle, permissions, plugins, IAP, device features |
+| `web-export` | Browser builds, threads vs COOP/COEP headers, itch.io/self-hosting, PWA, JavaScriptBridge |
 
 ### Scripting (4 skills)
 

@@ -7,7 +7,7 @@ description: Use when working with 3D-specific systems — materials, lighting, 
 
 All examples target Godot 4.3+ with no deprecated APIs. GDScript is shown first, then C#.
 
-> **Related skills:** **player-controller** for CharacterBody3D movement, **physics-system** for 3D collision shapes and raycasting, **camera-system** for Camera3D follow and transitions, **shader-basics** for spatial shaders and post-processing, **godot-optimization** for 3D performance tuning, **animation-system** for AnimationTree and 3D animation blending.
+> **Related skills:** **rendering-pipeline** for renderer choice, lighting strategy, AA and resolution scaling, **player-controller** for CharacterBody3D movement, **physics-system** for 3D collision shapes and raycasting, **camera-system** for Camera3D follow and transitions, **shader-basics** for spatial shaders and post-processing, **godot-optimization** for 3D performance tuning, **animation-system** for AnimationTree and 3D animation blending.
 
 ---
 
@@ -133,7 +133,7 @@ Configure global rendering — sky background, tonemapping, glow, SSR, SSAO/SSIL
 
 ## 5. Global Illumination
 
-Five GI options trade quality for cost: none (ambient only) → ReflectionProbe (localized) → LightmapGI (best quality, baked) → VoxelGI (small/medium dynamic) → SDFGI (large open-world). VoxelGI/SDFGI/LightmapGI require Forward+. The 4.5+ subsection below applies across GI methods.
+Five GI options trade quality for cost: none (ambient only) → ReflectionProbe (localized) → LightmapGI (best quality, baked) → VoxelGI (small/medium dynamic) → SDFGI (large open-world). VoxelGI and SDFGI require Forward+; LightmapGI plays on all three renderers but bakes only in a Forward+ or Mobile editor. The 4.5+ subsection below applies across GI methods.
 
 > See [references/global-illumination.md](references/global-illumination.md) for the methods comparison table, ReflectionProbe scene + code recipe, LightmapGI bake workflow, and SDFGI configuration.
 
