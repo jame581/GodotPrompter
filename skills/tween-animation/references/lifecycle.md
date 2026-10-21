@@ -58,7 +58,9 @@ tween.set_speed_scale(0.5)
 tween.set_speed_scale(2.0)
 ```
 
-### Ignore Time Scale
+### Ignore Time Scale (Godot 4.4+)
+
+On 4.3, compensate instead: `tween.set_speed_scale(1.0 / Engine.time_scale)` (set it again whenever the time scale changes).
 
 ```gdscript
 # Tween runs at normal speed even when Engine.time_scale is changed

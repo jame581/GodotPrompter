@@ -235,7 +235,7 @@ Procedurally rotates a bone to look at a world-space target. Ideal for head trac
 
 ### BoneConstraint3D (Godot 4.5+)
 
-`AimModifier3D`, `CopyTransformModifier3D`, and `ConvertTransformModifier3D` operate **bone-relative** rather than world-space — use them when the aim/source target is itself a bone on the same skeleton (mirroring, secondary rig binding, bone-to-bone aiming).
+`AimModifier3D`, `CopyTransformModifier3D`, and `ConvertTransformModifier3D` take their reference from **another bone** on the same skeleton (mirroring, secondary rig binding, bone-to-bone aiming); from Godot 4.6 the reference can also be a `Node3D` (`REFERENCE_TYPE_NODE`).
 
 > See [references/bone-constraints.md](references/bone-constraints.md) for the full deep dive — modifier table, scene structure, GDScript and C# examples for AimModifier3D and CopyTransformModifier3D.
 

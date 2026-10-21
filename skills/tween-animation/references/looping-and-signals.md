@@ -56,8 +56,8 @@ private void OnTweenFinished()
 | Signal                       | Fires When                                   |
 |------------------------------|----------------------------------------------|
 | `finished`                   | All tweeners complete (after final loop)     |
-| `loop_finished(loop_count)`  | Each loop iteration completes                |
-| `step_finished(idx)`         | Each individual tweener completes            |
+| `loop_finished(loop_count)`  | Each loop iteration completes, except the last (`finished` fires instead) |
+| `step_finished(idx)`         | Each step completes — one tweener, or a group of parallel tweeners |
 
 ---
 

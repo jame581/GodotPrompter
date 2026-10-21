@@ -30,12 +30,12 @@ Visual shaders provide a node-based graph editor — no code required.
 | `Texture2D` | Sample a texture |
 | `ColorConstant` | Solid color value |
 | `VectorOp` | Math operations on vectors |
-| `ScalarOp` | Math operations on floats |
+| `FloatOp` | Math operations on floats (`IntOp` for integers) |
 | `Mix` | Lerp between two values |
 | `Step` / `SmoothStep` | Threshold / smooth threshold |
 | `Time` | Current time (for animation) |
 | `UV` | Texture coordinates |
-| `Input` (custom) | Expose a uniform to Inspector |
+| `FloatParameter`, `ColorParameter`, … | Expose a uniform to Inspector (`Input` nodes read built-ins such as `TIME` and `UV`) |
 
 > Visual shaders compile to the same GPU code as written shaders. There is no performance difference.
 

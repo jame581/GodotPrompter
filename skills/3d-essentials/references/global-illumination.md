@@ -47,7 +47,7 @@ public override void _Ready()
 
 ### LightmapGI (Baked)
 
-Best quality, zero runtime cost. Requires UV2 on meshes (auto-generated on import).
+Best quality, zero runtime cost. Requires UV2 on meshes: set the scene import option **Meshes > Light Baking** to **Static Lightmaps** to generate it (the default, Static, does not unwrap UV2).
 
 1. Add a **LightmapGI** node to the scene
 2. Set all static lights to **Bake Mode: Static**

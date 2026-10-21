@@ -95,7 +95,7 @@ void fragment() {
 | `ROUGHNESS` | `float`| Roughness value (0.0–1.0) |
 | `NORMAL` | `vec3` | Surface normal (for normal mapping) |
 | `EMISSION` | `vec3` | Emissive color |
-| `ALPHA` | `float`| Transparency (enable in render mode) |
+| `ALPHA` | `float`| Transparency (writing it moves the material to the transparent pass) |
 | `VERTEX` | `vec3` | Vertex position (in `vertex()`) |
 
 ### Uniforms (Shader Parameters)
@@ -179,7 +179,7 @@ The standard pattern: full-rect `ColorRect` with a canvas_item shader on top of 
 
 ## 7. Compositor Effects (Godot 4.3+)
 
-`CompositorEffect` runs custom render passes within Godot's render pipeline (post-tonemap or pre-tonemap). Use when ColorRect overlays aren't enough — multi-pass effects, depth-aware effects, custom AO/SSR variants. Heavier setup than a screen-space shader; reach for it only when needed.
+`CompositorEffect` runs custom render passes at five points in the 3D render pipeline, from before the opaque pass to after the transparent pass — all before the built-in post effects and tonemapping. Use when ColorRect overlays aren't enough — multi-pass effects, depth-aware effects, custom AO/SSR variants. Heavier setup than a screen-space shader; reach for it only when needed.
 
 > See [references/compositor-effects.md](references/compositor-effects.md) for setup, a custom CompositorEffect GDScript example, and built-in Compositor use cases.
 

@@ -86,7 +86,7 @@ public void SetupEnvironment()
 | Reinhard   | Simple curve, preserves brights            | General use                    |
 | Filmic     | Film-like contrast                          | Cinematic games                |
 | ACES       | High contrast with desaturation            | Realistic/photographic         |
-| AgX        | Maintains hue as brightness increases      | Physically accurate lighting   |
+| AgX (4.4+) | Maintains hue as brightness increases      | Physically accurate lighting   |
 
 ### Post-Processing Effects (Inspector)
 

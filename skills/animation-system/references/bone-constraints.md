@@ -8,7 +8,7 @@ Reference for `skills/animation-system/SKILL.md` — Godot 4.5+ `BoneConstraint3
 
 ## BoneConstraint3D Modifiers (Godot 4.5+)
 
-Godot 4.5 introduces `BoneConstraint3D` — a new base class for skeleton modifiers that operate relative to another bone rather than a world-space target. Three concrete subclasses ship with 4.5:
+Godot 4.5 introduces `BoneConstraint3D` — a new base class for skeleton modifiers that take their reference from another bone. From Godot 4.6, `set_reference_type(i, BoneConstraint3D.REFERENCE_TYPE_NODE)` with `set_reference_node(i, path)` references a `Node3D` instead, read in the skeleton's model space. Three concrete subclasses ship with 4.5:
 
 | Modifier | What it does |
 |----------|-------------|
@@ -16,7 +16,7 @@ Godot 4.5 introduces `BoneConstraint3D` — a new base class for skeleton modifi
 | `CopyTransformModifier3D` | Copies position/rotation/scale from one bone to another (useful for mirroring or binding secondary rigs) |
 | `ConvertTransformModifier3D` | Converts between transform spaces — translates, rotates, or scales a bone based on another bone's transform, with remapping |
 
-These complement `LookAtModifier3D` (which targets a world-space `Node3D`). Use `AimModifier3D` when the aim target is itself a bone on the same skeleton.
+These complement `LookAtModifier3D` (which targets a world-space `Node3D`). Use `AimModifier3D` when the aim target is itself a bone on the same skeleton, or (4.6+) a `Node3D` you want handled in model space.
 
 **Scene structure:**
 

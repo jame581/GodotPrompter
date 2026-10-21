@@ -226,3 +226,101 @@ where snake_case is right. No agent or Codex file repeated a corrected claim.
 
 **Not changed:** `dialogue-system` `references/variable-interpolation.md` uses `GameState.Instance`
 (autoload-as-static) — already on the Task 4 deferred list.
+
+## Batch C — rendering
+
+Skills: `2d-essentials`, `3d-essentials`, `shader-basics`, `particles-vfx`, `animation-system`,
+`tween-animation`. Every SKILL.md and every reference file was read in full (prose and code
+comments; code bodies were read for the engine APIs they call). A claim repeated in a reference is
+counted once, under SKILL.md.
+
+| Skill | Claims checked (SKILL.md + references) | Wrong | Softened |
+|---|---|---|---|
+| `2d-essentials` | 22 + 43 | 8 | 0 |
+| `3d-essentials` | 24 + 60 | 7 | 0 |
+| `shader-basics` | 16 + 17 | 5 | 0 |
+| `particles-vfx` | 21 + 37 | 9 | 0 |
+| `animation-system` | 16 + 27 | 4 | 0 |
+| `tween-animation` | 19 + 13 | 5 | 0 |
+| **Total** | **315** | **38** | **0** |
+
+The worst errors were two broken examples and two features described as working where they do
+nothing. The decal spawner called `look_at()` before `add_child()`, which fails with "Node not inside
+tree" and leaves every decal unrotated. The tile lookup passed `global_position` to `local_to_map()`,
+which takes local coordinates. `Line2D.antialiased` is stored but never passed to the draw call, so
+the skill's "works by generating additional geometry" described an effect that does not exist, and
+`3d-essentials` said Compatibility renders decals, which it does not.
+
+| Skill file | Was | Is | Source |
+|---|---|---|---|
+| `2d-essentials` SKILL.md:24-26 | `z_as_relative` "default: false = global"; the example sets it `true` | default `true` (relative to the parent); the example sets `false` for an absolute `z_index` | 4.3 `doc/classes/CanvasItem.xml:631` |
+| `2d-essentials` SKILL.md:44 | `Parallax2D` placed in a `CanvasLayer` (layer −1) with no further setup | `follow_viewport = false` on the `Parallax2D`, to match the layer, which doesn't follow the camera | 4.3 `doc/classes/Parallax2D.xml:17-18`; `scene/2d/parallax_2d.cpp:122-124` |
+| `2d-essentials` SKILL.md:112 | `GPUParticles2D` and `CPUParticles2D` "share the same `ParticleProcessMaterial` interface" | `CPUParticles2D` exposes the same parameters as its own properties | 4.3 `doc/classes/CPUParticles2D.xml` (no `process_material`); `references/2d-particles.md:16` |
+| `2d-essentials` SKILL.md:167 | `Line2D.antialiased` "works by generating additional geometry — no MSAA needed" | stored but never passed to the draw call, so it has no visible effect; use MSAA 2D or a soft-edged texture | 4.3 `scene/2d/line_2d.cpp:264-270, 280-309` (`canvas_item_add_triangle_array` without the flag); same in 4.7.2 |
+| `2d-essentials` `references/parallax.md:12` | `ParallaxBackground`/`ParallaxLayer` "deprecated" (skill says 4.3+) | superseded by `Parallax2D` in 4.3; marked deprecated from 4.5 | 4.3 and 4.4-stable `ParallaxBackground.xml` have no `deprecated`; 4.5-stable and 4.7.2 `ParallaxBackground.xml:2` do |
+| `2d-essentials` `references/parallax.md:21` | `scroll_offset` is the "offset for the repeat canvas starting point" | a manual offset the camera does not override; loops when `repeat_size` is set | 4.3 `doc/classes/Parallax2D.xml:39-41` |
+| `2d-essentials` `references/tilemap.md:36` | `Use Texture Padding` adds a "1px transparent border" | a 1px border copied from each tile's edge pixels (default on) | 4.3 `scene/resources/2d/tile_set.cpp:5613-5622`; `TileSetAtlasSource.xml:275-276` |
+| `2d-essentials` `references/tilemap.md:91, 99` | `local_to_map(global_position)` | `local_to_map(tile_map.to_local(global_position))` (C#: `ToLocal`) | 4.3 `doc/classes/TileMapLayer.xml:160` |
+| `3d-essentials` SKILL.md:71 | `StandardMaterial3D` property `normal_map` | `normal_texture` with `normal_enabled` | 4.3 `doc/classes/BaseMaterial3D.xml:290`; 4.7.2 ClassDB has no `normal_map` |
+| `3d-essentials` SKILL.md:120; `references/materials-and-lighting-recipes.md:121, 123` | light bake mode default is Disabled | default is Dynamic (indirect baked into lightmaps, direct real-time; VoxelGI/SDFGI update it live) | 4.3 `doc/classes/Light3D.xml:62`; `scene/3d/lightmap_gi.cpp:370, 1029-1042`; `modules/lightmapper_rd/lm_compute.glsl:587` |
+| `3d-essentials` SKILL.md:128, 190; `references/environment-and-post.md:89` | AgX listed with the other tonemappers (skill says 4.3+) | AgX from Godot 4.4 | 4.3 `doc/classes/Environment.xml:413-423` (no `TONE_MAPPER_AGX`); 4.4-stable `Environment.xml:431` |
+| `3d-essentials` SKILL.md:158; `references/decals.md:84` | "All renderers support decals"; Compatibility "limited by max renderable elements" | Forward+ and Mobile only; Compatibility does not render decals | 4.3 and 4.7.2 `doc/classes/Decal.xml:11` |
+| `3d-essentials` `references/materials-and-lighting-recipes.md:87` | drive day/night with `Environment.sun_position` | no such property; tween the light's color and rotation | 4.7.2 ClassDB; no `sun_position` in 4.3 `doc/classes/` |
+| `3d-essentials` `references/decals.md:28-75` | decal oriented with `look_at()` before `add_child()` | add it first, then set `global_position` and `look_at()` | 4.3 `scene/3d/node_3d.cpp:939`; 4.7.2 run: "Node not inside tree" before, −Y along −normal after |
+| `3d-essentials` `references/global-illumination.md:50` | LightmapGI UV2 "auto-generated on import" | only with the import option Meshes > Light Baking = Static Lightmaps; the default, Static, does not unwrap | 4.3 `editor/import/3d/resource_importer_scene.cpp:2354, 2444, 2518` |
+| `shader-basics` SKILL.md:98 | spatial `ALPHA` needs to be enabled "in render mode" | writing it moves the material to the transparent pass | 4.3 `servers/rendering/renderer_rd/forward_clustered/scene_shader_forward_clustered.cpp:113, 418` |
+| `shader-basics` SKILL.md:182 | `CompositorEffect` runs "post-tonemap or pre-tonemap" | at five points from before the opaque pass to after the transparent pass, all before the built-in post effects | 4.3 `doc/classes/CompositorEffect.xml:65-79` |
+| `shader-basics` `references/compositor-effects.md:103-108` | "Godot uses the Compositor internally for SDFGI, VoxelGI, SSR" | those are part of the renderer; a `Compositor` holds only your effects | 4.3: no engine class derives from `CompositorEffect`; `render_forward_clustered.cpp:1981-2252` calls only the user effects |
+| `shader-basics` `references/visual-shaders.md:33` | `ScalarOp` node | `FloatOp` (`IntOp` for integers) | 4.7.2 ClassDB: no `VisualShaderNodeScalarOp` |
+| `shader-basics` `references/visual-shaders.md:38` | `Input` (custom) exposes a uniform | `FloatParameter`, `ColorParameter`, … expose uniforms; `Input` reads built-ins | 4.7.2 ClassDB (`VisualShaderNodeParameter` subclasses) |
+| `particles-vfx` SKILL.md:25 | use CPU particles "when you need CPU-side particle positions" | neither node exposes per-particle positions | 4.3 `doc/classes/CPUParticles2D.xml` method list |
+| `particles-vfx` SKILL.md:188 | sub-emitters fire at "birth, collision, death, manual" via a `subemitter` property | constant rate, collision, death, birth from 4.4; `sub_emitter_mode` + `sub_emitter` | 4.3 `ParticleProcessMaterial.xml` (no `SUB_EMITTER_AT_START`); 4.4-stable `:529` |
+| `particles-vfx` SKILL.md:198; `references/attractors-and-collision.md:55` | attractors and colliders "Forward+/Mobile only; no 2D equivalents"; SDF collider "Forward+ only" | Compatibility runs box/sphere attractors and box/sphere/height-field colliders; vector-field attractors and SDF colliders need Forward+/Mobile; `GPUParticles2D` collide with `LightOccluder2D` | 4.3 `drivers/gles3/storage/particles_storage.cpp:648, 681`; `ParticleProcessMaterial.xml:145` |
+| `particles-vfx` SKILL.md:206; `references/attractors-and-collision.md:95` | lower `turbulence_noise_scale` = larger swirls; higher values "cheaper but weaker" | higher = smoother, larger features | 4.3 `ParticleProcessMaterial.xml:386-388` |
+| `particles-vfx` SKILL.md:220; `references/performance-and-pitfalls.md:10, 72` | set `fixed_fps = 30` as an optimization; flicker when it is "not set" | 30 is the default; `0` updates every frame | 4.3 `GPUParticles2D.xml:75`, `GPUParticles3D.xml:106` |
+| `particles-vfx` SKILL.md:222; `references/performance-and-pitfalls.md:64` | a one-shot needs `restart()` before `emitting = true` to re-fire | `emitting = true` is ignored while the last burst's particles live; `restart()` clears them and sets `emitting` | 4.3 `scene/2d/gpu_particles_2d.cpp:46-56, 443-447`; `GPUParticles2D.xml:68` |
+| `particles-vfx` SKILL.md:222; `references/performance-and-pitfalls.md:68` | base `color` "overrides" `color_ramp` | it multiplies the ramp; a dark `color` hides it | 4.3 `scene/resources/particle_process_material.cpp:604`; `ParticleProcessMaterial.xml:159` |
+| `particles-vfx` `references/attractors-and-collision.md:12, 31`; `references/performance-and-pitfalls.md:70` | `attractor_interaction_enabled` must be turned on first | on by default | 4.3 `ParticleProcessMaterial.xml:133` |
+| `particles-vfx` `references/subemitters.md:23, 59` | the sub-emitter is assigned on the `ParticleProcessMaterial` (`SubEmitterNode` slot) | on the parent particles node's `sub_emitter` | 4.3 `scene/3d/gpu_particles_3d.cpp:430-442` |
+| `animation-system` SKILL.md:238; `references/bone-constraints.md:11, 19` | `BoneConstraint3D` modifiers reference only another bone | from 4.6 the reference can be a `Node3D` (`REFERENCE_TYPE_NODE`, model space) | 4.5-stable `BoneConstraint3D.xml` (no reference type); 4.6-stable `BoneConstraint3D.xml:144`; 4.7.2 `BoneConstraint3D.xml:145-151` |
+| `animation-system` `references/common-pitfalls.md:11` | snapping comes from "using `AnimationPlayer.play()` instead of AnimationTree" | `AnimationPlayer` blend time defaults to 0; set `playback_default_blend_time`, `set_blend_time()` or `play(name, custom_blend)` | 4.7.2 ClassDB: `playback_default_blend_time` default `0.0`, `play(name, custom_blend, …)` |
+| `animation-system` `references/common-recipes.md:103` | C# Call Method target "must be public" | private methods are registered too | 4.3 `modules/mono/editor/Godot.NET.Sdk/Godot.SourceGenerators/ScriptMethodsGenerator.cs:128-131` (no accessibility filter) |
+| `animation-system` `references/common-recipes.md:35-67` | GDScript combo defines `_on_animation_finished` but never connects it (the C# twin does) | `_ready()` connects `animation_finished` | the C# block at :76-80 |
+| `tween-animation` SKILL.md:264; `references/looping-and-signals.md:59` | `loop_finished` fires on each loop | not after the last loop; `finished` fires instead | 4.3 `doc/classes/Tween.xml:450-453` |
+| `tween-animation` `references/looping-and-signals.md:60` | `step_finished` fires per tweener | per step: one tweener or a group of parallel tweeners | 4.3 `Tween.xml:456-459` |
+| `tween-animation` SKILL.md:272, 316; `references/lifecycle.md:61-66` | `set_ignore_time_scale()` with no version (skill says 4.3+) | Godot 4.4+; on 4.3 compensate with `set_speed_scale(1.0 / Engine.time_scale)` | not in 4.3 `Tween.xml` / `scene/animation/tween.cpp`; 4.4-stable `Tween.xml:231` |
+| `tween-animation` SKILL.md:310 | "Tween runs during pause" → `TWEEN_PAUSE_PROCESS` | default `TWEEN_PAUSE_BOUND` follows the bound node's `process_mode`; `STOP` pauses, `PROCESS` keeps running | 4.3 `Tween.xml:253, 470-477` |
+| `tween-animation` SKILL.md:311 | `from()` ignored because it was "called after `set_parallel()` changed ordering" | the `from()` value is applied only when that tweener starts | 4.3 `scene/animation/tween.cpp:544-566` |
+
+**Checked and correct (selection):** MSAA 2D is Forward+/Mobile only (`ProjectSettings.xml:2360`);
+`LIGHT_VERTEX`/`SHADOW_VERTEX` are writable in canvas `fragment()` (`shader_types.cpp:262-263`);
+`physics_quadrant_size` default 16; 8 directional lights in Forward+ (`renderer_scene_render.h:50`);
+`max_clustered_elements` 512; Compatibility lights are 8 omni + 8 spot per object
+(`rasterizer_scene_gles3.cpp:83-89`); a static light bakes direct and indirect, a dynamic one indirect
+only (`lm_compute.glsl:587`); OBJ meshes get no LOD from the OBJ mesh importer; SSAO/SSIL/SSR/SDFGI,
+DOF and auto-exposure renderer support (`Environment.xml`, `CameraAttributes*.xml`); the AreaLight3D
+defaults and notes (4.7.2 `AreaLight3D.xml`); stencil modes are spatial only (4.7.2
+`shader_types.cpp:261-264`); compositor effects run in array order (`compositor_storage.cpp:186`);
+`RenderSceneBuffers` typed locals parse when calling `get_internal_size()` (the object is a
+`RenderSceneBuffersRD`); trails are absent in Compatibility (`particles_storage.cpp:290`); a system
+cannot be its own sub-emitter (`gpu_particles_3d.cpp:434`); `explosiveness` does not apply to
+sub-emitted particles (`particles.glsl:388-402`); calling `play()` with the playing animation does
+not restart it; `SpringBoneSimulator3D` defaults stiffness 1.0, drag 0.4, gravity 0 (4.7.2 run); the
+IK class hierarchy and C# names; `PropertyTweener` re-reads its start each loop, so `as_relative()`
+accumulates (`tween.cpp:554-563`); an empty tween errors "Tween without commands, aborting."
+(4.7.2 `tween.cpp:83`).
+
+**Sweep:** each correction's key nouns were grepped in `skills/`, `agents/`, `.codex/` (`z_as_relative`,
+`follow_viewport`, `ParallaxBackground`, `CPUParticles`, `Line2D`, texture padding, `local_to_map`,
+`normal_map`, `sun_position`, bake modes, AgX, decals, `look_at(` on a new node, UV2, `ALPHA`,
+tonemap/Compositor, `ScalarOp`, particle positions, attractors and 2D collision, `noise_scale`,
+`attractor_interaction`, `fixed_fps`, `restart()`, `color_ramp`, sub-emitter, SDF, snapping,
+"must be public", bone-relative, `step_finished`/`loop_finished`, `TWEEN_PAUSE`,
+`ignore_time_scale`). Every hit was inside batch C's skills. `rendering-pipeline` SKILL.md:72
+("static lights … cost nothing at runtime") agrees with the corrected bake-mode semantics and was
+left alone. No agent or Codex file repeated a corrected claim.
+
+**Not changed:** eval-measured text — `animation-system`'s BlendSpace `sync_mode` summary (skill-13)
+and `3d-essentials`' volumetric fog legacy-blending warning (skill-15) — was checked against 4.7.2
+(`sync_mode` default 0, `use_legacy_blending` default `false`) and left as written. Editor
+click-paths (`retargeting.md`'s Import-dock steps, snapping menu paths) are out of scope.

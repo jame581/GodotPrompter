@@ -40,6 +40,9 @@ extends CharacterBody2D
 var _combo_step: int = 0
 var _combo_window: bool = false
 
+func _ready() -> void:
+    anim_player.animation_finished.connect(_on_animation_finished)
+
 func _unhandled_input(event: InputEvent) -> void:
     if event.is_action_pressed("attack"):
         if _combo_step == 0:
@@ -100,7 +103,7 @@ public partial class Player : CharacterBody2D
         }
     }
 
-    // Called by the Call Method track. Must be public — the track resolves it by name.
+    // Called by the Call Method track, which resolves it by name (private methods are registered too).
     public void OpenComboWindow() => _comboWindow = true;
 
     private void ResetCombo()

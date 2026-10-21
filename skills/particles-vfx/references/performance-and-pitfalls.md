@@ -7,7 +7,7 @@
 | Technique                    | Savings              | When to Use                          |
 |------------------------------|----------------------|--------------------------------------|
 | Lower `amount`               | Linear GPU savings   | Always — use minimum needed          |
-| `fixed_fps = 30`             | Halves particle updates | Background particles, ambient       |
+| `fixed_fps = 30` (default)   | 30 Hz updates instead of every frame (`0`) | Keep it for background and ambient particles |
 | `amount_ratio` < 1.0         | Scale down dynamically | Quality settings slider              |
 | Smaller textures             | Less VRAM + bandwidth | Mobile, many particle systems        |
 | `local_coords = true`        | Cheaper transforms   | When particles should move with node |
@@ -61,12 +61,12 @@ public void SetParticleQuality(float level)
 |--------------------------------------|-------------------------------------------------|------------------------------------------------------------------|
 | Particles invisible                  | No texture (2D) or no draw pass mesh (3D)       | Set texture or assign a mesh to Draw Pass 1                      |
 | Particles appear then vanish immediately | `lifetime` too short                         | Increase `lifetime` (default 1.0s)                               |
-| One-shot doesn't re-trigger          | Need to call `restart()` before setting `emitting = true` | Call `restart()` then set `emitting = true`            |
+| One-shot doesn't re-trigger          | `emitting = true` is ignored while the previous burst's particles are alive | Call `restart()` (clears old particles and sets `emitting = true`) |
 | Particles emit in wrong direction    | `direction` or `gravity` misconfigured          | In 2D, Y is inverted — upward is `Vector3(0, -1, 0)`            |
 | Particles don't follow the node      | `local_coords` is `false`                       | Set `local_coords = true` for attached effects                   |
 | Particles pop in (no pre-warming)    | No `preprocess` time set                        | Set `preprocess` to 1–2x `lifetime` for ambient effects          |
-| Color ramp has no effect             | Using `color` property which overrides ramp      | Clear the base `color` (set to white) when using `color_ramp`    |
+| Color ramp has no effect             | Base `color` multiplies the ramp; a dark or transparent `color` hides it | Set the base `color` to white when using `color_ramp`  |
 | Trails not rendering                 | Missing trail material setup or wrong renderer   | Enable "Use Particle Trails" on material; use Forward+ or Mobile |
-| Attractors have no effect            | `attractor_interaction_enabled` is `false`       | Enable on the ParticleProcessMaterial                            |
+| Attractors have no effect            | `attractor_interaction_enabled` turned off (default `true`) | Re-enable on the ParticleProcessMaterial          |
 | Subemitter not spawning              | Child `amount` is too low to accommodate spawns  | Increase child system's `amount`                                 |
-| Particles flicker on mobile          | `fixed_fps` not set or too high                  | Set `fixed_fps = 30` for consistency across devices              |
+| Particles flicker on mobile          | `fixed_fps` set to `0` or raised                 | Restore the default `fixed_fps = 30` for consistency across devices |
