@@ -4,7 +4,10 @@ All notable changes to GodotPrompter will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
-## [Unreleased]
+## [1.16.0] - 2026-10-22
+
+Three new skills (59 in all), a C# method-body check of every code block, and a first prose audit of
+the 56 existing skills. 61 C# errors and 349 wrong prose claims were fixed.
 
 ### Added
 
@@ -38,6 +41,41 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
   Threads are an export preset option (`variant/thread_support`, off by default since 4.3).
 - **3d-essentials** said LightmapGI requires Forward+. It plays on all three renderers and only
   bakes in a Forward+ or Mobile editor; the renderer comparison now shows SSAO in Compatibility from 4.6.
+- **C# method-body check.** 513 of 517 C# blocks were compiled to method bodies against
+  `Godot.NET.Sdk` 4.7.2 (the other 4 are pseudo-code or deliberately wrong) and every "name does not
+  exist" error was triaged. **61 real errors were fixed in 13 skills**; the worst were
+  `godot-testing` and `event-bus` calling gdUnit4 APIs that do not exist (a `GdUnit4.GdUnitTestSuite`
+  base class, a mocking API, `.WithArgs` on `IsEmitted`), `limboai` using `LimboHSM` / `Anystate` for
+  the generated `LimboHsm` / `ANYSTATE`, and a `Basis.IsOrthonormal()` call GodotSharp does not have.
+  `gdUnit4.api` is pinned to 4.3.1 for Godot 4.3 (5.x needs 4.4+). Method and counts:
+  `docs/superpowers/notes/2026-10-21-csharp-body-check.md`.
+- **Prose audit.** 2,338 claims in the 56 existing skills were checked against the engine source and
+  class reference, in seven batches: **349 were wrong and fixed, 15 softened** where they could not
+  be verified. The worst: `scene-organization` put `Sprite2D` and `CollisionShape2D` under plain
+  `Node` containers, which breaks transform inheritance and leaves a body with no shape; the
+  hand-rolled `DialogueManager` autoload had a `class_name` clashing with its own autoload name; the
+  inventory registry scanned for `.tres` files that an exported build lists as `.tres.remap`;
+  `godot-optimization` recommended `CanvasGroup` for batching, which breaks batching;
+  `multiplayer-basics` set authority on the server only, so clients never agreed; `godot-testing`
+  documented gdUnit4 and GUT command lines that do not exist. Claims and sources per batch:
+  `docs/superpowers/notes/2026-10-21-prose-audit.md`.
+
+### Changed
+
+- **Pattern X moves** to keep the tightest skills clear of the 16 KB budget (bytes, validator count):
+  `web-services` 15,800 → 13,259 (WebSocket client to `references/websocket-client.md`),
+  `rendering-pipeline` 15,633 → 14,088 (SubViewports to `references/subviewports.md`),
+  `shader-basics` 15,344 → 13,507 (Visual Shaders to `references/visual-shaders.md`), `input-handling`
+  15,268 → 13,419 (the VirtualJoystick recipe merged into `references/touch.md`). Earlier in the
+  cycle `animation-system`, `xr-development` and `3d-essentials` were moved the same way.
+
+### Tests
+
+- Three new `claude plugin eval` cases in `evals/SKILLS.md`, each fact checked against the engine
+  source first: `skill-17-rendering-pipeline` 0.92 with the skill vs 0.50 without (Δ +0.42,
+  discriminating: the bare model recommends FSR 1 on the Mobile renderer);
+  `skill-16-web-services` 1.00 / 1.00 (ceiling; the skill fired in 1 of 3 runs, a routing gap
+  carried to the follow-ups); `skill-18-web-export` 1.00 / 1.00 (ceiling).
 
 ## [1.15.1] - 2026-10-12
 

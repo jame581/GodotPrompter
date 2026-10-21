@@ -39,7 +39,7 @@ The layout is self-evident from `ls`; these constraints are not:
 - **`.github/workflows/plugin-scan.yml`** runs the HOL plugin-scanner (the awesome-ai-plugins listing check) on every push to `master` and every PR, and fails below 80/100 or on any high finding. It flags a full-access sandbox mode, a never-ask approval policy, or a bypass approval mode written literally in any `.md`/`.json`/`.toml`/`.yml`/`.yaml` file, comments and this file included (patterns: `RISKY_APPROVAL_PATTERNS` in hol-guard's `checks/security.py`), so describe them rather than quoting them. The validator's `scanner-risky-approval` error catches the same text before a push. Every `uses:` must be pinned to a full commit SHA — Dependabot keeps the pins current.
 - **`.github/workflows/auto-assign-issues.yml`** assigns the repository owner to every newly opened issue, so it produces a notification.
 - **`master` is protected by the `Protect master` repository ruleset** (GitHub settings, not a file): changes land through a pull request with `Validate skills and hooks`, `Hook tests (Windows)` and `scan` green, and the branch cannot be deleted or force-pushed. Renaming one of those jobs means updating the ruleset, or every PR waits on a check that never reports. Repository admins can bypass it.
-- **`docs/superpowers/notes/`** holds per-release research notes, the C# parity debt list, and the open follow-ups carried between releases (`2026-10-05-v1.15.0-followups.md`).
+- **`docs/superpowers/notes/`** holds per-release research notes, the C# parity debt list, and the open follow-ups carried between releases (`2026-10-22-v1.16.0-followups.md`).
 
 ## File formats and releases
 
