@@ -784,3 +784,109 @@ inspector steps, Profiler column names). Example-code gaps left as written: `ass
 `get_health()`/`is_dead()` on a `HealthComponent` the skill never defines; `controllers-and-input.md`
 locomotion has no C# twin (pre-existing; the validator does not flag the reference). Batch F has no
 eval-measured content.
+
+## Batch G — addons
+
+Skills: `limboai`, `beehave`, `popochiu`, `dialogue-manager`, `phantom-camera`. Every SKILL.md and
+every reference file was read in full. Each addon was checked against its own repository at the
+version the skill names — all five name one, so no fallback tag was needed: LimboAI `v1.8.0`
+(`3fbd851`), Beehave `v2.9.2` (`f09fdbd`), Popochiu `v2.1.1` (`784d147`), Dialogue Manager `v3.10.4`
+(`5487c52`), Phantom Camera `v0.11.0.2` (`e468862`). Paths in the table are relative to the addon
+repository at that tag. The source was preferred over the addon's docs where they disagree (LimboAI's
+GDExtension limitations, Dialogue Manager's `{}` end-of-dialogue note, Popochiu's `E.active_command`
+tutorial snippet). Version callouts were not audited (the skills' Godot-version lines, LimboAI's
+compatibility table). Edited GDScript was re-parsed on 4.7.2 (`--check-only`): Beehave inside a project
+holding Beehave 2.9.2, LimboAI against stub classes for `BTCondition`/`BTPlayer`/`BT`, since the
+extension is not loaded. The LimboAI C# blocks were rebuilt with the Task 4 harness.
+
+| Skill | Claims checked (SKILL.md + references) | Wrong | Softened |
+|---|---|---|---|
+| `limboai` | 35 + 15 | 6 | 0 |
+| `beehave` | 40 + 15 | 4 | 1 |
+| `popochiu` | 35 + 70 | 13 | 1 |
+| `dialogue-manager` | 45 | 3 | 0 |
+| `phantom-camera` | 40 + 20 | 4 | 0 |
+| **Total** | **315** | **30** | **2** |
+
+The worst errors were in behaviour the examples rely on:
+- `limboai`'s `BTCondition` example declared `var in_range := agent.global_position…`, which does not
+  parse (`agent` is typed `Node`, so the value has no set type), and typed the blackboard read as
+  `Node2D` although §5 of the same file says object reads must stay untyped. The `BTPlayer` example
+  called `restart()` to "loop the tree", but an active `BTPlayer` re-runs a finished tree on its next
+  update by itself; `restart()` aborts a running one.
+- `beehave` said `after_run()` runs when a leaf is interrupted and put the attack action's interrupt
+  cleanup there; composites call `interrupt()` instead, so the cleanup never ran on an interrupt.
+- `popochiu`'s dialog option table described `disabled` as "shown but not selectable" (it is not
+  rendered at all) and `always_on` as immune to `turn_off_options()` (it only stops the option being
+  greyed out as used), and said `_option_selected()` runs only when no `_on_option_<id>()` exists (it
+  always runs first). `PopochiuInventoryItem` was called a `Node`; it is a `TextureRect`.
+
+| Skill file | Was | Is | Source |
+|---|---|---|---|
+| `limboai` SKILL.md:22 | "not usable on 4.3–4.5" | v1.8.0 needs 4.6+; the 4.3 line is 1.2.0–1.3.x, which the skill does not cover | `README.md:55-62`; `deps.env` (`GODOT_CPP_API_VERSION=4.6`) |
+| `limboai` SKILL.md:32 | enable the plugin under **Project Settings → Plugins** | no `plugin.cfg` exists; the extension registers its editor plugin itself on reload | no `plugin.cfg` in the repository; `register_types.cpp:282` (`EditorPlugins::add_by_type<LimboAIEditorPlugin>()`) |
+| `limboai` SKILL.md:50, :393 | GDExtension has no documentation tooltips and no `BBParam` property editor; checklist line "use the module build for `BBParam`" | the docs still say so, but v1.8.0's editor build embeds the class docs and registers the `BBParam` inspector plugin in both builds; the remaining gap is C#. Checklist line removed | `SConstruct:124-127` (`GodotCPPDocData` for `editor`/`template_debug`); `editor/limbo_ai_editor_plugin.cpp:1967-1969` (no build guard); `register_types.cpp:273` (`EditorPropertyBBParam` under `LIMBOAI_GDEXTENSION`); docs `doc/source/getting-started/getting-limboai.rst` |
+| `limboai` SKILL.md:77, :82-83, :104 | `updated(status)` reacts "when the tree finishes"; `restart()` "loops the tree" (GDScript and C#) | `updated` fires after every update; a finished tree starts over on the next update, so the example now stops it with `active = false` / `Active = false` | `bt/bt_player.cpp:178-199`; `bt/tasks/bt_task.cpp:219-245` (`execute` re-enters when status is not `RUNNING`) |
+| `limboai` SKILL.md:162, :165 | `var target: Node2D = blackboard.get_var(…)`; `var in_range := agent.global_position…` | untyped read, as §5 advises (assigning a freed instance to a typed variable is a debug-build error); `var in_range: bool` (the `:=` form is a parse error, run on 4.7.2) | 4.3 `modules/gdscript/gdscript_vm.cpp:1394-1418` (`DEBUG_ENABLED`); `doc_classes/BTTask.xml:214` (`agent: Node`); run |
+| `limboai` `references/hsm.md:86-87` | the chained builders (`.Named()`/`.CallOnEnter()`) are GDScript-only | they are bound methods, so the module build's C# API has them; the example's direct signal wiring is kept | `hsm/limbo_state.cpp:238-243` |
+| `beehave` SKILL.md:150-153, :163 | `after_run()` runs on success, failure "or is interrupted"; the attack action cleans up in `after_run` "when the tree interrupts this action" | `after_run()` follows only a `SUCCESS`/`FAILURE` tick; the example now cleans up in `interrupt()` and calls `super()` | `addons/beehave/nodes/beehave_node.gd:24-37`; `nodes/composites/sequence.gd` (`running_child.interrupt(...)`) |
+| `beehave` SKILL.md:194 | "every method" of `Blackboard` takes `blackboard_name` | `set_value`, `get_value`, `has_value`, `erase_value` do; `keys()` and `get_debug_data()` do not | `addons/beehave/blackboard.gd:21-54` |
+| `beehave` `references/custom-nodes.md:142` | no GDScript API for weights; inspector-only | no dedicated method, but `set("Weights/<child>", n)` goes through `_set()` | `addons/beehave/nodes/composites/randomized_composite.gd:98` (`_set`, `WEIGHTS_PREFIX`) |
+| `beehave` `references/custom-nodes.md:148` | `RepeaterDecorator.get_class_name()` returns `&"LimiterDecorator"` | it returns an `Array[StringName]` whose last entry is `&"LimiterDecorator"` | `addons/beehave/nodes/decorators/repeater.gd:63` |
+| `popochiu` SKILL.md:30 | Game Type "Custom/2D/Pixel"; templates `9 Verb`, `Sierra`, `SimpleClick` | Retro / Pixel Art or Modern / Hi-Res (the custom form: Custom / Pixel Art / High Resolution), setting stretch aspect and pixel-art filtering; templates 9 Verb, the Sierra-style "Action Bar", Simple Click | `editor/popups/setup/setup.gd:12-15, 356-365`; `setup.tscn:111, 123, 474-479`; `engine/objects/gui/templates/*/*_gui_info.tres` (`title`) |
+| `popochiu` SKILL.md:31; `references/pipeline.md:7` | PopochiuImporters is enabled separately in Project Settings | Popochiu enables PopochiuImporters and PopochiuGizmo itself | `popochiu_plugin.gd:106-109, 195-199` |
+| `popochiu` SKILL.md:141 | emotions map to the `voice_cues` export | the export is `voices` | `engine/objects/character/popochiu_character.gd:76` |
+| `popochiu` `references/dialogs.md:14` | `disabled`: shown but not selectable | not rendered; set by `turn_off_forever()`; `turn_on()` has no effect on it | `engine/objects/dialog/popochiu_dialog_option.gd:17-18, 41-56`; `engine/objects/gui/components/dialog_menu/dialog_menu.gd:91` |
+| `popochiu` `references/dialogs.md:15` | `always_on`: can't be turned off by `turn_off_options()` | always rendered as not yet used | `popochiu_dialog_option.gd:19-20`; `engine/objects/gui/components/dialog_menu/dialog_menu_option/dialog_menu_option.gd:44` |
+| `popochiu` `references/dialogs.md:30, 36` | `_option_selected()` runs only when no `_on_option_<id>()` exists; "both styles equally supported" | `_option_selected()` runs first for every option, then `_on_option_<id>()` if present, which re-shows the options; use one style per tree | `engine/objects/dialog/popochiu_dialog.gd:239-250` |
+| `popochiu` `references/inventory.md:3, 9` | `PopochiuInventoryItem extends Node` | `extends TextureRect` | `engine/objects/inventory_item/popochiu_inventory_item.gd:4` |
+| `popochiu` `references/inventory.md:41-44` | combining example overrides the public `on_item_used()` (copied from the addon's doc comment), contradicting SKILL.md's "never override the public wrapper" | `_on_item_used()`; the public wrapper also clears `I.active` afterwards | `popochiu_inventory_item.gd:205-226, 285-288` |
+| `popochiu` `references/inventory.md:66` | `_on_added_to_inventory()`/`_on_discard()` call `super()` "to preserve default GUI feedback" | all six item virtuals are empty (`pass`) | `popochiu_inventory_item.gd:51-82` |
+| `popochiu` `references/pipeline.md:7` | the importer builds `SpriteFrames`/`AnimationLibrary` resources | it builds `AnimationPlayer` animations (in an `AnimationLibrary`) that drive the `Sprite2D`/`TextureRect` frames | `editor/importers/aseprite/animation_creator_base.gd:18, 226-249` |
+| `popochiu` `references/pipeline.md:39` | `PLAY_MODE` includes "at least `IN_OUT` and `PLAY_AND_REVERSE`" | `IN`, `OUT`, `IN_OUT` | `engine/objects/transition_layer/popochiu_transition_layer.gd:14-18`; `engine/interfaces/i_transition_layer.gd:34` |
+| `popochiu` `references/pipeline.md:56` | room objects auto-persist `position`, `visible`, `modulate`, `clickable`, `baseline`, `interaction_polygon`, … | props, hotspots, regions and walkable areas store their basic-type script variables minus ignore lists (which include `baseline`, `clickable`); the position/visible/modulate list is the characters' | `popochiu_resources.gd:83-121, 482-510`; `engine/objects/room/popochiu_room_data.gd:77-92, 182-212` |
+| `popochiu` `references/pipeline.md:57` | custom state is saved if `bool`/`int`/`float`/`String` or `Array`/`Dictionary` of those | `bool`/`int`/`float`/`String`, `Array`, packed string/int/float arrays — a `Dictionary` is skipped | `popochiu_resources.gd:84-89` (`VALID_TYPES`), `:503` |
+| `dialogue-manager` SKILL.md:34-35 | the plugin adds a Dialogue tab to the bottom panel | a main-screen tab (beside 2D/3D/Script) | `addons/dialogue_manager/plugin.gd:90-91, 99-100` (`_has_main_screen()`) |
+| `dialogue-manager` SKILL.md:218 | `responses` is `Array[DialogueResponse]` | an untyped `Array` | `addons/dialogue_manager/dialogue_line.gd:36` |
+| `dialogue-manager` SKILL.md:293 | CSV re-import matches by static ID, "otherwise by literal text" | only lines with a static ID are updated | `addons/dialogue_manager/utilities/translations.gd:246-288` |
+| `phantom-camera` SKILL.md:166; `references/follow-modes.md:78-82` | `lookahead` is a shared 2D/3D option ("2D also exposes `lookahead_max`") | `lookahead` and its options are 2D-only; `PhantomCamera3D` has none | `scripts/phantom_camera/phantom_camera_2d.gd:322-360`; no `lookahead` in `phantom_camera_3d.gd` or `PhantomCamera3D.cs` |
+| `phantom-camera` SKILL.md:106 | `host_layers` is `@export_flags_2d_render` / `_3d_render` on both the Host and each PCam | 2D render flags on the Host and `PhantomCamera2D`, 3D on `PhantomCamera3D` | `scripts/phantom_camera_host/phantom_camera_host.gd:57`; `phantom_camera_2d.gd:262`; `phantom_camera_3d.gd:323` |
+| `phantom-camera` SKILL.md:290 | third-person setters `set_third_person_rotation`/`_degrees`/`_quaternion` | `set_third_person_rotation`, `set_third_person_rotation_degrees`, `set_third_person_quaternion` | `phantom_camera_3d.gd:1888, 1905, 1922` |
+| `phantom-camera` `references/follow-modes.md:25` | `THIRD_PERSON` key properties start with `follow_distance` | `spring_length`, `collision_mask`, `shape`, `margin`, the two rotation offsets (the ones shown only in that mode) | `phantom_camera_3d.gd:466-492, 792-800` (`_validate_property`) |
+
+**Softened (no source either way):** `beehave` SKILL.md:223 dropped "(leaf nodes are shared)" — each
+tree has its own leaf nodes, and no source says otherwise. `popochiu` `references/dialogs.md:69` — the
+tutorial warns against a bare string (`script-your-first-dialogue.md:148`) but does not call it "one of
+the most common authoring mistakes".
+
+**Checked and correct (sample):** LimboAI `.gdextension` keys and paths, `BTPlayer` members and
+`UpdateMode` (`PHYSICS` default), `behavior_tree_finished` deprecation, `BT.Status` values, task
+lifecycle, `res://ai/tasks` and subfolder categories, `Blackboard` methods and `create_blackboard`,
+`LimboHSM.add_transition` guard, `ANYSTATE`, `dispatch()` propagation and return, `BTState`
+`success_event`/`failure_event` defaults, the C# NuGet step. Beehave composites and decorators (all 16
+behaviours), `BeehaveTree` exports and `tick_rate` arithmetic, the two autoloads, the debugger tab name
+and `start_detached`, the custom monitor name, the expression leaves. Popochiu autoload set and
+signatures, `queue()` string shorthand and pause lengths, `popochiu-skip`, `T`/deprecated
+`E.play_transition`, room child nodes, clickable virtuals and command dispatch, GUI template copying,
+`D`/`I`/`A` APIs and signals, save slots and paths, `Globals` `on_save`. Dialogue Manager syntax
+(`[[…]]`, `[wait]`, `[next=auto]`, `=> END!`, `=><`, `%N`, tags, `?.`, `do!`, locals), the balloon
+fallback, `null` at end of dialogue, enums on `DMConstants`, `Guess` (PO/MO), the C# event bridge on
+first `Instance` access, `mutated` not firing for assignments. Phantom Camera plugin restart and six
+custom types, Host `InterpolationMode` and the first-host warning, priority clamp, signals and
+`tween_interrupted` argument, both enums, the untested look-at + follow warning text, the tween
+resource enums and `get_tween_duration()` with no resource.
+
+**Sweep:** `voice_cues`, `PLAY_AND_REVERSE`, `lookahead`, `PopochiuImporters`, game type names,
+`BBParam`, documentation tooltips, "tick LimboAI", `restart()`, `after_run`, `blackboard_name`, weights,
+`LimiterDecorator`, `always_on`, `disabled`, `PopochiuInventoryItem extends`, `on_item_used`,
+`SpriteFrames`, bottom panel, literal-text CSV import, `Array[DialogueResponse]`, `host_layers`,
+`set_third_person_*` were grepped in `skills/`, `agents/` and `.codex/`. Instances outside the batch-G
+files: none (`state-machine`'s "limboai (C++ + HSM, Godot 4.6+)" matches v1.8.0). No frontmatter or
+Related-skills line changed, so no index/Codex regeneration.
+
+**Not changed:** version callouts (the skills' Godot-version lines). Left as written: `beehave`
+`references/custom-nodes.md`'s `MoveToTargetAction.interrupt()` does not call `super()` (works; only
+the debugger's interrupt message is lost); `limboai` `references/hsm.md`'s C# fragments still need
+surrounding fields (`_hsm`, `_idle`, `damageInfo`) to compile — the same 8 harness errors as before the
+batch. No batch-G fact is measured by an eval grader (`evals/skill-05`–`09` graders check the leaf/task
+contracts, `R.goto_room`, the underscore virtuals and Array arguments, all unchanged).

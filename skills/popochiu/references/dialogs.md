@@ -11,8 +11,8 @@ A dialog tree is a `.tres` `PopochiuDialog` resource with an `options: Array[Pop
 | `id` | `String` | — | Option identifier, matched in `_option_selected` / used to derive `_on_option_<snake_case_id>` |
 | `text` | `String` | — | Line shown in the options list |
 | `visible` | `bool` | `true` | Shown in the current options list |
-| `disabled` | `bool` | `false` | Shown but not selectable |
-| `always_on` | `bool` | `false` | Can't be turned off by `turn_off_options()` |
+| `disabled` | `bool` | `false` | Not rendered at all; set by `turn_off_forever()`, and `turn_on()` cannot undo it |
+| `always_on` | `bool` | `false` | Always rendered as not yet used (the menu never greys it out) |
 | `used` / `used_times` | `bool` / `int` | runtime | Tracks whether/how often the option was picked |
 
 Options are authored either in the Inspector (Add Element on the `options` array) or from code via `create_option(id: String, config: Dictionary = {}) -> PopochiuDialogOption` inside the `_on_build_options` virtual — useful when you want to mix Inspector-authored options with procedurally generated ones.
@@ -27,13 +27,13 @@ func _on_start() -> void
 # must await something — the engine awaits this before showing options
 
 func _option_selected(opt: PopochiuDialogOption) -> void
-# called when no _on_option_<snake_case_id> method exists for the picked option
+# called for every picked option, before any _on_option_<snake_case_id> method
 
 func _on_save() -> Dictionary
 func _on_load(data: Dictionary) -> void
 ```
 
-Instead of one big `match` in `_option_selected`, Popochiu auto-calls a method named `_on_option_<snake_case(option.id)>` if it exists — option id `BYE2` calls `_on_option_bye_2(opt)`. Pick whichever style keeps a given tree readable; both are equally supported.
+Instead of one big `match` in `_option_selected`, Popochiu also calls a method named `_on_option_<snake_case(option.id)>` if it exists — option id `BYE2` calls `_on_option_bye_2(opt)` — and shows the options again after it returns. `_option_selected` still runs first for every option, so use one style per tree, not both for the same option.
 
 ## Branching / condition pattern
 
@@ -66,7 +66,7 @@ func start() -> void   # queue_start() twin
 func stop() -> void    # queue_stop() twin
 ```
 
-`turn_off_options("MessyRoom")` (a bare string) is explicitly called out in the addon's own docs as one of the most common authoring mistakes — always wrap in `[...]`.
+The addon's tutorial warns against passing a bare string (`turn_off_options("MessyRoom")`) — always wrap in `[...]`.
 
 `PopochiuDialogOption` instance methods: `turn_on()`, `turn_off()`, `turn_off_forever()` — equivalent single-option shortcuts to the tree-level calls above.
 

@@ -83,8 +83,8 @@ func _init_hsm() -> void:
 ### C#
 
 ```csharp
-// Fluent chaining (.Named()/.CallOnEnter()) is GDScript-only via LimboState builder methods.
-// In C# assign properties and connect signals instead.
+// The chained builders (Named(), CallOnEnter(), CallOnUpdate()) are bound methods, so the
+// module build's C# API has them too; this version sets Name and connects the signals directly.
 private void InitHsm()
 {
     var hsm = new LimboHsm(); // C# name of LimboHSM

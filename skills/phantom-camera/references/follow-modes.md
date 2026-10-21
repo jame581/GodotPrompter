@@ -22,7 +22,7 @@ enum FollowMode {
 | `GROUP` | Follows the centroid of `follow_targets`, can auto-reframe. | `follow_targets: Array[Node2D/3D]` |
 | `PATH` | Follows `follow_target` while confined to the closest point on `follow_path`. | `follow_path` (`Path2D`/`Path3D`) |
 | `FRAMED` | Dead-zone follow — only moves once the target nears the frame edge. | `dead_zone_width`, `dead_zone_height`; emits `dead_zone_reached(side)` |
-| `THIRD_PERSON` (3D) | Drives a `SpringArm3D` at the target, allowing orbit. | `follow_distance`, `collision_mask`, `shape`, `vertical_rotation_offset`, `horizontal_rotation_offset` |
+| `THIRD_PERSON` (3D) | Drives a `SpringArm3D` at the target, allowing orbit. | `spring_length`, `collision_mask`, `shape`, `margin`, `vertical_rotation_offset`, `horizontal_rotation_offset` |
 
 ```gdscript
 # Player-follow with damping — PhantomCamera2D inspector or code
@@ -75,10 +75,10 @@ public partial class PlayerFollowSetup : Node
 `Camera2D.zoom`), and `auto_follow_distance`/`auto_follow_distance_min`/`auto_follow_distance_max` in 3D
 (adjusts distance along local `-z`).
 
-Shared follow options: `follow_axis_lock` (`FollowLockAxis` — 2D: `NONE, X, Y, XY`; 3D adds `Z, XZ, YZ,
+Follow options: `follow_axis_lock` (`FollowLockAxis` — 2D: `NONE, X, Y, XY`; 3D adds `Z, XZ, YZ,
 XYZ`), `rotate_with_target: bool` (2D-only; requires `Camera2D.ignore_rotation = false`), `lookahead:
-bool` + `lookahead_time`/`lookahead_acceleration`/`lookahead_deceleration` (velocity-based look-ahead;
-2D also exposes a `lookahead_max`/`lookahead_max_value` velocity clamp that 3D does not).
+bool` + `lookahead_time`/`lookahead_acceleration`/`lookahead_deceleration` and a `lookahead_max`/`lookahead_max_value`
+velocity clamp (velocity-based look-ahead; 2D-only — `PhantomCamera3D` has no lookahead).
 
 Query state with `is_following() -> bool`; snap instantly (bypassing damping) with
 `teleport_position()`.

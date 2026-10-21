@@ -31,8 +31,8 @@ framework, so a larger point-and-click framework would still own rooms, inventor
 
 1. Godot AssetLib → search "Dialogue Manager" → Download. Or copy `addons/dialogue_manager/` from the
    [GitHub repo](https://github.com/nathanhoad/godot_dialogue_manager) into `res://addons/dialogue_manager/`.
-2. **Project → Project Settings → Plugins** → enable "Dialogue Manager". This adds a **Dialogue** tab to
-   the bottom editor panel and registers the `DialogueManager` autoload automatically — no manual
+2. **Project → Project Settings → Plugins** → enable "Dialogue Manager". This adds a **Dialogue** main-screen
+   tab (beside 2D/3D/Script) and registers the `DialogueManager` autoload automatically — no manual
    autoload step needed.
 3. `addons/dialogue_manager/plugin.cfg`:
 
@@ -215,7 +215,7 @@ supports `Wait`.
 ## 5. Signals & typed access
 
 `DialogueLine` fields: `id`, `next_id`, `character`, `text`, `tags` (`PackedStringArray`),
-`translation_key`, `responses` (`Array[DialogueResponse]`), `concurrent_lines`. `DialogueResponse` adds
+`translation_key`, `responses` (an untyped `Array` of `DialogueResponse`), `concurrent_lines`. `DialogueResponse` adds
 `is_allowed: bool` and `condition_as_text: String` on top of the same `id`/`next_id`/`character`/`text`/
 `tags`/`translation_key` fields.
 
@@ -290,7 +290,7 @@ Static per-line IDs (`Nathan: Hi! I'm Nathan. [ID:HI_IM_NATHAN]`) give a stable 
 matching voiced lines and CSV/PO round-trips, instead of keying off the literal text. `.dialogue` files
 auto-register in the POT Generation list; a `##` comment line before a dialogue line becomes a
 `#. TRANSLATORS:` note in the exported PO/POT. Export/import CSV from the editor's **Translations** menu
-(Dialogue tab); re-import matches by static ID when present, otherwise by literal text.
+(Dialogue tab); re-import only updates lines that carry a static ID.
 
 See the **localization** skill for `TranslationServer`, locale switching, and RTL — Dialogue Manager
 only produces the translation keys and CSV/PO export; wiring locale changes into the running game is

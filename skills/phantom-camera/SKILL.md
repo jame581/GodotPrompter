@@ -103,7 +103,7 @@ controls when the Host updates the real camera:
 `AUTO` (default — picks physics or idle based on the active PCam's target), `IDLE`, `PHYSICS`, or
 `MANUAL` (call `host.process(delta)` yourself each tick).
 
-`host_layers` (`@export_flags_2d_render` / `_3d_render`) on both the Host and each PCam gate which PCams
+`host_layers` (render-layer flags: 2D on the Host and `PhantomCamera2D`, 3D on `PhantomCamera3D`) gate which PCams
 a given Host will consider — a PCam is only eligible if its `host_layers` bitmask overlaps the Host's.
 
 ---
@@ -163,7 +163,7 @@ touching `priority`; it's disabled automatically in exported builds — don't us
 
 ## 5. Follow modes
 
-`PhantomCamera2D`/`PhantomCamera3D` follow a target through the `FollowMode` enum: `GLUED`, `SIMPLE`, `GROUP`, `PATH`, `FRAMED`, and `THIRD_PERSON` (3D only). The reference covers each mode's properties, GDScript and C# setup, `GROUP` auto-reframe, and the shared options `follow_axis_lock`, `rotate_with_target` (2D only), and `lookahead`, plus `is_following()` and `teleport_position()`.
+`PhantomCamera2D`/`PhantomCamera3D` follow a target through the `FollowMode` enum: `GLUED`, `SIMPLE`, `GROUP`, `PATH`, `FRAMED`, and `THIRD_PERSON` (3D only). The reference covers each mode's properties, GDScript and C# setup, `GROUP` auto-reframe, and the follow options `follow_axis_lock`, `rotate_with_target` and `lookahead` (both 2D only), plus `is_following()` and `teleport_position()`.
 
 > See [references/follow-modes.md](references/follow-modes.md) for the mode table, setup examples, and shared follow options.
 
@@ -287,7 +287,7 @@ at runtime, it tweens the camera into place on load; set `false` to cut instantl
 - [ ] Priority changes use `set_priority()` or the `priority` property (both route through the setter, which notifies the Host)
 - [ ] `follow_target` / `follow_targets` assigned before relying on `is_following()`
 - [ ] `GROUP` follow mode uses `follow_targets` (array), not `follow_target` (single node)
-- [ ] 3D `THIRD_PERSON` rotation setters (`set_third_person_rotation`/`_degrees`/`_quaternion`) guard on `follow_mode == THIRD_PERSON` and no-op with a printed error otherwise — `set_follow_distance`/`set_spring_length`/`set_collision_mask(_value)`/`set_shape` have **no** such guard and print nothing
+- [ ] 3D `THIRD_PERSON` rotation setters (`set_third_person_rotation`, `set_third_person_rotation_degrees`, `set_third_person_quaternion`) guard on `follow_mode == THIRD_PERSON` and no-op with a printed error otherwise — `set_follow_distance`/`set_spring_length`/`set_collision_mask(_value)`/`set_shape` have **no** such guard and print nothing
 - [ ] Combined `follow_mode` + `look_at_mode` on one `PhantomCamera3D` tested manually (addon marks this untested)
 - [ ] `tween_resource` shared deliberately (same `.tres`) when multiple PCams should transition identically
 - [ ] C# obtains wrappers via `AsPhantomCamera2D()`/`AsPhantomCamera3D()`/`AsPhantomCameraHost()`/`AsPhantomCameraTween()` — they are plain classes wrapping the node, **not** `Node` subclasses, so never `class MyCam : PhantomCamera2D`
