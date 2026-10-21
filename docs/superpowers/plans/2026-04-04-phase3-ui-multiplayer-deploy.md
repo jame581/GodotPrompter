@@ -1,5 +1,7 @@
 # GodotPrompter Phase 3 (UI, Multiplayer, Deploy, C#) Implementation Plan
 
+**Status:** shipped in v1.0.0 (2026-04-06)
+
 > **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
 
 **Goal:** Create 11 Phase 3 skills covering UI/UX, multiplayer networking, build/deploy pipelines, and C#-specific patterns.

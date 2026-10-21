@@ -1,5 +1,7 @@
 # Antigravity CLI & 2.0 Migration Design
 
+**Status:** shipped in v1.12.0 (2026-07-14)
+
 This design specifies the migration of the GodotPrompter skills framework plugin from the deprecated Gemini CLI to the modern Google Antigravity (AGY) CLI and Antigravity 2.0 desktop platform.
 
 ## Background

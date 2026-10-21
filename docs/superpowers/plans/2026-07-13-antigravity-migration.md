@@ -1,5 +1,7 @@
 # Antigravity CLI & 2.0 Migration Implementation Plan
 
+**Status:** shipped in v1.12.0 (2026-07-14)
+
 > **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
 
 **Goal:** Migrate GodotPrompter configuration and documentation from legacy Gemini CLI to modern Google Antigravity CLI (`agy`) and Antigravity 2.0.

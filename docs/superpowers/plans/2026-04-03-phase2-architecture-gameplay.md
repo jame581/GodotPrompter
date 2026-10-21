@@ -1,5 +1,7 @@
 # GodotPrompter Phase 2 (Architecture & Gameplay) Implementation Plan
 
+**Status:** shipped in v1.0.0 (2026-04-06)
+
 > **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
 
 **Goal:** Create 10 Phase 2 skills covering Godot-specific brainstorming, debugging, architectural patterns (event bus, components, resources, DI), and gameplay systems (inventory, dialogue, AI navigation, cameras).

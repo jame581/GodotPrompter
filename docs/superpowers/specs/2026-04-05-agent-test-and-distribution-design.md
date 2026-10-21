@@ -1,5 +1,7 @@
 # Agent Integration Test & Distribution Design
 
+**Status:** shipped in v1.0.0 (2026-04-06)
+
 **Goal:** Validate GodotPrompter works end-to-end when an AI agent loads and uses skills, then publish with polished docs and marketplace presence.
 
 **Order:** Agent test → incorporate findings → README polish → release package → marketplace listings.

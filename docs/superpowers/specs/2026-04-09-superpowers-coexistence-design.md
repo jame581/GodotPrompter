@@ -1,5 +1,7 @@
 # GodotPrompter — Superpowers Coexistence Fix
 
+**Status:** shipped in v1.4.1 (2026-04-09)
+
 **Problem:** When GodotPrompter and Superpowers are both installed, Superpowers' aggressive workflow (brainstorming → writing-plans → executing-plans) takes over the entire session. GodotPrompter's domain-specific skills are never invoked during implementation, even when the user explicitly requests them. This was observed in the DooGoo project (April 9, 2026) where all 35 commits used only Superpowers skills despite GodotPrompter being available.
 
 **Root cause:** Three handoff gaps:

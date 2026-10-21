@@ -1,5 +1,7 @@
 # Agent Integration Test & Distribution Implementation Plan
 
+**Status:** shipped in v1.0.0 (2026-04-06)
+
 > **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
 
 **Goal:** Validate GodotPrompter works end-to-end with AI agents, then publish v1.0.0 with polished docs and marketplace presence.
