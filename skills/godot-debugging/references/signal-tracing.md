@@ -86,7 +86,7 @@ enemy.Connect(Enemy.SignalName.Dead, new Callable(this, MethodName.OnEnemyDead))
 # Signal declared with one argument
 signal item_picked_up(item: Item)
 
-# WRONG receiver — missing argument causes "Expected 1 arguments" error
+# WRONG receiver — missing argument logs "Method expected 0 argument(s), but called with 1"
 func _on_item_picked_up() -> void:
     print("picked up something")
 

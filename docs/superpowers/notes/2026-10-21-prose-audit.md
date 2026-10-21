@@ -83,7 +83,7 @@ sprite that does not move with it.
 | `csharp-godot` `references/gdscript-interop.md:43` | GDScript sets `data.damage` on a C# `[GlobalClass]` | `data.Damage` — C# members keep their C# names | 4.3 `…/Godot.SourceGenerators/ScriptPropertiesGenerator.cs:138-150` |
 | `csharp-signals` SKILL.md:45 | allowed parameter list with `GodotDictionary`/`GodotArray`; "generics are not allowed" | `Variant`-compatible types incl. generic `Array<T>`/`Dictionary<TKey,TValue>`; others fail with GD0202 | 4.3 `…/Godot.SourceGenerators/MarshalType.cs:71-72`, `Common.cs:120-128` |
 | `csharp-signals` SKILL.md:51 | `SignalName` holds "static string constants" | cached `StringName`s | 4.3 `…/ScriptSignalsGenerator.cs:215` |
-| `csharp-signals` SKILL.md:88, 201, 204 | `EmitSignal` validates count and types in debug builds ("Signal parameter mismatch", "Expected N arguments, got M") | no validation; with a wrong count `+=` handlers on a custom signal are skipped silently, `Connect`ed receivers log "Method expected N argument(s), but called with M"; wrong types convert or default | 4.3 `…/ScriptSignalsGenerator.cs:491-495`; `core/object/object.cpp:1200`; `core/variant/variant.cpp:3653` (4.7.2 `object.cpp:1311`, `variant.cpp:3521`) |
+| `csharp-signals` SKILL.md:88, 201, 204 | `EmitSignal` validates count and types in debug builds ("Signal parameter mismatch", "Expected N arguments, got M") | no validation; with a wrong count `+=` handlers on a custom signal are skipped silently, `Connect`ed receivers log "Method expected N argument(s), but called with M"; a wrong type is converted or defaulted for C# handlers, while a typed GDScript receiver logs `Cannot convert argument N from X to Y` and is not called | 4.3 `…/ScriptSignalsGenerator.cs:491-495`; `core/object/object.cpp:1200`; `core/variant/variant.cpp:3653` (4.7.2 `object.cpp:1311`, `variant.cpp:3521`) |
 | `csharp-signals` SKILL.md:206 | a double `+=` always fires twice | twice on a custom `[Signal]`; on a built-in signal the second `+=` logs "already connected" | 4.3 `modules/mono/editor/bindings_generator.cpp:3081`; `core/object/object.cpp:1402` |
 | `scene-organization` SKILL.md:279-293 | `Visuals`, `Collision`, `Components`, `AI` as plain `Node` containers | `CollisionShape2D` stays a direct child; positioned children go under a `Node2D` | 4.3 `scene/main/canvas_item.cpp:514-520`; `scene/2d/physics/collision_shape_2d.cpp:179-181` |
 | `scene-organization` SKILL.md:309 | `MarginContainer` "handles safe-area padding"; `CanvasLayer` "always on top" | fixed margins, no safe area; layer `1` over the default `0` | `MarginContainer.xml` theme constants; 4.3 `doc/classes/CanvasLayer.xml:54` |
@@ -122,10 +122,13 @@ resumes on the main thread (`GodotSynchronizationContext`); C# instance IDs carr
 outside batch A was fixed: `godot-optimization` `references/cpu-bottlenecks.md:13` (batch D) said
 per-frame allocation "triggers the garbage collector" in GDScript and counted `Vector2`/`Vector3`
 constructors as allocations — GDScript has no GC, and `Variant` stores `Vector2`/`Vector3` inline
-(4.3 `core/variant/variant.h:253`, `variant.cpp:1116`). No agent or Codex file repeated a
-corrected claim.
+(4.3 `core/variant/variant.h:253`, `variant.cpp:1116`). A review round found a second: `godot-debugging` `references/signal-tracing.md:89` (batch F)
+quoted the missing-argument error as "Expected 1 arguments"; the message is "Method expected 0
+argument(s), but called with 1" (4.7.2 run; 4.3 prints "arguments", `core/variant/variant.cpp:3653`).
+The review round also replaced `Timer.SignalName.Timeout` with `SceneTreeTimer.SignalName.Timeout`
+in `csharp-godot` SKILL.md:201, 237 (same `StringName`, but `CreateTimer` returns a
+`SceneTreeTimer`; 4.7.2 `doc/classes/SceneTree.xml:20` uses that form). No agent or Codex file
+repeated a corrected claim.
 
-**Not changed:** five C# blocks await `CreateTimer(...)` with `Timer.SignalName.Timeout` instead of
-`SceneTreeTimer.SignalName.Timeout`; both are the `StringName` `"timeout"`, so the code works.
-`dependency-injection` `references/testing-with-di.md` assigns a `StubAudio extends Node` to an
+**Not changed:** `dependency-injection` `references/testing-with-di.md` assigns a `StubAudio extends Node` to an
 `AudioManager`-typed export — already on the Task 4 deferred list.

@@ -85,7 +85,7 @@ public partial class Player : CharacterBody2D
 }
 ```
 
-`EmitSignal` does not check its arguments against the delegate. With the wrong argument count, `+=` handlers on a custom `[Signal]` are skipped without an error, and `Connect`/GDScript receivers log `Error calling from signal … Method expected N argument(s), but called with M`. A wrong type is converted (or defaulted) rather than rejected.
+`EmitSignal` does not check its arguments against the delegate. With the wrong argument count, `+=` handlers on a custom `[Signal]` are skipped without an error, and `Connect`/GDScript receivers log `Error calling from signal … Method expected N argument(s), but called with M`. With a wrong type, C# handlers get the value converted or defaulted (`0`, `null`); a typed GDScript receiver logs `Cannot convert argument N from X to Y` and is not called.
 
 ---
 
@@ -198,7 +198,7 @@ When the signal is declared in a GDScript node and the listener is C#, use `node
 | Mistake | Symptom | Fix |
 |---|---|---|
 | Forgetting `EventHandler` suffix on the delegate | Build fails with GD0201: the delegate name must end with 'EventHandler' | Rename to `XxxEventHandler` |
-| Wrong parameter types in `EmitSignal` | No error — the value is converted, or defaulted (`0`, `null`) | Match `EmitSignal` args exactly to the delegate signature |
+| Wrong parameter types in `EmitSignal` | C# handlers: no error, the value is converted or defaulted (`0`, `null`); typed GDScript receivers: `Cannot convert argument N from X to Y`, handler not called | Match `EmitSignal` args exactly to the delegate signature |
 | Connecting to a freed object | `ObjectDisposedException` or silent crash on next signal emission | Guard with `IsInstanceValid` before connecting; store reference safely |
 | Not disconnecting a custom `[Signal]` or a capturing lambda | `ObjectDisposedException` on the next emission after the receiver is freed; built-in signals with a method handler are cleaned up automatically | Add a matching `-=` in `_ExitTree()` (or `Dispose()`) for those two cases |
 | Passing wrong argument count to `EmitSignal` | `+=` handlers silently not called; `Connect`ed receivers log "Method expected N argument(s), but called with M" | Count signal delegate parameters and match exactly |

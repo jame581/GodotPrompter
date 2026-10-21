@@ -198,7 +198,7 @@ GDScript's `await` maps to C#'s `await ToSignal(...)`. Godot signals return a `S
 public async void StartCutscene()
 {
     // Wait for a timer to finish
-    await ToSignal(GetTree().CreateTimer(2.0), Timer.SignalName.Timeout);
+    await ToSignal(GetTree().CreateTimer(2.0), SceneTreeTimer.SignalName.Timeout);
 
     // Wait for an animation to finish
     var anim = GetNode<AnimationPlayer>("AnimationPlayer");
@@ -234,7 +234,7 @@ private int ComputeSomethingExpensive()
 
 | GDScript | C# |
 |---|---|
-| `await get_tree().create_timer(1.0).timeout` | `await ToSignal(GetTree().CreateTimer(1.0), Timer.SignalName.Timeout)` |
+| `await get_tree().create_timer(1.0).timeout` | `await ToSignal(GetTree().CreateTimer(1.0), SceneTreeTimer.SignalName.Timeout)` |
 | `await animation_player.animation_finished` | `await ToSignal(animPlayer, AnimationPlayer.SignalName.AnimationFinished)` |
 | `await signal_name` | `await ToSignal(this, SignalName.YourSignal)` |
 
