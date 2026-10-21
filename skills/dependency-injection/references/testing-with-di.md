@@ -63,7 +63,7 @@ func test_died_signal_emitted_at_zero_health() -> void:
 
 ### C# (using GdUnit4)
 
-GdUnit4 supports C# since v4.4. Note: GdUnit4 signal assertions use `AssertSignal` rather than GUT's `watch_signals` / `assert_signal_emitted`. If a node emits a Godot signal from a C# `async Task` method, GDScript callers cannot `await` that task directly — emit a Godot signal at completion and `await` the signal instead.
+GdUnit4 supports C# since v4.4. Pin `gdUnit4.api` 4.3.x on Godot 4.3; 5.x needs Godot 4.4+, and these suites create nodes, so on 5.x mark them `[RequireGodotRuntime]`. Note: GdUnit4 signal assertions use `AssertSignal` rather than GUT's `watch_signals` / `assert_signal_emitted`. If a node emits a Godot signal from a C# `async Task` method, GDScript callers cannot `await` that task directly — emit a Godot signal at completion and `await` the signal instead.
 
 ```csharp
 using GdUnit4;

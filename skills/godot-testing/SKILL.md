@@ -138,6 +138,7 @@ Avoid testing things that add noise without catching real bugs:
 
 - [ ] Each test file matches the naming convention for the chosen framework (`test_*.gd` / `*Test.cs`)
 - [ ] Tests extend the correct base class (`GutTest` / `GdUnitTestSuite`); C# gdUnit4 suites are plain `[TestSuite]` classes
+- [ ] C#: `gdUnit4.api` pinned to 4.3.x on Godot 4.3; on 5.x (Godot 4.4+), suites that touch nodes or scenes carry `[RequireGodotRuntime]`
 - [ ] Nodes added to the scene tree use `add_child_autofree` or `auto_free` — never manual `queue_free()`
 - [ ] Signals are watched before the action that triggers them
 - [ ] Mocks/doubles are used for external dependencies, not for the unit under test

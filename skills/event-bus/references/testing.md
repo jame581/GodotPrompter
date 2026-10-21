@@ -52,7 +52,8 @@ func test_score_increments_correctly() -> void:
 
 ```csharp
 // C# equivalent — gdUnit4 producer-side signal assertions
-// Requires: gdUnit4 NuGet package (https://github.com/MikeSchulze/gdUnit4Net)
+// Requires: gdUnit4 NuGet package (https://github.com/MikeSchulze/gdUnit4Net), gdUnit4.api 4.3.x
+// on Godot 4.3. On 5.x (Godot 4.4+) add [RequireGodotRuntime]: these suites load scenes.
 using GdUnit4;
 using static GdUnit4.Assertions;
 

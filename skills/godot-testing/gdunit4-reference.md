@@ -22,8 +22,10 @@ git submodule add https://github.com/MikeSchulze/gdUnit4.git addons/gdUnit4
 **C# projects — add NuGet package**
 
 ```bash
-dotnet add package gdUnit4.api
+dotnet add package gdUnit4.api --version 4.3.1   # Godot 4.3
 ```
+
+> **Version:** the examples here are written for `gdUnit4.api` 4.3.x, which works on Godot 4.3. `gdUnit4.api` 5.x requires Godot 4.4+ (it depends on GodotSharp 4.4.0) and runs tests without the engine by default: mark a suite or test that uses nodes, scenes or resources with `[RequireGodotRuntime]` (the attribute does not exist in 4.3.x).
 
 Then enable the plugin in **Project > Project Settings > Plugins**.
 
