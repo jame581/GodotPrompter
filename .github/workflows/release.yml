@@ -5,8 +5,8 @@ on:
     tags:
       - 'v*.*.*'
 
-# Read-only by default; only the release job gets write access. No job pushes to this repo with
-# git, so checkouts don't leave the token in .git/config for later steps to read.
+# Read-only by default; only the release and directory-bundle jobs get write access. Only
+# directory-bundle pushes to this repo with git, so only its checkout keeps the token.
 permissions:
   contents: read
 
@@ -104,6 +104,53 @@ jobs:
             --notes-file /tmp/release-body.md \
             --latest
 
+  # Anthropic's plugin directory follows the plugin-bundle branch, not master. Master's root is
+  # the plugin folder for every other host, and with evals/, docs/ and tests/ it is over the
+  # directory's 512-file limit, which holds each version for a reviewer. The bundle carries only
+  # what Claude Code loads plus README/LICENSE (scripts/build-directory-bundle.mjs). Each tag
+  # adds one commit on top of the branch, so the directory sees a new version per release.
+  directory-bundle:
+    name: Publish plugin-bundle branch
+    needs: verify
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write # git push to plugin-bundle
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          # This job pushes with git, so it keeps the token; no step here runs repo code after
+          # the build, which reads only tracked files.
+          persist-credentials: true
+      - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
+        with:
+          node-version: '26'
+          package-manager-cache: false
+
+      - name: Build bundle
+        run: node scripts/build-directory-bundle.mjs "$RUNNER_TEMP/bundle" --ref "$GITHUB_REF_NAME"
+
+      - name: Commit bundle to plugin-bundle
+        run: |
+          set -euo pipefail
+          git config user.name "godot-prompter-bot"
+          git config user.email "noreply@github.com"
+          if git ls-remote --exit-code --heads origin plugin-bundle >/dev/null; then
+            git fetch --no-tags origin plugin-bundle
+            git switch -C plugin-bundle FETCH_HEAD
+          else
+            git switch --orphan plugin-bundle
+          fi
+          git rm -rq --ignore-unmatch .
+          git clean -fdxq
+          cp -a "$RUNNER_TEMP/bundle/." .
+          git add -A
+          if git diff --cached --quiet; then
+            echo "plugin-bundle already matches $GITHUB_REF_NAME"
+            exit 0
+          fi
+          git commit -q -m "GodotPrompter $GITHUB_REF_NAME plugin bundle" -m "Built from $GITHUB_SHA by scripts/build-directory-bundle.mjs."
+          git push origin plugin-bundle
+
   marketplace-prs:
     name: Open marketplace bump PRs
     needs: release
@@ -116,7 +163,7 @@ jobs:
           MTOKEN: ${{ secrets.MARKETPLACE_TOKEN }}
         run: |
           if [ -z "$MTOKEN" ]; then
-            echo "::warning::MARKETPLACE_TOKEN secret not set — skipping marketplace PRs. Bump skillsmith/.claude-plugin/marketplace.json and godot-prompter-marketplace/.claude-plugin/marketplace.json manually per CONTRIBUTING.md."
+            echo "::warning::MARKETPLACE_TOKEN secret not set — skipping marketplace PRs. Bump skillsmith and godot-prompter-marketplace (marketplace.json and README counts) manually per CONTRIBUTING.md."
             echo "skip=true" >> "$GITHUB_OUTPUT"
           else
             echo "skip=false" >> "$GITHUB_OUTPUT"
@@ -131,7 +178,7 @@ jobs:
 
       # Check out godot-prompter at the release tag so the bump scripts can copy
       # the canonical marketplace entry description (incl. the current skill count)
-      # into the marketplace repos — not just the version.
+      # into the marketplace repos — not just the version — and count skills/agents for their READMEs.
       - name: Checkout godot-prompter (canonical marketplace entry)
         if: steps.token-check.outputs.skip == 'false'
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
@@ -168,7 +215,8 @@ jobs:
             j.plugins[i].description=desc;
             fs.writeFileSync(p, JSON.stringify(j,null,2)+'\n');
           "
-          git add .claude-plugin/marketplace.json
+          node "$GITHUB_WORKSPACE/scripts/sync-marketplace-readme.mjs" README.md
+          git add .claude-plugin/marketplace.json README.md
           git commit -m "chore: bump godot-prompter to $V"
           git push -u origin "$BRANCH"
           gh pr create --title "Bump godot-prompter to $V" --body "Automated bump from godot-prompter v$V release."
@@ -201,7 +249,8 @@ jobs:
             j.plugins[i].description=desc;
             fs.writeFileSync(p, JSON.stringify(j,null,2)+'\n');
           "
-          git add .claude-plugin/marketplace.json
+          node "$GITHUB_WORKSPACE/scripts/sync-marketplace-readme.mjs" README.md
+          git add .claude-plugin/marketplace.json README.md
           git commit -m "chore: bump godot-prompter to $V"
           git push -u origin "$BRANCH"
           gh pr create --title "Bump godot-prompter to $V" --body "Automated bump from godot-prompter v$V release. Legacy marketplace — for existing installs only."

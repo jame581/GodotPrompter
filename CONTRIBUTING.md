@@ -177,6 +177,10 @@ When publishing a new version (e.g., v1.8.1):
    It also attempts to bump sibling marketplaces when present at known relative paths:
    - `../skillsmith/.claude-plugin/marketplace.json` (or `../../AI/skillsmith/.claude-plugin/marketplace.json`)
    - `../godot-prompter-marketplace/.claude-plugin/marketplace.json`
+
+   and syncs the skill and agent counts in those repos' `README.md` files (the numbers between the
+   `godot-prompter-skills` / `godot-prompter-agents` comment markers) via
+   `scripts/sync-marketplace-readme.mjs`.
 4. **Update `CHANGELOG.md`** by adding a `## [1.8.1]` section, and set the Grok "pin to a release"
    example in `README.md` to the new tag — the bump script does not touch it.
 5. **Validate skills and hooks** — both run in CI on the release tag, so failing here fails the release:
@@ -201,10 +205,13 @@ When publishing a new version (e.g., v1.8.1):
    - Verifies tag and manifest versions are consistent
    - Runs `scripts/validate-skills.mjs`
    - Creates the GitHub Release from the matching `CHANGELOG.md` section
+   - Commits the plugin-only bundle (`scripts/build-directory-bundle.mjs`) to the `plugin-bundle`
+     branch, which Anthropic's plugin directory follows
    - Opens marketplace bump PRs when `MARKETPLACE_TOKEN` is configured
 8. **If marketplace PRs are skipped** (missing `MARKETPLACE_TOKEN`), manually bump:
    - `skillsmith/.claude-plugin/marketplace.json` (primary distribution)
    - `godot-prompter-marketplace/.claude-plugin/marketplace.json` (legacy)
+   - the counts in both repos' `README.md`: `node scripts/sync-marketplace-readme.mjs ../skillsmith/README.md ../godot-prompter-marketplace/README.md`
 
 Users update with:
 ```bash

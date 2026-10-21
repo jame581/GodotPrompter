@@ -8,6 +8,14 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ### Added
 
+- **A plugin-only branch for Anthropic's plugin directory.** The directory held every version for
+  a reviewer (`BINARIES_NOT_INSPECTED`) because the repository root, which is the plugin folder,
+  tracks 613 files and the limit is 512. The release workflow now commits a bundle of only what
+  Claude Code loads (skills, agents, the SessionStart hook, the manifest and icon, README, LICENSE,
+  PRIVACY, SECURITY: 280 files) to the `plugin-bundle` branch, and the directory submission follows
+  that branch. README links to files left out of the bundle point at the release tag on GitHub.
+  `npm test` checks the bundle against the directory's file-count and file-size limits. Other hosts
+  still install from `master`, unchanged.
 - **`web-services`** — calling HTTP and WebSocket backends: one `HTTPRequest` per request with
   `await`, a reusable JSON API client autoload, transport result vs HTTP status, JSON numbers
   parsing as floats, downloads with progress, image loading, form and multipart uploads, TLS and
