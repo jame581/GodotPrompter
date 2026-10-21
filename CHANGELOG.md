@@ -15,7 +15,7 @@ the 56 existing skills. 61 C# errors and 349 wrong prose claims were fixed.
   a reviewer (`BINARIES_NOT_INSPECTED`) because the repository root, which is the plugin folder,
   tracks 613 files and the limit is 512. The release workflow now commits a bundle of only what
   Claude Code loads (skills, agents, the SessionStart hook, the manifest and icon, README, LICENSE,
-  PRIVACY, SECURITY: 280 files) to the `plugin-bundle` branch, and the directory submission follows
+  PRIVACY, SECURITY: 295 files) to the `plugin-bundle` branch, and the directory submission follows
   that branch. README links to files left out of the bundle point at the release tag on GitHub.
   `npm test` checks the bundle against the directory's file-count and file-size limits. Other hosts
   still install from `master`, unchanged.

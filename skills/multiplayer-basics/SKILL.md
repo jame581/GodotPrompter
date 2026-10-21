@@ -288,7 +288,7 @@ Listen for `peer_disconnected(id)` on the `multiplayer` API. On the server: free
 | Not checking `is_multiplayer_authority()` before input | Every peer controls every player | Add an `if not is_multiplayer_authority(): return` guard at the top of input handling |
 | Spawning without `MultiplayerSpawner` | Object appears on server, missing on clients | Add replicated instances under a `MultiplayerSpawner`'s `spawn_path` (scene in its spawnable list), or use its `spawn()` with a `spawn_function` |
 | Forgetting `call_local` on authority RPCs | Server state diverges from its own node | Add `"call_local"` when the sender also needs to execute the RPC locally |
-| Calling `rpc()` before the client has connected | Error `Attempt to call RPC while multiplayer peer is not connected yet.` | On clients, send RPCs only after `connected_to_server` (before a peer is assigned, the default `OfflineMultiplayerPeer` runs RPCs locally only) |
+| Calling `rpc()` before the client has connected | Error `Trying to call an RPC via a multiplayer peer which is not connected.` | On clients, send RPCs only after `connected_to_server` (before a peer is assigned, the default `OfflineMultiplayerPeer` runs only `call_local` RPCs, and only locally) |
 | Not stripping `res://` scenes from exported builds | Clients can read server-only scripts | Leave server-only files out of the client preset (Resources tab: export mode or exclude filters), or use PCK encryption for sensitive server code |
 
 ---

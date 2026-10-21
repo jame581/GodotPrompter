@@ -14,11 +14,11 @@ Godot 4.3 introduced specialized AudioStream types for dynamic music that respon
 Plays a sequence of audio streams in order (or shuffled). Use for sequenced level music or jukebox-style playlists. With `loop = true` (the default) the whole list repeats, first stream included — for an intro that plays once before a loop, use an `AudioStreamInteractive` clip with auto-advance.
 
 ```gdscript
-# Create a two-track playlist
+# Create a two-track playlist (both tracks repeat)
 var playlist := AudioStreamPlaylist.new()
 playlist.stream_count = 2
-playlist.set_list_stream(0, preload("res://audio/music/boss_intro.ogg"))
-playlist.set_list_stream(1, preload("res://audio/music/boss_loop.ogg"))
+playlist.set_list_stream(0, preload("res://audio/music/track_a.ogg"))
+playlist.set_list_stream(1, preload("res://audio/music/track_b.ogg"))
 # No bpm property: get_bpm() reads each stream's BPM (set it in the file's import options)
 playlist.shuffle = false
 playlist.loop = true    # loop the entire playlist
@@ -30,8 +30,8 @@ $MusicPlayer.play()
 ```csharp
 var playlist = new AudioStreamPlaylist();
 playlist.StreamCount = 2;
-playlist.SetListStream(0, GD.Load<AudioStream>("res://audio/music/boss_intro.ogg"));
-playlist.SetListStream(1, GD.Load<AudioStream>("res://audio/music/boss_loop.ogg"));
+playlist.SetListStream(0, GD.Load<AudioStream>("res://audio/music/track_a.ogg"));
+playlist.SetListStream(1, GD.Load<AudioStream>("res://audio/music/track_b.ogg"));
 playlist.Shuffle = false;
 playlist.Loop = true;
 
@@ -62,11 +62,11 @@ $MusicPlayer.play()
 # When combat starts — fade in drums layer
 func _on_combat_started() -> void:
     # The playback has no volume API; it reads the stream's layer volumes live.
-    var sync := $MusicPlayer.stream as AudioStreamSynchronized
+    var layers := $MusicPlayer.stream as AudioStreamSynchronized
     # Tween the volume of layer 1 from silent to audible
     var tween := create_tween()
     tween.tween_method(
-        func(db: float) -> void: sync.set_sync_stream_volume(1, db),
+        func(db: float) -> void: layers.set_sync_stream_volume(1, db),
         -80.0, 0.0, 1.5
     )
 ```
@@ -88,9 +88,9 @@ GetNode<AudioStreamPlayer>("MusicPlayer").Play();
 public void OnCombatStarted()
 {
     // The playback has no volume API; it reads the stream's layer volumes live.
-    var sync = (AudioStreamSynchronized)GetNode<AudioStreamPlayer>("MusicPlayer").Stream;
+    var layers = (AudioStreamSynchronized)GetNode<AudioStreamPlayer>("MusicPlayer").Stream;
     var tween = CreateTween();
-    tween.TweenMethod(Callable.From<float>(db => sync.SetSyncStreamVolume(1, db)), -80.0f, 0.0f, 1.5);
+    tween.TweenMethod(Callable.From<float>(db => layers.SetSyncStreamVolume(1, db)), -80.0f, 0.0f, 1.5);
 }
 ```
 

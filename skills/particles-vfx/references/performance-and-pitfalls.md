@@ -69,4 +69,4 @@ public void SetParticleQuality(float level)
 | Trails not rendering                 | Missing trail material setup or wrong renderer   | Enable "Use Particle Trails" on material; use Forward+ or Mobile |
 | Attractors have no effect            | `attractor_interaction_enabled` turned off (default `true`) | Re-enable on the ParticleProcessMaterial          |
 | Subemitter not spawning              | Child `amount` is too low to accommodate spawns  | Increase child system's `amount`                                 |
-| Particles flicker on mobile          | `fixed_fps` set to `0` or raised                 | Restore the default `fixed_fps = 30` for consistency across devices |
+| Particles stutter or look uneven     | `fixed_fps` differs from the frame rate (0 follows it) | Test with the default `fixed_fps = 30`; with moving colliders the class docs recommend 0 or a value at/above the frame rate |

@@ -292,6 +292,8 @@ the skill's "works by generating additional geometry" described an effect that d
 | `tween-animation` SKILL.md:310 | "Tween runs during pause" → `TWEEN_PAUSE_PROCESS` | default `TWEEN_PAUSE_BOUND` follows the bound node's `process_mode`; `STOP` pauses, `PROCESS` keeps running | 4.3 `Tween.xml:253, 470-477` |
 | `tween-animation` SKILL.md:311 | `from()` ignored because it was "called after `set_parallel()` changed ordering" | the `from()` value is applied only when that tweener starts | 4.3 `scene/animation/tween.cpp:544-566` |
 
+**Softened (no source either way):** `particles-vfx` `references/performance-and-pitfalls.md:72`: the flicker row "`fixed_fps` set to 0 causes mobile flicker" no longer asserts a cause. 4.7.2 `GPUParticlesCollision3D.xml:12` recommends `fixed_fps = 0` (or at/above the frame rate) to reduce stutter with moving colliders, so the row now reads "stutter or look uneven" and suggests testing against the default.
+
 **Checked and correct (selection):** MSAA 2D is Forward+/Mobile only (`ProjectSettings.xml:2360`);
 `LIGHT_VERTEX`/`SHADOW_VERTEX` are writable in canvas `fragment()` (`shader_types.cpp:262-263`);
 `physics_quadrant_size` default 16; 8 directional lights in Forward+ (`renderer_scene_render.h:50`);
@@ -465,7 +467,7 @@ Skills: `godot-ui`, `hud-system`, `responsive-ui`, `multiplayer-basics`, `multip
 `dedicated-server`. Every SKILL.md and every reference file was read in full (prose, code comments,
 and the engine APIs the code calls). A claim repeated in a checklist or a reference is counted once.
 Behaviour claims were checked for `#ifdef DEBUG_ENABLED` guards; none of the corrected ones has one
-(the RPC rejection and the "not connected yet" error are plain `ERR_FAIL_COND_MSG`, which also
+(the RPC rejection and the "not connected" error are plain `ERR_FAIL_COND_MSG`, which also
 prints in release exports).
 
 | Skill | Claims checked (SKILL.md + references) | Wrong | Softened |
@@ -532,7 +534,7 @@ The worst errors were examples and advice that cannot work as written:
 | `multiplayer-basics` SKILL.md:23, 253, 305; `references/spawning-networked-objects.md:49-55, 85-95`; `references/player-join-flow.md:16` | `set_multiplayer_authority()` "call on the server" after `spawn()` | local and not replicated — call it on every peer; the examples now set it in the `spawn_function` (GDScript and C#) | 4.3 `doc/classes/Node.xml:884-887` ("does not automatically replicate the new authority") |
 | `multiplayer-basics` SKILL.md:259, 289 | configure `_spawnable_scenes`; every replicated `add_child` "must go through `MultiplayerSpawner.spawn()`" | `add_spawnable_scene()` / Auto Spawn List replicates a plain `add_child` under `spawn_path`; `spawn()` is only for custom spawns | 4.3 `modules/multiplayer/doc_classes/MultiplayerSpawner.xml:18, 44-45`; `multiplayer_spawner.cpp:73` |
 | `multiplayer-basics` SKILL.md:285 | an RPC from the wrong peer is "silently ignored" | the receiver rejects it and logs `RPC '…' is not allowed on node …` (not debug-only) | 4.3 `modules/multiplayer/scene_rpc_interface.cpp:252`; 4.7.2 `:263` |
-| `multiplayer-basics` SKILL.md:291, 309 | `rpc()` before a peer is assigned: "crash or silent failure" | the default peer is an `OfflineMultiplayerPeer` (RPCs run locally only); the real error is a client calling before it has connected: "Attempt to call RPC while multiplayer peer is not connected yet." | 4.3 `scene_multiplayer.cpp:690`; `scene_rpc_interface.cpp:298` |
+| `multiplayer-basics` SKILL.md:291, 309 | `rpc()` before a peer is assigned: "crash or silent failure" | the default peer is an `OfflineMultiplayerPeer` (only `call_local` RPCs run, and only locally); the real error is a client calling before it has connected: "Trying to call an RPC via a multiplayer peer which is not connected." | 4.3 `scene_multiplayer.cpp:690`; `scene_rpc_interface.cpp:467, 478-492` (4.7.2 :478); the "not connected yet" text is in `_send_rpc` (:298), reached only after that check |
 | `multiplayer-basics` SKILL.md:292 | `export_exclude` | the export preset's exclude filter / Resources export mode (`exclude_filter`) | 4.3 `editor/export/editor_export.cpp:84` |
 | `multiplayer-basics` `references/spawning-networked-objects.md:99` | `spawn_path` is relative to the spawner's parent; "packed-scene paths are sent over the network" | resolved from the spawner itself (hence `../Players`); the spawn packet carries the scene's index in the spawnable list, so peers must register the same scenes in the same order | 4.3 `multiplayer_spawner.cpp:195`; `scene_replication_interface.cpp:483, 529` |
 | `multiplayer-basics` `references/disconnect-handling.md:12` | ENet timeout "~30 s by default" | 5–30 s depending on round-trip time (`ENetPacketPeer.set_timeout()`); the client also gets `server_disconnected` | 4.3 `thirdparty/enet/enet/enet.h:240-242`; `modules/enet/doc_classes/ENetPacketPeer.xml:101-108`; `scene_multiplayer.cpp:54-66` |
