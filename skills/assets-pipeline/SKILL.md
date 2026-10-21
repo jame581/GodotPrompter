@@ -223,11 +223,11 @@ Share animations between characters with different skeletons:
 |---------------|------------------------------------------------|-------------------------|
 | **Loop** | Enable looping playback | Music, ambient loops |
 | **Loop Offset** | Start position for loop restart | Avoid intro on loop |
-| **Force Mono** | Convert stereo to mono | 3D positional audio |
+| **Force Mono** (WAV only) | Convert stereo to mono | 3D positional audio |
 | **BPM** | Beats per minute | Rhythm games |
 | **Beat Count** | Total beats in the track | Rhythm sync |
 
-> **Import tip:** Use WAV for short SFX (zero decode latency). Use OGG for music (small file, good quality). Enable **Force Mono** for any audio used with AudioStreamPlayer3D — stereo doesn't spatialize properly.
+> **Import tip:** Use WAV for short SFX (PCM has no decode cost; 4.4+ imports WAV as QOA by default, which is cheap to decode). Use OGG for music (small file, good quality). Use mono files (WAV: **Force Mono**) for any audio used with AudioStreamPlayer3D — stereo doesn't spatialize properly.
 
 ---
 
@@ -299,7 +299,7 @@ Load large resources without freezing the game with the `ResourceLoader.load_thr
 - [ ] Collision shapes use naming suffixes (`-col`, `-convcol`) in the 3D authoring tool
 - [ ] Animations are split into individual clips in Advanced Import Settings
 - [ ] Audio SFX uses WAV; music uses OGG Vorbis
-- [ ] 3D positional audio files are imported as mono (Force Mono enabled)
+- [ ] 3D positional audio files are mono (Force Mono enabled on WAV imports)
 - [ ] Custom data resources use `.tres` (text) for version control diffability
 - [ ] Large or runtime-loaded resources use `ResourceLoader.load_threaded_request()`
 - [ ] Scene files use `.tscn` (text format) for version control

@@ -1,6 +1,6 @@
 # Music Manager Autoload
 
-Reference for `skills/audio-system/SKILL.md` — singleton music manager with crossfade, layering, GDScript + C#.
+Reference for `skills/audio-system/SKILL.md` — singleton music manager with crossfade, fade-out and music bus volume, GDScript + C#.
 
 > ← Back to [SKILL.md](../SKILL.md)
 

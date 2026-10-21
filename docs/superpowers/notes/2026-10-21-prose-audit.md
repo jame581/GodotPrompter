@@ -324,3 +324,136 @@ left alone. No agent or Codex file repeated a corrected claim.
 and `3d-essentials`' volumetric fog legacy-blending warning (skill-15) — was checked against 4.7.2
 (`sync_mode` default 0, `use_legacy_blending` default `false`) and left as written. Editor
 click-paths (`retargeting.md`'s Import-dock steps, snapping menu paths) are out of scope.
+
+## Batch D — systems
+
+Skills: `physics-system`, `ai-navigation`, `audio-system`, `multithreading`, `procedural-generation`,
+`localization`, `godot-optimization`. Every SKILL.md and every reference file was read in full
+(prose and code comments; code bodies were read for the engine APIs they call).
+`godot-optimization/references/cpu-bottlenecks.md` was sampled only, because batch A had already
+corrected it. A claim repeated in a reference is counted once, under SKILL.md.
+
+| Skill | Claims checked (SKILL.md + references) | Wrong | Softened |
+|---|---|---|---|
+| `physics-system` | 40 + 74 | 7 | 1 |
+| `ai-navigation` | 26 + 12 | 4 | 0 |
+| `audio-system` | 34 + 16 | 10 | 1 |
+| `multithreading` | 22 + 12 | 4 | 0 |
+| `procedural-generation` | 14 + 10 | 2 | 0 |
+| `localization` | 30 + 20 | 7 | 1 |
+| `godot-optimization` | 30 + 40 | 12 | 1 |
+| **Total** | **380** | **46** | **4** |
+
+The worst errors were advice that does the opposite of what it promises:
+- `godot-optimization` told readers to wrap sprites in a `CanvasGroup` so they batch. A
+  `CanvasGroup` does not batch. It draws its children into a backbuffer and then draws that once
+  with its own material, which adds a copy and breaks the batch. 2D batching is automatic.
+- The same skill's "RIGHT" material example duplicated the shared material for each instance, so
+  it cost exactly what the "WRONG" example did.
+- `ai-navigation` fixed "agent can't fit through doorways" by lowering the agent's `radius`, which
+  is used only for avoidance and has no effect on paths.
+- `localization`'s RTL recipe used a `[ltr]` BBCode tag that does not exist, so it printed literally.
+
+| Skill file | Was | Is | Source |
+|---|---|---|---|
+| `physics-system` SKILL.md:91-92 | `SeparationRay` and `WorldBoundary` shapes are 2D-only (no 3D column) | both have 3D variants | 4.7.2 ClassDB: `SeparationRayShape3D`, `WorldBoundaryShape3D` exist |
+| `physics-system` SKILL.md:93 | `CylinderShape3D` is "Jolt only — unstable on GodotPhysics" | it works on GodotPhysics but has known bugs; prefer Jolt | 4.3 and 4.7.2 `doc/classes/CylinderShape3D.xml:8` |
+| `physics-system` SKILL.md:126; `references/raycasting-recipes.md:96` | space queries are "only safe" in `_physics_process()` because "the space is locked during rendering" | the space is locked while the physics step runs, and with physics on a separate thread it can only be reached from `_physics_process()` | 4.3 `servers/physics_2d/godot_step_2d.cpp:129, 295`; `doc/classes/World2D.xml:17` |
+| `physics-system` SKILL.md:148 | Jolt wins include an "optional thread-safe mode" and active-edge detection "fixes ghost collisions" | dropped the thread mode, which both engines get from `physics/3d/run_on_separate_thread`; active-edge detection "reduces" ghost collisions | 4.7.2 `modules/jolt_physics/register_types.cpp:43-50`; `ProjectSettings.xml:2709-2711` ("can help alleviate") |
+| `physics-system` SKILL.md:158, 170; `references/interpolation-camera.md:9` | physics interpolation and `get_global_transform_interpolated()` were given with no version, in a skill that targets 4.3+ | 4.3 interpolates 2D only; 3D interpolation and `Node3D.get_global_transform_interpolated()` need 4.4+ | 4.3 `ProjectSettings.xml:2321` ("only implemented in the 2D renderer"), no method in 4.3 `Node3D.xml`; 4.4-stable `Node3D.xml:49` |
+| `physics-system` `references/rigidbody-recipes.md:54-55` | `rough` uses "max friction instead of geometric mean"; `absorbent` uses "min bounce instead of geometric mean" | the contact uses the lower friction (rough: this body's; both rough: the higher one) and the two bounce values summed (absorbent: this body's is subtracted) | 4.3 `scene/resources/physics_material.h:57-69`; `modules/godot_physics_3d/godot_body_pair_3d.cpp:253-259`; 4.7.2 `modules/jolt_physics/spaces/jolt_space_3d.cpp:154-160` |
+| `physics-system` `references/troubleshooting.md:11` | `continuous_cd = true` on a RigidBody | `true` on `RigidBody3D`; `RigidBody2D.continuous_cd` is an enum (`CCD_MODE_CAST_RAY`/`CAST_SHAPE`) | 4.7.2 ClassDB: `RigidBody2D.continuous_cd` hint "Disabled,Cast Ray,Cast Shape" |
+| `ai-navigation` SKILL.md:132 | `path_desired_distance` default 1 (2D table) | 20 (1 is the 3D default) | 4.3 `NavigationAgent2D.xml:182`, `NavigationAgent3D.xml:185` |
+| `ai-navigation` SKILL.md:283 | agent too wide for doorways: lower `radius` on the NavigationAgent | lower `agent_radius` on the NavigationPolygon/NavigationMesh and rebake; the agent's `radius` is avoidance only | 4.3 `NavigationAgent2D.xml:197-199` |
+| `ai-navigation` SKILL.md:287 | empty first path: defer `target_position` "to `_ready()`" | the map synchronizes on the first physics frame; `await get_tree().physics_frame` (or `map_changed`) in `_ready()` first | 4.3 `NavigationServer2D.xml:511`; godot-docs `navigation_introduction_2d.rst:141-146, 221` |
+| `ai-navigation` `references/async-baking.md:36-37` | C# connected `BakeFinished` with `+=` while the GDScript twin uses `CONNECT_ONE_SHOT`, so each rebake added a handler | `Connect(..., (uint)ConnectFlags.OneShot)` | the GDScript block at :13 |
+| `audio-system` SKILL.md:112 | -6 dB is "~50% perceived volume" | -6 dB is about half amplitude (`db_to_linear(-6.0)` ≈ 0.5) | 4.7.2 run: `db_to_linear(-6.0)` = 0.501 |
+| `audio-system` SKILL.md:163 | bus effect `Limiter` | `HardLimiter`; `Limiter` is deprecated | 4.3 `doc/classes/AudioEffectLimiter.xml:2` |
+| `audio-system` SKILL.md:191 | 2D players attenuate toward the "nearest `AudioListener2D` (or the Camera2D)" | the current `AudioListener2D`, otherwise the centre of the screen | 4.3 `scene/2d/audio_stream_player_2d.cpp:143-154` |
+| `audio-system` SKILL.md:277; `references/music-manager.md:3` | the music manager reference has a "push/pop stack, current-track query" and "layering" | crossfade, fade-out stop and music bus volume (what the file contains) | `references/music-manager.md:14-65` |
+| `audio-system` SKILL.md:95, 311, 323; `assets-pipeline` SKILL.md:230 | WAV is stored uncompressed and has zero decode cost | the WAV importer defaults to QOA from 4.4 (PCM, labelled Disabled, on 4.3); pick PCM for zero decode cost | 4.3 `editor/import/resource_importer_wav.cpp:93` (default 0); 4.4-stable `:88` and 4.7.2 `:89` (default 2, QOA) |
+| `audio-system` SKILL.md:321, 338; `assets-pipeline` SKILL.md:226, 230, 302 | "Force Mono" for any 3D audio file | Force Mono is a WAV import option only; OGG and MP3 must be mono at the source | 4.3 `resource_importer_wav.cpp:84`; `modules/vorbis/resource_importer_ogg_vorbis.cpp:76-82`, `modules/minimp3/resource_importer_mp3.cpp:76-82` (no mono option) |
+| `audio-system` SKILL.md:332 | "no audio heard" caused by a wrong bus name | a missing bus name falls back to `Master` — the sound plays, bypassing your bus; silence means a muted or lowered bus | 4.3 `doc/classes/AudioStreamPlayer.xml:66` |
+| `audio-system` SKILL.md:334 | "positional audio has no panning" without an AudioListener or camera | a 3D player with no current `Camera3D`/`AudioListener3D` is silent; 2D falls back to the screen centre | 4.3 `scene/3d/audio_stream_player_3d.cpp:358-382`; `audio_stream_player_2d.cpp:149-151` |
+| `audio-system` `references/interactive-music.md:22` | `playlist.bpm = 120.0` | removed: `AudioStreamPlaylist` has no `bpm` property (`get_bpm()` reads the streams) | 4.3 `modules/interactive_music/doc_classes/AudioStreamPlaylist.xml`; 4.7.2 run: "Invalid assignment of property or key 'bpm'" |
+| `audio-system` `references/interactive-music.md:14, 148` | `AudioStreamPlaylist` for "intro → loop → outro" | `loop` (default `true`) repeats the whole list, intro included; an intro that plays once is an `AudioStreamInteractive` clip with auto-advance | 4.3 `AudioStreamPlaylist.xml` (`loop`); `AudioStreamInteractive.xml:141, 216-222` |
+| `multithreading` SKILL.md:18; `references/pitfalls.md:52` | `Rendering > Driver > Thread Model = Separate` | `Rendering > Driver > Threads > Thread Model`; the value is `Multi-Threaded` on 4.3; marked experimental | 4.3 `core/config/project_settings.cpp:1508`; 4.7.2 `:1775`; `ProjectSettings.xml:2407` (experimental) |
+| `multithreading` SKILL.md:19 | `Navigation > Pathfinding > Max Threads` with no version | 4.4+ | absent from 4.3 `ProjectSettings.xml`; 4.4-stable has it; 4.7.2 `:2464` |
+| `multithreading` SKILL.md:75 | `Semaphore.post(count := 1)` with no version | `post()`; `count` from 4.4 | 4.3 `doc/classes/Semaphore.xml:18-20` (no parameter); 4.4-stable has `count` |
+| `multithreading` `references/pitfalls.md:9` | `ERR_BUSY` example: task A waits on task B "queued behind A" | a task waiting on an older task lower in the same call stack | 4.3 `doc/classes/WorkerThreadPool.xml:113` |
+| `procedural-generation` SKILL.md:32-33, 94 | global `randf()` gives "different results on different platforms" | the global generator is randomized at startup and shared with every other caller | 4.3 `doc/classes/@GlobalScope.xml:1083-1084` |
+| `procedural-generation` `references/wave-function-collapse.md:199` | addon `AlexeyBond/godot-wfc` with "3D grid WFC" | the repository is `AlexeyBond/godot-constraint-solving` (the old URL returns 404); flat `GridMap` layers only, full 3D not implemented | GitHub API: `repos/AlexeyBond/godot-wfc` 404; the addon's README ("What's not (yet) implemented: 3d map generation") |
+| `localization` SKILL.md:54-55 | CSV import: Delimiter "Comma or Tab"; a Translations section to enable or disable locales | Comma, Semicolon or Tab; the other option is Compress — there is no per-locale toggle | 4.3 `editor/import/resource_importer_csv_translation.cpp:71-72`; 4.7.2 `:71-74` |
+| `localization` SKILL.md:173-174 | C# `string.Format(Tr("PLAYER_HEALTH"), currentHealth)` | `string.Format` ignores the `%d` in the translation; `Tr(...).Replace("%d", ...)` | the CSV at :47 (`Health: %d`); .NET composite formatting uses `{0}` |
+| `localization` SKILL.md:258; `references/rtl-support.md:54` | `NOTIFICATION_TRANSLATION_CHANGED` "defined on `MainLoop`, inherited by `Node`" | `Node` defines its own constant (`Node` derives from `Object`); `MainLoop` has one of the same name | 4.3 `doc/classes/Node.xml:2, 1209`; `MainLoop.xml:106` |
+| `localization` SKILL.md:266 | GDScript has "no locale-aware number formatting" | no locale-aware digit grouping; `TextServer.format_number()` converts digits to the locale's numeral system | 4.3 `doc/classes/TextServer.xml:1022-1028` |
+| `localization` `references/rtl-support.md:14, 26` | project setting "Internationalization → Rendering → Text Direction → RTL" | `Root Node Layout Direction` → Right-to-Left | 4.3 `core/config/project_settings.cpp:1534` |
+| `localization` `references/rtl-support.md:21-23, 33` | `APPLICATION_LOCALE` / `SYSTEM_LOCALE` with no version (skill says 4.3+) | 4.4+; 4.3 has `LOCALE` only | 4.3 `doc/classes/Control.xml:1360-1369`; 4.4-stable has `LAYOUT_DIRECTION_APPLICATION_LOCALE` |
+| `localization` `references/rtl-support.md:40-48` | BBCode `[ltr]100/200[/ltr]` | `[lri]100/200[pdi]` (there is no `[ltr]` tag) | 4.3 `scene/gui/rich_text_label.cpp:4390-4423`; 4.7.2 run: `[ltr]` parses as literal text, `[lri]…[pdi]` inserts U+2066/U+2069 |
+| `godot-optimization` SKILL.md:71-74, 132, 136-137; `godot-debugging` `references/performance-debugging.md:44-47` | monitors `Render > Total Draw Calls`, `Render > Video RAM`, `Object > Object Count`, `Physics 3D > Active Bodies` | `Raster > Total Draw Calls`, `Video > Video Mem`, `Object > Objects`, `Physics 3D > Active Objects` | 4.3 `main/performance.cpp:116-130`; 4.7.2 `:175-188` |
+| `godot-optimization` SKILL.md:98, 100, 132, 164; `references/draw-calls.md:11-20` | wrap sprites in `CanvasGroup` so they batch into one draw call | 2D batching is automatic (Compatibility; Forward+/Mobile from 4.4) while consecutive items share texture, material, filter/repeat and clip; `CanvasGroup` draws its children to a backbuffer with its own material and breaks the batch | 4.3 `doc/classes/CanvasGroup.xml:7-8`; `drivers/gles3/rasterizer_canvas_gles3.cpp:601-624, 812-830`; the RD canvas renderer (`renderer_canvas_render_rd.cpp`) has no batching code in 4.3 (no occurrence of "batch") and 232 occurrences in 4.4-stable |
+| `godot-optimization` SKILL.md:122; `references/memory-management.md:88, 127` | `free()` inside a self-emitted signal "will crash" (undefined behaviour) | the call is refused ("Object is locked and can't be freed") and the node stays alive | 4.3 `core/object/object.cpp:769-772`; 4.7.2 run: the error above plus "Attempted to free a locked object (calling or emitting)" |
+| `godot-optimization` SKILL.md:133 | move logic to `_physics_process` because it "runs less often" | fixed 60 ticks/s by default — less often only when the frame rate is higher | 4.7.2 `ProjectSettings.get_setting("physics/common/physics_ticks_per_second")` = 60 |
+| `godot-optimization` SKILL.md:135 | diagnosed by "Profiler shows `TileMap._process`"; fix: disable `use_parent_material` | `TileMap` has no `_process` to profile (diagnose by draw calls); `use_parent_material` is already `false` by default | 4.3 `doc/classes/TileMap.xml` (no `_process`); `CanvasItem.xml` (`use_parent_material` default `false`) |
+| `godot-optimization` SKILL.md:139 | Profiler shows `PackedScene.instantiate` | only with Editor Settings > Debugger > Profile Native Calls on | 4.3 `editor/debugger/editor_profiler.cpp:101` (`debugger/profile_native_calls`) |
+| `godot-optimization` `references/draw-calls.md:23-61` | the "RIGHT" example duplicates the shared material per instance | one shared material; the variation goes in an `instance uniform` via `set_instance_shader_parameter()` (GDScript and C#) | 4.3 `doc/classes/GeometryInstance3D.xml:20-28`; godot-docs `optimizing_3d_performance.rst:110-119` (Forward+ auto-instancing needs the same mesh and material) |
+| `godot-optimization` `references/draw-calls.md:64` | `gi_mode = BAKE_STATIC` lets "the engine merge static geometry"; "enable Rendering > Mesh LOD" | `gi_mode` (`GI_MODE_STATIC`) only affects GI baking and nothing merges meshes; use `MultiMeshInstance3D` or merge in the modelling tool | 4.3 `GeometryInstance3D.xml:45-47` |
+| `godot-optimization` `references/draw-calls.md:169, 197` | `VisibleOnScreenNotifier3D` "distance thresholds"; enable "Rendering > Mesh LOD"; "Import > Generate LODs" must be enabled | the notifier has no distance setting (use `visibility_range_begin/end`); automatic LOD is on by default (`meshes/generate_lods` = true, `threshold_pixels` 1.0, 0 disables) | 4.3 `GeometryInstance3D.xml:78`; `ProjectSettings.xml:2677-2679`; `editor/import/3d/resource_importer_scene.cpp:2352` |
+| `godot-optimization` `references/memory-management.md:57, 69-74` | resources are freed only once "the cache entry is cleared"; eviction by `load_threaded_request` and `OS.gc()` | the cache holds no reference: a resource is freed when its last reference goes and its entry goes with it; `CACHE_MODE_IGNORE` bypasses the cache; `OS.gc()` does not exist | 4.3 `core/io/resource.cpp:571-583`; `ResourceLoader.xml:142-143`; 4.7.2 ClassDB: no `OS.gc` |
+| `godot-optimization` `references/memory-management.md:110-113` | C# `ImageTexture` "is freed when it goes out of scope or is set to null" | the C# wrapper holds the reference until the GC finalizes it; `Dispose()` releases it at once | 4.3 `modules/mono/glue/GodotSharp/GodotSharp/Core/GodotObject.base.cs:83-100` |
+| `godot-optimization` `references/physics-tuning.md:24-28` | comment `mask = 2 \| 3` written as layer numbers next to code using bit values (`2 \| 3` is layers 1 and 2) | "mask layers 2 + 3", with a note that layer N is bit `1 << (N - 1)` | `references/physics-tuning.md:32-33` |
+
+**Softened (no source either way):**
+- `physics-system` SKILL.md:148 and `references/troubleshooting.md:15`: "reliable `CylinderShape3D`" and "fully supported" under Jolt became "without GodotPhysics' known cylinder bugs" and "use Jolt". Neither the Jolt docs page nor the class reference says the Jolt cylinder is bug-free.
+- `audio-system` SKILL.md:95, 339: "MP3 adds silence at the start" became "depending on the encoder it can start with padding silence". Neither the importer docs nor the decoder documentation states it.
+- `localization` SKILL.md:309: "Label shows key after scene change" is no longer blamed on a translation "not loaded yet". Translations registered with `TranslationServer` are global and outlive scenes. The cause now reads "added at runtime by code that has not run yet in this scene".
+- `godot-optimization` SKILL.md:138: the diagnosis "Profiler shows `String` allocation functions; high GC pressure" became "Profiler Self time in string-heavy functions; in C#, frequent GC pauses". The GDScript profiler lists script functions, not allocations, and GDScript has no GC.
+
+**Checked and correct (selection):**
+- Physics bodies and areas:
+  - `_integrate_forces()` is not called for a sleeping body, because sleeping bodies leave the active list (4.3 `godot_body_2d.cpp:398-403, 621-623`).
+  - Contact signals need `contact_monitor` and `max_contacts_reported` (default 0).
+  - `Area2D` mask defaults to 1 and `monitoring` to true.
+  - Point-gravity and space-override semantics.
+  - `ConcavePolygonShape3D` is meant for static bodies (`ConcavePolygonShape3D.xml:9`).
+  - An untransformed single shape enables a broad-phase optimization (godot-docs `collision_shapes_3d.rst:121-125`).
+  - Create Physical Skeleton assigns `JOINT_TYPE_PIN` (4.3 `skeleton_3d_editor_plugin.cpp:409`).
+  - `PhysicalBoneSimulator3D` exists in 4.3, and `influence` defaults to 1.0.
+  - `SoftBody3D` `simulation_precision` defaults to 5.
+- Jolt:
+  - The differences list (Baumgarte, margins, the `world_node` default Node A, face index, unsupported joint properties) matches godot-docs `using_jolt_physics.rst:30-110`.
+  - The engine setting is `Jolt Physics`.
+  - New projects default to Jolt from 4.6 (`editor_node.cpp:8350`).
+- Navigation and threading:
+  - `bake_navigation_*` takes `on_thread = true`.
+  - `NavigationServer2D.map_get_path` signature.
+  - `disable_navigation_3d` is an SCons option (4.7.2 `SConstruct:269`).
+  - `WorkerThreadPool` return codes.
+  - `Mutex` is reentrant.
+  - `load_threaded_get` statuses.
+  - The thread-safe API rules match godot-docs `thread_safe_apis.rst`.
+- Audio:
+  - `AudioStreamPlayer2D` defaults: `max_distance` 2000, `attenuation` 1.0 (exponent, `audio_stream_player_2d.cpp:160`), `max_polyphony` 1.
+  - `unit_size` is the 0 dB distance for the inverse models.
+  - Adaptive-music class names and `add_transition` parameters.
+  - `TRANSITION_TO_TIME_PREVIOUS_POSITION` = 2 (4.7.2).
+- Localization:
+  - CSV `?context`/`?plural` semantics.
+  - `TranslationServer` has no signals.
+  - The CSV importer's compress option.
+- Optimization:
+  - `Performance` monitor constants.
+  - Forward+ automatic instancing (godot-docs).
+  - `Engine.max_physics_steps_per_frame` defaults to 8.
+
+**Sweep:** each correction's key nouns were grepped in `skills/`, `agents/` and `.codex/`: `CanvasGroup`/batching, monitor names, `free()`/crash, `OS.gc`, `gi_mode`, Mesh LOD, notifier distance, `locked`, Cylinder, thread-safe, ghost collision, `get_global_transform_interpolated`, `rough`/`absorbent`, `continuous_cd`, `SeparationRay`/`WorldBoundary`, `path_desired_distance`, agent `radius`, `MainLoop`, `[ltr]`, `APPLICATION_LOCALE`, `string.Format(Tr`, Text Direction, Delimiter, `Limiter`, Force Mono, WAV decode cost, bus fallback, playlist `bpm`, push/pop, Thread Model, Max Threads, `post(count`, `ERR_BUSY`, `godot-wfc`, global `randf`.
+
+Three hits were outside batch D, and all were fixed:
+- `assets-pipeline` SKILL.md:226, 230, 302: Force Mono and WAV decode cost (batch F skill).
+- `godot-debugging` `references/performance-debugging.md:44-47`: monitor names (batch F skill).
+
+`godot-debugging` SKILL.md:171 and 236 name the monitors informally ("Video RAM / Object count") and were left as written. `godot-code-review` SKILL.md:393 ("`queue_free()`, not `free()`, to avoid use-after-free crashes") is about use-after-free, not the signal lock, and was left as written. No agent or Codex file repeated a corrected claim.
+
+**Not changed:** version callouts (out of scope); editor click-paths (Create Physical Skeleton, SoftBody attachment steps, Import dock labels). Batch D has no eval-measured content. Other edits, not counted as claims:
+- the `procedural-generation` tip renames `var seed` to `level_seed`, so it no longer shadows the global `seed()`, and adds the C# `GD.Hash`;
+- an explanatory comment in the C# one-shot connect.

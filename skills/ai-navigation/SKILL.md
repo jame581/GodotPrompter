@@ -129,7 +129,7 @@ func set_target(target_pos: Vector2) -> void:
 | Property | Purpose |
 |---|---|
 | `target_position` | World-space destination |
-| `path_desired_distance` | How close to each waypoint counts as reached (default 1) |
+| `path_desired_distance` | How close to each waypoint counts as reached (default 20) |
 | `target_desired_distance` | How close to the final target counts as finished (default 10) |
 | `avoidance_enabled` | Enable RVO obstacle avoidance |
 | `radius` | Agent collision radius for avoidance |
@@ -280,11 +280,11 @@ public Vector2[] FindPathTo(Vector2 target)
 | Pitfall | Symptom | Fix |
 |---|---|---|
 | **Navigation mesh not baked** | Agent stands still; no path found | Bake the NavigationPolygon/NavigationMesh before running, or call `bake_navigation_polygon()` at runtime after scene loads |
-| **`agent_radius` too large** | Agent can't fit through doorways or narrow corridors | Lower `radius` on NavigationAgent to be slightly less than half the passage width |
+| **`agent_radius` too large** | Agent can't fit through doorways or narrow corridors | Lower `agent_radius` on the NavigationPolygon/NavigationMesh and rebake — the agent's own `radius` is for avoidance only and does not affect pathfinding |
 | **Avoidance jitter** | Agent stutters or oscillates when near other agents | Increase `time_horizon_agents` (try 2–4 s) or slightly lower `max_speed` on the agent |
 | **Path recalculation too frequent** | CPU spike each frame; agents lag | Add a `Timer` (0.2–0.5 s) and only set `target_position` when the timer fires, not every physics frame |
 | **Wrong navigation layer** | Agent ignores some regions or finds no path | Confirm `navigation_layers` bitmask matches between the NavigationRegion and the NavigationAgent |
-| **Target set before NavigationServer is ready** | Path is empty on the first frame | Defer `target_position` assignment to `_ready()` or await `NavigationServer2D.map_changed` |
+| **Target set before NavigationServer is ready** | Path is empty on the first frame | The map first synchronizes on a physics frame — in `_ready()`, `await get_tree().physics_frame` (or `NavigationServer2D.map_changed`) before setting `target_position` |
 | **Gravity ignored in 3D** | Agent floats or sinks into the floor | Always accumulate `velocity.y` from gravity separately; only zero out X/Z from the nav direction |
 | **Baking causes frame drop** | Bake forced onto the main thread (`on_thread = false`), or parsing a very large scene | Keep the default threaded bake (`bake_navigation_mesh()`); connect `bake_finished` and never block waiting for it |
 

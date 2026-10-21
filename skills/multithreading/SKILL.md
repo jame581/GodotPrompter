@@ -15,8 +15,8 @@ Run expensive work off the main thread without corrupting the scene tree. Prefer
 
 The main thread owns the scene tree — **interacting with the active scene tree is not thread-safe.** Observe these doc-sourced rules:
 
-- **Servers** (RenderingServer, PhysicsServer) are thread-safe **only after enabling it in Project Settings** (`Rendering > Driver > Thread Model = Separate`, `Physics > {2D,3D} > Run on Separate Thread`). Servers handle thousands of thread-driven instances well.
-- **NavigationServer2D/3D are thread-safe and thread-friendly** (true parallel queries); tune `Navigation > Pathfinding > Max Threads`.
+- **Servers** (RenderingServer, PhysicsServer) are thread-safe **only after enabling it in Project Settings** (`Rendering > Driver > Threads > Thread Model = Separate` — `Multi-Threaded` on 4.3, and experimental; `Physics > {2D,3D} > Run on Separate Thread`). Servers handle thousands of thread-driven instances well.
+- **NavigationServer2D/3D are thread-safe and thread-friendly** (true parallel queries); tune `Navigation > Pathfinding > Max Threads` (4.4+).
 - **AStar2D/3D/Grid2D are NOT thread-safe** — one dedicated thread per object only; sharing one object across threads corrupts data.
 - **GDScript `Array`/`Dictionary`:** reading/writing existing elements across threads is OK; **resizing (add/remove) needs a `Mutex`.**
 - **No GPU work off the main thread** (texture creation, image read/modify) — causes RenderingServer sync stalls.
@@ -72,7 +72,7 @@ This relies on the element count staying constant during the multithreaded part.
 
 ## 3. Thread / Mutex / Semaphore
 
-Real signatures: `Thread.start(callable: Callable, priority := PRIORITY_NORMAL)`, `wait_to_finish()` (blocks; join before free), `is_alive()`. `Mutex` is reentrant (`lock`/`unlock`/`try_lock`). `Semaphore` exposes `wait()` / `post(count := 1)`.
+Real signatures: `Thread.start(callable: Callable, priority := PRIORITY_NORMAL)`, `wait_to_finish()` (blocks; join before free), `is_alive()`. `Mutex` is reentrant (`lock`/`unlock`/`try_lock`). `Semaphore` exposes `wait()` / `post()` (`post(count := 1)` from 4.4).
 
 ### GDScript
 

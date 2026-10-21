@@ -54,7 +54,7 @@ Godot caches every resource loaded via `load()` or `preload()` by path. Subseque
 
 - Resources are shared by default — modifying one instance modifies all users.
 - Use `resource.duplicate()` when you need a per-instance copy (e.g. per-enemy stats).
-- Resources are not freed until all references are released **and** the cache entry is cleared.
+- The cache does not keep a resource alive: it is freed as soon as its last reference is released, and its cache entry goes with it.
 
 ```gdscript
 # Shared resource — all enemies use the same stats object (intended for read-only data)
@@ -66,14 +66,11 @@ func _ready() -> void:
     _stats.health = _stats.max_health  # safe to modify
 ```
 
-To force a resource out of the cache:
+There is no eviction call and no garbage collector to wait for — drop every reference and the resource is freed. To get a fresh copy that bypasses the cache:
 
 ```gdscript
-# Remove from ResourceLoader cache — the resource will be freed once
-# all script references to it are also released.
-ResourceLoader.load_threaded_request("res://large_texture.png")  # if using async
-# For synchronous cache eviction there is no direct API; drop all references
-# and call OS.gc() or wait for the next GC pass.
+# A new instance read from disk, not shared with other users of the path.
+var fresh := ResourceLoader.load("res://data/enemy_stats.tres", "", ResourceLoader.CACHE_MODE_IGNORE)
 ```
 
 For large resources that are only needed temporarily (e.g. a loading-screen video), keep them in a local variable and let it go out of scope — Godot's reference counting will free it.
@@ -88,7 +85,7 @@ func _on_enemy_died() -> void:
 # Nodes: free() is synchronous and immediate — only use when you are certain
 # no other code will access the node in the same frame
 func _force_remove_node(node: Node) -> void:
-    node.free()  # dangerous if called from a signal emitted by `node` itself
+    node.free()  # refused ("Object is locked") while `node` is emitting a signal
 
 # Non-node RefCounted resources are freed automatically when the last
 # reference is released — no manual call needed.
@@ -110,9 +107,10 @@ private void OnEnemyDied()
 }
 
 // Non-node RefCounted resources are freed automatically when the last
-// reference is released (C# GC + Godot ref counting work together).
+// reference is released. In C# the wrapper holds a reference until the GC finalizes it,
+// so call Dispose() to release it immediately.
 ImageTexture texture = new();
-// texture is freed when it goes out of scope or is set to null
+texture.Dispose(); // without this, freed only after the GC collects the wrapper
 
 // Non-node GodotObject (not RefCounted) — must be freed manually
 var rawObj = new GodotObject();
@@ -126,7 +124,7 @@ rawObj.Free();
 | `queue_free()` | End of current frame | Yes | Normal node removal |
 | `free()` | Immediate | Only if not inside own signal | Synchronous teardown, editor tools |
 
-Always prefer `queue_free()` for nodes created during gameplay. `free()` inside a signal handler emitted by the same node is undefined behaviour and will crash.
+Always prefer `queue_free()` for nodes created during gameplay. `free()` inside a handler of a signal the same node is emitting is refused — Godot reports "Object is locked and can't be freed" and the node stays alive.
 
 ---
 

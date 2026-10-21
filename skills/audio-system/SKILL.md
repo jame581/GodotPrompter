@@ -92,7 +92,7 @@ Looping is configured on the **AudioStream resource**, not the player node:
 - **OGG:** Import tab → Loop → On, set Loop Offset
 - **MP3:** Import tab → Loop → On
 
-> Always use OGG Vorbis for music (smaller files, good quality). Use WAV for short SFX (no decoding latency). Avoid MP3 for SFX — it adds silence at the start.
+> Always use OGG Vorbis for music (smaller files, good quality). Use WAV for short SFX (PCM or QOA, cheap to decode). Avoid MP3 for SFX — depending on the encoder it can start with padding silence.
 
 ---
 
@@ -109,7 +109,7 @@ Godot uses **decibels (dB)** for volume. Linear-to-dB conversion is required for
 var bus_index: int = AudioServer.get_bus_index("SFX")
 
 # Set volume in dB directly
-AudioServer.set_bus_volume_db(bus_index, -6.0)  # -6 dB = ~50% perceived volume
+AudioServer.set_bus_volume_db(bus_index, -6.0)  # -6 dB ≈ half amplitude (db_to_linear(-6.0) ≈ 0.5)
 
 # Convert linear (0.0–1.0) to dB — use for UI sliders
 func set_bus_volume_linear(bus_name: String, linear: float) -> void:
@@ -160,7 +160,7 @@ Add effects to buses in the Audio panel (bottom dock). Common effects:
 | `Reverb`        | Cave, cathedral, bathroom ambience           |
 | `Delay`         | Echo effects                                 |
 | `Compressor`    | Normalize loud/quiet sounds (master bus)     |
-| `Limiter`       | Prevent clipping on master bus               |
+| `HardLimiter`   | Prevent clipping on master bus (`Limiter` is deprecated) |
 | `LowPassFilter` | Muffled sounds (underwater, behind walls)    |
 | `HighPassFilter` | Thin/tinny sound (radio, phone)             |
 | `Chorus`        | Thicken sounds                               |
@@ -188,7 +188,7 @@ func set_underwater(enabled: bool) -> void:
 
 ### AudioStreamPlayer2D
 
-Automatically adjusts volume and panning based on distance to the nearest `AudioListener2D` (or the Camera2D if no listener exists).
+Automatically adjusts volume and panning based on distance to the current `AudioListener2D` (or the centre of the screen if none is current).
 
 ```
 Enemy (CharacterBody2D)
@@ -274,7 +274,7 @@ public partial class FollowCamListener : AudioListener3D
 
 Crossfade between background tracks via a singleton autoload that manages two `AudioStreamPlayer` nodes and tweens their volume_db. Wire a `Music` audio bus so the settings menu can adjust music separately.
 
-> See [references/music-manager.md](references/music-manager.md) for the full GDScript and C# autoload (crossfade, push/pop stack, current-track query).
+> See [references/music-manager.md](references/music-manager.md) for the full GDScript and C# autoload (crossfade, fade-out stop, music bus volume).
 
 ---
 
@@ -308,7 +308,7 @@ Three stream types for adaptive music: `AudioStreamPlaylist` (sequenced or shuff
 
 | Format    | Use For        | File Size | Decode Latency | Loop Support  |
 |-----------|----------------|-----------|----------------|---------------|
-| **WAV**   | Short SFX      | Large     | None (PCM)     | Via import    |
+| **WAV**   | Short SFX      | Large     | None (PCM) / light (QOA, 4.4+ default) | Via import    |
 | **OGG**   | Music, long SFX| Small     | Minimal        | Via import    |
 | **MP3**   | Music (fallback)| Small    | Has padding    | Via import    |
 
@@ -318,9 +318,9 @@ In the Import dock (select an audio file):
 
 - **Loop:** Enable for music and ambient loops
 - **BPM / Beat Count / Bar Beats:** Set for rhythm-synced games
-- **Force Mono:** Enable for 3D positional audio (stereo doesn't spatialize well)
+- **Force Mono** (WAV only): Enable for 3D positional audio (stereo doesn't spatialize well); export OGG/MP3 as mono from your audio editor
 
-> **Tip:** Keep SFX as 16-bit WAV at 44.1kHz. Godot stores WAV uncompressed in PCK, so they play instantly with zero decode overhead. For music, OGG Vorbis at quality 6–8 is a good balance.
+> **Tip:** Keep SFX as 16-bit WAV at 44.1kHz. Set the WAV import **Compress > Mode** to PCM (Uncompressed) for zero decode overhead — 4.4+ defaults to QOA (4.3 defaults to PCM, labelled Disabled). For music, OGG Vorbis at quality 6–8 is a good balance.
 
 ---
 
@@ -329,14 +329,14 @@ In the Import dock (select an audio file):
 | Symptom                            | Cause                                          | Fix                                                               |
 |------------------------------------|-------------------------------------------------|-------------------------------------------------------------------|
 | Sound doesn't play                 | Player not in the scene tree                    | Ensure the AudioStreamPlayer is `add_child()`'d before `play()`  |
-| Sound plays but no audio heard     | Wrong bus name or bus is muted                  | Check `bus` property matches a bus name exactly (case-sensitive)   |
+| Sound plays but no audio heard     | Bus muted or turned down                        | Check the bus in the Audio panel; a misspelled `bus` name falls back to `Master` (bypassing your bus) |
 | Music restarts on scene change     | Player is part of the scene, not an autoload    | Move music player to an autoload (MusicManager)                   |
-| Positional audio has no panning    | No AudioListener or Camera in the scene         | Add an AudioListener2D/3D or ensure a Camera is current           |
+| 3D positional audio is silent      | No current Camera3D or AudioListener3D (2D uses the screen centre) | Add an AudioListener3D or ensure a Camera3D is current |
 | Sound clicks or pops               | Audio file has no fade-in/fade-out              | Add a tiny fade (2–5ms) at start/end of WAV in audio editor      |
 | Too many sounds playing at once    | No polyphony limit                              | Set `max_polyphony` on players or use an SFX pool                 |
 | Volume slider feels non-linear     | Using dB directly instead of linear conversion  | Use `linear_to_db()` / `db_to_linear()` for slider values        |
-| 3D audio sounds mono/flat          | Stereo source file                              | Import as mono (Force Mono in Import tab) for 3D spatialization   |
-| MP3 has silence at start           | MP3 format adds encoder padding                 | Use WAV for timing-critical SFX, OGG for music                   |
+| 3D audio sounds mono/flat          | Stereo source file                              | Use mono files (WAV: Force Mono in Import tab) for 3D spatialization |
+| MP3 has silence at start           | Encoder padding in the file                     | Use WAV for timing-critical SFX, OGG for music                   |
 
 ---
 

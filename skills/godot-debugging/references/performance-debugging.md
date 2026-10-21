@@ -41,10 +41,10 @@ GD.Print($"RunExpensiveOperation took: {elapsed} µs");
 | `Time > FPS` | Below target (e.g. 60 fps) indicates frame budget overrun |
 | `Time > Process` | High value means `_process()` callbacks are expensive |
 | `Time > Physics Process` | High value means `_physics_process()` or physics sim is expensive |
-| `Render > Total Draw Calls` | Above ~500 on mobile or ~2000 on desktop may need batching |
-| `Render > Video RAM` | Steadily growing value indicates a memory leak (unfreed textures/meshes) |
-| `Object > Object Count` | Growing count across identical scenes indicates nodes are not freed |
-| `Physics 3D > Active Bodies` | Large count with simple scenes suggests objects are not sleeping |
+| `Raster > Total Draw Calls` | Above ~500 on mobile or ~2000 on desktop may need batching |
+| `Video > Video Mem` | Steadily growing value indicates a memory leak (unfreed textures/meshes) |
+| `Object > Objects` | Growing count across identical scenes indicates nodes are not freed |
+| `Physics 3D > Active Objects` | Large count with simple scenes suggests objects are not sleeping |
 
 ### Identifying Draw Call Bottlenecks
 

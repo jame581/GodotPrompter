@@ -21,10 +21,11 @@ Every physics body checks for collisions against bodies whose layer is included 
 # Layer 4 — Projectiles
 # Layer 5 — Triggers / Sensors
 
-# Player: layer = 1, mask = 2 | 3          (collides with enemies and environment)
-# Enemy:  layer = 2, mask = 1 | 3          (collides with player and environment)
-# Bullet: layer = 4, mask = 2 | 3          (hits enemies and environment only)
-# Sensor: layer = 5, mask = 1              (detects player only)
+# (layer numbers, not bit values — layer N is bit 1 << (N - 1))
+# Player: layer 1, mask layers 2 + 3       (collides with enemies and environment)
+# Enemy:  layer 2, mask layers 1 + 3       (collides with player and environment)
+# Bullet: layer 4, mask layers 2 + 3       (hits enemies and environment only)
+# Sensor: layer 5, mask layer 1            (detects player only)
 
 func _ready() -> void:
     # Set via code (bit index is layer number minus 1)

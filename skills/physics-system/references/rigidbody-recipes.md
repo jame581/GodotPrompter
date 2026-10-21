@@ -51,8 +51,8 @@ Attach a `PhysicsMaterial` resource to control surface properties:
 |----------|---------|--------|
 | `friction` | 1.0 | Resistance to sliding (0 = ice, 1 = rubber) |
 | `bounce` | 0.0 | Restitution (0 = no bounce, 1 = full bounce) |
-| `rough` | false | If true, uses max friction instead of geometric mean |
-| `absorbent` | false | If true, uses min bounce instead of geometric mean |
+| `rough` | false | Contact friction is normally the lower of the two bodies'; if true, this body's friction wins (both rough: the higher one) |
+| `absorbent` | false | Contact bounce is normally the two values summed (clamped 0–1); if true, this body's bounce is subtracted instead |
 
 ### Freeze Modes
 

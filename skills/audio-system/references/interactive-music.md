@@ -11,16 +11,15 @@ Godot 4.3 introduced specialized AudioStream types for dynamic music that respon
 
 ### AudioStreamPlaylist
 
-Plays a sequence of audio streams in order. Use for level music with intro → loop → outro structure, or for jukebox-style playlists.
+Plays a sequence of audio streams in order (or shuffled). Use for sequenced level music or jukebox-style playlists. With `loop = true` (the default) the whole list repeats, first stream included — for an intro that plays once before a loop, use an `AudioStreamInteractive` clip with auto-advance.
 
 ```gdscript
-# Create a playlist with intro and loop
+# Create a two-track playlist
 var playlist := AudioStreamPlaylist.new()
 playlist.stream_count = 2
 playlist.set_list_stream(0, preload("res://audio/music/boss_intro.ogg"))
 playlist.set_list_stream(1, preload("res://audio/music/boss_loop.ogg"))
-# BPM sync ensures transitions land on beat boundaries
-playlist.bpm = 120.0
+# No bpm property: get_bpm() reads each stream's BPM (set it in the file's import options)
 playlist.shuffle = false
 playlist.loop = true    # loop the entire playlist
 
@@ -146,7 +145,7 @@ The same option is available in the Inspector's transition editor.
 
 | Stream Type | Use For |
 |---|---|
-| `AudioStreamPlaylist` | Sequential tracks (intro → loop), jukeboxes |
+| `AudioStreamPlaylist` | Sequential or shuffled tracks, jukeboxes |
 | `AudioStreamSynchronized` | Layered music with volume blending |
 | `AudioStreamInteractive` | State-based music with designed transitions |
 

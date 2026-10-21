@@ -33,7 +33,8 @@ func _on_bake_finished_3d() -> void:
 public void RebakeAsync3D()
 {
     var navRegion = GetNode<NavigationRegion3D>("NavigationRegion3D");
-    navRegion.BakeFinished += OnBakeFinished;
+    // One-shot, like the GDScript CONNECT_ONE_SHOT: `+=` would add another handler per rebake.
+    navRegion.Connect(NavigationRegion3D.SignalName.BakeFinished, Callable.From(OnBakeFinished), (uint)ConnectFlags.OneShot);
     navRegion.BakeNavigationMesh(); // onThread defaults to true
 }
 
