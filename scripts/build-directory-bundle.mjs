@@ -1,11 +1,13 @@
 #!/usr/bin/env node
-// Builds the plugin-only tree that Anthropic's plugin directory follows (the `plugin-bundle`
-// branch, published by release.yml on every tag).
+// Builds the plugin-only tree on the `plugin-bundle` branch (published by release.yml on every
+// tag). Anthropic's plugin directory and both marketplaces (skillsmith, godot-prompter-marketplace)
+// install from that branch, so Claude Code and Copilot CLI marketplace installs get this tree.
 //
 // The directory counts every file in the plugin folder, and this repo's root is the plugin
 // folder: evals/, docs/, tests/ and the CI workflows pushed it past the 512-file limit, which
 // holds every version for a reviewer (BINARIES_NOT_INSPECTED). Master keeps its layout because
-// Copilot, Cursor, Codex, OpenCode, Antigravity and Grok install from it.
+// Cursor, Codex, OpenCode, Antigravity, Grok and local-clone installs read it directly. Copilot CLI
+// reads `.claude-plugin/plugin.json`, skills/, agents/ and hooks/, all of which the bundle keeps.
 //
 // Usage:
 //   node scripts/build-directory-bundle.mjs <out-dir> [--ref <git-ref>]

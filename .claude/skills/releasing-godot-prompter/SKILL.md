@@ -26,8 +26,9 @@ Full command sequence lives in `CONTRIBUTING.md`.
    "Protect master" ruleset: no direct push). Then tag the merge commit on `master` with an annotated
    tag (`git tag -a v<version>`) and `git push origin v<version>` — `.github/workflows/release.yml`
    then validates, creates the GitHub release, commits the plugin-only bundle to
-   the `plugin-bundle` branch (what Anthropic's plugin directory follows), and opens
-   marketplace PRs (when `MARKETPLACE_TOKEN` is configured).
+   the `plugin-bundle` branch (what Anthropic's plugin directory and both marketplaces install
+   from), and opens marketplace PRs that point the entry at `"ref": "plugin-bundle"` (when
+   `MARKETPLACE_TOKEN` is configured). Merge those PRs only after `plugin-bundle` has the tag's commit.
 5. If the workflow's marketplace step is skipped, manually bump
    `skillsmith/.claude-plugin/marketplace.json` (primary) and the legacy
    `godot-prompter-marketplace/.claude-plugin/marketplace.json`.

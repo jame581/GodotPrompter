@@ -77,7 +77,7 @@ Applies to subagents writing Godot code too.
 | New system, or the requirements are unclear | `godot-grill` — settle decisions, then design and build |
 | Known change, explicit ask, bug fix | the domain skill below — build |
 
-**Then report before you build:** name the pattern you picked, the alternative you rejected, and why. The choice is the developer's. A report states; it never ends on your own questions. A design decision needing the developer's go-ahead? Invoke `godot-grill`.
+**Then report before you build:** name the pattern you picked, the alternative you rejected, and why. The choice is the developer's. A report states; it never ends on your own questions. A design decision needs the developer's answer or go-ahead first? Invoke `godot-grill`.
 
 | Building… | Start with |
 |---|---|
@@ -89,7 +89,7 @@ Applies to subagents writing Godot code too.
 | Animation, tweens, audio | `animation-system`, `tween-animation`, `audio-system` |
 | Physics, 2D, 3D | `physics-system`, `2d-essentials`, `3d-essentials` |
 | Shaders, rendering, VFX, procgen, math | `shader-basics`, `rendering-pipeline`, `particles-vfx`, `procedural-generation`, `math-essentials` |
-| Multiplayer, networking | `multiplayer-basics`, `multiplayer-sync`, `dedicated-server`, `web-services` |
+| Networking | `multiplayer-basics`, `multiplayer-sync`, `dedicated-server`, `web-services` |
 | Mobile, XR, native, threads | `mobile-development`, `xr-development`, `gdextension`, `multithreading` |
 | Editor tools, assets | `addon-development`, `assets-pipeline` |
 | GDScript / C# idioms | `gdscript-patterns`, `gdscript-advanced`, `csharp-godot`, `csharp-signals` |

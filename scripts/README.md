@@ -91,8 +91,8 @@ node scripts/count-tokens.mjs --tokenizer --markdown
 2. Runs `validate-skills.mjs`
 3. Runs hook, validator, and metadata tests
 4. Creates the GitHub release using the matching CHANGELOG section as the body
-5. Builds the plugin-only bundle (`build-directory-bundle.mjs`) and commits it to the `plugin-bundle` branch (the `directory-bundle` job), which Anthropic's plugin directory follows
-6. Opens marketplace PRs against `skillsmith` and `godot-prompter-marketplace`, with the skill and agent counts in their READMEs synced by `sync-marketplace-readme.mjs` (requires `MARKETPLACE_TOKEN` secret)
+5. Builds the plugin-only bundle (`build-directory-bundle.mjs`) and commits it to the `plugin-bundle` branch (the `directory-bundle` job), which Anthropic's plugin directory and both marketplaces install from
+6. After the bundle job, opens marketplace PRs against `skillsmith` and `godot-prompter-marketplace` that point the entry at `"ref": "plugin-bundle"`, with the skill and agent counts in their READMEs synced by `sync-marketplace-readme.mjs` (requires `MARKETPLACE_TOKEN` secret)
 
 If `MARKETPLACE_TOKEN` is not set, the marketplace step logs a warning and is skipped — the release itself still succeeds. Bump the marketplaces manually per `CONTRIBUTING.md` in that case.
 

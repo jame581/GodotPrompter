@@ -227,10 +227,13 @@ When publishing a new version (e.g., v1.8.1):
    - Runs `scripts/validate-skills.mjs`
    - Creates the GitHub Release from the matching `CHANGELOG.md` section
    - Commits the plugin-only bundle (`scripts/build-directory-bundle.mjs`) to the `plugin-bundle`
-     branch, which Anthropic's plugin directory follows
-   - Opens marketplace bump PRs when `MARKETPLACE_TOKEN` is configured
+     branch, which Anthropic's plugin directory and both marketplaces install from
+   - Opens marketplace bump PRs when `MARKETPLACE_TOKEN` is configured (after the bundle job): they
+     set the version, description, `"ref": "plugin-bundle"` source and README counts. Merge them
+     only after `plugin-bundle` carries the new tag's commit
 8. **If marketplace PRs are skipped** (missing `MARKETPLACE_TOKEN`), manually bump:
-   - `skillsmith/.claude-plugin/marketplace.json` (primary distribution)
+   - `skillsmith/.claude-plugin/marketplace.json` (primary distribution; keep the entry's source
+     `{"source": "url", "url": "https://github.com/jame581/GodotPrompter.git", "ref": "plugin-bundle"}`)
    - `godot-prompter-marketplace/.claude-plugin/marketplace.json` (legacy)
    - the counts in both repos' `README.md`: `node scripts/sync-marketplace-readme.mjs ../skillsmith/README.md ../godot-prompter-marketplace/README.md`
 

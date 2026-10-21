@@ -17,8 +17,13 @@ the 56 existing skills. 61 C# errors and 349 wrong prose claims were fixed.
   Claude Code loads (skills, agents, the SessionStart hook, the manifest and icon, README, LICENSE,
   PRIVACY, SECURITY: 295 files) to the `plugin-bundle` branch, and the directory submission follows
   that branch. README links to files left out of the bundle point at the release tag on GitHub.
-  `npm test` checks the bundle against the directory's file-count and file-size limits. Other hosts
-  still install from `master`, unchanged.
+  `npm test` checks the bundle against the directory's file-count and file-size limits.
+- **Marketplace installs follow the release bundle.** The marketplace PRs that `release.yml` opens
+  now set `"ref": "plugin-bundle"` on the `godot-prompter` entry in `skillsmith` and the legacy
+  `godot-prompter-marketplace`, and wait for the bundle job. Claude Code and Copilot CLI installs
+  from either marketplace get the released tree instead of whatever is on `master` between
+  releases. Both hosts were checked installing from the branch. Cursor, Codex, OpenCode,
+  Antigravity, Grok and local clones still install from `master`.
 - **`web-services`** — calling HTTP and WebSocket backends: one `HTTPRequest` per request with
   `await`, a reusable JSON API client autoload, transport result vs HTTP status, JSON numbers
   parsing as floats, downloads with progress, image loading, form and multipart uploads, TLS and
