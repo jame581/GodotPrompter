@@ -3,6 +3,7 @@
 import { readFileSync, writeFileSync, existsSync, readdirSync } from 'node:fs';
 import { resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
+import { syncReadme } from './sync-marketplace-readme.mjs';
 
 const ROOT = resolve(fileURLToPath(new URL('..', import.meta.url)));
 const newVersion = process.argv[2];
@@ -135,6 +136,12 @@ for (const t of siblingTargets) {
   if (found) {
     const { current: prev, descUpdated } = bump({ path: found, key: t.key, descKey: t.descKey });
     console.log(`  [${t.label}] ${found}: ${prev} -> ${newVersion}${descUpdated ? ` (description synced to ${descUpdated} skills)` : ''}`);
+    // The README sits two levels above .claude-plugin/marketplace.json and carries count markers.
+    const readme = resolve(found, '..', '..', 'README.md');
+    if (existsSync(readme)) {
+      const { changed, found: markers } = syncReadme(readme);
+      console.log(`  [${t.label}] ${readme}: ${markers.length === 0 ? 'no count markers, update by hand' : changed ? 'counts synced' : 'counts already current'}`);
+    }
   } else {
     console.log(`  [${t.label}] not found at any of: ${t.paths.join(', ')} — bump manually after the release tag`);
   }

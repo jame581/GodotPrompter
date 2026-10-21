@@ -163,7 +163,7 @@ jobs:
           MTOKEN: ${{ secrets.MARKETPLACE_TOKEN }}
         run: |
           if [ -z "$MTOKEN" ]; then
-            echo "::warning::MARKETPLACE_TOKEN secret not set — skipping marketplace PRs. Bump skillsmith/.claude-plugin/marketplace.json and godot-prompter-marketplace/.claude-plugin/marketplace.json manually per CONTRIBUTING.md."
+            echo "::warning::MARKETPLACE_TOKEN secret not set — skipping marketplace PRs. Bump skillsmith and godot-prompter-marketplace (marketplace.json and README counts) manually per CONTRIBUTING.md."
             echo "skip=true" >> "$GITHUB_OUTPUT"
           else
             echo "skip=false" >> "$GITHUB_OUTPUT"
@@ -178,7 +178,7 @@ jobs:
 
       # Check out godot-prompter at the release tag so the bump scripts can copy
       # the canonical marketplace entry description (incl. the current skill count)
-      # into the marketplace repos — not just the version.
+      # into the marketplace repos — not just the version — and count skills/agents for their READMEs.
       - name: Checkout godot-prompter (canonical marketplace entry)
         if: steps.token-check.outputs.skip == 'false'
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
@@ -215,7 +215,8 @@ jobs:
             j.plugins[i].description=desc;
             fs.writeFileSync(p, JSON.stringify(j,null,2)+'\n');
           "
-          git add .claude-plugin/marketplace.json
+          node "$GITHUB_WORKSPACE/scripts/sync-marketplace-readme.mjs" README.md
+          git add .claude-plugin/marketplace.json README.md
           git commit -m "chore: bump godot-prompter to $V"
           git push -u origin "$BRANCH"
           gh pr create --title "Bump godot-prompter to $V" --body "Automated bump from godot-prompter v$V release."
@@ -248,7 +249,8 @@ jobs:
             j.plugins[i].description=desc;
             fs.writeFileSync(p, JSON.stringify(j,null,2)+'\n');
           "
-          git add .claude-plugin/marketplace.json
+          node "$GITHUB_WORKSPACE/scripts/sync-marketplace-readme.mjs" README.md
+          git add .claude-plugin/marketplace.json README.md
           git commit -m "chore: bump godot-prompter to $V"
           git push -u origin "$BRANCH"
           gh pr create --title "Bump godot-prompter to $V" --body "Automated bump from godot-prompter v$V release. Legacy marketplace — for existing installs only."
