@@ -201,6 +201,7 @@ Skills use Claude Code tool names as the canonical reference. Non-Claude platfor
 - `multiplayer-basics` — MultiplayerAPI, RPCs, authority
 - `multiplayer-sync` — Synchronization, interpolation
 - `dedicated-server` — Headless export, server architecture
+- `web-services` — HTTPRequest, REST/JSON clients, downloads, TLS, WebSocket clients
 
 ### Physics & 2D/3D
 - `physics-system` — RigidBody, Area, raycasting, collision shapes, Jolt, ragdolls
@@ -209,11 +210,13 @@ Skills use Claude Code tool names as the canonical reference. Non-Claude platfor
 - `xr-development` — OpenXR, XROrigin3D, hand tracking, controllers, Meta Quest
 
 ### Rendering & Visual
+- `rendering-pipeline` — Renderer per platform, lighting strategy, AA, 3D resolution scaling, SubViewports
 - `shader-basics` — Godot shader language, visual shaders, common recipes, post-processing
 - `particles-vfx` — GPUParticles2D/3D, process materials, subemitters, trails, attractors
 
 ### Build & Deploy
 - `export-pipeline` — Platform exports, CI/CD
+- `web-export` — Browser builds, threads and COOP/COEP, hosting, JavaScriptBridge, persistence
 - `godot-optimization` — Profiler, performance patterns
 - `addon-development` — EditorPlugin, tool scripts
 - `assets-pipeline` — Image compression, 3D scene import, audio formats, resource management

@@ -27,10 +27,10 @@ You have access to GodotPrompter skills — read them before writing code:
 - **Animation & VFX:** `skills/animation-system/SKILL.md`, `skills/tween-animation/SKILL.md`, `skills/particles-vfx/SKILL.md`
 - **Audio:** `skills/audio-system/SKILL.md`
 - **UI:** `skills/godot-ui/SKILL.md`, `skills/responsive-ui/SKILL.md`, `skills/hud-system/SKILL.md`
-- **Rendering:** `skills/shader-basics/SKILL.md`, `skills/2d-essentials/SKILL.md`, `skills/3d-essentials/SKILL.md`
+- **Rendering:** `skills/rendering-pipeline/SKILL.md`, `skills/shader-basics/SKILL.md`, `skills/2d-essentials/SKILL.md`, `skills/3d-essentials/SKILL.md`
 - **Physics:** `skills/physics-system/SKILL.md`
-- **Multiplayer:** `skills/multiplayer-basics/SKILL.md`, `skills/multiplayer-sync/SKILL.md`, `skills/dedicated-server/SKILL.md`
-- **Build:** `skills/export-pipeline/SKILL.md`, `skills/godot-optimization/SKILL.md`, `skills/addon-development/SKILL.md`, `skills/assets-pipeline/SKILL.md`
+- **Multiplayer & web services:** `skills/multiplayer-basics/SKILL.md`, `skills/multiplayer-sync/SKILL.md`, `skills/dedicated-server/SKILL.md`, `skills/web-services/SKILL.md`
+- **Build:** `skills/export-pipeline/SKILL.md`, `skills/web-export/SKILL.md`, `skills/godot-optimization/SKILL.md`, `skills/addon-development/SKILL.md`, `skills/assets-pipeline/SKILL.md`
 - **Scripting:** `skills/gdscript-patterns/SKILL.md`, `skills/csharp-godot/SKILL.md`, `skills/csharp-signals/SKILL.md`
 - **Math:** `skills/math-essentials/SKILL.md`
 

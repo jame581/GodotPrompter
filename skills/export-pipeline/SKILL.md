@@ -7,7 +7,7 @@ description: Use when exporting and distributing Godot games — export presets,
 
 All examples target Godot 4.3+ with no deprecated APIs. GDScript is shown first, C# follows where applicable.
 
-> **Related skills:** **godot-testing** for CI/CD test integration, **godot-optimization** for pre-export performance checks, **responsive-ui** for platform-specific resolution settings, **mobile-development** for Android/iOS export specifics.
+> **Related skills:** **godot-testing** for CI/CD test integration, **godot-optimization** for pre-export performance checks, **responsive-ui** for platform-specific resolution settings, **mobile-development** for Android/iOS export specifics, **web-export** for browser builds and hosting.
 
 ---
 
@@ -98,7 +98,7 @@ ssh_remote_deploy/cleanup_script="#!/usr/bin/env bash\nkill $(pgrep -x -f \"{tem
 | **Windows** | Set `application/icon` (.ico file). Codesigning requires a `.pfx` certificate; set `codesign/enable=true` and supply `codesign/identity` + `codesign/password` via env vars. Without codesigning, Windows SmartScreen will warn users. |
 | **Linux**   | No codesigning required. After export, run `chmod +x MyGame.x86_64` on the binary. Ship as a tarball or AppImage for distribution. |
 | **macOS**   | Requires notarization for Gatekeeper to allow launch without warning. Set `codesign/enable=true` and `notarization/enable=true`. Provide the `codesign/identity` (Apple Developer ID). The `Info.plist` entries (bundle ID, version, display name, privacy usage descriptions) are set under `application/*` options in the preset. Notarization is done post-export via `xcrun notarytool`. |
-| **Web**     | Requires `SharedArrayBuffer` for multi-threading — the web server must send `Cross-Origin-Opener-Policy: same-origin` and `Cross-Origin-Embedder-Policy: require-corp` headers. Disable threads (`rendering/threads/thread_model=0`) if hosting on a server you cannot configure. Exported output is a `.html` + `.js` + `.wasm` + `.pck` bundle. |
+| **Web**     | Compatibility renderer only, and no C#. The preset's `variant/thread_support` is off by default (Godot 4.3+), so the build runs on any static host; a threaded build needs `Cross-Origin-Opener-Policy: same-origin` and `Cross-Origin-Embedder-Policy: require-corp` headers. Exported output is a `.html` + `.js` + `.wasm` + `.pck` bundle. Details: **web-export**. |
 | **Android** | Requires a keystore for release signing. Set `keystore/release` to the `.keystore` path and supply `keystore/release_user` + `keystore/release_password` via env vars. Declare permissions in the preset under `permissions/*`. Set `package/unique_name` to a reverse-DNS string (e.g., `com.studio.mygame`). |
 | **iOS**     | Requires a valid Apple provisioning profile (`.mobileprovision`). Set `application/bundle_identifier`, `codesign/identity`, and `application/provisioning_profile`. Distribution builds require an App Store distribution certificate. |
 
@@ -255,7 +255,7 @@ Before Godot 4.5, modifying `.exe` metadata (version info, icon, copyright, comp
 - [ ] Output directories created before the export command runs (`mkdir -p`)
 - [ ] Linux binary marked executable after export (`chmod +x`)
 - [ ] `application/config/version` in project.godot is populated at export time from a git tag
-- [ ] Web export: hosting server sends `COOP` + `COEP` headers if threads are enabled
+- [ ] Web export: thread support left off, or the host sends `COOP` + `COEP` headers (see **web-export**)
 - [ ] Android release preset uses a signed keystore, not the debug keystore
 - [ ] macOS builds intended for distribution are codesigned and notarized
 - [ ] Artifacts are uploaded per-platform in CI so individual platform builds can be downloaded

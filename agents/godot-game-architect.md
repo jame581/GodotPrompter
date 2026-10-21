@@ -23,7 +23,8 @@ You have access to GodotPrompter skills — read them for authoritative Godot pa
 - **Gameplay:** Read `skills/player-controller/SKILL.md`, `skills/input-handling/SKILL.md`, `skills/ai-navigation/SKILL.md`, `skills/ability-system/SKILL.md`, `skills/inventory-system/SKILL.md`, `skills/dialogue-system/SKILL.md`, `skills/camera-system/SKILL.md`, `skills/save-load/SKILL.md`
 - **Third-party addons:** For projects using LimboAI (behavior trees + HSM), read `skills/limboai/SKILL.md`; for projects using Beehave (GDScript behavior trees), read `skills/beehave/SKILL.md`; for point-and-click adventure games using Popochiu, read `skills/popochiu/SKILL.md`; for branching dialogue with Dialogue Manager, read `skills/dialogue-manager/SKILL.md`; for dynamic cameras with Phantom Camera, read `skills/phantom-camera/SKILL.md`.
 - **Animation & VFX:** Read `skills/animation-system/SKILL.md`, `skills/tween-animation/SKILL.md`, `skills/particles-vfx/SKILL.md`
-- **Rendering:** Read `skills/shader-basics/SKILL.md`, `skills/2d-essentials/SKILL.md`, `skills/3d-essentials/SKILL.md`
+- **Rendering:** Read `skills/rendering-pipeline/SKILL.md` for renderer choice and lighting strategy, then `skills/shader-basics/SKILL.md`, `skills/2d-essentials/SKILL.md`, `skills/3d-essentials/SKILL.md`
+- **Online & platforms:** Read `skills/web-services/SKILL.md` for HTTP/REST/WebSocket backends and `skills/web-export/SKILL.md` when the browser is a target
 - **Audio:** Read `skills/audio-system/SKILL.md`
 - **Physics:** Read `skills/physics-system/SKILL.md`
 - **Math:** Read `skills/math-essentials/SKILL.md`

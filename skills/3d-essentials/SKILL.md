@@ -7,7 +7,7 @@ description: Use when working with 3D-specific systems — materials, lighting, 
 
 All examples target Godot 4.3+ with no deprecated APIs. GDScript is shown first, then C#.
 
-> **Related skills:** **player-controller** for CharacterBody3D movement, **physics-system** for 3D collision shapes and raycasting, **camera-system** for Camera3D follow and transitions, **shader-basics** for spatial shaders and post-processing, **godot-optimization** for 3D performance tuning, **animation-system** for AnimationTree and 3D animation blending.
+> **Related skills:** **rendering-pipeline** for renderer choice, lighting strategy, AA and resolution scaling, **player-controller** for CharacterBody3D movement, **physics-system** for 3D collision shapes and raycasting, **camera-system** for Camera3D follow and transitions, **shader-basics** for spatial shaders and post-processing, **godot-optimization** for 3D performance tuning, **animation-system** for AnimationTree and 3D animation blending.
 
 ---
 

@@ -4,6 +4,31 @@ All notable changes to GodotPrompter will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
+## [Unreleased]
+
+### Added
+
+- **`web-services`** — calling HTTP and WebSocket backends: one `HTTPRequest` per request with
+  `await`, a reusable JSON API client autoload, transport result vs HTTP status, JSON numbers
+  parsing as floats, downloads with progress, image loading, form and multipart uploads, TLS and
+  keeping privileged keys off the client, retries with backoff, cancellation, token refresh, and a
+  `WebSocketPeer` client. References: `rest-client-patterns.md`, `downloads-and-uploads.md`.
+- **`rendering-pipeline`** — project-level rendering decisions that 3d-essentials did not cover:
+  renderer per platform, a lighting strategy table and light budgets per renderer, anti-aliasing
+  and 3D resolution scaling with the renderer each mode actually supports (checked against the
+  4.7.2 renderer source: FSR 1 and 2 are Forward+ only), SubViewport update modes, shader stutter,
+  rendering stats and debug draw. Reference: `graphics-settings.md` (preset menu with persistence).
+- **`web-export`** — the browser target, promoted from a row in export-pipeline: preset options and
+  defaults, threads vs no threads and the COOP/COEP headers, itch.io / GitHub Pages / own-server
+  hosting, the PWA header workaround, `JavaScriptBridge`, `user://` persistence in IndexedDB,
+  autoplay and sample playback, input gestures, and load size. GDScript only, because C# projects
+  cannot export to Web in Godot 4. References: `hosting.md`, `javascript-bridge.md`.
+
+### Fixed
+
+- **export-pipeline** told readers to disable web threads with `rendering/threads/thread_model=0`.
+  Threads are an export preset option (`variant/thread_support`, off by default since 4.3).
+
 ## [1.15.1] - 2026-10-12
 
 A correction release. Every code example and every statement tied to a Godot version was checked
