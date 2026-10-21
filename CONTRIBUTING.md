@@ -56,6 +56,21 @@ Add a related skills line after the intro paragraph:
 
 Keep to 3-5 references max. Only link genuinely related skills.
 
+### 6. Wire it in
+
+A new skill is not discoverable until the places that list skills know about it:
+
+- **README.md** — the category table row, the skill count in the intro and in the badge.
+- **`skills/using-godot-prompter/SKILL.md`** — the full index, and the `SESSION-CARD` region (a row in
+  the "Building…" table; the region has a 3 KB cap, so tighten wording rather than drop a skill).
+- **Agent routing lines** — `agents/godot-game-dev.md` and `agents/godot-game-architect.md`, plus the
+  specialist agent that owns the domain (for example `godot-shader-author` for rendering skills). Then
+  run `npm run sync:codex-agents`.
+- **`npm run build:skill-index`** — regenerates `skills/index.json`; `npm test` fails if it is stale.
+- A bidirectional cross-reference with the core skill it sits next to.
+
+Finish with `node scripts/validate-skills.mjs` and `npm test`.
+
 ## Third-Party Addon Skills
 
 Skills that document a community addon (`limboai`, `beehave`, `popochiu`, `dialogue-manager`,
@@ -85,8 +100,8 @@ Skills that document a community addon (`limboai`, `beehave`, `popochiu`, `dialo
    rewrite it mid-release.
 
    `GDSCRIPT_ONLY_BY_DESIGN` is **whole-skill**. When only one *section* has no C# counterpart, mark
-   that section instead — `<!-- csharp-parity: n/a — reason -->`, reason mandatory. See the root
-   `CLAUDE.md` for why the two obvious shortcuts (allowlisting the skill, renaming the heading) both
+   that section instead — `<!-- csharp-parity: n/a — reason -->`, reason mandatory. See
+   `.claude/skills/authoring-godot-prompter-skills/SKILL.md` for why the two obvious shortcuts (allowlisting the skill, renaming the heading) both
    hide real gaps in neighbouring sections.
 
 4. **Wire it in**: README's Third-Party Addons table, the `using-godot-prompter` index, the routing lines
@@ -194,12 +209,18 @@ When publishing a new version (e.g., v1.8.1):
    git ls-files -s hooks/             # session-start and run-hook.cmd must be 100755
    git check-attr text eol -- hooks/session-start hooks/run-hook.cmd
    ```
-6. **Commit and tag:**
+6. **Release branch, pull request, tag:** `master` is protected by the `Protect master` ruleset, so
+   nothing is pushed to it directly and the tag goes on the merge commit, not on the branch.
    ```bash
+   git switch -c release/v1.8.1
    git add -A
    git commit -m "chore: bump version to 1.8.1"
+   git push -u origin release/v1.8.1
+   gh pr create --title "Release v1.8.1" --base master    # needs Validate skills and hooks, Hook tests (Windows), scan green
+   # merge the PR, then tag the merge commit on master:
+   git switch master && git pull
    git tag -a v1.8.1 -m "v1.8.1 — description of changes"
-   git push origin master --tags
+   git push origin v1.8.1
    ```
 7. **Let GitHub Actions publish the release** (`.github/workflows/release.yml`):
    - Verifies tag and manifest versions are consistent

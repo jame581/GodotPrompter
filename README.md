@@ -14,9 +14,7 @@ GodotPrompter is a plugin that provides **skills** — structured domain knowled
 
 **59 skills** covering project setup, architecture, gameplay systems, input handling, physics, 2D/3D systems, animation, shaders, audio, UI, multiplayer, web services, localization, procedural generation, XR/VR, native extensions, multithreading, mobile and web shipping, rendering pipeline, optimization, GDScript / C# patterns, a teaching mode, and third-party addons (LimboAI, Beehave, Popochiu, Dialogue Manager, Phantom Camera). All targeting Godot 4.3+ with both GDScript and C# examples — newer features from Godot 4.5, 4.6, and 4.7 (variadic functions, abstract classes, stencil buffers, AreaLight3D, VirtualJoystick, OpenXR Spatial Entities, and more) are included as annotated additive sections.
 
-**v1.7.0 introduces a 16 KB token budget** for `SKILL.md` files (validator-enforced) and the new **`gdscript-advanced`** skill for production-grade GDScript depth (performance idioms, metaprogramming, `@tool` lifecycle, profiler-driven idioms).
-
-**v1.9.0 adds native power and mobile shipping** — the new **`gdextension`** (godot-cpp / Rust native extensions), **`multithreading`** (WorkerThreadPool, threads, threaded loading), and **`mobile-development`** (Android/iOS export, lifecycle, plugins, IAP) skills.
+**v1.16.0** adds three skills — `web-services` (HTTP and WebSocket backends), `rendering-pipeline` (renderer and graphics settings) and `web-export` (the browser target) — plus a C# compile check of every code block and a prose audit of the existing skills. See the [CHANGELOG](CHANGELOG.md).
 
 ## Quick Start
 
@@ -344,9 +342,12 @@ The validator (`scripts/validate-skills.mjs`) checks every `skills/*/SKILL.md` a
 |---|---|---|
 | `frontmatter-{missing,name-missing,description-missing,name-mismatch}` | YAML frontmatter is present and `name` matches folder | error |
 | `cross-ref-broken` | Every skill referenced on the `**Related skills:**` line and inline `see <skill> skill` mentions resolves to an existing skill folder | error |
+| `agent-frontmatter-{missing,name-missing,description-missing}` | An `agents/*.md` file has YAML frontmatter with `name` and `description` | error |
 | `agent-skill-path-broken` | Every `skills/<name>/SKILL.md` path inside an agent definition exists | error |
 | `related-skills-line-missing` | Skill has a `**Related skills:**` line between H1 and first section | warning |
 | `csharp-parity-missing` / `csharp-parity-accepted` | Every section with a GDScript code block also has a C# block (skills allowlisted as GDScript-only-by-design emit `accepted` instead of `missing`) | warning |
+| `csharp-parity-exempt-no-reason` | A `csharp-parity: n/a` marker in a section states a reason. Checked for every marker, not only where C# is missing, so a reasonless marker cannot hide until the section is edited | error |
+| `csharp-parity-{missing,accepted}-reference` | The same parity check for `skills/<name>/references/*.md`, section by section (or the whole file when it has no headings); allowlisted GDScript-only skills and `n/a` sections emit `accepted` | warning |
 | `checklist-missing` | Implementation checklist (`- [ ]` items) present near end of file | warning |
 | `token-budget-exceeded` | `SKILL.md` < 16 KB (references under `skills/<name>/references/` are unrestricted) | error |
 | `token-budget-approaching` | `SKILL.md` ≥ 15.5 KB and < 16 KB — advisory heads-up before the hard budget | warning |
@@ -358,7 +359,7 @@ The validator (`scripts/validate-skills.mjs`) checks every `skills/*/SKILL.md` a
 | `gdscript-nonexistent-api` | No GDScript code block in a `SKILL.md` or `references/*.md` uses an API already caught being invented: `Signal.any()` / `Signal.all()`, or the C#-only `ToSignal()`. Prose is not scanned. It is a denylist, so it cannot prove an API exists | error |
 | `scanner-risky-approval` | No `.md`, `.json`, `.toml`, `.yml` or `.yaml` file writes out a setting the plugin scanner in `plugin-scan.yml` flags: a full-access sandbox mode, a never-ask approval policy, or a bypass approval mode. Comments and prose count, as they do for the scanner. In a git work tree it checks the files a clone would hold (tracked, or untracked and not ignored) | error |
 
-Hook behaviour is covered separately by `npm run test:hooks` (50 cases), which also runs on release tags. Metadata coverage now also includes `node scripts/sync-codex-agents.mjs --check`, `node scripts/generate-skill-index.mjs --check`, and `node scripts/validate-platform-metadata.mjs`.
+Hook behaviour is covered separately by `npm run test:hooks` (51 cases), which also runs on release tags. Metadata coverage now also includes `node scripts/sync-codex-agents.mjs --check`, `node scripts/generate-skill-index.mjs --check`, and `node scripts/validate-platform-metadata.mjs`.
 
 Token cost reporting:
 

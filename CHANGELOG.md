@@ -13,7 +13,7 @@ the 56 existing skills. 61 C# errors and 349 wrong prose claims were fixed.
 
 - **A plugin-only branch for Anthropic's plugin directory.** The directory held every version for
   a reviewer (`BINARIES_NOT_INSPECTED`) because the repository root, which is the plugin folder,
-  tracks 613 files and the limit is 512. The release workflow now commits a bundle of only what
+  tracks more than 600 files and the limit is 512. The release workflow now commits a bundle of only what
   Claude Code loads (skills, agents, the SessionStart hook, the manifest and icon, README, LICENSE,
   PRIVACY, SECURITY: 295 files) to the `plugin-bundle` branch, and the directory submission follows
   that branch. README links to files left out of the bundle point at the release tag on GitHub.
@@ -34,6 +34,19 @@ the 56 existing skills. 61 C# errors and 349 wrong prose claims were fixed.
   hosting, the PWA header workaround, `JavaScriptBridge`, `user://` persistence in IndexedDB,
   autoplay and sample playback, input gestures, and load size. GDScript only, because C# projects
   cannot export to Web in Godot 4. References: `hosting.md`, `javascript-bridge.md`.
+
+- **export-pipeline** gained `references/steam-release-planning.md` (#32, closes #30): the release
+  side of shipping on Steam, which the upload-focused distribution reference left out. The 21-day
+  app-fee wait, the two-week Coming Soon minimum, store page and build review lead times, a
+  backwards timeline from a launch date, store and library asset sizes, demo and Next Fest rules,
+  discount cooldowns and wishlist emails, and when a Godot game needs the Steamworks API at all.
+  Each section names the Steamworks page its values come from.
+- **Issue auto-assignment.** `.github/workflows/auto-assign-issues.yml` assigns the repository owner
+  to every newly opened issue, so a new issue produces a notification instead of arriving unassigned.
+- **Marketplace README count sync.** The skillsmith and godot-prompter-marketplace READMEs had
+  drifted to 41 and 44 skills because a release only bumped `marketplace.json`.
+  `scripts/sync-marketplace-readme.mjs` rewrites the skill and agent counts between comment markers;
+  `release.yml` runs it in both marketplace PR steps and `bump-version.mjs` runs it for local sibling clones.
 
 ### Fixed
 

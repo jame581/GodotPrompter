@@ -4,7 +4,7 @@ This page documents the token cost of every skill and agent in the repository, s
 
 ## What this is
 
-GodotPrompter ships **59 skills** and **9 agents** as Markdown files. When an AI coding assistant (Claude Code, Copilot, Gemini, Cursor, etc.) loads a skill, every byte of the skill's `SKILL.md` enters the model's context. Loading 3-4 skills is normal for a single feature task — without the budget rule that's 20-30k tokens before the user prompt even starts; with it, restructured skills load 50-60% lighter.
+GodotPrompter ships **59 skills** and **9 agents** as Markdown files. When an AI coding assistant (Claude Code, Copilot, Antigravity, Cursor, etc.) loads a skill, every byte of the skill's `SKILL.md` enters the model's context. Loading 3-4 skills is normal for a single feature task — without the budget rule that's 20-30k tokens before the user prompt even starts; with it, restructured skills load 50-60% lighter.
 
 To keep skills loadable in combination, v1.7.0 introduced a **16 KB budget** for `SKILL.md` files. Skills that exceed the budget are progressively restructured using the **Pattern X** approach — core SKILL.md (canonical recipe + distinguishing choices + anti-patterns) plus `references/<topic>.md` files that load only when an agent explicitly opens them.
 
@@ -22,7 +22,7 @@ Columns:
 
 - **Bytes / KB** — file size measured on **LF-normalized** content, so Windows (CRLF) checkouts report the same numbers as CI (v1.12.0; before that, raw bytes over-reported by ~1 byte per line on CRLF checkouts)
 - **Est. tokens** — cheap estimate (bytes ÷ 4), used by the validator
-- **Claude / GPT** — real tokens via `@anthropic-ai/tokenizer` (Claude) and `js-tiktoken` (GPT cl100k_base, also a reasonable Gemini-Code proxy)
+- **Claude / GPT** — real tokens via `@anthropic-ai/tokenizer` (Claude) and `js-tiktoken` (GPT cl100k_base, also a reasonable Antigravity proxy)
 
 <!-- BEGIN-TOKEN-TABLE -->
 
@@ -39,8 +39,8 @@ Columns:
 | skill | godot-code-review | 14981 | 14.6 | 3745 | 4125 | 3656 | ✓ under budget |
 | skill | state-machine | 14872 | 14.5 | 3718 | 4001 | 3463 | ✓ under budget |
 | skill | csharp-godot | 14752 | 14.4 | 3688 | 4166 | 3767 | ✓ under budget |
+| skill | using-godot-prompter | 14559 | 14.2 | 3640 | 4038 | 3633 | ✓ under budget |
 | skill | ai-navigation | 14399 | 14.1 | 3600 | 3793 | 3451 | ✓ under budget |
-| skill | using-godot-prompter | 14396 | 14.1 | 3599 | 3993 | 3591 | ✓ under budget |
 | skill | gdscript-patterns | 14273 | 13.9 | 3568 | 3947 | 3574 | ✓ under budget |
 | skill | tween-animation | 14201 | 13.9 | 3550 | 4167 | 3571 | ✓ under budget |
 | skill | gdscript-advanced | 14183 | 13.9 | 3546 | 3816 | 3450 | ✓ under budget |
@@ -63,7 +63,7 @@ Columns:
 | skill | web-services | 13259 | 12.9 | 3315 | 3657 | 3297 | ✓ under budget |
 | skill | godot-mentor | 13245 | 12.9 | 3311 | 3536 | 3337 | ✓ under budget |
 | skill | phantom-camera | 13040 | 12.7 | 3260 | 3892 | 3529 | ✓ under budget |
-| skill | multiplayer-basics | 13006 | 12.7 | 3252 | 3526 | 3065 | ✓ under budget |
+| skill | multiplayer-basics | 13033 | 12.7 | 3258 | 3536 | 3074 | ✓ under budget |
 | skill | godot-brainstorming | 12950 | 12.6 | 3238 | 3306 | 3086 | ✓ under budget |
 | reference | save-load/json-saves.md | 12939 | 12.6 | 3235 | 3221 | 2729 | — |
 | skill | resource-pattern | 12771 | 12.5 | 3193 | 3428 | 3095 | ✓ under budget |
@@ -110,7 +110,7 @@ Columns:
 | reference | web-services/rest-client-patterns.md | 7175 | 7.0 | 1794 | 1910 | 1679 | — |
 | reference | export-pipeline/steam-release-planning.md | 7002 | 6.8 | 1751 | 1777 | 1694 | — |
 | reference | animation-system/ik-recipes.md | 6932 | 6.8 | 1733 | 2219 | 1997 | — |
-| reference | audio-system/interactive-music.md | 6888 | 6.7 | 1722 | 1981 | 1706 | — |
+| reference | audio-system/interactive-music.md | 6907 | 6.7 | 1727 | 1986 | 1710 | — |
 | reference | inventory-system/ui-binding.md | 6870 | 6.7 | 1718 | 1822 | 1585 | — |
 | reference | hud-system/damage-numbers.md | 6709 | 6.6 | 1677 | 1936 | 1724 | — |
 | reference | input-handling/gamepad.md | 6598 | 6.4 | 1650 | 1972 | 1748 | — |
@@ -158,7 +158,7 @@ Columns:
 | reference | particles-vfx/vfx-recipes.md | 4803 | 4.7 | 1201 | 1615 | 1544 | — |
 | reference | responsive-ui/mobile.md | 4775 | 4.7 | 1194 | 1345 | 1097 | — |
 | agent | godot-performance-profiler | 4774 | 4.7 | 1194 | 1182 | 1139 | — |
-| reference | particles-vfx/performance-and-pitfalls.md | 4680 | 4.6 | 1170 | 1140 | 1063 | — |
+| reference | particles-vfx/performance-and-pitfalls.md | 4742 | 4.6 | 1186 | 1158 | 1081 | — |
 | reference | procedural-generation/cellular-automata.md | 4655 | 4.5 | 1164 | 1340 | 1289 | — |
 | reference | godot-brainstorming/example-chest.md | 4578 | 4.5 | 1145 | 1323 | 1179 | — |
 | reference | input-handling/mouse.md | 4510 | 4.4 | 1128 | 1225 | 1033 | — |
@@ -279,6 +279,7 @@ Columns:
 | reference | math-essentials/curves-and-paths.md | 1895 | 1.9 | 474 | 599 | 533 | — |
 | reference | resource-pattern/saving-resources.md | 1882 | 1.8 | 471 | 522 | 460 | — |
 | reference | physics-system/staticbody-recipes.md | 1879 | 1.8 | 470 | 549 | 484 | — |
+| reference | tween-animation/lifecycle.md | 1870 | 1.8 | 468 | 641 | 503 | — |
 | reference | physics-system/collision-shapes.md | 1869 | 1.8 | 467 | 532 | 495 | — |
 | reference | physics-system/interpolation-camera.md | 1856 | 1.8 | 464 | 522 | 466 | — |
 | reference | animation-system/common-pitfalls.md | 1844 | 1.8 | 461 | 344 | 309 | — |
@@ -287,7 +288,6 @@ Columns:
 | reference | tween-animation/looping-and-signals.md | 1789 | 1.7 | 447 | 599 | 506 | — |
 | reference | particles-vfx/flipbook-animation.md | 1781 | 1.7 | 445 | 499 | 469 | — |
 | reference | csharp-signals/connecting-gdscript-signals.md | 1770 | 1.7 | 443 | 481 | 407 | — |
-| reference | tween-animation/lifecycle.md | 1708 | 1.7 | 427 | 599 | 463 | — |
 | reference | shader-basics/3d-shader-recipes.md | 1703 | 1.7 | 426 | 629 | 554 | — |
 | reference | animation-system/ik-solver-comparison.md | 1640 | 1.6 | 410 | 443 | 424 | — |
 | reference | animation-system/animation-markers.md | 1637 | 1.6 | 409 | 465 | 379 | — |

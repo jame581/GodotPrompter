@@ -38,7 +38,7 @@ To pin (or upgrade to) a specific version:
 
 ```json
 {
-  "plugin": ["godot-prompter@git+https://github.com/jame581/GodotPrompter.git#v1.0.0"]
+  "plugin": ["godot-prompter@git+https://github.com/jame581/GodotPrompter.git#v1.16.0"]
 }
 ```
 

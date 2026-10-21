@@ -22,7 +22,9 @@ Full command sequence lives in `CONTRIBUTING.md`.
    - set the Grok "pin to a release" example in `README.md` to the new tag — it sat at
      v1.11.0 through three releases.
 3. Update `CHANGELOG.md` with the new section.
-4. Commit, tag (`v<version>`), push with tags — `.github/workflows/release.yml`
+4. Commit on a `release/v<version>` branch, open a PR and merge it (`master` is protected by the
+   "Protect master" ruleset: no direct push). Then tag the merge commit on `master` with an annotated
+   tag (`git tag -a v<version>`) and `git push origin v<version>` — `.github/workflows/release.yml`
    then validates, creates the GitHub release, commits the plugin-only bundle to
    the `plugin-bundle` branch (what Anthropic's plugin directory follows), and opens
    marketplace PRs (when `MARKETPLACE_TOKEN` is configured).
