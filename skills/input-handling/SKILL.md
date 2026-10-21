@@ -212,51 +212,9 @@ Buffer discrete actions so they aren't lost between physics frames: catch the ac
 
 ## 6. Touch Input
 
-`InputEventScreenTouch` for tap/release, `InputEventScreenDrag` for finger drag. Multi-touch tracked by `event.index`. Enable **Project Settings → Input Devices → Pointing → Emulate Touch From Mouse** to test on desktop.
+`InputEventScreenTouch` for tap/release, `InputEventScreenDrag` for finger drag; multi-touch is tracked by `event.index`. To test on desktop, enable **Project Settings → Input Devices → Pointing → Emulate Touch From Mouse**; **Emulate Mouse From Touch** is on by default so UI works on touchscreens.
 
-> See [references/touch.md](references/touch.md) for the GDScript and C# basic touch event handling and the emulate-touch-from-mouse setting.
-
-### VirtualJoystick (Godot 4.7+)
-
-Godot 4.7 adds a built-in `VirtualJoystick` Control node for on-screen touch joysticks. Add it to a `CanvasLayer`, point its `action_up/down/left/right` properties (`StringName`, defaults `&"ui_up"` etc.) at your movement actions, and it triggers those actions like a physical stick.
-
-```gdscript
-@onready var joystick: VirtualJoystick = $CanvasLayer/VirtualJoystick
-
-func _ready() -> void:
-    joystick.action_left = &"move_left"
-    joystick.action_right = &"move_right"
-    joystick.action_up = &"move_up"
-    joystick.action_down = &"move_down"
-    joystick.joystick_mode = VirtualJoystick.JOYSTICK_DYNAMIC  # recenters on touch
-    joystick.visibility_mode = VirtualJoystick.VISIBILITY_WHEN_TOUCHED
-
-func _physics_process(_delta: float) -> void:
-    # The joystick drives the actions — normal polling just works
-    var direction := Input.get_vector("move_left", "move_right", "move_up", "move_down")
-```
-
-```csharp
-private VirtualJoystick _joystick;
-
-public override void _Ready()
-{
-    _joystick = GetNode<VirtualJoystick>("CanvasLayer/VirtualJoystick");
-    _joystick.ActionLeft = "move_left";
-    _joystick.ActionRight = "move_right";
-    _joystick.ActionUp = "move_up";
-    _joystick.ActionDown = "move_down";
-    _joystick.JoystickMode = VirtualJoystick.JoystickModeEnum.Dynamic;
-    _joystick.VisibilityMode = VirtualJoystick.VisibilityModeEnum.WhenTouched;
-}
-
-public override void _PhysicsProcess(double delta)
-{
-    Vector2 direction = Input.GetVector("move_left", "move_right", "move_up", "move_down");
-}
-```
-
-Tune `deadzone_ratio` (default `0.0` — InputMap action deadzones apply on top), `clampzone_ratio` (`1.0`), `joystick_size` (`100.0` px), and `tip_size` (`50.0` px); restyle via the `normal_joystick`/`normal_tip` and `pressed_joystick`/`pressed_tip` StyleBox theme slots. The `released(input_vector)` and `flicked(input_vector)` signals report final direction and strength.
+> See [references/touch.md](references/touch.md) for the touch event recipes (GDScript and C#) and the `VirtualJoystick` on-screen stick (Godot 4.7+).
 
 ---
 

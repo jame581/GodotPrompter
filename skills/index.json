@@ -986,7 +986,8 @@
         "skills/shader-basics/references/compositor-effects.md",
         "skills/shader-basics/references/post-processing.md",
         "skills/shader-basics/references/shader-baker.md",
-        "skills/shader-basics/references/stencil-buffer.md"
+        "skills/shader-basics/references/stencil-buffer.md",
+        "skills/shader-basics/references/visual-shaders.md"
       ],
       "source": "skills/shader-basics/SKILL.md"
     },

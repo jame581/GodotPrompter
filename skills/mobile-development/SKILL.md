@@ -234,7 +234,7 @@ public override void _Ready()
 
 Native file dialogs (`DisplayServer.file_dialog_show()`) are supported on Android; since Godot 4.7 the native file picker works on all devices — the Android version check gating `FEATURE_NATIVE_DIALOG_FILE` support was removed ([GH-115257](https://github.com/godotengine/godot/pull/115257)).
 
-> **Godot 4.7+:** For on-screen touch joysticks, use the built-in `VirtualJoystick` Control node instead of a hand-rolled `TouchScreenButton` rig — see **input-handling** (§ 6, "VirtualJoystick (Godot 4.7+)") for the full API.
+> **Godot 4.7+:** For on-screen touch joysticks, use the built-in `VirtualJoystick` Control node instead of a hand-rolled `TouchScreenButton` rig — see **input-handling** (`references/touch.md`, "VirtualJoystick (Godot 4.7+)") for the full API.
 
 ### Device Orientation Signal (Godot 4.7+)
 
