@@ -33,7 +33,7 @@ Or install from a local clone:
 ```bash
 git clone https://github.com/jame581/GodotPrompter.git
 claude plugins marketplace add ./GodotPrompter
-claude plugins install godot-prompter@godot-prompter
+claude plugins install godot-prompter@godot-prompter-marketplace
 ```
 
 Then start a new session and ask:

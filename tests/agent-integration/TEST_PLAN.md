@@ -576,7 +576,7 @@ case covers this path.
 Use `host-smoke-matrix.json` as the machine-readable release checklist for Claude Code, GitHub Copilot CLI, Cursor, Codex, Antigravity, OpenCode, and Grok Build. The numbered steps below remain the detailed Claude-first workflow.
 
 1. Start a fresh Claude Code session
-2. Install GodotPrompter: `claude plugins marketplace add ./GodotPrompter` then `claude plugins install godot-prompter@godot-prompter`
+2. Install GodotPrompter: `claude plugins marketplace add ./GodotPrompter` then `claude plugins install godot-prompter@godot-prompter-marketplace`
 3. Navigate to an empty test directory
 4. Run each test sequentially, recording results in RESULTS.md
 5. For Category 3, keep the same session (tests build on each other)
