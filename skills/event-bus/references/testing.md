@@ -78,25 +78,22 @@ public partial class PlayerSignalTest
     [TestCase]
     public async Task TakeDamage_EmitsHealthChanged()
     {
-        // Assert the signal fires with the expected (current=90, maximum=100) args
-        var signalAssert = AssertSignal(_eventBus)
-            .IsEmitted(nameof(EventBus.SignalName.HealthChanged))
-            .WithArgs(90, 100);
+        AssertSignal(_eventBus).StartMonitoring(); // before the emit, or it is missed
 
         _player.TakeDamage(10);
 
-        await signalAssert.WithTimeout(100);
+        // Assert the signal fired with the expected (current=90, maximum=100) args
+        await AssertSignal(_eventBus).IsEmitted(EventBus.SignalName.HealthChanged, 90, 100).WithTimeout(100);
     }
 
     [TestCase]
     public async Task LethalDamage_EmitsPlayerDied()
     {
-        var signalAssert = AssertSignal(_eventBus)
-            .IsEmitted(nameof(EventBus.SignalName.PlayerDied));
+        AssertSignal(_eventBus).StartMonitoring();
 
         _player.TakeDamage(999);
 
-        await signalAssert.WithTimeout(100);
+        await AssertSignal(_eventBus).IsEmitted(EventBus.SignalName.PlayerDied).WithTimeout(100);
     }
 
     [TestCase]
@@ -105,20 +102,18 @@ public partial class PlayerSignalTest
         // Capture emissions via a counter helper before firing
         int emitCount = 0;
         _eventBus.ScoreChanged += (_) => emitCount++;
+        AssertSignal(_eventBus).StartMonitoring();
 
         _player.AddScore(50);
         _player.AddScore(25);
 
         // Allow one frame for signal processing
-        await _runner.AwaitSignal(_runner.Scene().GetTree(), "process_frame").WithTimeout(500);
+        await _runner.AwaitIdleFrame();
 
         AssertThat(emitCount).IsEqual(2);
 
         // Verify the cumulative value from the last emission
-        var signalAssert = AssertSignal(_eventBus)
-            .IsEmitted(nameof(EventBus.SignalName.ScoreChanged))
-            .WithArgs(75);
-        await signalAssert.WithTimeout(100);
+        await AssertSignal(_eventBus).IsEmitted(EventBus.SignalName.ScoreChanged, 75).WithTimeout(100);
     }
 }
 ```
@@ -180,15 +175,15 @@ public partial class HudLayerTest
     public async Task PlayerDied_ShowsDeathScreen()
     {
         var deathScreen = _hud.GetNode<Control>("DeathScreen");
-        AssertThat(deathScreen.Visible).IsFalse("death screen should start hidden");
+        AssertThat(deathScreen.Visible).OverrideFailureMessage("death screen should start hidden").IsFalse();
 
         // Emit directly on the autoload — HudLayer's handler fires synchronously
         _eventBus.EmitSignal(EventBus.SignalName.PlayerDied);
 
         // Allow one frame for _Process / deferred calls to settle
-        await _runner.AwaitSignal(_runner.Scene().GetTree(), "process_frame").WithTimeout(500);
+        await _runner.AwaitIdleFrame();
 
-        AssertThat(deathScreen.Visible).IsTrue("death screen should be visible after PlayerDied");
+        AssertThat(deathScreen.Visible).OverrideFailureMessage("death screen should be visible after PlayerDied").IsTrue();
     }
 
     [TestCase]
@@ -196,7 +191,7 @@ public partial class HudLayerTest
     {
         _eventBus.EmitSignal(EventBus.SignalName.ScoreChanged, 1234);
 
-        await _runner.AwaitSignal(_runner.Scene().GetTree(), "process_frame").WithTimeout(500);
+        await _runner.AwaitIdleFrame();
 
         AssertThat(_hud.GetNode<Label>("ScoreLabel").Text).IsEqual("Score: 1234");
     }

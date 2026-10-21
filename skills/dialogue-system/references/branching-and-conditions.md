@@ -32,7 +32,7 @@ using Godot.Collections;
 var askLine = new DialogueLine();
 askLine.Speaker = "Guard";
 askLine.Text    = "What brings you here, traveller?";
-askLine.Choices = new Array<Dictionary>
+askLine.Choices = new Array // DialogueLine.Choices is an untyped Array
 {
     new Dictionary { { "text", "I seek the king." },      { "next_line_id", "seek_king" } },
     new Dictionary { { "text", "Just passing through." }, { "next_line_id", "passing_through" } },

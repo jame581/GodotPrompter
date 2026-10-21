@@ -226,7 +226,7 @@ public partial class ScoreDisplay : Label
 
     public override void _Ready()
     {
-        EventBus.Instance.ScoreChanged += OnScoreChanged;
+        GetNode<EventBus>("/root/EventBus").ScoreChanged += OnScoreChanged;
         Text = "0";
     }
 
@@ -278,7 +278,7 @@ EventBus.score_changed.emit(GameState.score)
 
 ```csharp
 // Inside a collectible or enemy death handler
-EventBus.Instance.EmitSignal(EventBus.SignalName.ScoreChanged, GameState.Score);
+GetNode<EventBus>("/root/EventBus").EmitSignal(EventBus.SignalName.ScoreChanged, GameState.Score);
 ```
 
 ---

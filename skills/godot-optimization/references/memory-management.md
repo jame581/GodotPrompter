@@ -310,6 +310,7 @@ public partial class BulletSpawner : Node2D
 public partial class Bullet : CharacterBody2D
 {
     [Export] private ObjectPool _pool;
+    public Vector2 Direction { get; set; }
 
     private void OnHitSomething()
     {

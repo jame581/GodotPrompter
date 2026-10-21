@@ -62,11 +62,12 @@ $MusicPlayer.play()
 
 # When combat starts — fade in drums layer
 func _on_combat_started() -> void:
-    var playback := $MusicPlayer.get_stream_playback() as AudioStreamPlaybackSynchronized
+    # The playback has no volume API; it reads the stream's layer volumes live.
+    var sync := $MusicPlayer.stream as AudioStreamSynchronized
     # Tween the volume of layer 1 from silent to audible
     var tween := create_tween()
     tween.tween_method(
-        func(db: float) -> void: playback.set_stream_volume(1, db),
+        func(db: float) -> void: sync.set_sync_stream_volume(1, db),
         -80.0, 0.0, 1.5
     )
 ```
@@ -87,9 +88,10 @@ GetNode<AudioStreamPlayer>("MusicPlayer").Play();
 // When combat starts — fade in drums layer
 public void OnCombatStarted()
 {
-    var playback = GetNode<AudioStreamPlayer>("MusicPlayer").GetStreamPlayback() as AudioStreamPlaybackSynchronized;
+    // The playback has no volume API; it reads the stream's layer volumes live.
+    var sync = (AudioStreamSynchronized)GetNode<AudioStreamPlayer>("MusicPlayer").Stream;
     var tween = CreateTween();
-    tween.TweenMethod(Callable.From<float>(db => playback.SetStreamVolume(1, db)), -80.0f, 0.0f, 1.5);
+    tween.TweenMethod(Callable.From<float>(db => sync.SetSyncStreamVolume(1, db)), -80.0f, 0.0f, 1.5);
 }
 ```
 

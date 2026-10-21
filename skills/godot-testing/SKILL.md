@@ -72,7 +72,7 @@ Both frameworks ship a CLI runner. **GUT:** `addons/gut/gut_cmdln.gd` invoked vi
 
 ## Testing Patterns
 
-Four common patterns: **scenes with nodes** (instantiate via `add_child` in `before_each`, free in `after_each`), **signal testing** (assert that emitting works and connect-then-emit fires), **mocking/doubling** (gdUnit4 `Mock<T>` or hand-rolled fakes via `@export` injection), **async** (await yields, signals, frames in tests).
+Four common patterns: **scenes with nodes** (instantiate via `add_child` in `before_each`, free in `after_each`), **signal testing** (assert that emitting works and connect-then-emit fires), **mocking/doubling** (gdUnit4 `mock()` in GDScript; in C#, hand-rolled fakes via `@export` injection), **async** (await yields, signals, frames in tests).
 
 > See [references/testing-patterns.md](references/testing-patterns.md) for full code on each pattern (GDScript + C# where applicable).
 
@@ -116,8 +116,8 @@ Four common patterns: **scenes with nodes** (instantiate via `add_child` in `bef
 | `assert_that(val).is_between(min, max)`            | `AssertThat(val).IsBetween(min, max)`           | In range (inclusive)            |
 | `assert_that(arr).contains([a, b])`                | `AssertThat(arr).Contains(a, b)`                | Array contains elements         |
 | `assert_that(str).contains("sub")`                 | `AssertThat(str).Contains("sub")`               | String contains substring       |
-| `assert_that(val).is_approximately(exp, margin)`   | `AssertThat(val).IsApproximately(exp, margin)`  | Float within margin             |
-| `assert_signal(mon).is_emitted("name")`            | `AssertSignal(mon).IsEmitted("name")`           | Signal emitted                  |
+| `assert_that(val).is_approximately(exp, margin)`   | `AssertThat(val).IsEqualApprox(exp, margin)`    | Float within margin             |
+| `assert_signal(mon).is_emitted("name")`            | `await AssertSignal(node).IsEmitted("name")`    | Signal emitted                  |
 
 ---
 
@@ -128,7 +128,7 @@ Avoid testing things that add noise without catching real bugs:
 - **Godot engine internals** — do not assert that `Node.add_child()` works or that `@export` variables show up in the editor
 - **Private implementation details** — test behavior through the public API; if a refactor breaks a test that covers only private state, the test is wrong
 - **Visual/rendering output** — pixel-level rendering results are brittle; test the data driving the visuals instead
-- **Timing-sensitive floats without margins** — use `assert_almost_eq` / `IsApproximately` for physics values
+- **Timing-sensitive floats without margins** — use `assert_almost_eq` / `IsEqualApprox` for physics values
 - **One-liners that wrap a built-in** — a property getter that just returns a field needs no test
 - **Every possible invalid input** — test the documented contract, not every imaginable misuse
 
@@ -137,7 +137,7 @@ Avoid testing things that add noise without catching real bugs:
 ## Checklist
 
 - [ ] Each test file matches the naming convention for the chosen framework (`test_*.gd` / `*Test.cs`)
-- [ ] Tests extend the correct base class (`GutTest` / `GdUnit4.GdUnitTestSuite`)
+- [ ] Tests extend the correct base class (`GutTest` / `GdUnitTestSuite`); C# gdUnit4 suites are plain `[TestSuite]` classes
 - [ ] Nodes added to the scene tree use `add_child_autofree` or `auto_free` — never manual `queue_free()`
 - [ ] Signals are watched before the action that triggers them
 - [ ] Mocks/doubles are used for external dependencies, not for the unit under test

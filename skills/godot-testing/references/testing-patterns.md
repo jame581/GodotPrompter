@@ -40,7 +40,7 @@ public void BeforeTest()
 {
     var scene = GD.Load<PackedScene>("res://scenes/player.tscn");
     _player = AutoFree(scene.Instantiate<Player>());
-    AddChild(_player);
+    ((SceneTree)Engine.GetMainLoop()).Root.AddChild(_player); // suites are not Nodes
 }
 ```
 
@@ -79,15 +79,14 @@ func test_health_emits_signal() -> void:
 
 ```csharp
 [TestCase]
-public async GdUnitAwaiter HealthEmitsSignal()
+public async Task HealthEmitsSignal()
 {
-    var monitor = MonitorSignals(_health);
+    AssertSignal(_health).StartMonitoring();
     _health.TakeDamage(10);
 
-    AssertSignal(monitor).IsEmitted("health_changed");
-    AssertSignal(monitor).IsEmitted("health_changed").WithArgs(100, 90);
-    AssertSignal(monitor).IsNotEmitted("died");
-    await Task.CompletedTask;
+    await AssertSignal(_health).IsEmitted(HealthComponent.SignalName.HealthChanged).WithTimeout(100);
+    await AssertSignal(_health).IsEmitted(HealthComponent.SignalName.HealthChanged, 100, 90).WithTimeout(100);
+    await AssertSignal(_health).IsNotEmitted(HealthComponent.SignalName.Died).WithTimeout(100);
 }
 ```
 
@@ -125,19 +124,26 @@ func test_player_uses_health_component() -> void:
     verify(mock_health).take_damage(25)
 ```
 
-#### gdUnit4 (C#) — `Mock<T>()`
+#### gdUnit4 (C#) — hand-rolled fake
+
+gdUnit4Net has no `mock()`, `spy()` or `verify()`; those are GDScript-only. Subclass the dependency (its methods must be `virtual`) or inject an interface:
 
 ```csharp
+public partial class FakeHealth : HealthComponent
+{
+    public int LastDamage { get; private set; } = -1;
+    public override void TakeDamage(int amount) => LastDamage = amount;
+}
+
 [TestCase]
 public void PlayerUsesHealthComponent()
 {
-    var mockHealth = Mock<HealthComponent>();
-    mockHealth.MockProperty(h => h.CurrentHealth, 75);
+    var fakeHealth = AutoFree(new FakeHealth());
 
-    _player.HealthComponent = mockHealth;
+    _player.HealthComponent = fakeHealth;
     _player.TakeHit(25);
 
-    Verify(mockHealth).TakeDamage(25);
+    AssertThat(fakeHealth.LastDamage).IsEqual(25);
 }
 ```
 
@@ -171,10 +177,10 @@ func test_tween_completes() -> void:
 
 ```csharp
 [TestCase(Timeout = 1000)]
-public async GdUnitAwaiter TweenCompletes()
+public async Task TweenCompletes()
 {
     _player.StartMoveTween();
-    await ISceneRunner.SimulateFrames(30);
+    await _player.ToSignal(_player.GetTree().CreateTimer(0.5), SceneTreeTimer.SignalName.Timeout);
     AssertThat(_player.Position).IsEqual(new Vector2(100, 0));
 }
 ```

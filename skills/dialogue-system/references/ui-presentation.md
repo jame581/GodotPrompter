@@ -198,12 +198,12 @@ public partial class DialogueUI : Control
             _typewriterTimer.Stop();
     }
 
-    private void OnChoicePresented(Array<Dictionary> choices)
+    private void OnChoicePresented(Array choices)
     {
         ClearChoices();
         for (int i = 0; i < choices.Count; i++)
         {
-            var choice = choices[i];
+            var choice = choices[i].AsGodotDictionary();
             var btn = new Button();
             btn.Text = choice.TryGetValue("text", out var t) ? t.AsString() : "";
             int captured = i;

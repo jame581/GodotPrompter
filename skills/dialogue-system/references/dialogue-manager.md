@@ -239,7 +239,7 @@ public partial class DialogueManager : Node
             GD.PushError($"DialogueManager: bad condition '{expression}' — {expr.GetErrorText()}");
             return false;
         }
-        var result = expr.Execute(Array.From(System.Array.Empty<Variant>()), this);
+        var result = expr.Execute(new Array(), this);
         if (expr.HasExecuteFailed())
         {
             GD.PushError($"DialogueManager: condition execute failed for '{expression}'");

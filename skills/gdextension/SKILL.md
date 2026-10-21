@@ -202,7 +202,8 @@ public partial class Demo : Node
 {
     public override void _Ready()
     {
-        var node = new GDExample(); // The native class is available like any Godot type.
+        // No C# type exists for a GDExtension class: create it by name.
+        var node = ClassDB.Instantiate("GDExample").As<Node>();
         node.Set("speed", 2.0);
         node.Connect("position_changed", Callable.From<Node, Vector2>(OnPositionChanged));
         AddChild(node);

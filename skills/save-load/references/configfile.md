@@ -127,11 +127,14 @@ public partial class SettingsManager : Node
 **Usage:**
 
 ```csharp
+// A C# autoload is not static — fetch the node first
+var settings = GetNode<SettingsManager>("/root/SettingsManager");
+
 // Read
-float vol = SettingsManager.GetSetting("audio", "master_volume", Variant.From(1.0f)).As<float>();
+float vol = settings.GetSetting("audio", "master_volume", Variant.From(1.0f)).As<float>();
 
 // Write
-SettingsManager.SetSetting("audio", "master_volume", Variant.From(0.5f));
+settings.SetSetting("audio", "master_volume", Variant.From(0.5f));
 ```
 
 ---

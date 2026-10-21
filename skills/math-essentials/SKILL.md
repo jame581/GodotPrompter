@@ -177,10 +177,11 @@ if not global_transform.basis.is_orthonormal():
 ```
 
 ```csharp
-if (!GlobalTransform.Basis.IsOrthonormal())
+// GodotSharp has no IsOrthonormal(); compare with the orthonormalized basis instead.
+Basis basis = GlobalTransform.Basis;
+if (!basis.IsEqualApprox(basis.Orthonormalized()))
 {
-    GlobalTransform = new Transform3D(
-        GlobalTransform.Basis.Orthonormalized(), GlobalPosition);
+    GlobalTransform = new Transform3D(basis.Orthonormalized(), GlobalPosition);
 }
 ```
 

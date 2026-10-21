@@ -69,13 +69,16 @@ GdUnit4 supports C# since v4.4. Note: GdUnit4 signal assertions use `AssertSigna
 using GdUnit4;
 using static GdUnit4.Assertions;
 
-// StubAudio.cs — a lightweight stand-in for AudioManager
-public partial class StubAudio : Node
+// StubAudio.cs — a lightweight stand-in for AudioManager.
+// It must be an AudioManager to fit the typed Audio property, so PlaySfx is virtual there.
+public partial class StubAudio : AudioManager
 {
     public string LastSfx { get; private set; } = "";
     public int PlayCount { get; private set; } = 0;
 
-    public void PlaySfx(string key)
+    public override void _Ready() { }   // skip loading the real sfx library
+
+    public override void PlaySfx(string key)
     {
         LastSfx = key;
         PlayCount++;
@@ -84,6 +87,7 @@ public partial class StubAudio : Node
 ```
 
 ```csharp
+using System.Threading.Tasks;
 using GdUnit4;
 using static GdUnit4.Assertions;
 
@@ -122,13 +126,13 @@ public partial class HealthComponentTest
     }
 
     [TestCase]
-    public void TakeDamage_AtZeroHealth_EmitsDiedSignal()
+    public async Task TakeDamage_AtZeroHealth_EmitsDiedSignal()
     {
-        var signalAssert = AssertSignal(_health).IsEmitted(nameof(HealthComponent.SignalName.Died));
+        AssertSignal(_health).StartMonitoring();
 
         _health.TakeDamage(100);
 
-        signalAssert.WithTimeout(100);
+        await AssertSignal(_health).IsEmitted(HealthComponent.SignalName.Died).WithTimeout(100);
     }
 }
 ```

@@ -66,7 +66,7 @@ func weighted_random(table: Array[Dictionary]) -> Dictionary:
 ```
 
 ```csharp
-public Dictionary WeightedRandom(Godot.Collections.Array<Godot.Collections.Dictionary> table)
+public Godot.Collections.Dictionary WeightedRandom(Godot.Collections.Array<Godot.Collections.Dictionary> table)
 {
     float totalWeight = 0.0f;
     foreach (var entry in table)

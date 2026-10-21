@@ -188,7 +188,7 @@ EventBus.damage_dealt.connect(func(pos: Vector2, amount: int, crit: bool) -> voi
 
 ```csharp
 // In the HUD root or the DamageNumberSpawner's _Ready:
-EventBus.Instance.DamageDealt += (Vector2 pos, int amount, bool crit) =>
+GetNode<EventBus>("/root/EventBus").DamageDealt += (Vector2 pos, int amount, bool crit) =>
 {
     GetNode<DamageNumberSpawner>("DamageNumbersLayer/DamageNumberSpawner")
         .Spawn(pos, amount, crit);

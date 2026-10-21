@@ -92,7 +92,7 @@ public partial class NotificationStack : VBoxContainer
 
     public override void _Ready()
     {
-        EventBus.Instance.NotificationRequested += Push;
+        GetNode<EventBus>("/root/EventBus").NotificationRequested += Push;
     }
 
     public void Push(string message)

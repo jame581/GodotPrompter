@@ -97,9 +97,9 @@ public partial class EnemyAI : CharacterBody2D
         _btPlayer.Updated += OnBtUpdated;
     }
 
-    private void OnBtUpdated(int status)
+    private void OnBtUpdated(long status) // int signal args are long in C#
     {
-        if (status == (int)BT.Status.Success)
+        if (status == (long)BT.Status.Success)
             _btPlayer.Restart();
     }
 }
@@ -317,14 +317,14 @@ using Godot;
 
 public partial class Character : CharacterBody2D
 {
-    [Export] private LimboHSM _hsm;
+    [Export] private LimboHsm _hsm; // C# name of LimboHSM
     [Export] private LimboState _idle;
     [Export] private LimboState _move;
 
     public override void _Ready()
     {
-        _hsm.AddTransition(_idle, _move, _idle.EventFinished);
-        _hsm.AddTransition(_move, _idle, _move.EventFinished);
+        _hsm.AddTransition(_idle, _move, _idle.EVENTFINISHED);
+        _hsm.AddTransition(_move, _idle, _move.EVENTFINISHED);
         _hsm.Initialize(this);
         _hsm.SetActive(true);
     }
@@ -371,7 +371,7 @@ public partial class IdleState : LimboState
     public override void _Update(double delta)
     {
         if (Input.GetVector("ui_left", "ui_right", "ui_up", "ui_down").Length() > 0.1f)
-            Dispatch(EventFinished);
+            Dispatch(EVENTFINISHED);
     }
 }
 ```

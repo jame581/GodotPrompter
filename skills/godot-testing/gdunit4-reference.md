@@ -52,7 +52,7 @@ func test_example() -> void:
 | Convention   | Rule                                                                  |
 |--------------|-----------------------------------------------------------------------|
 | File name    | Any name; `*Test.cs` is the convention                               |
-| Class        | Decorated with `[TestSuite]`; inherits `GdUnit4.GdUnitTestSuite`     |
+| Class        | Decorated with `[TestSuite]`; a plain class, no base class          |
 | Test method  | Decorated with `[TestCase]`                                           |
 
 ```csharp
@@ -61,7 +61,7 @@ using GdUnit4;
 using static GdUnit4.Assertions;
 
 [TestSuite]
-public partial class HealthComponentTest : GdUnit4.GdUnitTestSuite
+public class HealthComponentTest
 {
     [TestCase]
     public void Example()
@@ -108,7 +108,7 @@ func after_test() -> void:
 
 ```csharp
 [TestSuite]
-public partial class ExampleTest : GdUnit4.GdUnitTestSuite
+public class ExampleTest
 {
     [Before]
     public void Before()
@@ -157,7 +157,7 @@ func before_test() -> void:
 public void BeforeTest()
 {
     _health = AutoFree(new HealthComponent());
-    AddChild(_health);
+    ((SceneTree)Engine.GetMainLoop()).Root.AddChild(_health); // suites are not Nodes
 }
 ```
 
@@ -262,7 +262,7 @@ AssertThat(n).IsGreaterEqual(x);
 AssertThat(n).IsLess(x);
 AssertThat(n).IsLessEqual(x);
 AssertThat(n).IsBetween(low, high);
-AssertThat(n).IsApproximately(expected, margin);
+AssertThat(n).IsEqualApprox(expected, margin);
 AssertThat(n).IsNegative();
 AssertThat(n).IsZero();
 ```
@@ -296,16 +296,14 @@ AssertThat(arr).HasSize(n);
 
 ```csharp
 [TestCase]
-public async GdUnitAwaiter SignalTest()
+public async Task SignalTest()
 {
-    var monitor = MonitorSignals(_health);
+    AssertSignal(_health).StartMonitoring(); // before the emit, or it is missed
     _health.TakeDamage(10);
 
-    AssertSignal(monitor).IsEmitted("health_changed");
-    AssertSignal(monitor).IsEmitted("health_changed").WithArgs(100, 90);
-    AssertSignal(monitor).IsNotEmitted("died");
-    AssertSignal(monitor).IsEmitted("health_changed").Exactly(1);
-    await Task.CompletedTask;
+    await AssertSignal(_health).IsEmitted(HealthComponent.SignalName.HealthChanged).WithTimeout(100);
+    await AssertSignal(_health).IsEmitted(HealthComponent.SignalName.HealthChanged, 100, 90).WithTimeout(100);
+    await AssertSignal(_health).IsNotEmitted(HealthComponent.SignalName.Died).WithTimeout(100);
 }
 ```
 
@@ -345,30 +343,20 @@ verify(spy_health).take_damage(10)               # call was tracked
 
 ## Mocking API — C#
 
+gdUnit4Net (`gdUnit4.api`) has no mocking API: `mock()`, `spy()` and `verify()` are GDScript-only. In C#, hand-roll a fake — subclass the dependency (its methods must be `virtual`) or inject an interface — and assert on what it recorded:
+
 ```csharp
-// Create a mock (all methods stubbed)
-var mockHealth = Mock<HealthComponent>();
+public partial class FakeHealth : HealthComponent
+{
+    public int LastDamage { get; private set; } = -1;
+    public override void TakeDamage(int amount) => LastDamage = amount;
+}
 
-// Stub method return value
-mockHealth.MockMethod(h => h.GetHealth(), 75);
-mockHealth.MockProperty(h => h.CurrentHealth, 75);
-
-// Use the mock
-_player.HealthComponent = mockHealth;
+// In a [TestCase]
+var fakeHealth = AutoFree(new FakeHealth());
+_player.HealthComponent = fakeHealth;
 _player.ReceiveHit(10);
-
-// Verify calls
-Verify(mockHealth).TakeDamage(10);
-Verify(mockHealth, Times(1)).TakeDamage(10);
-VerifyNoInteractions(mockHealth);
-
-// Spy — real object with call tracking
-var spyHealth = Spy(new HealthComponent());
-AddChild(AutoFree(spyHealth));
-spyHealth.TakeDamage(10);
-
-AssertThat(spyHealth.CurrentHealth).IsEqual(90);  // real behavior
-Verify(spyHealth).TakeDamage(10);                 // call tracked
+AssertThat(fakeHealth.LastDamage).IsEqual(10);
 ```
 
 ---

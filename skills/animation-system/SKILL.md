@@ -121,7 +121,7 @@ _animPlayer.Queue("idle");
 _animPlayer.Stop();
 _animPlayer.Pause();
 _animPlayer.Play();
-_animPlayer.SpeedScale = 2.0;
+_animPlayer.SpeedScale = 2.0f;
 _animPlayer.Seek(0.5);
 ```
 
