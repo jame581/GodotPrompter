@@ -1,6 +1,6 @@
 # Global Illumination
 
-Reference for `skills/3d-essentials/SKILL.md` — GI methods comparison, ReflectionProbe, LightmapGI, SDFGI deep dive. The 4.5+ Specular Occlusion and Bent Normal Maps notes stay in core SKILL.md.
+Reference for `skills/3d-essentials/SKILL.md` — GI methods comparison, ReflectionProbe, LightmapGI, SDFGI deep dive, and the 4.5+ specular occlusion and bent normal map notes, which apply across GI methods.
 
 > ← Back to [SKILL.md](../SKILL.md)
 
@@ -73,3 +73,16 @@ env.SdfgiCascades = 4;
 env.SdfgiUseOcclusion = true;
 ```
 
+### Specular Occlusion from Ambient Light (Godot 4.5+)
+
+Godot 4.5+ dims indirect specular (sky, ReflectionProbe, GI reflections) by the brightness of the ambient light reaching each pixel, in all three renderers. This prevents unrealistically bright reflections in areas that receive little indirect light (under eaves, in crevices and corners). It is on by default and needs no re-bake: turn it off globally with `rendering/reflections/specular_occlusion/enabled`, or per shader with `render_mode specular_occlusion_disabled`.
+
+### Bent Normal Maps (Godot 4.5+)
+
+Bent normal maps encode the mean unoccluded direction from each texel — the average direction toward open sky across the hemisphere. When assigned to the **Bent Normal** slot on `StandardMaterial3D`, Godot uses this information to improve indirect lighting directionality and specular occlusion accuracy. The result is more realistic ambient lighting on complex surfaces like cloth, carved stone, or organic shapes.
+
+**Inspector setup:** In `StandardMaterial3D`, enable **Bent Normal** → assign your tangent-space bent normal texture (baked from Marmoset, Substance, or xNormal).
+
+> **Most visible on:** materials that combine low roughness or high metallic values with baked GI (LightmapGI / VoxelGI / SDFGI). On fully rough dielectric surfaces the benefit is subtler. Use on hero assets; skip on background geometry.
+
+> See [materials-and-lighting-recipes.md](materials-and-lighting-recipes.md#bent-normal-maps-godot-45) for the runtime-assignment GDScript + C# code path (the Inspector setup above is the typical case).

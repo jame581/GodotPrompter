@@ -156,121 +156,17 @@ Godot 4.6 requests OpenXR 1.1 from the runtime, unlocking 1.1 features (promoted
 
 ### Spatial Entities — Anchors, Plane Tracking, Marker Tracking (Godot 4.6+)
 
-Godot 4.6 adds the OpenXR **Spatial Entities** extensions (experimental API), enabling:
+Godot 4.6 adds the OpenXR **Spatial Entities** extensions (experimental API): **spatial anchors** that persist virtual object positions across sessions, **plane detection** for floors, walls and ceilings, and **marker tracking** for QR codes and image markers. Enable them under **XR → OpenXR → Extensions → Spatial Entity** (all off by default; anchors with the default `RID()` context also need **Enable Spatial Anchors** and **Enable Builtin Anchor Detection**). Create an anchor with `OpenXRSpatialAnchorCapability.create_new_anchor(local_transform, RID())`, which returns an `OpenXRAnchorTracker`, and show it with an `XRAnchor3D` whose `tracker` is that tracker's name. There is no `XRSpatialAnchor` class.
 
-- **Spatial anchors** — persist virtual object positions across sessions (`OpenXRSpatialAnchorCapability`, `OpenXRAnchorTracker`, `XRAnchor3D`)
-- **Plane detection** — detect floor, wall, and ceiling surfaces from the environment scan
-- **Marker tracking** — track QR codes or image markers in the scene
-
-**Basic spatial anchor usage:**
-
-```gdscript
-# Under XR > OpenXR > Extensions > Spatial Entity enable: Enabled, Enable Spatial Anchors, and
-# Enable Builtin Anchor Detection (the default RID() context needs it). All are off by default.
-# The capability is a singleton only while OpenXR is enabled; without it this script will not parse.
-extends XROrigin3D
-
-func place_anchor_at(local_transform: Transform3D) -> XRAnchor3D:
-    if not OpenXRSpatialAnchorCapability.is_spatial_anchor_supported():
-        push_error("Spatial anchors are not supported on this device.")
-        return null
-
-    # The transform is in this XROrigin3D's local space.
-    var tracker: OpenXRAnchorTracker = OpenXRSpatialAnchorCapability.create_new_anchor(local_transform, RID())
-    if tracker == null:
-        return null
-
-    # An XRAnchor3D follows the tracker it names; the runtime keeps it on the real-world spot.
-    var anchor := XRAnchor3D.new()
-    anchor.tracker = tracker.name
-    add_child(anchor)
-    return anchor
-```
-
-```csharp
-// The capability is an engine singleton registered only while OpenXR is running.
-public partial class SpatialAnchorManager : XROrigin3D
-{
-    public XRAnchor3D PlaceAnchorAt(Transform3D localTransform)
-    {
-        var anchors = Engine.GetSingleton("OpenXRSpatialAnchorCapability") as OpenXRSpatialAnchorCapability;
-        if (anchors == null || !anchors.IsSpatialAnchorSupported())
-        {
-            GD.PushError("Spatial anchors are not supported on this device.");
-            return null;
-        }
-
-        // The transform is in this XROrigin3D's local space.
-        OpenXRAnchorTracker tracker = anchors.CreateNewAnchor(localTransform);
-        if (tracker == null)
-            return null;
-
-        // An XRAnchor3D follows the tracker it names; the runtime keeps it on the real-world spot.
-        var anchor = new XRAnchor3D { Tracker = tracker.Name };
-        AddChild(anchor);
-        return anchor;
-    }
-}
-```
-
-To keep an anchor across sessions, turn on **Enable Persistent Anchors**, check `is_spatial_persistence_supported()`, then call `persist_anchor(tracker, RID(), callback)` and store `tracker.uuid` with your own data; persisted anchors come back as `XRServer.TRACKER_ANCHOR` trackers on the next launch. See the [OpenXR spatial entities tutorial](https://docs.godotengine.org/en/stable/tutorials/xr/openxr_spatial_entities.html).
-
-> **Note:** The spatial entities classes arrived in Godot 4.6 and `OpenXRSpatialAnchorCapability` is still marked experimental — its API may change. There is no `XRSpatialAnchor` class; the scene node is `XRAnchor3D`.
+> See [references/spatial-entities.md](references/spatial-entities.md) for the GDScript + C# anchor placement recipe, the C# singleton lookup, anchor persistence across sessions, and the 4.7 `next` parameter on `create_new_anchor()`.
 
 ---
 
 ## 10. Godot 4.7+ XR Features
 
-### User Presence Detection (Godot 4.7+)
+Godot 4.7 adds the OpenXR user presence extension: `OpenXRInterface.user_presence_changed(is_user_present: bool)` fires when the headset is put on or taken off (not during startup or shutdown), with `is_user_presence_supported()` and `is_user_present()` to check and poll. Typical use: pause the game and mute audio while the headset is off. `OpenXRCompositionLayer` also gains `eye_visibility` (`EYE_VISIBILITY_BOTH`, `_LEFT`, `_RIGHT`) to show a layer to one eye only, and `create_new_anchor()` gains an optional `next` parameter for vendor create-info structs.
 
-`OpenXRInterface` exposes the OpenXR user presence extension: the `user_presence_changed(is_user_present: bool)` signal fires when the user puts on or removes the headset, `is_user_presence_supported()` reports whether the extension is supported and enabled, and `is_user_present()` polls the current state (both only return valid values after OpenXR is initialized). Typical use: pause the game and mute audio when the headset comes off.
-
-> **Note:** The signal is not emitted during application startup or shutdown — assume user presence is gained on startup and lost on shutdown.
-
-```gdscript
-func _ready() -> void:
-    var xr_interface: OpenXRInterface = XRServer.find_interface("OpenXR")
-    if xr_interface and xr_interface.is_user_presence_supported():
-        xr_interface.user_presence_changed.connect(_on_user_presence_changed)
-
-func _on_user_presence_changed(is_user_present: bool) -> void:
-    get_tree().paused = not is_user_present
-```
-
-```csharp
-public override void _Ready()
-{
-    var xrInterface = XRServer.FindInterface("OpenXR") as OpenXRInterface;
-    if (xrInterface != null && xrInterface.IsUserPresenceSupported())
-        xrInterface.UserPresenceChanged += OnUserPresenceChanged;
-}
-
-private void OnUserPresenceChanged(bool isUserPresent)
-{
-    GetTree().Paused = !isUserPresent;
-}
-```
-
-### Composition Layer Eye Visibility (Godot 4.7+)
-
-`OpenXRCompositionLayer` gains `eye_visibility` (`EyeVisibility` enum: `EYE_VISIBILITY_BOTH = 0` default, `EYE_VISIBILITY_LEFT = 1`, `EYE_VISIBILITY_RIGHT = 2`) — the eye(s) the composition layer is visible to. Renders a quad/cylinder/equirect layer to one eye only, e.g. for per-eye calibration screens or stereo content authored per eye.
-
-```gdscript
-$OpenXRCompositionLayerQuad.eye_visibility = OpenXRCompositionLayer.EYE_VISIBILITY_LEFT
-```
-
-```csharp
-GetNode<OpenXRCompositionLayerQuad>("OpenXRCompositionLayerQuad").EyeVisibility =
-    OpenXRCompositionLayer.EyeVisibilityEnum.Left;
-```
-
-> **Note:** Not all composition layer types or runtimes support restricting visibility to a single eye.
-
-### Spatial Anchor Extensibility (Godot 4.7+)
-
-`OpenXRSpatialAnchorCapability.create_new_anchor()` gains an optional `next` parameter — full signature: `create_new_anchor(transform: Transform3D, spatial_context: RID = RID(), next: OpenXRStructureBase = null) -> OpenXRAnchorTracker`. `next` must be a valid next object for the `XrSpatialAnchorCreateInfoEXT` chain, letting vendor-specific create-info structs be appended when creating an anchor. Existing calls are unaffected (compatible change, [GH-118128](https://github.com/godotengine/godot/pull/118128)).
-
-> **Note:** `OpenXRSpatialAnchorCapability` is still marked experimental — the class may change in future versions. Section 9 shows typical anchor placement.
+> See [references/godot-4-7-features.md](references/godot-4-7-features.md) for the user presence and eye visibility recipes (GDScript + C#), and [references/spatial-entities.md](references/spatial-entities.md#spatial-anchor-extensibility-godot-47) for the anchor `next` parameter.
 
 ---
 

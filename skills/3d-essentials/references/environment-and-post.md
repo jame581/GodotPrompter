@@ -1,6 +1,6 @@
 # Environment & Post-Processing
 
-Reference for `skills/3d-essentials/SKILL.md` — `WorldEnvironment` setup, sky options, tonemap modes, post-processing effects, and the 4.6+ glow / SSR upgrades.
+Reference for `skills/3d-essentials/SKILL.md` — `WorldEnvironment` setup, sky options, tonemap modes, post-processing effects, the 4.6+ glow / SSR upgrades, and the 4.7 HDR output and sky reflection layer notes.
 
 > ← Back to [SKILL.md](../SKILL.md)
 
@@ -142,3 +142,9 @@ SSR in Godot 4.6 has been redesigned for higher quality at reduced GPU cost. The
 If you previously disabled SSR due to performance concerns, it is worth re-enabling after upgrading to 4.6 and re-profiling.
 
 ---
+
+### HDR Output and Sky Reflection Layers (Godot 4.7+)
+
+> **Godot 4.7+:** `display/window/hdr/request_hdr_output` (default `false`, promoted to a basic project setting) requests HDR display output for the main window and editor where supported, auto-switching between HDR and SDR as screens or system settings change; it forces `Viewport.use_hdr_2d` on for the main viewport (other `SubViewport`s must enable it themselves). Read only at startup — toggle `Window.hdr_output_requested` at runtime.
+
+> ⚠️ **Changed in Godot 4.7:** The `rendering/reflections/sky_reflections/roughness_layers` default is `8` again. Only 4.6.0 and 4.6.1 used `7`; the revert ([GH-116154](https://github.com/godotengine/godot/pull/116154)) shipped in 4.7 and was backported to 4.6.2. Only projects upgrading from 4.6.0 or 4.6.1 with the setting at its default see different sky reflections — set it to `7` to keep that look. See the [4.7 migration guide](https://docs.godotengine.org/en/latest/tutorials/migrating/upgrading_to_godot_4.7.html).

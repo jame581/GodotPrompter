@@ -1,6 +1,6 @@
 # Sprite Frame Animation
 
-Reference for `skills/animation-system/SKILL.md` — 2D sprite animation patterns: `AnimatedSprite2D` vs `AnimationPlayer + Sprite2D`.
+Reference for `skills/animation-system/SKILL.md` — 2D sprite animation patterns: `AnimatedSprite2D` vs `AnimationPlayer + Sprite2D`, and `SpriteFrames` ping-pong looping (4.7+).
 
 > ← Back to [SKILL.md](../SKILL.md)
 
@@ -67,4 +67,18 @@ public partial class Character : CharacterBody2D
         MoveAndSlide();
     }
 }
+```
+
+## Ping-Pong Playback (Godot 4.7+)
+
+`SpriteFrames` gains a `LoopMode` enum — `LOOP_NONE = 0`, `LOOP_LINEAR = 1`, `LOOP_PINGPONG = 2` — set per animation with `set_animation_loop_mode(anim, loop_mode)` and read back with `get_animation_loop_mode(anim)`. The old bool `set_animation_loop()` / `get_animation_loop()` are deprecated. Ping-pong alternates direction each time the animation reaches the end or start, and works with both `AnimatedSprite2D` and `AnimatedSprite3D`.
+
+```gdscript
+var frames: SpriteFrames = $AnimatedSprite2D.sprite_frames
+frames.set_animation_loop_mode(&"sway", SpriteFrames.LOOP_PINGPONG)
+```
+
+```csharp
+var frames = GetNode<AnimatedSprite2D>("AnimatedSprite2D").SpriteFrames;
+frames.SetAnimationLoopMode("sway", SpriteFrames.LoopMode.Pingpong);
 ```

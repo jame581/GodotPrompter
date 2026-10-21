@@ -1,6 +1,6 @@
 # Skeleton Modifiers (3D)
 
-Reference for `skills/animation-system/SKILL.md` — procedural skeleton modifiers (4.4+): `LookAtModifier3D`, `SpringBoneSimulator3D`.
+Reference for `skills/animation-system/SKILL.md` — procedural skeleton modifiers (4.4+): `LookAtModifier3D` (including its 4.7 `relative` default change), `SpringBoneSimulator3D`.
 
 > ← Back to [SKILL.md](../SKILL.md)
 
@@ -40,6 +40,8 @@ _lookAt.SymmetryLimitation = true;
 _lookAt.PrimaryLimitAngle = Mathf.DegToRad(70f);
 _lookAt.SecondaryLimitAngle = Mathf.DegToRad(45f);
 ```
+
+> ⚠️ **Changed in Godot 4.7:** `LookAtModifier3D.relative` now defaults to `false` — the rotation is applied relative to the rest pose instead of the current pose. The default was `true` only in 4.6.0; the change was also backported to 4.6.1, so projects coming from 4.6.1 or later see no difference. Set `relative = true` to restore the 4.6.0 behavior. See the [4.7 migration guide](https://docs.godotengine.org/en/latest/tutorials/migrating/upgrading_to_godot_4.7.html).
 
 ## SpringBoneSimulator3D (Godot 4.4+)
 
