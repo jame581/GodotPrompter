@@ -7,7 +7,7 @@ Reference for `skills/hud-system/SKILL.md` — floating damage-number scene with
 ---
 ## 4. Damage Numbers
 
-Damage numbers are short-lived `Label` nodes that float upward and fade out. Spawn one per damage event; release it after the tween completes. For high-frequency damage (e.g. rapid-fire weapons) a simple manual pool avoids per-hit allocation.
+Damage numbers are short-lived `Label` nodes that float upward and fade out. Spawn one per damage event and hide it after the tween completes, so the pool below can reuse it (call `queue_free()` instead only when you instantiate one per hit without a pool). For high-frequency damage (e.g. rapid-fire weapons) a simple manual pool avoids per-hit allocation.
 
 ### GDScript — DamageNumber scene (single instance)
 
@@ -49,7 +49,7 @@ func _play_animation() -> void:
         .set_delay(lifetime * 0.5) \
         .set_ease(Tween.EASE_IN)
 
-    tween.finished.connect(queue_free)
+    tween.finished.connect(hide)  # pooled: hide, never free — the spawner keeps reusing this node
 ```
 
 ### C# — DamageNumber scene (single instance)
@@ -89,7 +89,7 @@ public partial class DamageNumber : Label
             .SetDelay(Lifetime * 0.5f)
             .SetEase(Tween.EaseType.In);
 
-        tween.Finished += QueueFree;
+        tween.Finished += Hide; // pooled: hide, never free — the spawner keeps reusing this node
     }
 }
 ```

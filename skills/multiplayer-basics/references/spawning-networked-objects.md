@@ -38,11 +38,13 @@ func _ready() -> void:
 
 
 func _custom_spawn(data: Variant) -> Node:
-	# data is whatever you passed to spawner.spawn(data).
+	# data is whatever you passed to spawner.spawn(data). Runs on EVERY peer.
 	var scene: PackedScene = load("res://scenes/player.tscn")
-	var player: Node = scene.instantiate()
+	var player: Node2D = scene.instantiate()
 	player.name = str(data["peer_id"])
 	player.global_position = data["position"]
+	# Authority is not replicated — set it here so every peer agrees on the owner.
+	player.set_multiplayer_authority(data["peer_id"])
 	return player
 
 
@@ -51,8 +53,7 @@ func server_spawn_player(peer_id: int, spawn_pos: Vector2) -> void:
 	if not multiplayer.is_server():
 		return
 	var data := {"peer_id": peer_id, "position": spawn_pos}
-	var player: Node = spawner.spawn(data)
-	player.set_multiplayer_authority(peer_id)
+	spawner.spawn(data)
 ```
 
 ### C#
@@ -77,8 +78,11 @@ public partial class World : Node
         var dict   = data.AsGodotDictionary();
         var scene  = GD.Load<PackedScene>("res://scenes/player.tscn");
         var player = scene.Instantiate<Node2D>();
-        player.Name              = dict["peer_id"].As<int>().ToString();
+        int peerId = dict["peer_id"].As<int>();
+        player.Name              = peerId.ToString();
         player.GlobalPosition    = dict["position"].As<Vector2>();
+        // Runs on every peer; authority is not replicated, so set it here.
+        player.SetMultiplayerAuthority(peerId);
         return player;
     }
 
@@ -90,13 +94,12 @@ public partial class World : Node
             ["peer_id"]  = peerId,
             ["position"] = spawnPos,
         };
-        var player = _spawner.Spawn(data);
-        player.SetMultiplayerAuthority(peerId);
+        _spawner.Spawn(data);
     }
 }
 ```
 
-> **Note:** `spawner.spawn()` must be called on the server. `spawn_path` must point to the container node using a NodePath relative to the MultiplayerSpawner's parent. Every scene passed to `add_spawnable_scene` must be in the project — packed-scene paths are sent over the network.
+> **Note:** `spawner.spawn()` must be called on the spawner's authority (the server by default). `spawn_path` is resolved from the MultiplayerSpawner itself, hence `../Players`. For an automatic spawn the spawner sends the scene's index in its spawnable list, not its path, so every peer must register the same scenes in the same order.
 
 ---
 

@@ -20,7 +20,7 @@ All examples target Godot 4.3+ with no deprecated APIs; GDScript first, then C#.
 | Feature | `Node2D` | `Control` |
 |---|---|---|
 | Position model | World-space `position` (pixels from parent) | Anchor + offset relative to parent rect |
-| Size | No intrinsic size | Has `size`, `minimum_size`, `custom_minimum_size` |
+| Size | No intrinsic size | Has `size`, `custom_minimum_size`, and a computed minimum (`get_combined_minimum_size()`) |
 | Theme | None | Inherits and overrides `Theme` resources |
 | Focus | Not applicable | Built-in focus system (`focus_mode`, `grab_focus()`) |
 | Mouse events | Manual via `_input` | `gui_input`, `mouse_entered`, `mouse_exited` |
@@ -33,10 +33,10 @@ Every UI widget (`Button`, `Label`, `LineEdit`, etc.) extends `Control`. Key pro
 - `anchor_left`, `anchor_top`, `anchor_right`, `anchor_bottom` — fractional values (0.0–1.0) relative to the parent rect
 - `offset_left`, `offset_top`, `offset_right`, `offset_bottom` — pixel offsets applied after the anchor resolves
 - `size_flags_horizontal`, `size_flags_vertical` — how the node participates in `Container` layout
-- `theme` — a `Theme` resource; if `null`, walks up the tree to the nearest ancestor with one
+- `theme` — a `Theme` resource; lookups check each ancestor `Control`/`Window` that has one, nearest first, and stop at the first parent that is neither (e.g. a `CanvasLayer` or `Node2D`)
 - `focus_mode` — whether the node can receive keyboard/gamepad focus
 
-Place UI nodes inside a `CanvasLayer` (or directly under the scene root's built-in canvas) so they render on top of the 3D/2D world, unaffected by `Camera` transforms.
+Place UI nodes inside a `CanvasLayer` so they render on top of the 3D/2D world, unaffected by `Camera2D` transforms. Controls on the scene root's built-in canvas (layer 0) move with a `Camera2D`, because the camera sets that canvas's transform.
 
 > ⚠️ **Changed in Godot 4.7:** `Control.accessibility_live` changed type from `DisplayServer.AccessibilityLiveMode` to `AccessibilityServer.AccessibilityLiveMode` (`LIVE_OFF = 0` default, `LIVE_POLITE`, `LIVE_ASSERTIVE`) — accessibility enums/APIs moved to the new `AccessibilityServer` singleton. GDScript-compatible; breaks C# binary/source compatibility (rebuild against the new enum). See the [4.7 migration guide](https://docs.godotengine.org/en/latest/tutorials/migrating/upgrading_to_godot_4.7.html).
 
@@ -98,7 +98,7 @@ The anchor-vs-offset rule (keep offsets at 0 and let anchors do the work) plus f
 
 ## 4. Theme System
 
-A `Theme` resource centralizes fonts, colors, and `StyleBox`es. Apply at the root and let inheritance do the work; use `theme_override_*` only for one-off tweaks. `StyleBoxFlat` covers most flat-design needs (`bg_color`, `border_color`, `corner_radius`, `border_width`); `StyleBoxTexture` for textures.
+A `Theme` resource centralizes fonts, colors, and `StyleBox`es. Apply at the root and let inheritance do the work; use `theme_override_*` only for one-off tweaks. `StyleBoxFlat` covers most flat-design needs (`bg_color`, `border_color`, `corner_radius_*`, `border_width_*`); `StyleBoxTexture` for textures.
 
 > See [references/theme-system.md](references/theme-system.md) for the full Theme resource creation walk-through, StyleBoxFlat properties, font overrides, theme inheritance rules, and per-node `theme_override_*` methods.
 

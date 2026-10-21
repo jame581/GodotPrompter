@@ -21,12 +21,12 @@ HUD (CanvasLayer)
 
 ### How it Works
 
-The `SubViewport` renders a completely separate view of the world. Rather than duplicating nodes, use Godot's **visibility layers** to control what each camera sees:
+A `SubViewport` has its own `World2D`, so it shows nothing of the main world until you share it: `minimap_viewport.world_2d = get_viewport().world_2d`. Rather than duplicating nodes, use Godot's **visibility layers** to control what each viewport shows (`Camera2D` has no cull mask — the mask is on the viewport):
 
-1. Assign your world `TileMapLayer`, environment, and entities to a **world layer** (e.g. layer 1).
+1. Assign your world `TileMapLayer`, environment, and entities to a **world layer** (e.g. layer 1) via `CanvasItem.visibility_layer`.
 2. Assign minimap-specific indicator sprites (player dot, enemy dots) to a **minimap layer** (e.g. layer 2).
-3. Set the main `Camera2D`'s `cull_mask` to show only layer 1.
-4. Set the `MinimapCamera`'s `cull_mask` to show layers 1 + 2, or only layer 2 if you want an abstract minimap.
+3. Set the main viewport's `canvas_cull_mask` to show only layer 1.
+4. Set the `SubViewport`'s `canvas_cull_mask` to show layers 1 + 2, or only layer 2 if you want an abstract minimap.
 
 ### GDScript — MinimapCamera
 
@@ -74,10 +74,10 @@ public partial class MinimapCamera : Camera2D
 
 | Property | Recommended value | Reason |
 |---|---|---|
-| `size` | `Vector2i(256, 256)` | Internal render resolution; `SubViewportContainer` scales to display size |
+| `size` | `Vector2i(256, 256)` | Internal render resolution; with `SubViewportContainer.stretch` off (default) the container shows it at this size — `stretch = true` instead resizes the SubViewport to the container (`stretch_shrink` divides it) |
 | `render_target_update_mode` | `UPDATE_ALWAYS` | Keeps the minimap live every frame |
 | `disable_3d` | `true` | Skip 3D rendering overhead for a 2D minimap |
-| `canvas_item_default_texture_filter` | `TEXTURE_FILTER_NEAREST` | Preserves pixel art crispness |
+| `canvas_item_default_texture_filter` | `DEFAULT_CANVAS_ITEM_TEXTURE_FILTER_NEAREST` | Preserves pixel art crispness |
 
 ### Circular Mask (Optional)
 

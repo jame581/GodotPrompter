@@ -20,7 +20,7 @@ Godot uses a **client-server model** built on top of `MultiplayerAPI`. One peer 
 | `1` | The server (always) |
 | `2`+ | Connected clients — randomly generated unique IDs, **not** sequential |
 
-**Multiplayer authority** is the concept of ownership over a node. Only the authoritative peer should read input and drive that node's state. By default the server (peer `1`) is the authority for every node. Call `set_multiplayer_authority(peer_id)` to transfer ownership to a client.
+**Multiplayer authority** is the concept of ownership over a node. Only the authoritative peer should read input and drive that node's state. By default the server (peer `1`) is the authority for every node. Call `set_multiplayer_authority(peer_id)` to transfer ownership to a client — on **every** peer, since the call is local and is not replicated.
 
 ```
 Server (peer 1)
@@ -36,7 +36,7 @@ Client (peer 2, 3, …)
 
 ## 2. Setting Up ENetMultiplayerPeer
 
-Both sides use the same three steps: create an `ENetMultiplayerPeer`, call `create_server(port, max_clients)` or `create_client(address, port)`, then assign it to `multiplayer.multiplayer_peer` and connect the four `MultiplayerAPI` signals. **Check the `create_*` return value** — it returns an `Error`, and a silent `ERR_CANT_CREATE` (port already in use) otherwise looks exactly like a hang.
+Both sides use the same three steps: create an `ENetMultiplayerPeer`, call `create_server(port, max_clients)` or `create_client(address, port)`, then assign it to `multiplayer.multiplayer_peer` and connect the `MultiplayerAPI` signals (`peer_connected`, `peer_disconnected`, `connected_to_server`, `connection_failed`, plus `server_disconnected` — see §7). **Check the `create_*` return value** — it returns an `Error`, and a silent `ERR_CANT_CREATE` (port already in use) otherwise looks exactly like a hang.
 
 The server is always peer ID `1`; clients receive randomly generated unique IDs, so never assume they are sequential.
 
@@ -250,13 +250,13 @@ public partial class Player : CharacterBody2D
 | `multiplayer.get_unique_id()` | `int` | This peer's ID |
 | `get_multiplayer_authority()` | `int` | ID of the peer that owns this node |
 | `is_multiplayer_authority()` | `bool` | True if this peer owns this node |
-| `set_multiplayer_authority(id)` | `void` | Transfer ownership; call on the server |
+| `set_multiplayer_authority(id)` | `void` | Transfer ownership; local only — call it on every peer (e.g. in the spawn function) |
 
 ---
 
 ## 5. Spawning Networked Objects
 
-Use `MultiplayerSpawner` to replicate scene instances across peers. The server adds a child to the spawned node's parent, the spawner mirrors it on every peer with synchronized state. For dynamic spawn paths, configure `_spawnable_scenes` and call `add_child(scene.instantiate())` only on the server.
+Use `MultiplayerSpawner` to replicate scene instances across peers. Register the scenes (`add_spawnable_scene()` or the inspector's Auto Spawn List); when the server adds an instance of one as a direct child of the `spawn_path` node, the spawner instantiates it on every peer. For a spawn that needs data (position, owner), set `spawn_function` and call `spawn(data)` on the server.
 
 > See [references/spawning-networked-objects.md](references/spawning-networked-objects.md) for `MultiplayerSpawner` scene setup and the spawn-on-server flow (GDScript + C#).
 
@@ -282,28 +282,28 @@ Listen for `peer_disconnected(id)` on the `multiplayer` API. On the server: free
 
 | Pitfall | Symptom | Fix |
 |---------|---------|-----|
-| Calling an RPC on the wrong authority | `rpc_id` silently ignored; method never runs | Check `is_multiplayer_authority()` before sending; use `"any_peer"` only where intentional |
+| Calling an RPC on the wrong authority | Method never runs; the receiver logs `RPC '…' is not allowed on node …` | Check `is_multiplayer_authority()` before sending; use `"any_peer"` only where intentional |
 | Desync from unordered RPCs | Positions jitter or snap | Use `"unreliable_ordered"` for streams; use `"reliable"` for critical state changes |
 | Reading input in `_process` vs `_physics_process` | Movement desyncs on different frame rates | Always move `CharacterBody2D` in `_physics_process`; send sync RPCs from there too |
 | Not checking `is_multiplayer_authority()` before input | Every peer controls every player | Add an `if not is_multiplayer_authority(): return` guard at the top of input handling |
-| Spawning without `MultiplayerSpawner` | Object appears on server, missing on clients | Every runtime `add_child` on the server that should be replicated must go through `MultiplayerSpawner.spawn()` |
+| Spawning without `MultiplayerSpawner` | Object appears on server, missing on clients | Add replicated instances under a `MultiplayerSpawner`'s `spawn_path` (scene in its spawnable list), or use its `spawn()` with a `spawn_function` |
 | Forgetting `call_local` on authority RPCs | Server state diverges from its own node | Add `"call_local"` when the sender also needs to execute the RPC locally |
-| Using `rpc()` before the peer is assigned | Crash or silent failure | Assign `multiplayer.multiplayer_peer` before calling any RPC |
-| Not stripping `res://` scenes from exported builds | Clients can read server-only scripts | Use `export_exclude` or PCK encryption for sensitive server code |
+| Calling `rpc()` before the client has connected | Error `Attempt to call RPC while multiplayer peer is not connected yet.` | On clients, send RPCs only after `connected_to_server` (before a peer is assigned, the default `OfflineMultiplayerPeer` runs RPCs locally only) |
+| Not stripping `res://` scenes from exported builds | Clients can read server-only scripts | Leave server-only files out of the client preset (Resources tab: export mode or exclude filters), or use PCK encryption for sensitive server code |
 
 ---
 
 ## 9. Checklist
 
 - [ ] `ENetMultiplayerPeer.create_server()` / `create_client()` return `OK` before assigning to `multiplayer.multiplayer_peer`
-- [ ] All four multiplayer signals connected: `peer_connected`, `peer_disconnected`, `connected_to_server`, `connection_failed`
+- [ ] All five multiplayer signals connected: `peer_connected`, `peer_disconnected`, `connected_to_server`, `connection_failed`, `server_disconnected`
 - [ ] Every node that reads player input guards with `if not is_multiplayer_authority(): return`
 - [ ] Input processing and `sync_position` RPC are both in `_physics_process`, not `_process`
 - [ ] RPC modes chosen deliberately: `"any_peer"` only for client → server calls; `"authority"` for server → client
 - [ ] Unreliable RPCs used only for high-frequency updates (position, rotation); reliable for events (spawn, damage, chat)
 - [ ] `MultiplayerSpawner` configured with all spawnable scenes before the first player joins
-- [ ] `set_multiplayer_authority(peer_id)` called on the server after each player node is spawned
+- [ ] `set_multiplayer_authority(peer_id)` called on every peer when each player node is spawned (e.g. inside the `spawn_function`)
 - [ ] `peer_disconnected` handler frees the player node and removes it from tracking collections
 - [ ] `server_disconnected` handler on clients returns to main menu and nulls `multiplayer.multiplayer_peer`
 - [ ] `is_instance_valid()` checked before dereferencing any stored node reference in disconnect callbacks
-- [ ] No `rpc()` calls made before `multiplayer.multiplayer_peer` is assigned
+- [ ] No client `rpc()` calls made before `connected_to_server` fires

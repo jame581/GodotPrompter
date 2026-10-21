@@ -458,3 +458,144 @@ Three hits were outside batch D, and all were fixed:
 **Not changed:** version callouts (out of scope); editor click-paths (Create Physical Skeleton, SoftBody attachment steps, Import dock labels). Batch D has no eval-measured content. Other edits, not counted as claims:
 - the `procedural-generation` tip renames `var seed` to `level_seed`, so it no longer shadows the global `seed()`, and adds the C# `GD.Hash`;
 - an explanatory comment in the C# one-shot connect.
+
+## Batch E — UI + networking
+
+Skills: `godot-ui`, `hud-system`, `responsive-ui`, `multiplayer-basics`, `multiplayer-sync`,
+`dedicated-server`. Every SKILL.md and every reference file was read in full (prose, code comments,
+and the engine APIs the code calls). A claim repeated in a checklist or a reference is counted once.
+Behaviour claims were checked for `#ifdef DEBUG_ENABLED` guards; none of the corrected ones has one
+(the RPC rejection and the "not connected yet" error are plain `ERR_FAIL_COND_MSG`, which also
+prints in release exports).
+
+| Skill | Claims checked (SKILL.md + references) | Wrong | Softened |
+|---|---|---|---|
+| `godot-ui` | 24 + 49 | 14 | 0 |
+| `hud-system` | 20 + 23 | 12 | 0 |
+| `responsive-ui` | 26 + 29 | 8 | 0 |
+| `multiplayer-basics` | 32 + 22 | 12 | 0 |
+| `multiplayer-sync` | 24 + 20 | 11 | 0 |
+| `dedicated-server` | 26 + 16 | 6 | 0 |
+| **Total** | **311** | **63** | **0** |
+
+The worst errors were examples and advice that cannot work as written:
+- `multiplayer-basics` set `set_multiplayer_authority()` "on the server" after spawning. The call is
+  local and is not replicated, so every client kept the server as the authority and the owning
+  client's input guard always returned. The authority is now set inside the `spawn_function`,
+  which runs on every peer.
+- `multiplayer-sync`'s interpolation connected `synchronized` on the replicated `CharacterBody2D`
+  (the signal belongs to the `MultiplayerSynchronizer`, so the connect fails) and blended by
+  `Engine.get_physics_interpolation_fraction()`, which restarts every physics tick rather than
+  every network update. It also said `delta_interval = 0` disables delta sync; `0` sends every frame.
+- `responsive-ui`'s pixel-art script set `content_scale_factor` to the integer scale. In `viewport`
+  stretch mode the factor divides the render resolution, so a 4× screen rendered the 320×180 game
+  at 80×45. Integer scaling is `content_scale_stretch = CONTENT_SCALE_STRETCH_INTEGER`
+  (`display/window/stretch/scale_mode`). The same skill changed the stretch mode at runtime with
+  `ProjectSettings.set_setting()`, which the engine reads only at startup.
+- `dedicated-server` described a "server export template" that strips rendering from the binary.
+  Godot 4 has none: the dedicated-server export uses the regular template and strips resources
+  to placeholders. It also listed a `headless` feature tag that does not exist.
+- `hud-system`'s minimap set a `cull_mask` on `Camera2D` (2D has no camera cull mask) and never
+  shared the main `World2D` with the `SubViewport`, so the minimap showed nothing; its damage-number
+  pool freed every label after its first animation and then reused the freed nodes.
+
+| Skill file | Was | Is | Source |
+|---|---|---|---|
+| `godot-ui` SKILL.md:23 | Control has a `minimum_size` property | `custom_minimum_size` plus a computed minimum (`get_combined_minimum_size()`) | 4.7.2 ClassDB: no `Control.minimum_size`; 4.3 `doc/classes/Control.xml:376` |
+| `godot-ui` SKILL.md:36; `references/theme-system.md:80-87` | a null `theme` "walks up the tree to the nearest ancestor with one"; assign the theme "at the root `CanvasLayer`" | every ancestor `Control`/`Window` with a theme is checked, nearest first, and the walk stops at the first parent that is neither; `CanvasLayer` has no `theme` property | 4.3 `scene/theme/theme_owner.cpp:252-287, 428-441`; 4.7.2 ClassDB: no `CanvasLayer.theme` |
+| `godot-ui` SKILL.md:39 | UI "directly under the scene root's built-in canvas" is unaffected by camera transforms | the default canvas (layer 0) follows a `Camera2D`, which sets the viewport's canvas transform; use a `CanvasLayer` | 4.3 `scene/2d/camera_2d.cpp:67`; `doc/classes/CanvasLayer.xml:47` (`follow_viewport_enabled`, default `false`) |
+| `godot-ui` SKILL.md:101 | `StyleBoxFlat` properties `corner_radius`, `border_width` | `corner_radius_*`, `border_width_*` (per side/corner) | 4.7.2 ClassDB: neither property exists |
+| `godot-ui` `references/focus-and-navigation.md:58-59` | `ui_accept` (Enter / A button), `ui_cancel` (Escape / B button) | `ui_accept` is Enter, Kp Enter, Space; `ui_cancel` is Escape; neither has a gamepad button by default | 4.3 `core/input/input_map.cpp:424-438`; 4.7.2 `:458-471`; 4.7.2 run: `InputMap.action_get_events()` |
+| `godot-ui` `references/anchors-in-code.md:11-16, 35-40` | `set_anchors_and_offsets_preset(TOP_RIGHT)`, `size = 200×60`, then `offset_right = -16` gives a "fixed 200x60" label | that sequence yields 36×44; `set_anchors_preset()` plus all four offsets (-216, -16, 16, 76) gives 200×60 (GDScript and C#) | 4.7.2 run: both sequences on a 1000×500 parent |
+| `godot-ui` `references/signals.md:15-16, 27` | `toggled(button_pressed)`; `TextEdit.text_changed(new_text)`; `gui_input` is "any event within the rect" | `toggled(toggled_on)`; `TextEdit.text_changed` has no argument; `gui_input` also gets key events while focused | 4.3 `doc/classes/BaseButton.xml:100-101`, `TextEdit.xml:1413`, `Control.xml:1094-1097` |
+| `godot-ui` `references/ui-patterns.md:14` | `TextureRect — stretch: EXPAND_FIT` | `expand_mode: EXPAND_IGNORE_SIZE`, `stretch_mode: STRETCH_KEEP_ASPECT_COVERED` (no `EXPAND_FIT` constant) | 4.7.2 ClassDB: `TextureRect.ExpandMode`, `StretchMode` |
+| `godot-ui` `references/ui-patterns.md:253` | `event.is_action_just_pressed("ui_cancel")` | `event.is_action_pressed(...)` — `InputEvent` has no `is_action_just_pressed()` | 4.7.2 run: "Invalid call. Nonexistent function 'is_action_just_pressed' in base 'InputEventKey'" |
+| `hud-system` SKILL.md:18, 320 | `CanvasLayer` with layer `≥ 1` is what keeps the HUD off the camera | any `CanvasLayer` ignores `Camera2D` unless `follow_viewport_enabled`; layer `≥ 1` only draws it above the world | 4.3 `doc/classes/CanvasLayer.xml:7-8, 47, 54-55`; `camera_2d.cpp:67` |
+| `hud-system` SKILL.md:49 | world → screen with `get_viewport().get_screen_transform()` | `get_viewport().get_canvas_transform()` (what the damage-number and prompt code use); `get_screen_transform()` maps to the OS window | 4.3 `doc/classes/Viewport.xml:89-92` |
+| `hud-system` SKILL.md:62, 321 | `step = 0` avoids "snapping to integer steps" (`ProgressBar.step`) | `TextureProgressBar` defaults `step` to 1, `ProgressBar` to 0.01 | 4.3 `doc/classes/TextureProgressBar.xml:47`, `Range.xml:66` |
+| `hud-system` SKILL.md:330; `references/minimap.md:24-29` | the main and minimap `Camera2D`'s `cull_mask`; the SubViewport "renders a separate view of the world" | `Camera2D` has no cull mask: set `visibility_layer` on items and `canvas_cull_mask` on each viewport; share the world with `world_2d = get_viewport().world_2d`, since every viewport creates its own `World2D` | 4.7.2 ClassDB: no `Camera2D.cull_mask`; 4.3 `Viewport.xml:251, 413`; `scene/main/viewport.cpp:4985` |
+| `hud-system` `references/minimap.md:77` | `SubViewportContainer` "scales" the 256×256 render to display size | with `stretch` off (default) it shows the texture at the SubViewport's size; `stretch = true` resizes the SubViewport instead | 4.3 `doc/classes/SubViewportContainer.xml:24` |
+| `hud-system` `references/minimap.md:80` | `canvas_item_default_texture_filter = TEXTURE_FILTER_NEAREST` | `DEFAULT_CANVAS_ITEM_TEXTURE_FILTER_NEAREST` | 4.7.2 ClassDB: `Viewport.DefaultCanvasItemTextureFilter` |
+| `hud-system` `references/interaction-prompts.md:18` | `interaction_prompt.gd` had no `class_name`, while `interactable.gd` returns `InteractionPrompt` | added `class_name InteractionPrompt` | 4.7.2 `--check-only`: "Could not find type "InteractionPrompt" in the current scope" |
+| `hud-system` `references/interaction-prompts.md:187` | a world-space `Label` with `top_level = true` floats above the object | a plain child `Label`; `top_level` stops it inheriting the parent's transform | 4.3 `doc/classes/CanvasItem.xml:613-614` |
+| `hud-system` `references/notifications.md:10` | the max-visible cap "drops the oldest when the queue overflows" | extra messages wait in the queue (what the code does, and what SKILL.md:296 says) | the code at `:38-40` |
+| `hud-system` `references/notifications.md:48, 114` | `get_node("MessageLabel")` | `get_node("MarginContainer/MessageLabel")`, the path in the toast tree at `:145-149` (GDScript and C#) | the tree at `:145-149` |
+| `hud-system` `references/damage-numbers.md:10, 52, 92` | the pooled label calls `queue_free()` when its tween ends | `hide()` — the spawner reuses the 20 pooled nodes, so freeing them made the 21st hit use a freed instance | the spawner at `:107-132` |
+| `responsive-ui` SKILL.md:18 | keys of `.godot/project.godot` | the `[display]` section of `project.godot` (project root) | — (file location) |
+| `responsive-ui` SKILL.md:26, 87, 163; `references/pixel-art-setup.md:15, 28-44, 56-73` | pixel-art integer scaling by `Stretch > Scale` = 2–4 or a script setting `content_scale_factor` | `Stretch > Scale Mode = integer` / `content_scale_stretch = CONTENT_SCALE_STRETCH_INTEGER`; in `viewport` mode the scale factor divides the render resolution | 4.3 `scene/main/window.cpp:1197` (`final_size = viewport_size / content_scale_factor`), `core/config/project_settings.cpp:1515`; `main/main.cpp:3765, 3786` |
+| `responsive-ui` SKILL.md:38-49 | `ProjectSettings.set_setting("display/window/stretch/mode", …)` changes the stretch mode at runtime ("takes effect next frame") | read once at startup; at runtime set `get_window().content_scale_mode` | 4.3 `main/main.cpp:3760-3794` |
+| `responsive-ui` SKILL.md:58 | `canvas_items`: "rendered at design resolution, then upscaled" | rendered at the window's resolution, 2D and UI scaled from the design size (that description is the `viewport` mode) | 4.3 `doc/classes/Window.xml:851-856`; `window.cpp:1189` |
+| `responsive-ui` SKILL.md:60 | `disabled`: "every Control node must handle its own layout" | no scaling; the viewport is the window size (anchors and containers still work) | 4.3 `window.cpp:1105-1110` |
+| `responsive-ui` SKILL.md:123 | Project Settings `Size > Test Width/Height` | `Window Width/Height Override` (`display/window/size/window_width_override`); "Test Width" is the Godot 3 name | 4.3 `core/config/project_settings.cpp:1471` |
+| `responsive-ui` `references/dpi-scaling.md:12` | `content_scale_factor` "multiplies all UI element sizes" | in `canvas_items` and `disabled` modes; in `viewport` mode it divides the render resolution | 4.3 `window.cpp:1109, 1197` |
+| `multiplayer-basics` SKILL.md:39, 299; `references/enet-setup.md:70-76` | "the four `MultiplayerAPI` signals" | five: `server_disconnected` too (added to the signal table) | 4.3 `doc/classes/MultiplayerAPI.xml:130`; 4.7.2 ClassDB |
+| `multiplayer-basics` SKILL.md:23, 253, 305; `references/spawning-networked-objects.md:49-55, 85-95`; `references/player-join-flow.md:16` | `set_multiplayer_authority()` "call on the server" after `spawn()` | local and not replicated — call it on every peer; the examples now set it in the `spawn_function` (GDScript and C#) | 4.3 `doc/classes/Node.xml:884-887` ("does not automatically replicate the new authority") |
+| `multiplayer-basics` SKILL.md:259, 289 | configure `_spawnable_scenes`; every replicated `add_child` "must go through `MultiplayerSpawner.spawn()`" | `add_spawnable_scene()` / Auto Spawn List replicates a plain `add_child` under `spawn_path`; `spawn()` is only for custom spawns | 4.3 `modules/multiplayer/doc_classes/MultiplayerSpawner.xml:18, 44-45`; `multiplayer_spawner.cpp:73` |
+| `multiplayer-basics` SKILL.md:285 | an RPC from the wrong peer is "silently ignored" | the receiver rejects it and logs `RPC '…' is not allowed on node …` (not debug-only) | 4.3 `modules/multiplayer/scene_rpc_interface.cpp:252`; 4.7.2 `:263` |
+| `multiplayer-basics` SKILL.md:291, 309 | `rpc()` before a peer is assigned: "crash or silent failure" | the default peer is an `OfflineMultiplayerPeer` (RPCs run locally only); the real error is a client calling before it has connected: "Attempt to call RPC while multiplayer peer is not connected yet." | 4.3 `scene_multiplayer.cpp:690`; `scene_rpc_interface.cpp:298` |
+| `multiplayer-basics` SKILL.md:292 | `export_exclude` | the export preset's exclude filter / Resources export mode (`exclude_filter`) | 4.3 `editor/export/editor_export.cpp:84` |
+| `multiplayer-basics` `references/spawning-networked-objects.md:99` | `spawn_path` is relative to the spawner's parent; "packed-scene paths are sent over the network" | resolved from the spawner itself (hence `../Players`); the spawn packet carries the scene's index in the spawnable list, so peers must register the same scenes in the same order | 4.3 `multiplayer_spawner.cpp:195`; `scene_replication_interface.cpp:483, 529` |
+| `multiplayer-basics` `references/disconnect-handling.md:12` | ENet timeout "~30 s by default" | 5–30 s depending on round-trip time (`ENetPacketPeer.set_timeout()`); the client also gets `server_disconnected` | 4.3 `thirdparty/enet/enet/enet.h:240-242`; `modules/enet/doc_classes/ENetPacketPeer.xml:101-108`; `scene_multiplayer.cpp:54-66` |
+| `multiplayer-basics` `references/disconnect-handling.md:50-58` | retry loop `await multiplayer.connected_to_server` | a failed attempt never emits it, so the loop hung on the first failure; it now polls the new peer's `get_connection_status()` | `scene_multiplayer.cpp:58-61` (failure emits `connection_failed`) |
+| `multiplayer-sync` SKILL.md:30, 36 | `replication_interval = 0` means "every physics frame" | every network process frame — the multiplayer API is polled from `SceneTree::process`, not the physics step | 4.3 `MultiplayerSynchronizer.xml:64-65`; `scene/main/scene_tree.cpp:504-514`; 4.7.2 `:688-707` |
+| `multiplayer-sync` SKILL.md:37 | `delta_interval = 0` "disabled" | `0` (default) = delta sync every network process frame | 4.3 `MultiplayerSynchronizer.xml:55-56` |
+| `multiplayer-sync` SKILL.md:39 | a `visibility_filters` property | no such property; `add_visibility_filter(callable)` | 4.7.2 ClassDB |
+| `multiplayer-sync` SKILL.md:21, 45-48; `references/bandwidth-optimization.md:15-29` | full sync sends "all values"; use `replication_interval` as a "full-state heartbeat" next to delta sync | each property is Always (unreliable, every `replication_interval`) or On Change (reliable, `delta_interval`); the intervals govern disjoint sets | 4.3 `SceneReplicationConfig.xml:112-117`; `scene_replication_interface.cpp:747, 764, 837, 852` |
+| `multiplayer-sync` SKILL.md:180, 236; `references/interpolation.md:15, 29-50, 67-91` | connect `synchronized` on the replicated node; blend with `Engine.get_physics_interpolation_fraction()` | the signal is on the `MultiplayerSynchronizer`; blend by time since the update over the sync interval (GDScript and C#) | 4.3 `MultiplayerSynchronizer.xml:76-84`; `doc/classes/Engine.xml:114` (fraction between physics ticks) |
+| `multiplayer-sync` SKILL.md:223; `references/bandwidth-optimization.md:35` | 16-bit quantization "cuts bytes by 2×" (and "mm" vs the reference's cm) | only when packed into a `PackedByteArray`; a `Variant` int ≤ 32 bits and a float32-exact float both encode in 4 bytes | 4.3 `core/io/marshalls.cpp:1284-1296, 1368-1395` |
+| `multiplayer-sync` `references/bandwidth-optimization.md:109` | "set the channel per `@rpc`" (for `reliable`/`unreliable`) | those are transfer modes; the channel is the optional trailing integer | `@rpc` annotation: mode, sync, transfer mode, channel |
+| `dedicated-server` SKILL.md:26, 34, 39, 84, 253, 298 | a "server export template" strips rendering and audio code from the binary | no such template in Godot 4: the "Export as dedicated server" mode uses the regular template, adds the `dedicated_server` tag (which forces the headless display and dummy audio drivers) and exports visual resources as placeholders | 4.3 `editor/plugins/dedicated_server_export_plugin.cpp:72-73, 104-111`; `editor/export/project_export.cpp:788-794, 1329`; `main/main.cpp:1826-1829` |
+| `dedicated-server` SKILL.md:30, 33 | a **Linux/X11** (or Linux Server) preset | the platform is named **Linux** | 4.3 `platform/linuxbsd/export/export.cpp:44` |
+| `dedicated-server` SKILL.md:85 | `--headless` sets a `headless` feature tag | no such tag; check `DisplayServer.get_name() == "headless"` | 4.7.2 run with `--headless`: `OS.has_feature("headless")` false, display `headless`, audio `Dummy`; 4.3 `core/os/os.cpp:384-440` |
+| `dedicated-server` `references/deployment.md:133`; SKILL.md:267, 298 | C#: enable "Include Scripts Content" and install the `dotnet` runtime on the target | C# exports are self-contained: assemblies and runtime go into `data_<project>_<platform>_<arch>` (or the binary with `dotnet/embed_build_outputs`); `include_scripts_content` only ships the `.cs` sources | 4.3 `modules/mono/editor/GodotTools/GodotTools/Export/ExportPlugin.cs:47, 69, 102-110, 212, 224`; `Build/BuildSystem.cs:219-220` |
+| `dedicated-server` `references/server-config.md:24-27, 114-118` | CLI args parsed first, then config file, then env — while the comment and SKILL.md:261 say env overrides config and CLI overrides both | order is config → env → CLI (GDScript and C#) | the comment at `:72` |
+
+**Softened (no source either way):** none. Left as written and unverified: the `screen_get_dpi()`
+figures in `responsive-ui/references/dpi-scaling.md:76` (192 on Windows at 200 %, 220+ on macOS
+Retina — consistent with the macOS formula in 4.3 `display_server_macos.mm:1534-1553`, not run), and
+the Dockerfile package list in `dedicated-server/references/deployment.md:19-22`.
+
+**Checked and correct (selection):**
+- UI defaults: `Button`/`LineEdit`/`HSlider` `focus_mode` `FOCUS_ALL`, `Label`/`TextureRect`
+  `FOCUS_NONE`; `Label.mouse_filter` `IGNORE`, containers `PASS`; `CanvasLayer.layer` 1;
+  `SubViewport.render_target_update_mode` default `UPDATE_WHEN_VISIBLE`; `ui_left` etc. carry D-pad and
+  left stick; Tab/Shift-Tab are `ui_focus_next`/`ui_focus_prev`.
+- `LabelSettings` takes priority over theme properties (4.7.2 `Label.xml:70`); RichTextLabel
+  `[outline_size]`/`[outline_color]` tags (4.3 `rich_text_label.cpp:4775, 4941`);
+  `FoldableContainer.folding_changed(is_folded)`, `title_alignment`; PopupMenu search-bar defaults and
+  the `allow_search` note; `offset_transform_*` defaults.
+- `MarginContainer` `margin_*` theme constants; `gui/theme/custom`; `InputMap.action_get_events()`
+  returns `Array[InputEvent]`; `as_text_physical_keycode()`.
+- `display/window/stretch/aspect` semantics for `keep_width`/`keep_height`/`expand` (4.3
+  `window.cpp`); `--resolution`; `get_display_safe_area()`; `screen_set_orientation()` constants;
+  `virtual_keyboard_*`; `LineEdit`/`TextEdit` show the keyboard themselves.
+- Networking: server is peer 1 and client IDs are random; authority defaults to 1; RPC modes and
+  transfer modes; `call_local`; trailing channel argument; `create_server()` returns `Error`;
+  `multiplayer_peer = null` is accepted (4.3 `scene_multiplayer.cpp:195`); `public_visibility`
+  default `true`; `synchronized`/`delta_synchronized` signals.
+- Dedicated server: `--headless` uses the headless display server and dummy audio;
+  `RenderingServer.set_render_loop_enabled()`; `_process`/`_physics_process` still run;
+  `Engine.physics_ticks_per_second` can be set at runtime; `OS.get_cmdline_args()`.
+
+**Sweep:** each correction's key nouns were grepped in `skills/`, `agents/` and `.codex/`:
+`minimum_size`, theme lookup / `CanvasLayer` theme, camera / default canvas, `corner_radius`,
+`ui_accept`/`ui_cancel` gamepad, `is_action_just_pressed` on events, `EXPAND_FIT`, `toggled`,
+`get_screen_transform`, `step = 0`, `cull_mask`, `world_2d`, `canvas_item_default_texture_filter`,
+`top_level`, `.godot/project.godot`, `content_scale_factor` / stretch scale / `scale_mode`,
+`ProjectSettings.set_setting("display`, Test Width, four signals, `set_multiplayer_authority`,
+`_spawnable_scenes` / `spawn()`, `export_exclude`, `OfflineMultiplayerPeer`, `visibility_filters`,
+`delta_interval`, "every physics frame", `get_physics_interpolation_fraction`, `synchronized`,
+server template / `dedicated_server` / `headless` tag, Include Scripts Content / .NET runtime.
+No hit outside batch E needed a change: `2d-essentials` SKILL.md:71 uses `get_screen_transform()`
+correctly (with `get_global_transform_with_canvas()`, for OS-window coordinates);
+`camera-system/references/split-screen.md:12` already states that each viewport has its own
+`World2D`; `2d-essentials` SKILL.md:31 already describes `CanvasLayer` as independent of the camera.
+No agent or Codex file repeated a corrected claim.
+
+**Not changed:** version callouts (out of scope); editor click-paths, except
+`dedicated-server` SKILL.md:34-35, whose sentence was rewritten for the template correction and now
+names the Resources tab's **Export Mode** (4.3 `project_export.cpp:1329`).
+`dedicated-server` SKILL.md:39 still sends custom features to "Project Settings → Export" (they are
+on the export preset's Features tab) — click-path, out of scope. `dedicated-server` SKILL.md has two
+`## 7. Checklist` sections (one between §2 and §3) — structure, not a claim. Batch E has no
+eval-measured content.

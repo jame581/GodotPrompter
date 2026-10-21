@@ -15,7 +15,7 @@ All examples target Godot 4.3+ with no deprecated APIs. GDScript is shown first,
 
 Configure base resolution and stretch behaviour in `Project > Project Settings > Display > Window`.
 
-Key settings and their `.godot/project.godot` keys:
+Key settings and their keys in the `[display]` section of `project.godot`:
 
 | Setting | project.godot key | Recommended value |
 |---|---|---|
@@ -23,11 +23,12 @@ Key settings and their `.godot/project.godot` keys:
 | Viewport height | `window/size/viewport_height` | `1080` (or your base design height) |
 | Stretch mode | `window/stretch/mode` | `canvas_items` (most games) |
 | Stretch aspect | `window/stretch/aspect` | `expand` (fill screen) or `keep` (letterbox) |
-| Scale factor | `window/stretch/scale` | `1` (adjust for pixel art integer scaling) |
+| Scale factor | `window/stretch/scale` | `1` |
+| Scale mode | `window/stretch/scale_mode` | `fractional`; `integer` for pixel art |
 
 > **Godot 4.7+:** Projects **newly created** in Godot 4.7 already default `display/window/stretch/mode` to `canvas_items` and `display/window/stretch/aspect` to `expand` (previously `disabled` / `keep`) — the recommendations above are now the out-of-the-box values. Projects created on older versions are unchanged (the property default is still `disabled`), so set both explicitly when upgrading. See the [4.7 migration guide](https://docs.godotengine.org/en/latest/tutorials/migrating/upgrading_to_godot_4.7.html).
 
-These can also be set at runtime:
+The engine reads these settings once at startup; changing them with `ProjectSettings.set_setting()` later has no effect. At runtime, set the matching `Window` properties instead:
 
 **GDScript:**
 
@@ -35,8 +36,8 @@ These can also be set at runtime:
 # Read current viewport size
 var viewport_size: Vector2 = get_viewport().get_visible_rect().size
 
-# Change stretch mode at runtime
-ProjectSettings.set_setting("display/window/stretch/mode", "canvas_items")
+# Change stretch mode at runtime (takes effect immediately)
+get_window().content_scale_mode = Window.CONTENT_SCALE_MODE_CANVAS_ITEMS
 ```
 
 **C#:**
@@ -45,8 +46,8 @@ ProjectSettings.set_setting("display/window/stretch/mode", "canvas_items")
 // Read current viewport size
 Vector2 viewportSize = GetViewport().GetVisibleRect().Size;
 
-// Change a project setting at runtime (takes effect next frame)
-ProjectSettings.SetSetting("display/window/stretch/mode", "canvas_items");
+// Change stretch mode at runtime (takes effect immediately)
+GetWindow().ContentScaleMode = Window.ContentScaleModeEnum.CanvasItems;
 ```
 
 ---
@@ -55,9 +56,9 @@ ProjectSettings.SetSetting("display/window/stretch/mode", "canvas_items");
 
 | Mode | `project.godot` value | Rendering | Best For |
 |---|---|---|---|
-| `canvas_items` | `"canvas_items"` | Viewport rendered at design resolution, then upscaled — UI and 2D nodes scale smoothly | Most 2D and UI-heavy games |
+| `canvas_items` | `"canvas_items"` | Rendered at the window's resolution; 2D nodes and UI are scaled from the design resolution, so text stays sharp | Most 2D and UI-heavy games |
 | `viewport` | `"viewport"` | Entire viewport is rendered at design resolution and stretched; no sub-pixel blending | Pixel art games needing pixel-perfect output |
-| `disabled` | `"disabled"` | No automatic scaling; every Control node must handle its own layout | Complex custom scaling, 3D games with a Control HUD |
+| `disabled` | `"disabled"` | No automatic scaling; the viewport is the window size, so a bigger window shows more at the same pixel size (anchors and containers still lay out) | Complex custom scaling, 3D games with a Control HUD |
 
 **When to choose each:**
 
@@ -84,7 +85,7 @@ Set via `Project > Project Settings > Display > Window > Stretch > Aspect` or th
 
 ## 4. Pixel Art Setup
 
-For crisp pixel-art games: `Project Settings → Display → Window → Stretch → Mode = viewport`, base resolution at native pixel size (e.g., 320×180), `Window Size Override = 4×` for editor preview. Use integer scaling to avoid sub-pixel blur.
+For crisp pixel-art games: `Project Settings → Display → Window → Stretch → Mode = viewport`, base resolution at native pixel size (e.g., 320×180), `Window Width/Height Override` (e.g. 1280×720) for a larger window when testing. Use integer scaling (`Stretch → Scale Mode = integer`) to avoid uneven pixels.
 
 > See [references/pixel-art-setup.md](references/pixel-art-setup.md) for full project settings, integer-scaling script, nearest-neighbour filter overrides.
 
@@ -120,7 +121,7 @@ Anchor presets + Container nodes do most of the work. Use `size_flags_horizontal
 
 In the editor viewport, use **Editor > Editor Settings > Run > Window Placement** to start the game at specific sizes, or use the viewport size selector in the 2D editor toolbar.
 
-Add common test sizes under **Project > Project Settings > Display > Window > Size > Test Width/Height** to preview in the editor.
+Set a test window size under **Project > Project Settings > Display > Window > Size > Window Width/Height Override** — the game window opens at that size while the base viewport size stays the same.
 
 ### `--resolution` CLI Flag
 
@@ -160,7 +161,7 @@ godot --path /projects/mygame --resolution 1280x720
 - [ ] Base viewport size (`viewport_width` / `viewport_height`) matches the design canvas in the editor
 - [ ] Stretch mode chosen deliberately: `canvas_items` for most games, `viewport` for pixel art
 - [ ] Aspect ratio mode chosen: `expand` unless fixed-layout content requires `keep`
-- [ ] Pixel art games use `viewport` stretch + `Nearest` texture filter + integer `content_scale_factor`
+- [ ] Pixel art games use `viewport` stretch + `Nearest` texture filter + `integer` stretch scale mode
 - [ ] All HUD `Control` nodes use anchors anchored to the nearest edge, not fixed `position` values
 - [ ] `custom_minimum_size` set on buttons and interactive elements to prevent collapse below tap target size (minimum 44×44 px recommended for mobile)
 - [ ] `size_flags_horizontal` / `size_flags_vertical` set to `SIZE_EXPAND_FILL` on elements that should fill space

@@ -55,8 +55,9 @@ start.FocusNeighborTop      = quit.GetPath();
 
 Godot maps controller D-pad and left stick to the built-in `ui_left`, `ui_right`, `ui_up`, `ui_down` actions automatically. Ensure your interactive nodes have `FOCUS_ALL` and neighbours wired so gamepad navigation feels intentional.
 
-- `ui_accept` (Enter / A button) — activates the focused widget.
-- `ui_cancel` (Escape / B button) — typically used to go back; handle in `_unhandled_input`.
+- `ui_accept` (Enter, Kp Enter, Space) — activates the focused widget.
+- `ui_cancel` (Escape) — typically used to go back; handle in `_unhandled_input`.
+- Neither action has a gamepad button by default (unlike `ui_left`/`ui_right`/`ui_up`/`ui_down`) — add Joypad A / B to them in the Input Map for controller menus.
 - Tab / Shift-Tab cycles through `FOCUS_ALL` nodes in tree order.
 
 ### grab_focus()

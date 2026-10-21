@@ -9,7 +9,7 @@ Reference for `skills/responsive-ui/SKILL.md` — `content_scale_factor`, queryi
 
 ### content_scale_factor
 
-`Window.content_scale_factor` multiplies all UI element sizes uniformly. Increase it on high-DPI (Retina) displays so text and controls are not microscopic.
+`Window.content_scale_factor` multiplies all UI element sizes uniformly in the `canvas_items` and `disabled` stretch modes (in `viewport` mode it divides the render resolution instead). Increase it on high-DPI (Retina) displays so text and controls are not microscopic.
 
 **GDScript:**
 
