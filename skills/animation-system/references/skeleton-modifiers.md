@@ -1,6 +1,6 @@
 # Skeleton Modifiers (3D)
 
-Reference for `skills/animation-system/SKILL.md` — procedural skeleton modifiers (4.4+): `LookAtModifier3D`, `SpringBoneSimulator3D`.
+Reference for `skills/animation-system/SKILL.md` — procedural skeleton modifiers (4.4+): `LookAtModifier3D` (including its 4.7 `relative` default change), `SpringBoneSimulator3D`.
 
 > ← Back to [SKILL.md](../SKILL.md)
 

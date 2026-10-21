@@ -219,7 +219,7 @@ For continuous blending (walk↔run on speed, 4/8-directional movement on a 2D v
 
 > See [references/blend-spaces.md](references/blend-spaces.md#named-blend-points-godot-47) for the GDScript + C# snippet.
 
-> ⚠️ **Changed in Godot 4.7:** the bool `sync` on `AnimationNodeBlendSpace1D/2D` is deprecated, replaced by the `sync_mode` enum (C#: `SyncMode`): `SYNC_MODE_NONE` (default — inactive animations frozen), `SYNC_MODE_INDEPENDENT` (the old `sync = true`), `SYNC_MODE_CYCLIC_MUTABLE`, `SYNC_MODE_CYCLIC_CONSTANT`. If a tree that blended correctly in 4.6 stops transitioning correctly, set `sync_mode` on each blend space. Full enum semantics: [references/blend-spaces.md](references/blend-spaces.md#sync-mode-godot-47).
+> ⚠️ **Changed in Godot 4.7:** the bool `sync` on `AnimationNodeBlendSpace1D/2D` is deprecated, replaced by the `sync_mode` property (C#: `SyncMode`), which takes an enum: `SYNC_MODE_NONE` (default — inactive animations frozen), `SYNC_MODE_INDEPENDENT` (the old `sync = true`), `SYNC_MODE_CYCLIC_MUTABLE`, `SYNC_MODE_CYCLIC_CONSTANT`. If a tree that blended correctly in 4.6 stops transitioning correctly, set `sync_mode` on each blend space. Full enum semantics: [references/blend-spaces.md](references/blend-spaces.md#sync-mode-godot-47).
 
 ---
 

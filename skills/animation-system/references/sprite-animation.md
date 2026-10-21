@@ -1,6 +1,6 @@
 # Sprite Frame Animation
 
-Reference for `skills/animation-system/SKILL.md` — 2D sprite animation patterns: `AnimatedSprite2D` vs `AnimationPlayer + Sprite2D`.
+Reference for `skills/animation-system/SKILL.md` — 2D sprite animation patterns: `AnimatedSprite2D` vs `AnimationPlayer + Sprite2D`, and `SpriteFrames` ping-pong looping (4.7+).
 
 > ← Back to [SKILL.md](../SKILL.md)
 

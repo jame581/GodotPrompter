@@ -1,6 +1,6 @@
 # Environment & Post-Processing
 
-Reference for `skills/3d-essentials/SKILL.md` — `WorldEnvironment` setup, sky options, tonemap modes, post-processing effects, and the 4.6+ glow / SSR upgrades.
+Reference for `skills/3d-essentials/SKILL.md` — `WorldEnvironment` setup, sky options, tonemap modes, post-processing effects, the 4.6+ glow / SSR upgrades, and the 4.7 HDR output and sky reflection layer notes.
 
 > ← Back to [SKILL.md](../SKILL.md)
 
@@ -140,8 +140,6 @@ env.TonemapAgxContrast = 1.25f;
 SSR in Godot 4.6 has been redesigned for higher quality at reduced GPU cost. The Environment SSR properties keep their names (`ssr_enabled`, `ssr_max_steps`, `ssr_fade_in`, `ssr_fade_out`, `ssr_depth_tolerance`), but the `ssr_depth_tolerance` default rose from `0.2` to `0.5`, and the project setting `rendering/environment/screen_space_reflection/roughness_quality` was replaced by `…/screen_space_reflection/half_size` (default `true`; set `false` for full-resolution reflections).
 
 If you previously disabled SSR due to performance concerns, it is worth re-enabling after upgrading to 4.6 and re-profiling.
-
----
 
 ---
 

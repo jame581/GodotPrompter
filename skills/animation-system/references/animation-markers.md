@@ -18,7 +18,8 @@ func play_attack_loop() -> void:
 
 func is_past_hit_frame() -> bool:
     var animation: Animation = anim_player.get_animation(&"attack")
-    return anim_player.current_animation_position >= animation.get_marker_time(&"hit_frame")
+    return anim_player.current_animation == &"attack" \
+        and anim_player.current_animation_position >= animation.get_marker_time(&"hit_frame")
 ```
 
 ```csharp
@@ -37,6 +38,7 @@ private void PlayAttackLoop()
 private bool IsPastHitFrame()
 {
     Animation animation = _animPlayer.GetAnimation("attack");
-    return _animPlayer.CurrentAnimationPosition >= animation.GetMarkerTime("hit_frame");
+    return _animPlayer.CurrentAnimation == "attack"
+        && _animPlayer.CurrentAnimationPosition >= animation.GetMarkerTime("hit_frame");
 }
 ```

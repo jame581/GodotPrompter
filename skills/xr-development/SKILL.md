@@ -156,7 +156,7 @@ Godot 4.6 requests OpenXR 1.1 from the runtime, unlocking 1.1 features (promoted
 
 ### Spatial Entities — Anchors, Plane Tracking, Marker Tracking (Godot 4.6+)
 
-Godot 4.6 adds the OpenXR **Spatial Entities** extensions (experimental API): **spatial anchors** that persist virtual object positions across sessions, **plane detection** for floors, walls and ceilings, and **marker tracking** for QR codes and image markers. Enable them under **XR → OpenXR → Extensions → Spatial Entity** (all off by default). Create an anchor with `OpenXRSpatialAnchorCapability.create_new_anchor(local_transform, RID())`, which returns an `OpenXRAnchorTracker`, and show it with an `XRAnchor3D` whose `tracker` is that tracker's name. There is no `XRSpatialAnchor` class.
+Godot 4.6 adds the OpenXR **Spatial Entities** extensions (experimental API): **spatial anchors** that persist virtual object positions across sessions, **plane detection** for floors, walls and ceilings, and **marker tracking** for QR codes and image markers. Enable them under **XR → OpenXR → Extensions → Spatial Entity** (all off by default; anchors with the default `RID()` context also need **Enable Spatial Anchors** and **Enable Builtin Anchor Detection**). Create an anchor with `OpenXRSpatialAnchorCapability.create_new_anchor(local_transform, RID())`, which returns an `OpenXRAnchorTracker`, and show it with an `XRAnchor3D` whose `tracker` is that tracker's name. There is no `XRSpatialAnchor` class.
 
 > See [references/spatial-entities.md](references/spatial-entities.md) for the GDScript + C# anchor placement recipe, the C# singleton lookup, anchor persistence across sessions, and the 4.7 `next` parameter on `create_new_anchor()`.
 
