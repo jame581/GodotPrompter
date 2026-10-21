@@ -105,7 +105,7 @@ Key knobs: `light_color`, `light_energy` (HDR — values >1 are valid), `shadow_
 
 ### AreaLight3D (Godot 4.7+)
 
-`AreaLight3D` emits light from a rectangle along the node's **-Z** — neon tubes, screens, softbox panels — with PCSS soft shadows driven by `light_size`. Key properties: `area_size = Vector2(1, 1)` (meters), `area_range = 5.0`, `area_attenuation = 1.0` (`2.0` = physically accurate inverse square), `area_normalize_energy = true` (resizing keeps total output stable), optional `area_texture` for textured emission (Forward+/Mobile only). Mobile support is limited and Compatibility cannot cast area-light shadows; in Forward+, a single visible area light adds clustered-lighting cost to *all* rendered objects — reserve for cinematics or high-end targets.
+`AreaLight3D` emits light from a rectangle along the node's **-Z** (neon tubes, screens, softbox panels), with PCSS soft shadows driven by `light_size`. Mobile support is limited and Compatibility cannot cast area-light shadows; in Forward+ one visible area light adds clustered-lighting cost to *all* rendered objects, so reserve it for cinematics or high-end targets.
 
 > See [references/materials-and-lighting-recipes.md](references/materials-and-lighting-recipes.md#arealight3d-godot-47) for the full property table and the GDScript + C# setup recipe.
 
@@ -129,29 +129,19 @@ Configure global rendering — sky background, tonemapping, glow, SSR, SSAO/SSIL
 
 > See [references/environment-and-post.md](references/environment-and-post.md) for the full setup recipes (sky options, tonemap modes, all post-processing effects, the 4.6+ glow blend and default changes, AgX `tonemap_agx_white` / `tonemap_agx_contrast` controls, and the 4.6+ SSR quality upgrade).
 
-> **Godot 4.7+:** `display/window/hdr/request_hdr_output` (default `false`, promoted to a basic project setting) requests HDR display output for the main window and editor where supported, auto-switching between HDR and SDR as screens or system settings change; it forces `Viewport.use_hdr_2d` on for the main viewport (other `SubViewport`s must enable it themselves). Read only at startup — toggle `Window.hdr_output_requested` at runtime.
-
-> ⚠️ **Changed in Godot 4.7:** The `rendering/reflections/sky_reflections/roughness_layers` default is `8` again. Only 4.6.0 and 4.6.1 used `7`; the revert ([GH-116154](https://github.com/godotengine/godot/pull/116154)) shipped in 4.7 and was backported to 4.6.2. Only projects upgrading from 4.6.0 or 4.6.1 with the setting at its default see different sky reflections — set it to `7` to keep that look. See the [4.7 migration guide](https://docs.godotengine.org/en/latest/tutorials/migrating/upgrading_to_godot_4.7.html).
+> **Godot 4.7+:** `display/window/hdr/request_hdr_output` requests HDR display output (read at startup; toggle `Window.hdr_output_requested` at runtime). ⚠️ The `rendering/reflections/sky_reflections/roughness_layers` default is `8` again after `7` in 4.6.0–4.6.1. Details in [references/environment-and-post.md](references/environment-and-post.md#hdr-output-and-sky-reflection-layers-godot-47).
 
 ## 5. Global Illumination
 
-Five GI options trade quality for cost: none (ambient only) → ReflectionProbe (localized) → LightmapGI (best quality, baked) → VoxelGI (small/medium dynamic) → SDFGI (large open-world). VoxelGI/SDFGI/LightmapGI require Forward+. The 4.5+ subsections below (Specular Occlusion, Bent Normal Maps) stay inline because they apply across GI methods.
+Five GI options trade quality for cost: none (ambient only) → ReflectionProbe (localized) → LightmapGI (best quality, baked) → VoxelGI (small/medium dynamic) → SDFGI (large open-world). VoxelGI/SDFGI/LightmapGI require Forward+. The 4.5+ subsection below applies across GI methods.
 
 > See [references/global-illumination.md](references/global-illumination.md) for the methods comparison table, ReflectionProbe scene + code recipe, LightmapGI bake workflow, and SDFGI configuration.
 
-### Specular Occlusion from Ambient Light (Godot 4.5+)
+### Specular Occlusion & Bent Normal Maps (Godot 4.5+)
 
-Godot 4.5+ dims indirect specular (sky, ReflectionProbe, GI reflections) by the brightness of the ambient light reaching each pixel, in all three renderers. This prevents unrealistically bright reflections in areas that receive little indirect light (under eaves, in crevices and corners). It is on by default and needs no re-bake: turn it off globally with `rendering/reflections/specular_occlusion/enabled`, or per shader with `render_mode specular_occlusion_disabled`.
+Since 4.5, indirect specular is dimmed by the ambient light reaching each pixel, in all renderers — on by default, no re-bake; disable globally with `rendering/reflections/specular_occlusion/enabled` or per shader with `render_mode specular_occlusion_disabled`. The `StandardMaterial3D` **Bent Normal** slot takes a baked bent normal map for better indirect lighting on hero assets.
 
-### Bent Normal Maps (Godot 4.5+)
-
-Bent normal maps encode the mean unoccluded direction from each texel — the average direction toward open sky across the hemisphere. When assigned to the **Bent Normal** slot on `StandardMaterial3D`, Godot uses this information to improve indirect lighting directionality and specular occlusion accuracy. The result is more realistic ambient lighting on complex surfaces like cloth, carved stone, or organic shapes.
-
-**Inspector setup:** In `StandardMaterial3D`, enable **Bent Normal** → assign your tangent-space bent normal texture (baked from Marmoset, Substance, or xNormal).
-
-> **Most visible on:** materials that combine low roughness or high metallic values with baked GI (LightmapGI / VoxelGI / SDFGI). On fully rough dielectric surfaces the benefit is subtler. Use on hero assets; skip on background geometry.
-
-> See [references/materials-and-lighting-recipes.md](references/materials-and-lighting-recipes.md) for the runtime-assignment GDScript + C# code path (the Inspector setup above is the typical case).
+> See [references/global-illumination.md](references/global-illumination.md#specular-occlusion-from-ambient-light-godot-45) for when each one matters and the bent normal setup.
 
 ---
 
