@@ -890,7 +890,8 @@
       ],
       "addon": null,
       "references": [
-        "skills/rendering-pipeline/references/graphics-settings.md"
+        "skills/rendering-pipeline/references/graphics-settings.md",
+        "skills/rendering-pipeline/references/subviewports.md"
       ],
       "source": "skills/rendering-pipeline/SKILL.md"
     },
@@ -1083,7 +1084,8 @@
       "addon": null,
       "references": [
         "skills/web-services/references/downloads-and-uploads.md",
-        "skills/web-services/references/rest-client-patterns.md"
+        "skills/web-services/references/rest-client-patterns.md",
+        "skills/web-services/references/websocket-client.md"
       ],
       "source": "skills/web-services/SKILL.md"
     },
