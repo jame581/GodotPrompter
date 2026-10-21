@@ -22,7 +22,7 @@ Godot batches 2D draw calls automatically — the Compatibility renderer in ever
 
 ### Reducing Unique Materials
 
-Each unique material breaks batching — in Forward+, `MeshInstance3D`s that share a mesh and material are instanced into one draw call automatically. Keep the material count low and put per-instance variation in an `instance uniform`:
+Each unique material breaks batching — in Forward+, `MeshInstance3D`s that share a mesh and material are instanced into one draw call automatically. Keep the material count low and put per-instance variation in an `instance uniform` (Compatibility renderer: 4.4+):
 
 ```gdscript
 # WRONG — creating a new material per instance duplicates draw calls
@@ -32,6 +32,7 @@ func _ready() -> void:
     $MeshInstance3D.material_override = mat  # unique material = unique draw call
 
 # RIGHT — one shared material; the shader declares `instance uniform vec4 tint : source_color;`
+# (instance uniforms in the Compatibility renderer need Godot 4.4+)
 @export var shared_material: ShaderMaterial
 
 func _ready() -> void:
@@ -51,6 +52,7 @@ public override void _Ready()
 }
 
 // RIGHT — one shared material; the shader declares `instance uniform vec4 tint : source_color;`
+// (instance uniforms in the Compatibility renderer need Godot 4.4+)
 [Export] public ShaderMaterial SharedMaterial { get; set; }
 
 public override void _Ready()

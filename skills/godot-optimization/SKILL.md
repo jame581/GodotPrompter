@@ -119,7 +119,7 @@ Hot-path GDScript wins come from eliminating per-frame allocations, comparing `S
 
 ## 5. Memory Management
 
-Watch `Performance.MEMORY_STATIC` and `OBJECT_COUNT` across scene reloads — steady growth means leaked references. Resources loaded by path are cached and shared; call `.duplicate()` when you need per-instance mutation. Always prefer `queue_free()` for nodes; `free()` on a node that is emitting a signal is refused ("Object is locked and can't be freed") and the node lives on.
+Watch `Performance.MEMORY_STATIC` and `OBJECT_COUNT` across scene reloads — steady growth means leaked references. Resources loaded by path are cached and shared; call `.duplicate()` when you need per-instance mutation. Always prefer `queue_free()` for nodes; `free()` on a node that is emitting a signal is refused in the editor and debug exports ("Object is locked and can't be freed"), but release exports skip that check and free it mid-emission (undefined behaviour).
 
 > See [references/memory-management.md](references/memory-management.md) for the full recipes (Performance singleton queries, ResourceLoader cache semantics, `queue_free` vs `free` table, plus the full GDScript and C# **object pool** implementations for bullets/effects/particles).
 

@@ -85,7 +85,7 @@ func _on_enemy_died() -> void:
 # Nodes: free() is synchronous and immediate — only use when you are certain
 # no other code will access the node in the same frame
 func _force_remove_node(node: Node) -> void:
-    node.free()  # refused ("Object is locked") while `node` is emitting a signal
+    node.free()  # while `node` is emitting: refused in debug builds, undefined behaviour in release
 
 # Non-node RefCounted resources are freed automatically when the last
 # reference is released — no manual call needed.
@@ -124,7 +124,7 @@ rawObj.Free();
 | `queue_free()` | End of current frame | Yes | Normal node removal |
 | `free()` | Immediate | Only if not inside own signal | Synchronous teardown, editor tools |
 
-Always prefer `queue_free()` for nodes created during gameplay. `free()` inside a handler of a signal the same node is emitting is refused — Godot reports "Object is locked and can't be freed" and the node stays alive.
+Always prefer `queue_free()` for nodes created during gameplay. `free()` inside a handler of a signal the same node is emitting is refused in the editor and debug exports ("Object is locked and can't be freed") and the script stops there; release exports skip that check and free the node mid-emission (undefined behaviour, can crash) — use `queue_free()`.
 
 ---
 
