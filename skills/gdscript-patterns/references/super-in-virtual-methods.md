@@ -70,7 +70,7 @@ public partial class SpecialEnemy : EnemyBase
 | Child node doesn't join a group set in parent `_ready()` | Missing `super()` in child `_ready()` |
 | Signals connected in parent `_ready()` never fire | Missing `super()` — connections never made |
 | Parent animation logic stops working in child | Missing `super()` in child `_process()` or `_physics_process()` |
-| `@onready` vars in parent are null when child accesses them | Parent `_ready()` body never ran — those vars never initialized |
+| Parent state set in `_ready()` is unset when the child reads it | Parent `_ready()` body never ran (its `@onready` vars are still initialized — that runs for every class in the chain) |
 
 > **Rule of thumb:** If you extend a script that you or someone else wrote (not a bare Godot class), always call `super()` as the first line of any overridden virtual method.
 

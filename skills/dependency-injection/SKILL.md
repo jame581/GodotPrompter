@@ -98,7 +98,7 @@ Expose collaborator nodes as `@export var health_component: HealthComponent`, th
 
 ## 5. Service Locator Pattern
 
-A central registry autoload mapping `String` keys to service instances. Services register themselves at `_ready()`, deregister at `_exit_tree()`, consumers call `ServiceLocator.get(name)`. Useful when you want flexible runtime swap of implementations (testing, mods, A/B variants).
+A central registry autoload mapping `String` keys to service instances. Services register themselves at `_ready()`, deregister at `_exit_tree()`, consumers call `ServiceLocator.get_service(name)`. Useful when you want flexible runtime swap of implementations (testing, mods, A/B variants).
 
 > See [references/service-locator.md](references/service-locator.md) for the full Service Locator (GDScript + C#) with typed helper methods.
 
@@ -243,7 +243,7 @@ Does a parent scene own both the consumer and the dependency?
 ```gdscript
 # BAD — crashes if the @export was never set in the editor
 func take_damage(amount: int) -> void:
-    audio.play_sfx("hurt")   # NullReferenceError if audio was not wired
+    audio.play_sfx("hurt")   # "Nonexistent function 'play_sfx' in base 'Nil'" if audio was not wired
 
 # GOOD — guard or assert clearly
 func take_damage(amount: int) -> void:

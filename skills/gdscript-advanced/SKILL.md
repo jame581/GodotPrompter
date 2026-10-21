@@ -41,7 +41,7 @@ static func get_score() -> int:
 
 Avoid singletons-as-autoloads when a static method on a class would do.
 
-**Vector2i vs Vector2 / Vector3i vs Vector3** — integer vectors are 30-40% faster on hot paths (tile coords, grid math). Convert to float only at the rendering boundary:
+**Vector2i vs Vector2 / Vector3i vs Vector3** — integer vectors keep tile coords and grid math exact (no float drift, usable as `Dictionary` keys). Measure before assuming a speed gain. Convert to float only at the rendering boundary:
 
 ```gdscript
 var grid_pos: Vector2i = Vector2i(8, 12)              # cheap
@@ -66,7 +66,7 @@ stats["hp"] = 100  # type-checked; stats["hp"] is statically an int
 
 **`is_instance_valid` vs `null` check** — `is_instance_valid()` does an engine-side lookup; `!= null` is a pointer compare. Prefer `!= null` after `@onready` assignment; reserve `is_instance_valid()` for nodes that may be `queue_free`'d while a reference is held.
 
-> Common pitfall: `_process` doing `if is_instance_valid(target)` once per frame burns ~1µs per call — tiny per-call but multiplies fast.
+> Common pitfall: `_process` doing `if is_instance_valid(target)` for many targets every frame — each call is an object-database lookup; small per call, but it multiplies.
 
 ## 3. Metaprogramming
 
@@ -82,7 +82,7 @@ func print_named(name: String) -> void:
     print("Hello, %s" % name)
 ```
 
-**Deferred calls** — run on the next frame's idle phase, useful for cross-thread or signal-storm safety:
+**Deferred calls** — run at the end of the current frame (idle time), useful for cross-thread or signal-storm safety:
 
 ```gdscript
 heavy_recompute.call_deferred()
@@ -95,7 +95,7 @@ if obj.has_method("on_damaged"):
     obj.call("on_damaged", 25)
 ```
 
-> **Security gotcha:** Never pass `obj.call(user_string, ...)` where `user_string` comes from save files, network, or mod content without an allowlist. `call("queue_free")` is a free crash. Match against a known set:
+> **Security gotcha:** Never pass `obj.call(user_string, ...)` where `user_string` comes from save files, network, or mod content without an allowlist. `call("free")` lets the data delete the object. Match against a known set:
 
 ```gdscript
 const ALLOWED_RPCS: PackedStringArray = ["take_damage", "apply_buff", "set_position"]
@@ -124,7 +124,7 @@ func _ready() -> void:
         _setup_game_runtime()
 ```
 
-**Editor notifications** — use `_notification` for editor lifecycle events (`NOTIFICATION_EDITOR_PRE_SAVE`, `NOTIFICATION_EDITOR_POST_SAVE`, `NOTIFICATION_PARENTED`):
+**Editor notifications** — use `_notification` for editor lifecycle events (`NOTIFICATION_EDITOR_PRE_SAVE`, `NOTIFICATION_EDITOR_POST_SAVE`):
 
 ```gdscript
 func _notification(what: int) -> void:
@@ -132,7 +132,7 @@ func _notification(what: int) -> void:
         _bake_preview()
 ```
 
-> Common pitfall: a `@tool` script that calls `get_tree().create_timer()` at editor time. Editor has no main loop in some contexts — guard with `is_editor_hint()`.
+> Common pitfall: a `@tool` setter that calls `get_tree()` while the scene is loading. Exported values are set before the node enters the tree, so `get_tree()` returns `null` with an error — guard with `is_inside_tree()`.
 
 > See [references/tool-script-recipes.md](references/tool-script-recipes.md) for full `@tool` patterns including editor preview, baking, and procedural mesh generation.
 
@@ -206,7 +206,7 @@ Use callables for:
 - Deferred work scheduling (`call_deferred`)
 - Tween methods (`tween_method` takes a Callable)
 
-> Common pitfall: connecting a lambda to a signal stores the lambda's captured environment forever. If the captured object is freed, you get warnings. Disconnect explicitly in `_exit_tree` or use bound methods instead.
+> Common pitfall: a lambda that does not use `self` belongs to the script, not the node, so freeing the node does not disconnect it — it keeps its captures alive and still runs on the next emit. Disconnect explicitly in `_exit_tree` or use bound methods instead.
 
 ## 7. Profiler-driven idioms
 
@@ -215,10 +215,10 @@ Open the **Debugger → Profiler** panel. The patterns that show up most often:
 | Profiler hot spot | Likely cause | Fix |
 |---|---|---|
 | `String` allocation in `_process` | `print()` / `"%s" % var` per frame | Pre-format outside the loop, or batch logs with a circular buffer |
-| `Object.get_node` showing high self-time | Repeated `$Path/Sub/Node` per frame | Cache in `@onready var` |
+| `Node.get_node` showing high self-time | Repeated `$Path/Sub/Node` per frame | Cache in `@onready var` |
 | `Signal.emit` showing high call count | Per-frame signal storms (e.g., position update) | Throttle to 10 Hz, or use a polling pattern |
-| `CharacterBody.move_and_slide` self-time | Many character bodies on one frame | Scale by distance from camera; use Area for cheap detection |
-| GDScript GC spikes | Allocator churn from temp Arrays/Strings | Pool the arrays; pre-allocate at startup |
+| `CharacterBody2D/3D.move_and_slide` self-time | Many character bodies on one frame | Scale by distance from camera; use Area for cheap detection |
+| Frame-time spikes from allocation (GDScript has no GC; it frees by reference counting) | Allocator churn from temp Arrays/Strings | Pool the arrays; pre-allocate at startup |
 
 > See [references/profiler-recipes.md](references/profiler-recipes.md) for before/after annotated examples for each row.
 
@@ -248,7 +248,7 @@ var bump := func() -> int:
 - Don't reference parent state in a child's `_ready` unless you're sure the parent is initialized
 - For cross-node setup, prefer the parent calling `child.setup_with(self)` from its own `_ready`
 
-**Static var lifecycle across scene reload** — static vars on a class persist for the lifetime of the *engine*, not the scene. Reloading a scene does NOT reset them. If you need a per-scene singleton, use an autoload, not a static var.
+**Static var lifecycle across scene reload** — static vars on a class persist while the script stays loaded (normally the whole run; `@static_unload` lets an unreferenced script free them), not for the scene. Reloading a scene does NOT reset them. If you need a per-scene singleton, use an autoload, not a static var.
 
 **Resource sharing surprises** — `@export var item: ItemData` with the same Resource asset in two scenes shares state by reference. Mutating one mutates the other. Use `item.duplicate()` when each instance needs its own state.
 

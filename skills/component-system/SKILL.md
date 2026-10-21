@@ -280,7 +280,7 @@ Components must not call methods on siblings directly. Use signals to keep them 
 
 Three patterns in order of preference:
 
-### @export NodePath — most flexible, works across the scene tree
+### @export node reference — most flexible, works across the scene tree
 
 ```gdscript
 # hurtbox_component.gd
@@ -289,7 +289,7 @@ Three patterns in order of preference:
 # Inspector: drag the HealthComponent node into the slot.
 ```
 
-> **Gotcha:** `@export` node references are wired via the editor inspector. If you build scenes programmatically or hand-write `.tscn` files, the reference may be null at runtime. In that case, wire it explicitly in the parent's `_ready()`:
+> **Gotcha:** `@export` node references are wired via the editor inspector. If you build scenes programmatically, nothing assigns the reference and it is null at runtime. In that case, wire it explicitly in the parent's `_ready()`:
 > ```gdscript
 > hurtbox.health_component = health_component
 > ```

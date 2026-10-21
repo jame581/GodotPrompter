@@ -120,8 +120,8 @@ Consumers connect in `_ready()`. In C#, always disconnect in `_ExitTree()`: the 
 ```gdscript
 extends CanvasLayer
 
-# GDScript connections are reference-counted and cleaned up automatically
-# when the node is freed, but explicit disconnection is still good practice
+# A connection to this node's method is removed automatically when the
+# node is freed, but explicit disconnection is still good practice
 # for long-lived nodes that reconnect frequently.
 
 func _ready() -> void:
@@ -168,9 +168,9 @@ public partial class HudLayer : CanvasLayer
     }
 
     // IMPORTANT: Always disconnect in _ExitTree() in C#.
-    // C# delegates are not automatically cleaned up when a node is freed.
-    // Failing to disconnect causes the EventBus to hold a reference to the
-    // freed node, leading to memory leaks and InvalidOperationExceptions.
+    // A += on a custom [Signal] is not cleaned up when this node is freed.
+    // Failing to disconnect leaves the EventBus holding a delegate to the
+    // freed node: a leak, and ObjectDisposedException on the next emit.
     public override void _ExitTree()
     {
         _eventBus.PlayerDied    -= OnPlayerDied;
