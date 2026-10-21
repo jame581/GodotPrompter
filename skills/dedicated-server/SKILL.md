@@ -36,7 +36,7 @@ In the Godot editor, create a dedicated **Linux** export preset:
 
 ### Feature Tags
 
-Use `OS.has_feature()` to branch between server and client code at runtime. Define a custom `server` feature in the export preset (Project Settings → Export → Custom Features) or rely on the built-in `dedicated_server` feature that a dedicated-server export sets automatically:
+Use `OS.has_feature()` to branch between server and client code at runtime. Define a custom `server` feature on the export preset's **Features** tab (**Custom (comma-separated)** field) or rely on the built-in `dedicated_server` feature that a dedicated-server export sets automatically:
 
 ```gdscript
 # boot.gd — autoload, runs before any scene loads

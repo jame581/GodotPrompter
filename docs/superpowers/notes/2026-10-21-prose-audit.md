@@ -475,8 +475,8 @@ prints in release exports).
 | `responsive-ui` | 26 + 29 | 8 | 0 |
 | `multiplayer-basics` | 32 + 22 | 12 | 0 |
 | `multiplayer-sync` | 24 + 20 | 11 | 0 |
-| `dedicated-server` | 26 + 16 | 6 | 0 |
-| **Total** | **311** | **63** | **0** |
+| `dedicated-server` | 26 + 16 | 7 | 0 |
+| **Total** | **311** | **64** | **0** |
 
 The worst errors were examples and advice that cannot work as written:
 - `multiplayer-basics` set `set_multiplayer_authority()` "on the server" after spawning. The call is
@@ -542,7 +542,7 @@ The worst errors were examples and advice that cannot work as written:
 | `multiplayer-sync` SKILL.md:39 | a `visibility_filters` property | no such property; `add_visibility_filter(callable)` | 4.7.2 ClassDB |
 | `multiplayer-sync` SKILL.md:21, 45-48; `references/bandwidth-optimization.md:15-29` | full sync sends "all values"; use `replication_interval` as a "full-state heartbeat" next to delta sync | each property is Always (unreliable, every `replication_interval`) or On Change (reliable, `delta_interval`); the intervals govern disjoint sets | 4.3 `SceneReplicationConfig.xml:112-117`; `scene_replication_interface.cpp:747, 764, 837, 852` |
 | `multiplayer-sync` SKILL.md:180, 236; `references/interpolation.md:15, 29-50, 67-91` | connect `synchronized` on the replicated node; blend with `Engine.get_physics_interpolation_fraction()` | the signal is on the `MultiplayerSynchronizer`; blend by time since the update over the sync interval (GDScript and C#) | 4.3 `MultiplayerSynchronizer.xml:76-84`; `doc/classes/Engine.xml:114` (fraction between physics ticks) |
-| `multiplayer-sync` SKILL.md:223; `references/bandwidth-optimization.md:35` | 16-bit quantization "cuts bytes by 2×" (and "mm" vs the reference's cm) | only when packed into a `PackedByteArray`; a `Variant` int ≤ 32 bits and a float32-exact float both encode in 4 bytes | 4.3 `core/io/marshalls.cpp:1284-1296, 1368-1395` |
+| `multiplayer-sync` SKILL.md:223; `references/bandwidth-optimization.md:33` | 16-bit quantization "cuts bytes by 2×" (and "mm" vs the reference's cm) | RPC arguments and synced state compress an int to a type byte + 1/2/4/8 bytes, so a 16-bit int costs 3 bytes; a float falls through to `encode_variant` (4-byte header, type stored in its first byte) and costs 8, or 12 if it is not float32-exact; packing into a `PackedByteArray` is optional and drops the per-value type byte (review fix: the first correction claimed ints cost 4 bytes via plain `encode_variant`) | 4.3 `scene/main/multiplayer_api.cpp:72-137` (`ENCODE_16` at :105, fallback at :132), `modules/multiplayer/scene_rpc_interface.cpp:401, 411`, `scene_replication_interface.cpp:518, 548, 740, 754, 831, 843`, `core/io/marshalls.cpp:1290-1296, 1384-1398`; 4.7.2 `multiplayer_api.cpp:66-131` (`ENCODE_16` at :99), `scene_rpc_interface.cpp:412, 422`, `marshalls.cpp:1380` |
 | `multiplayer-sync` `references/bandwidth-optimization.md:109` | "set the channel per `@rpc`" (for `reliable`/`unreliable`) | those are transfer modes; the channel is the optional trailing integer | `@rpc` annotation: mode, sync, transfer mode, channel |
 | `dedicated-server` SKILL.md:26, 34, 39, 84, 253, 298 | a "server export template" strips rendering and audio code from the binary | no such template in Godot 4: the "Export as dedicated server" mode uses the regular template, adds the `dedicated_server` tag (which forces the headless display and dummy audio drivers) and exports visual resources as placeholders | 4.3 `editor/plugins/dedicated_server_export_plugin.cpp:72-73, 104-111`; `editor/export/project_export.cpp:788-794, 1329`; `main/main.cpp:1826-1829` |
 | `dedicated-server` SKILL.md:30, 33 | a **Linux/X11** (or Linux Server) preset | the platform is named **Linux** | 4.3 `platform/linuxbsd/export/export.cpp:44` |
@@ -595,7 +595,9 @@ No agent or Codex file repeated a corrected claim.
 **Not changed:** version callouts (out of scope); editor click-paths, except
 `dedicated-server` SKILL.md:34-35, whose sentence was rewritten for the template correction and now
 names the Resources tab's **Export Mode** (4.3 `project_export.cpp:1329`).
-`dedicated-server` SKILL.md:39 still sends custom features to "Project Settings → Export" (they are
-on the export preset's Features tab) — click-path, out of scope. `dedicated-server` SKILL.md has two
+`dedicated-server` SKILL.md:39 (review fix, ruled in scope): custom features were placed in "Project
+Settings → Export → Custom Features"; they are the **Custom (comma-separated)** field on the export
+preset's **Features** tab (4.3 `editor/export/project_export.cpp:1393-1399`; 4.7.2 `:1845-1851`).
+`dedicated-server` SKILL.md has two
 `## 7. Checklist` sections (one between §2 and §3) — structure, not a claim. Batch E has no
 eval-measured content.

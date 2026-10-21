@@ -30,7 +30,7 @@ public override void _Ready()
 
 ### Quantize Floats
 
-Reduce float precision before sending. A 16-bit integer covers ±32767 cm — more than enough for most game worlds. The saving needs packing: an `int` passed as an RPC argument or synced property is still encoded in 4 bytes (the same as a float), so write the values into a `PackedByteArray` (`encode_s16()`) and send that.
+Reduce float precision before sending. A 16-bit integer covers ±32767 cm — more than enough for most game worlds. RPC arguments and synced properties compress an `int` to 1, 2, 4 or 8 bytes plus a 1-byte type tag, so a value in the 16-bit range costs 3 bytes; a `float` is not compressed and costs 8 (12 if it is not exactly representable as a 32-bit float). Optionally, writing many values into one `PackedByteArray` (`encode_s16()`) also drops the per-value type byte, at the cost of the array's 8-byte header.
 
 ```gdscript
 # Encode a position component to a 16-bit integer (1 cm precision, ±327 m range).

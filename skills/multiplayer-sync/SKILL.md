@@ -220,7 +220,7 @@ Choose the synchronization model that fits your game's needs:
 
 ## 7. Bandwidth Optimization
 
-Four levers: **sync only changed properties** (replication-config flag per property), **quantize floats** (components as 16-bit centimetres instead of 32-bit floats — halves the bytes only when packed into a `PackedByteArray`, since a `Variant` int is still sent as 4 bytes), **distance-based sync rate** (far-away objects sync at 5 Hz, close at 30 Hz), and **channel selection** (reliable for state changes that must arrive, unreliable for position streams that get superseded).
+Four levers: **sync only changed properties** (replication-config flag per property), **quantize floats** (components as 16-bit centimetres instead of floats — RPC arguments and synced properties compress ints to 1/2/4/8 bytes plus a type byte, so a 16-bit int costs 3 bytes against 8 for a float), **distance-based sync rate** (far-away objects sync at 5 Hz, close at 30 Hz), and **channel selection** (reliable for state changes that must arrive, unreliable for position streams that get superseded).
 
 > See [references/bandwidth-optimization.md](references/bandwidth-optimization.md) for full GDScript + C# recipes for each lever, plus the reliable-vs-unreliable channel decision tree.
 
