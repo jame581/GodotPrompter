@@ -47,7 +47,7 @@ macos.release          = "res://addons/limboai/bin/liblimboai.macos.template_rel
 # ... (additional platform entries for linux arm64/rv64, android, iOS, web)
 ```
 
-**GDExtension limitations:** the LimboAI docs list no documentation tooltips and no `BBParam` property editor, but in v1.8.0 the extension's editor build embeds the class docs and registers the `BBParam` inspector plugin. The remaining gap is C#, which needs the module build (below).
+**GDExtension limitations:** the LimboAI task palette shows no documentation tooltips (module-only in v1.8.0). The `BBParam` property editor was ported to GDExtension in 2025, although the docs still list it as missing. C# needs the module build (below).
 
 ### Module version (C# or full editor integration)
 

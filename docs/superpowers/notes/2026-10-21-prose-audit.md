@@ -801,7 +801,7 @@ extension is not loaded. The LimboAI C# blocks were rebuilt with the Task 4 harn
 
 | Skill | Claims checked (SKILL.md + references) | Wrong | Softened |
 |---|---|---|---|
-| `limboai` | 35 + 15 | 6 | 0 |
+| `limboai` | 35 + 15 | 6 (one partially) | 0 |
 | `beehave` | 40 + 15 | 4 | 1 |
 | `popochiu` | 35 + 70 | 13 | 1 |
 | `dialogue-manager` | 45 | 3 | 0 |
@@ -825,7 +825,7 @@ The worst errors were in behaviour the examples rely on:
 |---|---|---|---|
 | `limboai` SKILL.md:22 | "not usable on 4.3–4.5" | v1.8.0 needs 4.6+; the 4.3 line is 1.2.0–1.3.x, which the skill does not cover | `README.md:55-62`; `deps.env` (`GODOT_CPP_API_VERSION=4.6`) |
 | `limboai` SKILL.md:32 | enable the plugin under **Project Settings → Plugins** | no `plugin.cfg` exists; the extension registers its editor plugin itself on reload | no `plugin.cfg` in the repository; `register_types.cpp:282` (`EditorPlugins::add_by_type<LimboAIEditorPlugin>()`) |
-| `limboai` SKILL.md:50, :393 | GDExtension has no documentation tooltips and no `BBParam` property editor; checklist line "use the module build for `BBParam`" | the docs still say so, but v1.8.0's editor build embeds the class docs and registers the `BBParam` inspector plugin in both builds; the remaining gap is C#. Checklist line removed | `SConstruct:124-127` (`GodotCPPDocData` for `editor`/`template_debug`); `editor/limbo_ai_editor_plugin.cpp:1967-1969` (no build guard); `register_types.cpp:273` (`EditorPropertyBBParam` under `LIMBOAI_GDEXTENSION`); docs `doc/source/getting-started/getting-limboai.rst` |
+| `limboai` SKILL.md:50, :393 | GDExtension has no documentation tooltips and no `BBParam` property editor; checklist line "use the module build for `BBParam`" | partially correct: the tooltip half stands (task-palette documentation tooltips are module-only in v1.8.0); the `BBParam` half was wrong — the editor was ported to GDExtension (upstream #287, 2025), though the docs still list it as missing. Checklist line removed. (Review fix: the first pass also claimed the extension shows the class docs; it does not.) | `editor/task_palette.cpp:72-73` (GDExtension returns no tooltip), `:106` ("Documentation tooltips are only available in the module variant"); `editor/limbo_ai_editor_plugin.cpp:1967-1969` (no build guard); `register_types.cpp:273` (`EditorPropertyBBParam` under `LIMBOAI_GDEXTENSION`); docs `doc/source/getting-started/getting-limboai.rst` |
 | `limboai` SKILL.md:77, :82-83, :104 | `updated(status)` reacts "when the tree finishes"; `restart()` "loops the tree" (GDScript and C#) | `updated` fires after every update; a finished tree starts over on the next update, so the example now stops it with `active = false` / `Active = false` | `bt/bt_player.cpp:178-199`; `bt/tasks/bt_task.cpp:219-245` (`execute` re-enters when status is not `RUNNING`) |
 | `limboai` SKILL.md:162, :165 | `var target: Node2D = blackboard.get_var(…)`; `var in_range := agent.global_position…` | untyped read, as §5 advises (assigning a freed instance to a typed variable is a debug-build error); `var in_range: bool` (the `:=` form is a parse error, run on 4.7.2) | 4.3 `modules/gdscript/gdscript_vm.cpp:1394-1418` (`DEBUG_ENABLED`); `doc_classes/BTTask.xml:214` (`agent: Node`); run |
 | `limboai` `references/hsm.md:86-87` | the chained builders (`.Named()`/`.CallOnEnter()`) are GDScript-only | they are bound methods, so the module build's C# API has them; the example's direct signal wiring is kept | `hsm/limbo_state.cpp:238-243` |
