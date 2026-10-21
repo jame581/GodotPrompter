@@ -50,7 +50,7 @@ the 56 existing skills. 61 C# errors and 349 wrong prose claims were fixed.
   `gdUnit4.api` is pinned to 4.3.1 for Godot 4.3 (5.x needs 4.4+). Method and counts:
   `docs/superpowers/notes/2026-10-21-csharp-body-check.md`.
 - **Prose audit.** 2,338 claims in the 56 existing skills were checked against the engine source and
-  class reference, in seven batches: **349 were wrong and fixed, 15 softened** where they could not
+  class reference, in seven batches: **349 were wrong and fixed, 16 softened** where they could not
   be verified. The worst: `scene-organization` put `Sprite2D` and `CollisionShape2D` under plain
   `Node` containers, which breaks transform inheritance and leaves a body with no shape; the
   hand-rolled `DialogueManager` autoload had a `class_name` clashing with its own autoload name; the

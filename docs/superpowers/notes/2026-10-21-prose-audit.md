@@ -239,10 +239,10 @@ counted once, under SKILL.md.
 | `2d-essentials` | 22 + 43 | 8 | 0 |
 | `3d-essentials` | 24 + 60 | 7 | 0 |
 | `shader-basics` | 16 + 17 | 5 | 0 |
-| `particles-vfx` | 21 + 37 | 9 | 0 |
+| `particles-vfx` | 21 + 37 | 9 | 1 |
 | `animation-system` | 16 + 27 | 4 | 0 |
 | `tween-animation` | 19 + 13 | 5 | 0 |
-| **Total** | **315** | **38** | **0** |
+| **Total** | **315** | **38** | **1** |
 
 The worst errors were two broken examples and two features described as working where they do
 nothing. The decal spawner called `look_at()` before `add_child()`, which fails with "Node not inside
