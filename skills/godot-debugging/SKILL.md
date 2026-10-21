@@ -32,7 +32,8 @@ push_error("save_game: file path is empty")
 # push_warning() — logs a warning with stack trace; use for recoverable issues
 push_warning("AudioStreamPlayer: bus '%s' not found, using Master" % bus_name)
 
-# print_debug() — only prints in debug builds; stripped from release exports
+# print_debug() — print() plus the calling file:line when the debugger is attached;
+# it still prints in release exports (guard with OS.is_debug_build() to silence it)
 print_debug("Frame delta: ", delta, " | FPS: ", Engine.get_frames_per_second())
 
 # printerr() — prints to stderr; visible in external terminals and CI logs
@@ -79,7 +80,7 @@ if (DebugConfig.VerboseAi)
 | `print_rich()` | Yes | No | Categorised, colour-coded logs |
 | `push_error()` | Yes | Yes | Invalid state, programmer errors |
 | `push_warning()` | Yes | Yes | Recoverable problems |
-| `print_debug()` | No | No | Verbose frame-level output |
+| `print_debug()` | Yes | Calling line (debugger attached) | Locating where a value was printed |
 | `printerr()` | Yes | No | External terminal / CI output |
 
 ### C\#
@@ -151,8 +152,8 @@ When execution pauses at a breakpoint, the **Debugger** panel (bottom of the edi
 
 - **Stack Frames** — the full call stack; click a frame to inspect its local variables.
 - **Locals / Members / Globals** — inspect and modify variable values live.
-- **Step Into (F11)** / **Step Over (F10)** / **Step Out (Shift+F11)** — navigate execution line by line.
-- **Continue (F5)** — resume execution until the next breakpoint.
+- **Step Into (F11)** / **Step Over (F10)** — navigate execution line by line (**Step Out**, Alt+F11, from Godot 4.6).
+- **Continue (F12)** — resume execution until the next breakpoint.
 
 ### Remote Scene Inspector
 
@@ -178,7 +179,7 @@ Click any monitor name to open its graph. Use the **Add** button to build custom
 
 ## 3. Signal Debugging
 
-Inspect at runtime via `node.get_signal_connection_list("signal_name")` (returns Array of Dictionary with `callable`, `flags`, `signal`). The most common signal bugs: connecting twice (handler fires twice), forgetting to disconnect on free (warnings + dangling refs), wrong handler signature (silent miss).
+Inspect at runtime via `node.get_signal_connection_list("signal_name")` (returns Array of Dictionary with `callable`, `flags`, `signal`). The most common signal bugs: connecting twice (handler fires twice), forgetting to disconnect on free (warnings + dangling refs), wrong handler signature (`Error calling from signal …` on every emit).
 
 > See [references/signal-tracing.md](references/signal-tracing.md) for the full GDScript and C# inspection helpers and the common-signal-issues catalog (double connect, deferred-free races, lambda capture lifecycle, signal-vs-Callable choice).
 
@@ -192,18 +193,18 @@ Inspect at runtime via `node.get_signal_connection_list("signal_name")` (returns
 | `Attempt to call function on a null instance` | Node was freed, export not assigned, or `get_node()` returned null | Guard with `is_instance_valid(node)`. Check exports in Inspector. Prefer `@onready var _node := $Node`. |
 | `Can't change this state while flushing queries` | Modifying physics state (e.g. disabling a CollisionShape) inside a physics callback such as `body_entered` | Defer the change: `collision_shape.set_deferred("disabled", true)`. |
 | `Invalid call. Nonexistent function 'X' in base 'Y'` | Calling a method that does not exist on that type, or accessing a node as the wrong type | Check `class_name`, cast with `as`, or verify the script is attached. Use `has_method("X")` to guard. |
-| `Cyclic reference` (on `JSON.stringify` or resource save) | A Resource or Dictionary references itself, directly or indirectly | Break the cycle. Use node references instead of resource references where possible, or mark sub-resources as local only. |
-| `Cannot access member without instance` | Calling an instance method as if it were static, or accessing `self` in a `@static` function | Move the call to an instance context or refactor to a proper static helper that takes data as arguments. |
-| `Stack overflow / Maximum recursion depth reached` | Infinite recursion — often a signal that triggers itself, or a setter that sets itself | Add a guard variable (`_updating := true`) in setters. Trace the call stack in the Debugger. |
-| `Already connected` | Calling `connect()` a second time on the same signal/callable pair without `CONNECT_ONE_SHOT` | Check `is_connected()` before connecting, or disconnect first, or use `CONNECT_REFERENCE_COUNTED`. |
-| `Index out of bounds (index X out of size Y)` | Accessing an Array or PackedArray beyond its length | Validate index before access: `if index < array.size()`. Use `array.get(index)` where available. |
-| `Condition "p_mbuf_current..." is true` / audio underrun | Audio callback missed its deadline; processing too much on the audio thread | Reduce audio bus effects, lower polyphony, or increase audio buffer size in Project Settings. |
+| `Converting circular structure to JSON.` / `Circular reference to resource being saved found` | A Resource or Dictionary references itself, directly or indirectly | Break the cycle. Use node references instead of resource references where possible, or mark sub-resources as local only. |
+| `Cannot call non-static function "x()" from the static function "y()".` | Calling an instance method from a `static func` | Move the call to an instance context or refactor to a proper static helper that takes data as arguments. |
+| `Stack overflow. Check for infinite recursion in your script.` | Infinite recursion — often a signal that triggers itself, or a setter that sets itself | Add a guard variable (`_updating := true`) in setters. Trace the call stack in the Debugger. |
+| `Signal 'x' is already connected to given callable '…' in that object.` | Calling `connect()` a second time on the same signal/callable pair without `CONNECT_REFERENCE_COUNTED` | Check `is_connected()` before connecting, or disconnect first, or use `CONNECT_REFERENCE_COUNTED`. |
+| `Out of bounds get index 'X' (on base: 'Array')` | Accessing an Array or PackedArray beyond its length | Validate index before access: `if index < array.size()`. Use `array.get(index)` where available. |
+| Audio crackles or drops out (underrun) | Audio callback missed its deadline; processing too much on the audio thread | Reduce audio bus effects, lower polyphony, or increase audio buffer size in Project Settings. |
 
 ---
 
 ## 5. Performance Debugging
 
-The Profiler (Debugger → Profiler) shows per-function self-time and call counts. The Monitors tab tracks frame time, FPS, draw-call count, physics tick budget, memory. Open both during the most demanding gameplay scenario; sort the Profiler by **Self time** to find culprits. For draw-call bottlenecks, watch `Visible/Per frame` in the Monitors tab.
+The Profiler (Debugger → Profiler) shows per-function self-time and call counts. The Monitors tab tracks frame time, FPS, draw-call count, physics tick budget, memory. Open both during the most demanding gameplay scenario; sort the Profiler by **Self time** to find culprits. For draw-call bottlenecks, watch `Raster > Total Draw Calls` in the Monitors tab.
 
 > See [references/performance-debugging.md](references/performance-debugging.md) for Profiler workflow, Monitors tab usage, draw-call bottleneck identification, physics-tick monitoring patterns. See also **godot-optimization** for fixes once a bottleneck is identified.
 
@@ -227,7 +228,7 @@ When prints, breakpoints, and remote inspection don't immediately reveal the bug
 
 ## 8. Implementation Checklist
 
-- [ ] Use `print_debug()` for verbose frame-level output that must not appear in release builds
+- [ ] Guard verbose frame-level output with `OS.is_debug_build()` — neither `print()` nor `print_debug()` is stripped from release builds
 - [ ] Use `push_error()` / `push_warning()` (not `print()`) for invalid state and recoverable problems — they include stack traces
 - [ ] Set a breakpoint with `F9` or the `breakpoint` statement to pause execution rather than sprinkling prints
 - [ ] Check signal connections with `get_signal_connection_list()` before assuming a signal is wired correctly

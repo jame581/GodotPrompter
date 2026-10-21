@@ -37,7 +37,7 @@ Then enable the plugin in **Project > Project Settings > Plugins**.
 
 | Convention   | Rule                                                                  |
 |--------------|-----------------------------------------------------------------------|
-| File name    | Must start with `test_` (e.g., `test_health_component.gd`)           |
+| File name    | Any; suites are found by `extends GdUnitTestSuite` (generated: `*_test.gd`) |
 | Class        | `extends GdUnitTestSuite`                                             |
 | Test method  | Must start with `func test_`                                          |
 
@@ -190,7 +190,7 @@ assert_that(n).is_greater_equal(x)
 assert_that(n).is_less(x)
 assert_that(n).is_less_equal(x)
 assert_that(n).is_between(low, high)        # inclusive
-assert_that(n).is_approximately(expected, margin)
+assert_that(n).is_equal_approx(expected, margin)
 assert_that(n).is_negative()
 assert_that(n).is_zero()
 ```
@@ -214,7 +214,8 @@ assert_that(str).has_length(n)
 assert_that(arr).is_equal([1, 2, 3])
 assert_that(arr).contains([2, 3])           # subset check
 assert_that(arr).not_contains([4])
-assert_that(arr).contains_exactly([1, 2, 3]) # exact match, any order
+assert_that(arr).contains_exactly([1, 2, 3]) # same elements, same order
+assert_that(arr).contains_exactly_in_any_order([3, 1, 2])
 assert_that(arr).is_empty()
 assert_that(arr).is_not_empty()
 assert_that(arr).has_size(n)
@@ -227,10 +228,10 @@ func test_signal() -> void:
     var monitor := monitor_signals(_health)
     _health.take_damage(10)
 
-    assert_signal(monitor).is_emitted("health_changed")
-    assert_signal(monitor).is_emitted("health_changed").with_parameters([100, 90])
-    assert_signal(monitor).is_not_emitted("died")
-    assert_signal(monitor).is_emitted("health_changed").exactly(1)
+    # is_emitted() waits for the signal (default timeout 2000 ms), so await it.
+    await assert_signal(monitor).is_emitted("health_changed")
+    await assert_signal(monitor).is_emitted("health_changed", [100, 90])  # with these args
+    await assert_signal(monitor).wait_until(500).is_not_emitted("died")
 ```
 
 ---
@@ -315,7 +316,7 @@ public async Task SignalTest()
 
 ```gdscript
 # Create a mock (all methods stubbed to return null/defaults)
-var mock_health := mock(HealthComponent)
+var mock_health = mock(HealthComponent)
 
 # Stub a return value
 do_return(75).on(mock_health).get_health()
@@ -329,15 +330,15 @@ _player.health = mock_health
 _player.receive_hit(10)
 
 verify(mock_health).take_damage(10)
-verify(mock_health, times(1)).take_damage(10)    # called exactly once
+verify(mock_health, 1).take_damage(10)           # called exactly once
 verify_no_interactions(mock_health)              # use before any calls
 
 # Spy — wraps a real object, keeps real behavior, but tracks calls
-var spy_health := spy(HealthComponent.new())
+var spy_health = spy(HealthComponent.new())
 add_child(auto_free(spy_health))
 spy_health.take_damage(10)
 
-assert_eq(spy_health.current_health, 90)         # real method ran
+assert_that(spy_health.current_health).is_equal(90)  # real method ran
 verify(spy_health).take_damage(10)               # call was tracked
 ```
 
@@ -365,55 +366,41 @@ AssertThat(fakeHealth.LastDamage).IsEqual(10);
 
 ## CLI Commands
 
-### GDScript tests only
+The plugin ships `addons/gdUnit4/runtest.sh` / `runtest.cmd` (set `GODOT_BIN` first), which run `res://addons/gdUnit4/bin/GdUnitCmdTool.gd`. The same tool runs C# suites too when Godot is the .NET build.
 
 ```bash
-godot --headless \
-  -s addons/gdUnit4/GdUnitRunner.gd \
-  -- \
-  --testsuites res://tests
+export GODOT_BIN=/path/to/godot
+./addons/gdUnit4/runtest.sh -a res://tests
 ```
 
-### C# tests (requires .NET Godot build)
-
-```bash
-godot --headless \
-  -s addons/gdUnit4/bin/GdUnit4CSharpApiLoader.cs \
-  -- \
-  --testsuites res://tests
-```
+gdUnit4 refuses to run under `--headless` (exit code 103) unless you pass `--ignoreHeadlessMode`; tests that send input events do not work headless.
 
 ### Common CLI flags
 
 | Flag                          | Description                                          |
 |-------------------------------|------------------------------------------------------|
-| `--testsuites <path>`         | Path to test directory or specific file              |
-| `--report-dir <path>`         | Output directory for HTML/XML reports                |
-| `--report-count <n>`          | Number of reports to keep (default: 20)              |
-| `--verbose`                   | Verbose output                                       |
-| `--ignore-pause`              | Skip `pause()` calls during CI runs                  |
+| `-a, --add <path>`            | Test directory or suite to run                       |
+| `-i, --ignore <suite[:test]>` | Skip a suite or a single test                        |
+| `-c, --continue`              | Keep running after the first failure                 |
+| `-rd, --report-directory <path>` | Output directory for HTML/XML reports             |
+| `-rc, --report-count <n>`     | Number of reports to keep                            |
+| `--ignoreHeadlessMode`        | Allow a `--headless` run                             |
 
 ### Minimal CI invocation
 
 ```bash
-# GDScript
-godot --headless \
-  -s addons/gdUnit4/GdUnitRunner.gd \
-  -- \
-  --testsuites res://tests \
-  --report-dir ./reports
-
-# C# (mixed project)
-godot --headless \
-  -s addons/gdUnit4/bin/GdUnit4CSharpApiLoader.cs \
-  -- \
-  --testsuites res://tests \
-  --report-dir ./reports
+godot --headless --path . \
+  -s -d res://addons/gdUnit4/bin/GdUnitCmdTool.gd \
+  -a res://tests \
+  -rd ./reports \
+  --ignoreHeadlessMode
 ```
 
 ### Exit codes
 
-| Code | Meaning                  |
-|------|--------------------------|
-| 0    | All tests passed         |
-| 1    | One or more tests failed |
+| Code | Meaning                          |
+|------|----------------------------------|
+| 0    | All tests passed                 |
+| 100  | One or more tests failed or errored |
+| 101  | Passed with warnings             |
+| 103  | Headless mode refused            |

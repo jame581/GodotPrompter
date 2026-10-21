@@ -48,9 +48,9 @@ func _parse_property(
         var btn := Button.new()
         btn.text = "Reset to Default"
         btn.pressed.connect(func() -> void:
+            # A direct set is not undoable; for undo, pass the EditorPlugin's
+            # get_undo_redo() into this plugin and record the change there.
             object.my_special_value = 0
-            # Notify the editor that a property changed so undo/redo works.
-            emit_signal("property_changed", name, 0)
         )
         add_custom_control(btn)
         return true  # suppress default editor for this property
@@ -280,10 +280,9 @@ func _generate(resource: Resource, size: Vector2i, metadata: Dictionary) -> Text
     return ImageTexture.create_from_image(img)
 
 
-# Optional — generate from a path instead of a loaded resource.
-# Return null to fall back to _generate.
-func _generate_from_path(path: String, size: Vector2i, metadata: Dictionary) -> Texture2D:
-    return null
+# Optional: _generate_from_path(path, size, metadata). The default loads the
+# resource and calls _generate(); an override that returns null gives no preview,
+# so leave it out unless you can preview straight from the file.
 ```
 
 Register the generator from your `EditorPlugin`:

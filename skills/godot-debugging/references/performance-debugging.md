@@ -49,7 +49,8 @@ GD.Print($"RunExpensiveOperation took: {elapsed} µs");
 ### Identifying Draw Call Bottlenecks
 
 ```gdscript
-# Reduce draw calls with VisibleOnScreenNotifier3D — pause processing when off-screen
+# Skip _process work while off-screen with VisibleOnScreenNotifier3D. This saves CPU,
+# not draw calls — the renderer already culls off-screen objects.
 @onready var _vis: VisibleOnScreenNotifier3D = $VisibleOnScreenNotifier3D
 
 func _ready() -> void:
@@ -64,7 +65,8 @@ func _on_screen_exited() -> void:
 ```
 
 ```csharp
-// Reduce draw calls with VisibleOnScreenNotifier3D — pause processing when off-screen
+// Skip _Process work while off-screen with VisibleOnScreenNotifier3D. This saves CPU,
+// not draw calls — the renderer already culls off-screen objects.
 private VisibleOnScreenNotifier3D _vis;
 
 public override void _Ready()
@@ -78,7 +80,7 @@ private void OnScreenEntered() => SetProcess(true);
 private void OnScreenExited() => SetProcess(false);
 ```
 
-- Enable **Rendering > Debug > Draw Calls** in the editor Viewport menu to visualise batching.
+- Turn on **View Information** in the 3D viewport's menu to see the editor view's draw-call count.
 - Use `RenderingServer.get_rendering_info(RenderingServer.RENDERING_INFO_TOTAL_DRAW_CALLS_IN_FRAME)` for runtime draw call counts.
 
 ### Physics Tick Monitoring

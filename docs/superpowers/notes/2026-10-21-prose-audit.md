@@ -601,3 +601,186 @@ preset's **Features** tab (4.3 `editor/export/project_export.cpp:1393-1399`; 4.7
 `dedicated-server` SKILL.md has two
 `## 7. Checklist` sections (one between §2 and §3) — structure, not a claim. Batch E has no
 eval-measured content.
+
+## Batch F — platform + tooling
+
+Skills: `export-pipeline`, `mobile-development`, `xr-development`, `assets-pipeline`,
+`addon-development`, `gdextension`, `godot-testing`, `godot-debugging`, `godot-project-setup`.
+Every SKILL.md and every reference file was read in full, including `godot-testing`'s two
+root-level files (`gut-reference.md`, `gdunit4-reference.md`). Not audited: the Steam/itch release
+facts in `export-pipeline` (`steam-release-planning.md`, `distribution-itch-steam.md` — store
+policy, not engine behaviour), `mobile-development/references/iap-and-ads.md` (third-party billing
+plugin, no version named), and the gdext (Rust) binding page. A claim repeated in a checklist or a
+reference is counted once. Behaviour claims were checked for `#ifdef DEBUG_ENABLED` / `TOOLS_ENABLED`
+guards; the corrected `print_debug()` and signal-call errors have none (they print in release
+exports), while GDExtension reloading is `TOOLS_ENABLED`-only.
+
+Extra sources for this batch: `godot-cpp` branch `4.3` (`tools/godotcpp.py`); GUT `v9.3.0` (the
+Godot 4.3 line) and `main` (9.6.1); gdUnit4 `v4.5.0` (the Godot 4.3 line) and `master` (7.0.0);
+`godot_openxr_vendors` `master` (5.2.0-rc1); raw files at `4.4-stable`–`4.6-stable` to date three
+additions. Edited GDScript was re-parsed on 4.7.2 (`--check-only`; the test examples inside a
+project holding GUT 9.6.1 and gdUnit4 7.0.0, since the 4.3-line addons no longer compile on 4.7);
+the new `inject_version.gd` was run against a tagged scratch repository.
+
+| Skill | Claims checked (SKILL.md + references) | Wrong | Softened |
+|---|---|---|---|
+| `export-pipeline` | 39 + 8 | 9 | 0 |
+| `mobile-development` | 33 + 16 | 4 | 1 |
+| `xr-development` | 33 + 38 | 9 | 1 |
+| `assets-pipeline` | 35 + 4 | 5 | 0 |
+| `addon-development` | 30 + 45 | 11 | 1 |
+| `gdextension` | 25 + 10 | 4 | 0 |
+| `godot-testing` | 40 + 70 | 23 | 0 |
+| `godot-debugging` | 35 + 25 | 15 | 1 |
+| `godot-project-setup` | 25 | 2 | 0 |
+| **Total** | **511** | **82** | **4** |
+
+The worst errors were examples that cannot work as written:
+- `godot-testing`'s command lines did not exist. gdUnit4 has no `GdUnitRunner.gd --testsuites`
+  runner, no `GdUnit4CSharpApiLoader.cs` entry script and no `--add-gdunit-test-runner` flag; it is
+  `bin/GdUnitCmdTool.gd -a <dir>`, and it refuses a `--headless` run (exit 103) without
+  `--ignoreHeadlessMode`. GUT's CI line passed `-gexit_on_failure`, which GUT rejects as an unknown
+  argument and exits 1 before running a test. GUT doubles were used as instances (`double()`
+  returns a class; `.new()` is required), and `var x := double(...)` / `mock(...)` fails to parse
+  (inference on a Variant is an error by default).
+- `xr-development` read the thumbstick with `get_float("primary_x")` (no such input; the action is
+  the Vector2 `primary`), looked hand trackers up as `"left_hand"` (they are
+  `/user/hand_tracker/left`), and grabbed objects with a joint whose node A was the
+  `XRController3D` — not a physics body, so the joint is never created and nothing is held.
+- `addon-development` said GDScript `@tool` scripts are left out of exports (they are exported like
+  any script) and wrapped a `[Tool] Sprite2D` in `#if TOOLS`, which removes the class from exported
+  games; `godot-debugging` did the same to a game node. Its gizmo plugin called `get_undo_redo()`,
+  which only `EditorPlugin` has, and the C# twin used `EditorInterface.get_editor_undo_redo()`,
+  which 4.3 lacks.
+- `export-pipeline` ran an `EditorScript` through `godot --script`, which only accepts `SceneTree` /
+  `MainLoop` scripts, and named macOS/iOS preset keys (`codesign/enable`, `notarization/enable`,
+  `application/provisioning_profile`) that do not exist.
+
+| Skill file | Was | Is | Source |
+|---|---|---|---|
+| `export-pipeline` SKILL.md:26, 56-57 | `export_presets.cfg` "contains no secrets" while the example lists `codesign/identity` and `codesign/password` | options flagged secret (keystore and codesign paths and passwords, the encryption key) are written to `.godot/export_credentials.cfg`; the two lines are removed from the example and the CI env vars named | 4.3 `editor/export/editor_export.cpp:90-106`; `platform/windows/export/export_plugin.cpp:407-409` (`PROPERTY_USAGE_SECRET`); `platform/android/export/export_plugin.h:47` (`GODOT_ANDROID_KEYSTORE_*`) |
+| `export-pipeline` SKILL.md:84 | the file is regenerated "on every editor save" | rewritten (on a timer) whenever a preset changes | 4.3 `editor/export/editor_export_preset.cpp:37-383`, `editor_export.cpp:108-113` |
+| `export-pipeline` SKILL.md:97, 254 | Linux: "after export, run `chmod +x`" | the export writes the binary 0755; re-apply only if packaging drops the bit | 4.3 `platform/linuxbsd/export/export.cpp:46`; `editor/export/editor_export_platform_pc.cpp:167` |
+| `export-pipeline` SKILL.md:98 | macOS: `codesign/enable`, `notarization/enable`; notarize "post-export via `xcrun notarytool`" | `codesign/codesign` and `notarization/notarization` (enums); the export itself submits for notarization | 4.3 `platform/macos/export/export_plugin.cpp:468-511, 2270` |
+| `export-pipeline` SKILL.md:98 | privacy usage descriptions are `application/*` options | `privacy/*` options | 4.3 `platform/macos/export/export_plugin.cpp` (`privacy/camera_usage_description`, …) |
+| `export-pipeline` SKILL.md:101 | iOS `codesign/identity`, `application/provisioning_profile` | `application/code_sign_identity_release`, `application/provisioning_profile_uuid_release` | 4.3 `platform/ios/export/export_plugin.cpp`; 4.7.2 `editor/export/editor_export_platform_apple_embedded.cpp` |
+| `export-pipeline` SKILL.md:159 | `--quit-after N` quits after N milliseconds | after N main-loop iterations | 4.3 `main/main.cpp:1537` |
+| `export-pipeline` SKILL.md:175; `references/versioning.md:38-61` | version injection by an `EditorScript` run with `godot --headless --script` | `--script` accepts only a `SceneTree`/`MainLoop` script; an `EditorScript` fails with "Class 'EditorScript' can only be instantiated by editor" — the tool now extends `SceneTree` (run on 4.7.2) | 4.3 `main/main.cpp:3544-3545`, `core/object/class_db.cpp:521`; 4.7.2 `main.cpp:4384`, run |
+| `export-pipeline` `references/ci-cd-github-actions.md:34` | preset `"Linux/X11"` | `"Linux"` (the Godot 3 name) | 4.3 `platform/linuxbsd/export/export.cpp:44` |
+| `mobile-development` SKILL.md:269 | the C# iOS "simulator templates are x64-only" | the export builds arm64 + x86_64 simulator assemblies | 4.3 `modules/mono/editor/GodotTools/GodotTools/Export/ExportPlugin.cs:202`; 4.7.2 `:235` |
+| `mobile-development` `references/plugins.md:47` | `@tool class MyAndroidExportPlugin extends …` | inner classes inherit the script's `@tool`; the annotation there is a parse error ("must be at the top of the script") | 4.3 `modules/gdscript/gdscript_parser.cpp:1611`; 4.7.2 parse |
+| `mobile-development` `references/plugins.md:105` | `android_aar_plugin = true` "ships native code as an Android plugin" | set under `[configuration]` when an AAR plugin already bundles the `.so` files; the export then skips the extension's own Android libraries | 4.3 `editor/plugins/gdextension_export_plugin.h:54-58` |
+| `mobile-development` `references/plugins.md:145` | Gradle auto-includes any `.jar`/`.aar` "in the project addons dir" | since 4.4 (not 4.3), and only files directly in `res://addons/` (`include: ['*.jar', '*.aar']`) | 4.7.2 `platform/android/java/app/build.gradle:89-92`; `4.4-stable` same file `:66-69`; absent in 4.3 |
+| `xr-development` SKILL.md:18 | enable the `OpenXR` plugin | OpenXR is a built-in module; only `xr/openxr/enabled` | 4.3 `modules/openxr/` (no `plugin.cfg`) |
+| `xr-development` SKILL.md:72 | trigger `select_button`, grip `grip_button`, thumbstick `primary_axis` | `trigger`/`trigger_click`, `grip`/`grip_click`, `primary` (Vector2)/`primary_click`; `select_button` is a separate action | 4.3 `modules/openxr/action_map/openxr_action_map.cpp` (default action set) |
+| `xr-development` SKILL.md:80 | `XRController3D` nodes "can be configured to track hand joints" | joints come from `XRHandTracker`s (`/user/hand_tracker/left`/`right`) and are applied by `XRHandModifier3D`; the controller gets select/grip through the hand-interaction profile | 4.3 `modules/openxr/extensions/openxr_hand_tracking_extension.cpp:199`; `action_map/openxr_action_map.cpp:513`; `doc/classes/XRHandModifier3D.xml` |
+| `xr-development` SKILL.md:104 | `OpenXRInterface.environment_blend_mode = XR_ENVIRONMENT_BLEND_MODE_ALPHA_BLEND` | `XRInterface.XR_ENV_BLEND_MODE_ALPHA_BLEND` | 4.3 `doc/classes/XRInterface.xml:196, 272` |
+| `xr-development` SKILL.md:119 | **XR Features → Hand Tracking / Passthrough** in the Android preset | core has only `xr_features/xr_mode`; the two options are the vendors plugin's `meta_xr_features/*`, shown once the matching extension is on | 4.3 `platform/android/export/export_plugin.cpp`; `godot_openxr_vendors` `plugin/src/main/cpp/export/meta_export_plugin.cpp:69, 87, 309-312` |
+| `xr-development` `references/controllers-and-input.md:85-86, 102` | `primary` is the thumbstick click; axes via `get_float("primary_x")`/`("primary_y")` | `primary` is the Vector2 (`get_vector2("primary")`), `primary_click` the click; `primary_x/y` do not exist | as above (`OPENXR_ACTION_VECTOR`) |
+| `xr-development` `references/hand-tracking.md:25, 45` | `XRServer.get_tracker("left_hand")` | `"/user/hand_tracker/left"` (GDScript and C#) | 4.3 `openxr_hand_tracking_extension.cpp:199`; 4.7.2 `:212` |
+| `xr-development` `references/grabbing-objects.md:12-110` | grab with a `Generic6DOFJoint3D` from the controller to the body | `XRController3D` is not a `PhysicsBody3D`, so the joint stays unconfigured ("Node A must be a PhysicsBody3D"); the example now freezes and reparents the body, as SKILL.md §4 describes (GDScript and C#) | 4.3 `scene/3d/physics/joints/joint_3d.cpp:76-94` |
+| `assets-pipeline` SKILL.md:73-74 | `Compress > Mode` default VRAM Compressed; mipmaps Off | Lossless (VRAM Compressed in the 3D preset, and a texture detected in 3D is switched to it); mipmaps On in the 3D preset | 4.3 `editor/import/resource_importer_texture.cpp` (`compress/mode`, `mipmaps/generate`, `detect_3d/compress_to`); 4.7.2 `:125-145, 232, 243` |
+| `assets-pipeline` SKILL.md:77-78, 86 | import options `Flags > Filter` / `Flags > Repeat`; "per-image in Import dock: Filter → Nearest" | Godot 4 has no such import options; filtering and repeat are `CanvasItem.texture_filter` / `texture_repeat` (or the material sampler) | 4.3 `resource_importer_texture.cpp` option list; `scene/main/canvas_item.cpp:1291-1292` |
+| `assets-pipeline` SKILL.md:124 | suffix `-occluder` | `-occ` (`-occonly` drops the mesh); `-occluder` does not match | 4.3 `editor/import/3d/resource_importer_scene.cpp:385-404, 899-924` |
+| `assets-pipeline` SKILL.md:128-131 | `Wall-col` becomes a `StaticBody3D` parent of the mesh | the mesh object itself is suffixed: `Wall` (MeshInstance3D) → `StaticBody3D` → `CollisionShape3D` | 4.3 `resource_importer_scene.cpp:840-877` |
+| `assets-pipeline` SKILL.md:216 | WAV key settings "Loop Mode, Mix Rate" | Loop Mode, Max Rate (`force/max_rate`); mix rate is not an import option | 4.3 `editor/import/resource_importer_wav.cpp` option list |
+| `addon-development` SKILL.md:68-96 | `#if TOOLS` "prevents the class from being included in exported builds" for a `[Tool] Sprite2D`; "GDScript `@tool` scripts are excluded from exports automatically" | `TOOLS` exists only in editor builds, so `#if TOOLS` removes a game node from exports — use it for editor-only classes; `@tool` scripts are exported like any script (wrapper removed from the example) | 4.3 `modules/mono/editor/Godot.NET.Sdk/Godot.NET.Sdk/Sdk/Sdk.props:109-110`; `editor/export/editor_export_platform.cpp` (no tool-script filter) |
+| `addon-development` SKILL.md:127, 185 | `add_tool_menu_item` adds to the **Project** menu | **Project → Tools** | 4.3 `doc/classes/EditorPlugin.xml` (`add_tool_menu_item`) |
+| `addon-development` SKILL.md:262; `references/testing-plugins.md:49` | a C# build failure shows `Could not find type "Plugin"` | that is a GDScript analyzer error; a broken plugin script gives "Unable to load addon script from path: '…'. This might be due to a code error in that script." | 4.7.2 `modules/gdscript/gdscript_analyzer.cpp:904`; 4.3 `editor/editor_node.cpp:3683` |
+| `addon-development` SKILL.md:270, 291-302 | all fields required "except `dependencies` and `installs`"; a "complete example with all optional fields" | those keys do not exist; all five keys are required (a `plugin.cfg` missing one is skipped); the duplicate example is removed | 4.3 `editor/plugins/editor_plugin_settings.cpp:76-83` |
+| `addon-development` `references/dock-panels.md:27, 80-83` | `DOCK_SLOT_LEFT_UL` = Scene/Import, `LEFT_BL` = FileSystem; four slots | eight slots; Scene/Import default to `LEFT_UR`, FileSystem to `LEFT_BR`, Inspector/Node to `RIGHT_UL` | 4.3 `doc/classes/EditorPlugin.xml:831-855`; `editor/editor_node.cpp:7418-7433`; 4.7.2 `editor/docks/import_dock.cpp:755`, `filesystem_dock.cpp:4433` |
+| `addon-development` `references/inspector-plugins.md:51-53` | `emit_signal("property_changed", …)` from the inspector plugin "so undo/redo works" | `EditorInspectorPlugin` has no signals (`property_changed` belongs to `EditorProperty`); the set is now labelled as not undoable | 4.3 `doc/classes/EditorInspectorPlugin.xml`, `EditorProperty.xml:113` |
+| `addon-development` `references/inspector-plugins.md:283` | `_generate_from_path` returning null "falls back to `_generate`" | an override replaces the default (load, then `_generate`); null means no preview — the override is removed from the example | 4.3 `editor/editor_resource_preview.cpp:63-74` |
+| `addon-development` `references/gizmos-deep-dive.md:22, 98, 111, 130, 191, 205` | GDScript `get_undo_redo()` inside the gizmo plugin; C# `EditorInterface.Singleton.GetEditorUndoRedo()` | gizmo plugins have no `get_undo_redo()`, and `EditorInterface.get_editor_undo_redo()` is 4.4+; both versions now take the EditorPlugin's `get_undo_redo()` at registration | 4.3 `doc/classes/EditorNode3DGizmoPlugin.xml`, `EditorInterface.xml` (absent); `4.4-stable` `EditorInterface.xml` (present) |
+| `addon-development` `references/testing-plugins.md:74-77` | `godot.exe --editor` shows the OS console | the main `.exe` is a GUI-subsystem program; use the `_console.exe` wrapper | 4.3 `platform/windows/SCsub:61-73` |
+| `gdextension` SKILL.md:169; `references/debugging-native.md:7` | `reloadable = true` hot reload in "debug builds only" | editor builds only ("GDExtensions can only be reloaded in an editor build.") | 4.3 `core/extension/gdextension_manager.cpp:90-91` |
+| `gdextension` SKILL.md:170 | `compatibility_minimum` "too low and the extension fails to load" | required; an older engine refuses the extension, and a value below 4.1 is rejected | 4.3 `core/extension/gdextension.cpp:938-966` |
+| `gdextension` `references/debugging-native.md:19, 28` | `template_debug` binaries "carry debug symbols and assertions"; build symbols via "template_debug / unoptimized" | `template_debug` is optimized (`speed_trace`), defines `DEBUG_ENABLED` and `NDEBUG`, and has no symbols unless `debug_symbols=yes` (`dev_build=yes` for unoptimized) | godot-cpp `4.3` `tools/godotcpp.py:474-499, 527, 537` |
+| `godot-testing` SKILL.md:21, 67 | gdUnit4 CLI: "`gdunit4_runner` script", "`--add-gdunit-test-runner` argument" | `runtest.sh` / `runtest.cmd` wrapping `bin/GdUnitCmdTool.gd -a <dir>`; `--ignoreHeadlessMode` under `--headless` | gdUnit4 `v4.5.0` `addons/gdUnit4/runtest.sh`, `bin/GdUnitCmdTool.gd:39-101, 335-358` |
+| `godot-testing` SKILL.md:42, 51; `gut-reference.md:270` | GUT config `tests/gut_config.json` | default `res://.gutconfig.json` | GUT `v9.3.0` `addons/gut/cli/gut_cli.gd:91, 115` |
+| `godot-testing` SKILL.md:61, 139; `gdunit4-reference.md:40` | gdUnit4 GDScript suites "must start with `test_`" | any name; suites are found by `extends GdUnitTestSuite`, generated ones are `*_test.gd` | gdUnit4 `v4.5.0` `src/core/GdUnitTestSuiteScanner.gd:87-108, 242-255` |
+| `godot-testing` SKILL.md:119; `gdunit4-reference.md:193` | `is_approximately(exp, margin)` | `is_equal_approx(exp, margin)` | gdUnit4 `v4.5.0` `src/GdUnitFloatAssert.gd:20` |
+| `godot-testing` SKILL.md:120; `references/testing-patterns.md:73`; `gdunit4-reference.md:231` | `assert_signal(m).is_emitted(…)` without `await`; `.with_parameters([...])`, `.exactly(1)` | `is_emitted()` waits on a timer and must be awaited; arguments are its second parameter; there is no `with_parameters`/`exactly` (`wait_until(ms)` sets the timeout) | gdUnit4 `v4.5.0` `src/GdUnitSignalAssert.gd`, `src/asserts/GdUnitSignalAssertImpl.gd:63-90` |
+| `godot-testing` `references/running-tests.md:13-47, 105`; `gdunit4-reference.md:366-419`; `godot-debugging` `references/systematic-method.md:105, 113` | `-s addons/gdUnit4/GdUnitRunner.gd -- --testsuites …`, `-s …/GdUnit4CSharpApiLoader.cs`, `--report-dir`, `--verbose`, `--ignore-pause`, `GdUnit4CmdTool.gd`; exit code 1 on failure | `-s -d res://addons/gdUnit4/bin/GdUnitCmdTool.gd -a <dir>`, `-rd`, `-rc`, `-i`, `-c`, `--ignoreHeadlessMode`; the same tool runs C# suites; exit codes 0 / 100 failed / 101 warnings / 103 headless refused | gdUnit4 `v4.5.0` `bin/GdUnitCmdTool.gd:20-24, 39-101, 520-527`; `src/core/GdUnitTestSuiteScanner.gd:90` |
+| `godot-testing` `gdunit4-reference.md:217` | `contains_exactly` "exact match, any order" | same order; `contains_exactly_in_any_order` ignores order (added) | gdUnit4 `v4.5.0` `src/GdUnitArrayAssert.gd` |
+| `godot-testing` `gdunit4-reference.md:333, 341` | `verify(mock, times(1))`; `assert_eq(...)` in a gdUnit4 suite | `verify(mock, 1)` (no `times()`); `assert_that(...).is_equal(...)` (`assert_eq` is GUT) | gdUnit4 `v4.5.0` `src/GdUnitTestSuite.gd:241` and function list |
+| `godot-testing` `references/testing-patterns.md:102, 113`; `gut-reference.md:117, 154` | `double(HealthComponent)` / `partial_double(...)` used as the instance | they return a doubled class; `.new()` makes the instance | GUT `v9.3.0` `addons/gut/test.gd:1367-1379`, `documentation/docs/Stubbing.md:26` |
+| `godot-testing` `references/testing-patterns.md:106, 120` | `stub(mock, "current_health").to_return(75)` / `do_return(75).on(mock).current_health` | `current_health` is a property: GUT logs an error, gdUnit4 stubs nothing; both lines replaced by a note (only methods can be stubbed) | GUT `v9.3.0` `test.gd` (`stub` → `_get_bad_method_message`); tdd-workflow's `HealthComponent` (`var current_health`) |
+| `godot-testing` `references/testing-patterns.md:113`; `gut-reference.md:141, 247` | `assert_called_with_parameters(...)` | no such GUT assert; `assert_called(double, method, [args])` | GUT `v9.3.0` `test.gd:948` (and `main`) |
+| `godot-testing` `gut-reference.md:262-270, 278` | `-gselect` runs one test method; `-gexit_on_failure`; `-goutput_dir` | `-gselect` filters script file names (`-gunit_test_name` filters tests); `-gexit_on_failure` and `-goutput_dir` do not exist — unknown flags make GUT exit 1 before running (`-gexit_on_success` added); `-gexit` exits 1 when a test failed | GUT `v9.3.0` `cli/gut_cli.gd:110-143, 244-246`; `gui/GutRunner.gd:21-22, 123-146` |
+| `godot-testing` `references/running-tests.md:13-22` | GUT command lines without `-gexit` | added; without it the run never quits | GUT `v9.3.0` `cli/gut_cli.gd:125` |
+| `godot-testing` `references/testing-patterns.md:102, 120`; `gut-reference.md:117, 154`; `gdunit4-reference.md:319, 337` | `var x := double(...)` / `mock(...)` / `spy(...)` | `var x = …`: inferring from a Variant is a parse error by default | 4.7.2 parse (`INFERENCE_ON_VARIANT`) |
+| `godot-testing` `gut-reference.md:182` | `get_signal_emit_count` "gets the list of all emitted signals" | returns how many times one signal was emitted | GUT `v9.3.0` `test.gd:779` |
+| `godot-debugging` SKILL.md:35, 83, 231 | `print_debug()` "only prints in debug builds; stripped from release exports" | it prints in release too; it adds the calling `file:line` when the debugger is attached — guard verbose output with `OS.is_debug_build()` | 4.3 `modules/gdscript/gdscript_utility_functions.cpp:418-435` (no `DEBUG_ENABLED` guard); 4.7.2 `:348-360` |
+| `godot-debugging` SKILL.md:155-156 | Step Out (Shift+F11); Continue (F5) | Continue is F12; Step Out exists from 4.6 and is Alt+F11 | 4.3 `editor/plugins/debugger_editor_plugin.cpp:49-52`; 4.7.2 `editor/debugger/debugger_editor_plugin.cpp:48-52`; absent at `4.5-stable` |
+| `godot-debugging` SKILL.md:182 | a wrong handler signature is a "silent miss" | every emit logs `Error calling from signal '…' to callable: …` | 4.3 `core/object/object.cpp:1190-1200` |
+| `godot-debugging` SKILL.md:196-200 (error table) | `Cyclic reference`; `Cannot access member without instance` (with a `@static` function); `Stack overflow / Maximum recursion depth reached`; `Already connected` "without `CONNECT_ONE_SHOT`"; `Index out of bounds (index X out of size Y)` | the real messages: `Converting circular structure to JSON.` / `Circular reference to resource being saved found`; `Cannot call non-static function "x()" from the static function "y()".` (`static func`; `@static` does not exist); `Stack overflow. Check for infinite recursion in your script.`; `Signal '…' is already connected to given callable '…' in that object.` unless `CONNECT_REFERENCE_COUNTED`; `Out of bounds get index '…' (on base: '…')` | 4.3 `core/io/json.cpp:95, 117`; `scene/resources/resource_format_text.cpp:1586`; `modules/gdscript/gdscript_analyzer.cpp:3435`; `gdscript_vm.cpp:475, 1100`; `core/object/object.cpp:1396-1402`; 4.7.2 same strings |
+| `godot-debugging` SKILL.md:207 | watch `Visible/Per frame` in the Monitors tab | `Raster > Total Draw Calls` (the name batch D used) | batch D monitor row |
+| `godot-debugging` `references/signal-tracing.md:74` | connecting a nonexistent signal from C# is a "silent failure" | logs `Attempt to connect nonexistent signal …` and returns `ERR_INVALID_PARAMETER` | 4.3 `core/object/object.cpp:1390` |
+| `godot-debugging` `references/performance-debugging.md:52, 68, 83` | `VisibleOnScreenNotifier3D` processing toggle "reduces draw calls"; enable "Rendering > Debug > Draw Calls" in the viewport menu | it saves CPU only (off-screen objects are already culled); the draw-call count is in the 3D viewport's **View Information** overlay | 4.3 `editor/plugins/node_3d_editor_plugin.cpp:2936, 5305` |
+| `godot-debugging` `references/scene-tree-debugging.md:102, 115` | `[Tool] EnemySpawner : Node3D` wrapped in `#if TOOLS` | wrapper removed (it would drop the game node from exports) | 4.3 `Sdk.props:109-110` |
+| `godot-debugging` `references/systematic-method.md:53` | `set_script(null)`: "node becomes a plain Node" | it keeps its built-in type | `Object.set_script` (script removed, class unchanged) |
+| `godot-project-setup` SKILL.md:403 | "the namespace must match across all C# scripts to avoid registration errors" | namespaces are free-form; the class name must match the file name | 4.3 `modules/mono/editor/Godot.NET.Sdk/Godot.SourceGenerators/ScriptPathAttributeGenerator.cs:56, 113-117`; 4.7.2 `:56` |
+| `godot-project-setup` SKILL.md:413 | a non-`partial` class "will not register" | build error GD0001 (missing partial modifier) | 4.3 `Godot.SourceGenerators/Common.cs:11-18` |
+
+**Softened (no source either way):**
+- `mobile-development` SKILL.md:24, 263: "the iOS simulator supports the Compatibility renderer only"
+  → test with Compatibility there; the iOS display code creates a Metal layer for the RD drivers on
+  simulators too (4.3 `platform/ios/godot_view.mm:74-82`), so the restriction is not in the source.
+- `xr-development` SKILL.md:121: "set minimum API level to 29+" → the level Meta's store requires
+  (29+ when written); neither core nor the vendors plugin sets it (vendors `config.gradle:5`, `minSdk 24`).
+- `addon-development` `references/testing-plugins.md:86`: a stale custom type is a "`plugin_types`
+  cache" entry (no such cache in the source) → usually a missing `remove_custom_type()`.
+- `godot-debugging` SKILL.md:200: the quoted `Condition "p_mbuf_current..." is true` (not in either
+  tag) → "Audio crackles or drops out (underrun)".
+
+**Checked and correct (selection):**
+- Windows preset keys (`codesign/*`, `application/*` incl. `modify_resources`, icon formats
+  ICO/PNG/WebP/SVG, native resource editing via `TemplateModifier` in 4.7.2, rcedit in 4.3 — the
+  4.5 callout stands); Android `keystore/release*`, `permissions/*`, `package/unique_name`, keystore
+  and key password shared (`build.gradle:150-152`); `--headless`, `--export-release/-debug/-pack`;
+  `PCKPacker.add_file_from_buffer`; Shader Baker option and per-driver plugins.
+- Mobile: notification values 2014–2017, 1007, 2019–2020; `WM_CLOSE_REQUEST` desktop-only; the
+  iOS ~5 s note (`Node.xml`); `vibrate_handheld(duration_ms, amplitude)` and its VIBRATE / iOS 13
+  notes; `create_proxy`/`create_sam_callback` return null off Android; `AndroidRuntime` methods;
+  `.gdip` sections and keys; JDK 17 (`config.gradle:12`).
+- XR: `xr/openxr/enabled`, `xr/shaders/enabled`, 4.5–4.7 settings (`foveation_*`, `render_model`,
+  `frame_synthesis`, `target_api_version`, `driver.windows`), `OpenXRRenderModelManager`,
+  `eye_visibility`, `create_new_anchor(transform, spatial_context, next)`, `XRHandTracker` joints.
+- Assets: `-col`/`-convcol`/`-rigid`/`-navmesh`, `fix_alpha_border`/`premult_alpha` defaults,
+  `canvas_textures/default_texture_filter`, loop modes, Ogg/MP3 loop/BPM options.
+- Editor plugins: `plugin.cfg` script path relative to the plugin folder, required `@tool`/`EditorPlugin`
+  base, 4.7 `get_unsaved_scenes`/`ScriptEditor` methods, `create_default_inspector`,
+  `CONTEXT_SLOT_INSPECTOR_PROPERTY`, `_can_commit_handle_on_click`, inspector-plugin virtuals.
+- GDExtension: `GDREGISTER_CLASS`, `InitObject` API, default `template_debug`, CMake support
+  (godot-cpp 4.3), `[icons]`/`[dependencies]`, 4.0 extensions refused.
+- Testing: GUT 9.3 asserts (`assert_almost_eq`, `assert_signal_emitted_with_parameters`,
+  `assert_call_count`, `wait_for_signal`, …), `add_child_autofree`, lifecycle hooks; gdUnit4 4.5
+  asserts, `auto_free`, `monitor_signals`, `await_millis`, `scene_runner`.
+- Debugging: `Node not found: "…" (relative to "…")`, `Can't change this state while flushing
+  queries`, `Invalid call. Nonexistent function`, `get_signal_connection_list()` keys, F9/F10/F11,
+  `print_tree_pretty()` glyphs, `RENDERING_INFO_TOTAL_DRAW_CALLS_IN_FRAME`.
+
+**Sweep:** each correction's key nouns were grepped in `skills/`, `agents/` and `.codex/`:
+`export_credentials`/secret options, "regenerates", `chmod`, `codesign/enable`, `notarization/`,
+`provisioning_profile`, `--quit-after`, `EditorScript` run via `--script`, `Linux/X11`, simulator,
+`android_aar_plugin`, addons `.aar`, `primary_x`/`select_button`/`grip_button`, `left_hand`,
+blend-mode constant, `Generic6DOFJoint3D`, `Flags > Filter`/`Repeat`, `-occluder`, Mix Rate, texture
+compression default, `#if TOOLS` on non-editor classes, "excluded from exports",
+`add_tool_menu_item`, `Could not find type`, `dependencies`/`installs`, `DOCK_SLOT_`,
+`property_changed`, `_generate_from_path`, `get_undo_redo`/`GetEditorUndoRedo`, `reloadable`,
+`compatibility_minimum`, `template_debug`, `gdunit4_runner`, `GdUnitRunner`, `--testsuites`,
+`gut_config`, `is_approximately`, `with_parameters`, `assert_called_with_parameters`,
+`-gexit_on_failure`, `double(`/`mock(`/`spy(` declarations, `print_debug`, Step Out, `silent`,
+`namespace must match`. Instances outside the batch-F files: none. The `godot-tools-engineer`
+agent (and its Codex copy) says to guard editor-only C# with `#if TOOLS`, which is correct, so it
+was left. No frontmatter or Related-skills line changed, so no index/Codex regeneration.
+
+**Not changed:** version callouts (out of scope; `addon-development` SKILL.md:238's
+`add_control_to_dock()` sentence was not touched, so its deferred 4.6 callout stays open); editor
+click-paths (`testing-plugins.md` "Editor → Execute Script" and "Mono → Build Project", the Remote
+inspector steps, Profiler column names). Example-code gaps left as written: `assets-pipeline`
+`references/runtime-resource-loading.md` never assigns `_loading_path`; `gut-reference.md` stubs
+`get_health()`/`is_dead()` on a `HealthComponent` the skill never defines; `controllers-and-input.md`
+locomotion has no C# twin (pre-existing; the validator does not flag the reference). Batch F has no
+eval-measured content.

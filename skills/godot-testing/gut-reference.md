@@ -114,7 +114,7 @@ GUT uses "doubles" — partial stubs of real classes.
 ### Create a double
 
 ```gdscript
-var mock := double(HealthComponent)
+var mock = double(HealthComponent).new()  # double() returns a class; .new() makes the instance
 ```
 
 ### Stub a method return value
@@ -138,7 +138,7 @@ _player.receive_hit(10)
 
 assert_called(mock, "take_damage")
 assert_call_count(mock, "take_damage", 1)
-assert_called_with_parameters(mock, "take_damage", [10])
+assert_called(mock, "take_damage", [10])  # with these arguments
 ```
 
 ### Assert a method was NOT called
@@ -151,7 +151,7 @@ assert_not_called(mock, "heal")
 
 ```gdscript
 # double() replaces all methods; use partial_double() to keep real behavior
-var spy := partial_double(HealthComponent)
+var spy = partial_double(HealthComponent).new()
 add_child_autofree(spy)
 spy.take_damage(10)
 assert_called(spy, "take_damage")
@@ -179,7 +179,7 @@ func test_signals() -> void:
     # Assert a signal was NOT emitted
     assert_signal_not_emitted(_health, "died")
 
-    # Get the list of all emitted signals
+    # Count how many times one signal was emitted
     var emissions := get_signal_emit_count(_health, "health_changed")
     assert_eq(emissions, 1)
 ```
@@ -244,7 +244,7 @@ func test_emits_ready() -> void:
 | `assert_signal_emitted_with_parameters(obj, signal_name, params)` | Signal emitted with exact args |
 | `assert_called(double, method_name)`              | Double method was called                 |
 | `assert_not_called(double, method_name)`          | Double method was not called             |
-| `assert_called_with_parameters(double, method, args)` | Double method called with args      |
+| `assert_called(double, method, args)`             | Double method called with these args     |
 | `assert_call_count(double, method, count)`        | Double method called exactly N times     |
 
 ---
@@ -259,15 +259,15 @@ godot --headless -s addons/gut/gut_cmdln.gd [flags]
 |-------------------------------|------------------------------------------------------|
 | `-gdir=res://tests`           | Directory to scan for test files                     |
 | `-gtest=res://tests/test_x.gd`| Run a single test file                               |
-| `-gselect=test_method_name`   | Run a single test method by name                     |
+| `-gselect=health`             | Run only scripts whose file name contains the text   |
+| `-gunit_test_name=take_damage`| Run only tests whose name contains the text          |
 | `-gprefix=test_`              | File prefix to look for (default: `test_`)           |
 | `-gsuffix=.gd`                | File suffix to look for (default: `.gd`)             |
 | `-glog=0..3`                  | Log verbosity: 0=quiet, 1=default, 2=verbose, 3=max  |
-| `-gexit`                      | Exit Godot after tests complete (required for CI)    |
-| `-gexit_on_failure`           | Exit with error code if any test fails               |
-| `-goutput_dir=res://results`  | Directory to write result files                      |
+| `-gexit`                      | Exit after tests complete, code 1 if any failed (required for CI) |
+| `-gexit_on_success`           | Exit only if no test fails (stay open to inspect)    |
 | `-gjunit_xml_file=report.xml` | Write JUnit-compatible XML report                    |
-| `-gconfig=res://gut_config.json` | Load configuration from JSON file                 |
+| `-gconfig=res://.gutconfig.json` | Config file to load (this path is the default)    |
 
 ### Minimal CI invocation
 
@@ -276,6 +276,5 @@ godot --headless \
   -s addons/gut/gut_cmdln.gd \
   -gdir=res://tests \
   -gexit \
-  -gexit_on_failure \
   -glog=2
 ```

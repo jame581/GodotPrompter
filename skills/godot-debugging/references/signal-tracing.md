@@ -71,7 +71,7 @@ enemy.dead.connect(_on_enemy_dead)
 
 ```csharp
 // WRONG — connecting to a signal that does not exist (typo or wrong node type)
-enemy.Connect("Dead", new Callable(this, MethodName.OnEnemyDead)); // silent failure
+enemy.Connect("Dead", new Callable(this, MethodName.OnEnemyDead)); // logs "Attempt to connect nonexistent signal", returns InvalidParameter
 
 // RIGHT — verify signal exists before connecting
 System.Diagnostics.Debug.Assert(

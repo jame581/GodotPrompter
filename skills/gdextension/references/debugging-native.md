@@ -4,7 +4,7 @@ Native (C++/Rust) extensions can't be stepped through with Godot's script debugg
 
 ## Hot reload
 
-`reloadable = true` in the `.gdextension` `[configuration]` block lets the editor reload the library when you recompile, without restarting the editor. This works in **debug builds only**. It's invaluable while iterating on a class, but turn it off (or simply ship release binaries) for exported games.
+`reloadable = true` in the `.gdextension` `[configuration]` block lets the editor reload the library when you recompile, without restarting the editor. This works in the **editor only** ("GDExtensions can only be reloaded in an editor build"). It's invaluable while iterating on a class, but turn it off (or simply ship release binaries) for exported games.
 
 ## Debug vs release libraries
 
@@ -16,7 +16,7 @@ windows.debug.x86_64 = "res://bin/gdexample.windows.template_debug.x86_64.dll"
 windows.release.x86_64 = "res://bin/gdexample.windows.template_release.x86_64.dll"
 ```
 
-- `template_debug` binaries carry debug symbols and assertions — load these while developing in the editor and in debug exports.
+- `template_debug` binaries enable `DEBUG_ENABLED` checks — load these in the editor and in debug exports. Like release builds they are optimized and carry no debug symbols unless you build with `debug_symbols=yes`.
 - `template_release` binaries are optimized — these must be present in a release export or the native node type won't exist at runtime.
 
 Keep both built so the editor (debug) and your shipped game (release) each load the right one.
@@ -25,7 +25,7 @@ Keep both built so the editor (debug) and your shipped game (release) each load 
 
 Godot's tutorial doesn't ship a GDB/LLDB walkthrough; the implied path is to attach a native debugger to the running Godot process:
 
-- Build the extension with **debug symbols** (`template_debug` / unoptimized).
+- Build the extension with **debug symbols**: `scons debug_symbols=yes` (add `dev_build=yes` for an unoptimized build).
 - Launch the editor or game, then **attach** GDB (Linux), LLDB (macOS), or the Visual Studio / WinDbg debugger (Windows) to the `godot` / game process.
 - Set breakpoints in your extension's source; trigger the code path from the game.
 - On Windows you can also launch Godot as the debuggee directly from Visual Studio with your `.pdb` next to the `.dll`.

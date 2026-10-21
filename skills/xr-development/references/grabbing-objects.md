@@ -1,6 +1,6 @@
 # Grabbing Objects
 
-Reference for `skills/xr-development/SKILL.md` — physics-based grabbing pattern (controller area + RigidBody3D capture + release on trigger). GDScript + C#.
+Reference for `skills/xr-development/SKILL.md` — physics-based grabbing pattern (controller area + RigidBody3D freeze-and-reparent + release on grip). GDScript + C#.
 
 > ← Back to [SKILL.md](../SKILL.md)
 
@@ -9,11 +9,13 @@ Reference for `skills/xr-development/SKILL.md` — physics-based grabbing patter
 
 ### Physics-Based Grabbing
 
+Freeze the body and reparent it to the controller while held; on release, restore the parent, unfreeze it, and hand it the controller's velocity. (A joint from the controller does not work: `XRController3D` is not a `PhysicsBody3D`, so the joint reports "Node A must be a PhysicsBody3D" and is never created.)
+
 ```gdscript
 extends XRController3D
 
 var _held_object: RigidBody3D = null
-var _grab_joint: Generic6DOFJoint3D = null
+var _held_parent: Node = null
 
 @onready var grab_area: Area3D = $GrabArea  # small Area3D at controller position
 
@@ -30,33 +32,30 @@ func _on_button_released(button_name: String) -> void:
         _release()
 
 func _try_grab() -> void:
-    var bodies: Array[Node3D] = grab_area.get_overlapping_bodies()
-    for body in bodies:
+    for body in grab_area.get_overlapping_bodies():
         if body is RigidBody3D:
             _held_object = body
-            # Create a joint to attach object to controller
-            _grab_joint = Generic6DOFJoint3D.new()
-            add_child(_grab_joint)
-            _grab_joint.node_a = get_path()
-            _grab_joint.node_b = _held_object.get_path()
+            _held_parent = body.get_parent()
+            _held_object.freeze = true      # stop the simulation while held
+            _held_object.reparent(self)     # keeps its global transform
             break
 
 func _release() -> void:
-    if _grab_joint:
-        _grab_joint.queue_free()
-        _grab_joint = null
-    if _held_object:
-        # Apply controller velocity to thrown object
-        _held_object.linear_velocity = get_pose().linear_velocity
-        _held_object.angular_velocity = get_pose().angular_velocity
-        _held_object = null
+    _held_object.reparent(_held_parent)
+    _held_object.freeze = false
+    var pose := get_pose()
+    if pose:
+        # Apply controller velocity to the thrown object
+        _held_object.linear_velocity = pose.linear_velocity
+        _held_object.angular_velocity = pose.angular_velocity
+    _held_object = null
 ```
 
 ```csharp
 public partial class XRGrabController : XRController3D
 {
     private RigidBody3D _heldObject = null;
-    private Generic6DofJoint3D _grabJoint = null;
+    private Node _heldParent = null;
 
     [Export] public Area3D GrabArea { get; set; }
 
@@ -85,10 +84,9 @@ public partial class XRGrabController : XRController3D
             if (body is RigidBody3D rigidBody)
             {
                 _heldObject = rigidBody;
-                _grabJoint = new Generic6DofJoint3D();
-                AddChild(_grabJoint);
-                _grabJoint.NodeA = GetPath();
-                _grabJoint.NodeB = _heldObject.GetPath();
+                _heldParent = rigidBody.GetParent();
+                _heldObject.Freeze = true;   // stop the simulation while held
+                _heldObject.Reparent(this);  // keeps its global transform
                 break;
             }
         }
@@ -96,18 +94,16 @@ public partial class XRGrabController : XRController3D
 
     private void Release()
     {
-        if (_grabJoint != null)
+        _heldObject.Reparent(_heldParent);
+        _heldObject.Freeze = false;
+        var pose = GetPose();
+        if (pose != null)
         {
-            _grabJoint.QueueFree();
-            _grabJoint = null;
-        }
-        if (_heldObject != null)
-        {
-            var pose = GetPose();
+            // Apply controller velocity to the thrown object
             _heldObject.LinearVelocity = pose.LinearVelocity;
             _heldObject.AngularVelocity = pose.AngularVelocity;
-            _heldObject = null;
         }
+        _heldObject = null;
     }
 }
 ```

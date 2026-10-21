@@ -46,7 +46,7 @@ public partial class PluginReloader : EditorScript
 #endif
 ```
 
-> **C# plugin reload caveat:** unlike GDScript, C# plugins require recompilation. After editing C# plugin source the editor must rebuild the assembly before re-enabling. If the plugin fails to load with `Could not find type "Plugin"`, the C# project failed to compile — check the **MSBuild Panel** at the bottom of the editor for compilation errors.
+> **C# plugin reload caveat:** unlike GDScript, C# plugins require recompilation. After editing C# plugin source the editor must rebuild the assembly before re-enabling. If the plugin fails to load with "Unable to load addon script from path … This might be due to a code error in that script", the C# project most likely failed to compile — check the **MSBuild Panel** at the bottom of the editor for compilation errors.
 
 ## Debugging with print
 
@@ -71,10 +71,10 @@ public override void _EnterTree()
 #endif
 ```
 
-To launch with the OS console visible on Windows:
+To see that output in a console on Windows, launch the console wrapper that ships next to the editor (`…_console.exe`); the main `.exe` is a GUI-subsystem program and does not attach to a terminal:
 
 ```
-godot.exe --editor --path /path/to/project
+Godot_v4.3-stable_win64_console.exe --editor --path /path/to/project
 ```
 
 ## Plugin lifecycle gotchas
@@ -83,7 +83,7 @@ godot.exe --editor --path /path/to/project
 |---|---|---|
 | Plugin enabled but `_enter_tree` crashes | Plugin remains enabled but broken; editor may be unstable | Disable, fix, re-enable |
 | Forgot to remove a dock in `_exit_tree` | Dock orphan survives disable; duplicate docks appear on next enable | Always null-check and `queue_free()` in `_exit_tree` |
-| Custom type still listed after removal | Stale entry in the project's `plugin_types` cache | Restart the editor once after `remove_custom_type` |
+| Custom type still listed after removal | Usually a missing `remove_custom_type()` in `_exit_tree()` | Add the call; restart the editor if the entry persists |
 | `@tool` script crashes on property set | Editor shows the error but the script stops updating | Guard with `if Engine.is_editor_hint()` and validate inputs |
 | C# plugin not compiling | Entire plugin silently fails to load | Check the **Mono → Build Project** output and fix C# errors first |
 | `add_inspector_plugin` called twice | Inspector plugin fires twice per property | Track and guard with a null-check before `add_inspector_plugin` |

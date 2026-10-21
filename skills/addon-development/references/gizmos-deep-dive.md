@@ -19,6 +19,9 @@ extends EditorNode3DGizmoPlugin
 
 const HANDLE_RADIUS := 0.15
 
+# Gizmo plugins have no get_undo_redo(); the EditorPlugin passes its own in.
+var undo_redo: EditorUndoRedoManager
+
 
 func _init() -> void:
     # Create a named material for the gizmo lines/handles.
@@ -92,10 +95,10 @@ func _commit_handle(
         node.target_offset = restore
     else:
         # Register with undo/redo so Ctrl+Z works.
-        get_undo_redo().create_action("Move MyNode3D Handle")
-        get_undo_redo().add_do_property(node, "target_offset", node.target_offset)
-        get_undo_redo().add_undo_property(node, "target_offset", restore)
-        get_undo_redo().commit_action()
+        undo_redo.create_action("Move MyNode3D Handle")
+        undo_redo.add_do_property(node, "target_offset", node.target_offset)
+        undo_redo.add_undo_property(node, "target_offset", restore)
+        undo_redo.commit_action()
 ```
 
 Register from `EditorPlugin`:
@@ -105,7 +108,9 @@ Register from `EditorPlugin`:
 var _gizmo_plugin: EditorNode3DGizmoPlugin
 
 func _enter_tree() -> void:
-    _gizmo_plugin = preload("res://addons/my_plugin/my_gizmo_plugin.gd").new()
+    var gizmo_plugin := preload("res://addons/my_plugin/my_gizmo_plugin.gd").new()
+    gizmo_plugin.undo_redo = get_undo_redo()
+    _gizmo_plugin = gizmo_plugin
     add_node_3d_gizmo_plugin(_gizmo_plugin)
 
 func _exit_tree() -> void:
@@ -122,6 +127,9 @@ using Godot;
 [Tool]
 public partial class SpawnerGizmoPlugin : EditorNode3DGizmoPlugin
 {
+    // Set by the EditorPlugin: GetUndoRedo(). Gizmo plugins have no undo/redo accessor of their own.
+    public EditorUndoRedoManager UndoRedo { get; set; }
+
     public SpawnerGizmoPlugin()
     {
         CreateMaterial("main", new Color(1, 0.5f, 0));
@@ -180,8 +188,7 @@ public partial class SpawnerGizmoPlugin : EditorNode3DGizmoPlugin
         if (cancel) { spawner.SpawnRadius = (float)restore; return; }
 
         // Wire to UndoRedo so the change is undoable.
-        // Get the editor's undo/redo manager via EditorInterface (Godot 4.x pattern).
-        var undoRedo = EditorInterface.Singleton.GetEditorUndoRedo();
+        var undoRedo = UndoRedo;
         undoRedo.CreateAction("Set Spawner Radius");
         undoRedo.AddDoProperty(spawner, "spawn_radius", spawner.SpawnRadius);
         undoRedo.AddUndoProperty(spawner, "spawn_radius", restore);
@@ -195,7 +202,7 @@ public partial class SpawnerGizmoPlugin : EditorNode3DGizmoPlugin
 // #if TOOLS
 // public override void _EnterTree()
 // {
-//     _gizmoPlugin = new SpawnerGizmoPlugin();
+//     _gizmoPlugin = new SpawnerGizmoPlugin { UndoRedo = GetUndoRedo() };
 //     AddNode3DGizmoPlugin(_gizmoPlugin);
 // }
 // public override void _ExitTree()

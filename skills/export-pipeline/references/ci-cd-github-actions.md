@@ -31,7 +31,7 @@ jobs:
             artifact: windows
             output_path: build/windows/MyGame.exe
 
-          - preset: "Linux/X11"
+          - preset: "Linux"
             artifact: linux
             output_path: build/linux/MyGame.x86_64
 

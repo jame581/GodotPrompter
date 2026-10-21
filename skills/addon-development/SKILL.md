@@ -66,7 +66,6 @@ func _get_configuration_warnings() -> PackedStringArray:
 ### C#
 
 ```csharp
-#if TOOLS
 using Godot;
 
 [Tool]
@@ -92,10 +91,9 @@ public partial class MyToolSprite : Sprite2D
         return System.Array.Empty<string>();
     }
 }
-#endif
 ```
 
-> Wrap C# tool scripts in `#if TOOLS` / `#endif` to prevent the class from being included in exported builds. GDScript `@tool` scripts are excluded from exports automatically.
+> `TOOLS` is defined only in editor builds, so `#if TOOLS` removes a class from exported games: use it for editor-only classes (`EditorPlugin`, inspector plugins), never for a `[Tool]` node that also runs in the game. Exports include `@tool` scripts like any other script unless the preset's filters exclude them.
 
 **Key rules:**
 - Add `@tool` / `[Tool]` at the top of every script that needs editor access.
@@ -126,7 +124,7 @@ func _enter_tree() -> void:
         preload("res://addons/my_plugin/icons/my_node.svg")
     )
 
-    # Add a menu item to the Project menu (top toolbar).
+    # Add a menu item under Project > Tools.
     add_tool_menu_item("My Plugin Action", _on_tool_menu_item)
 
 
@@ -184,7 +182,7 @@ public partial class MyPlugin : EditorPlugin
 | `script` | The GDScript / C# script resource |
 | `icon` | A `Texture2D`, typically a 16×16 SVG |
 
-**add_tool_menu_item** adds an entry under **Project** in the top menu bar. Pass a `Callable` that takes no arguments.
+**add_tool_menu_item** adds an entry under **Project → Tools** in the top menu bar. Pass a `Callable` that takes no arguments.
 
 ### Unsaved-State & Script Editor Control (Godot 4.7+)
 
@@ -261,7 +259,7 @@ Add a custom dock to the editor by calling `add_control_to_dock(slot, control)` 
 
 ## 8. Testing Plugins
 
-Toggle the plugin off and on in **Project Settings → Plugins** to reload it; saving a `@tool` script hot-reloads automatically, but new class registrations and dock changes need the full cycle. `print()` / `push_warning()` / `push_error()` go to the Output panel. **C# plugins must recompile first** — `Could not find type "Plugin"` means the assembly failed to build, so check the MSBuild panel before anything else.
+Toggle the plugin off and on in **Project Settings → Plugins** to reload it; saving a `@tool` script hot-reloads automatically, but new class registrations and dock changes need the full cycle. `print()` / `push_warning()` / `push_error()` go to the Output panel. **C# plugins must recompile first** — "Unable to load addon script from path … This might be due to a code error in that script" usually means the assembly failed to build, so check the MSBuild panel before anything else.
 
 Reload recipes (GDScript + C# `PluginReloader`), console launch flags, and the lifecycle-gotcha table (orphaned docks, stale custom types, double-registered inspector plugins): [references/testing-plugins.md](references/testing-plugins.md)
 
@@ -269,7 +267,7 @@ Reload recipes (GDScript + C# `PluginReloader`), console launch flags, and the l
 
 ## 9. plugin.cfg Format
 
-`plugin.cfg` is a plain INI file placed at the root of the plugin folder. All fields in the `[plugin]` section are required except `dependencies` and `installs`.
+`plugin.cfg` is a plain INI file placed at the root of the plugin folder. All five fields in the `[plugin]` section are required: the Plugins list skips a `plugin.cfg` that lacks any of them.
 
 ```ini
 [plugin]
@@ -291,18 +289,6 @@ script="plugin.gd"
 | `version` | String | Semantic version string (e.g. `"1.2.0"`) |
 | `script` | String | Path to the main `EditorPlugin` script, **relative to the plugin folder** |
 
-**Complete example with all optional fields:**
-
-```ini
-[plugin]
-
-name="My Plugin"
-description="Adds MyNode, a custom inspector, and a dock panel to the editor."
-author="Your Name"
-version="1.0.0"
-script="plugin.gd"
-```
-
 > There are no other standard keys in Godot 4.x `plugin.cfg`. Dependency management is handled externally (e.g., by the Asset Library or manual installation instructions).
 
 ---
@@ -320,7 +306,7 @@ script="plugin.gd"
 - [ ] Dock scenes have a `Custom Minimum Size` set so the panel is usable at default dock widths
 - [ ] Dock `Control` is freed with `queue_free()` in `_exit_tree()`
 - [ ] `EditorResourcePreviewGenerator` is both added and removed via `EditorInterface.get_resource_previewer()`
-- [ ] Gizmo plugin implements `_commit_handle` with `get_undo_redo()` so handle drags are undoable
+- [ ] Gizmo plugin implements `_commit_handle` with the EditorPlugin's `get_undo_redo()` (passed in) so handle drags are undoable
 - [ ] Plugin tested by full disable/enable cycle after each structural change
 - [ ] `push_error()` used instead of silent failures in all `_enter_tree` setup paths
 - [ ] C# plugin scripts wrapped in `#if TOOLS` / `#endif`

@@ -70,12 +70,12 @@ Mobile targets             → VRAM Compressed (essential for memory)
 
 | Setting | Description | Default |
 |--------------------|-----------------------------------------------|-------------|
-| **Compress > Mode** | Compression algorithm (see table above) | VRAM Compressed |
-| **Mipmaps > Generate** | Generate mipmaps for distance rendering | Off |
+| **Compress > Mode** | Compression algorithm (see table above) | Lossless (VRAM Compressed in the 3D preset; a texture detected in 3D is switched to it) |
+| **Mipmaps > Generate** | Generate mipmaps for distance rendering | Off (On in the 3D preset) |
 | **Process > Fix Alpha Border** | Prevents dark outlines on transparent sprites | On |
 | **Process > Premult Alpha** | Pre-multiply alpha (avoids dark halos) | Off |
-| **Flags > Filter** | Bilinear filtering (smooth) vs nearest (crisp) | Linear |
-| **Flags > Repeat** | Enable texture tiling | Disabled |
+
+Filtering and repeat are not import options in Godot 4: they are `texture_filter` / `texture_repeat` on each `CanvasItem` (or the material's sampler in 3D).
 
 ### Pixel Art Setup
 
@@ -83,7 +83,7 @@ For crisp pixel art, set these project-wide:
 
 **Project Settings > Rendering > Textures > Canvas Textures > Default Texture Filter** → `Nearest`
 
-Or per-image in Import dock: **Filter** → `Nearest`
+Or per node: `CanvasItem.texture_filter` → `Nearest`
 
 ### Enabling Mipmaps
 
@@ -121,13 +121,13 @@ Godot auto-creates appropriate node types based on **suffixes** in your 3D model
 | `-convcol` | ConvexPolygonShape3D | `Rock-convcol` |
 | `-rigid` | RigidBody3D | `Barrel-rigid` |
 | `-navmesh` | NavigationRegion3D | `Floor-navmesh` |
-| `-occluder` | OccluderInstance3D | `BigWall-occluder` |
+| `-occ` | OccluderInstance3D (`-occonly` drops the mesh) | `BigWall-occ` |
 
 ```
 In Blender:                  In Godot (after import):
-Wall-col                  →  StaticBody3D
-├── Wall (mesh)           →    ├── MeshInstance3D
-                          →    └── CollisionShape3D (auto-generated)
+Wall-col (mesh object)    →  Wall (MeshInstance3D)
+                               └── StaticBody3D
+                                   └── CollisionShape3D (auto-generated)
 ```
 
 ### Import Dock Settings
@@ -213,7 +213,7 @@ Share animations between characters with different skeletons:
 
 | Format | Import As | Use For | Key Settings |
 |--------|-----------------|---------------------------|-------------------------|
-| WAV | AudioStreamWAV | Short SFX | Loop Mode, Mix Rate |
+| WAV | AudioStreamWAV | Short SFX | Loop Mode, Max Rate |
 | OGG | AudioStreamOggVorbis | Music, long SFX | Loop, Loop Offset |
 | MP3 | AudioStreamMP3 | Music (fallback) | Loop, BPM |
 

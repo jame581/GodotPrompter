@@ -166,8 +166,8 @@ The exported `extern "C"` symbol name **must equal** `entry_symbol`, or the exte
 **Forward-but-not-backward.** An extension targeting 4.2 works in 4.3, but one targeting 4.3 will **not** load in 4.2. **Exception:** extensions targeting 4.0 do not work in 4.1+.
 
 - The **godot-cpp branch must match** the engine version you build against.
-- `reloadable = true` hot reload works in **debug builds only**.
-- Set `compatibility_minimum` to the lowest engine version you actually support — too low and the extension fails to load at runtime.
+- `reloadable = true` hot reload works in the **editor only** — exported games never reload.
+- `compatibility_minimum` is required: set it to the lowest engine version you actually support. An older engine refuses to load the extension, and a value below `4.1` is rejected.
 - Exported games need the matching `template_release` binaries present, or the native node type simply won't exist at runtime.
 
 > ⚠️ **Changed in Godot 4.7:** `Object.is_class()` changed its `class` parameter type from `String` to `StringName` for performance. GDScript is unaffected and C# gained a compatibility method, but GDExtension binaries compiled against the old signature rely on the engine's compatibility mapping — rebuild against bindings matching your target version when updating to 4.7. See the [4.7 migration guide](https://docs.godotengine.org/en/latest/tutorials/migrating/upgrading_to_godot_4.7.html).
