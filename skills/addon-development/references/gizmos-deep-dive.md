@@ -190,8 +190,8 @@ public partial class SpawnerGizmoPlugin : EditorNode3DGizmoPlugin
         // Wire to UndoRedo so the change is undoable.
         var undoRedo = UndoRedo;
         undoRedo.CreateAction("Set Spawner Radius");
-        undoRedo.AddDoProperty(spawner, "spawn_radius", spawner.SpawnRadius);
-        undoRedo.AddUndoProperty(spawner, "spawn_radius", restore);
+        undoRedo.AddDoProperty(spawner, Spawner3D.PropertyName.SpawnRadius, spawner.SpawnRadius);
+        undoRedo.AddUndoProperty(spawner, Spawner3D.PropertyName.SpawnRadius, restore);
         undoRedo.CommitAction();
     }
 }

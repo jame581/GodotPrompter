@@ -64,7 +64,7 @@ res://
 
 ## Running Tests
 
-Both frameworks ship a CLI runner. **GUT:** `addons/gut/gut_cmdln.gd` invoked via `godot --headless --path . -s addons/gut/gut_cmdln.gd`. **gdUnit4:** `addons/gdUnit4/runtest.sh -a res://tests` (wraps `bin/GdUnitCmdTool.gd`; under `--headless` it also needs `--ignoreHeadlessMode`), or the editor's GdUnit dock. CI: tag-triggered or PR-triggered GitHub Action that installs Godot, runs the suite, exits non-zero on failure.
+Both frameworks ship a CLI runner. **GUT:** `addons/gut/gut_cmdln.gd` invoked via `godot --headless --path . -s addons/gut/gut_cmdln.gd -gexit` (without `-gexit` the run never quits). **gdUnit4:** `addons/gdUnit4/runtest.sh -a res://tests` (wraps `bin/GdUnitCmdTool.gd`; under `--headless` it also needs `--ignoreHeadlessMode`), or the editor's GdUnit dock. CI: tag-triggered or PR-triggered GitHub Action that installs Godot, runs the suite, exits non-zero on failure.
 
 > See [references/running-tests.md](references/running-tests.md) for full GUT and gdUnit4 CLI invocations + a copy-pasteable GitHub Actions workflow.
 

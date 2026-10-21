@@ -75,7 +75,8 @@ public partial class MyToolSprite : Sprite2D
     {
         if (Engine.IsEditorHint())
         {
-            // Editor-only logic — safe to call editor APIs here.
+            // Editor-only logic. EditorInterface and other GodotSharpEditor types
+            // exist only in the editor build — wrap them in #if TOOLS.
             UpdateConfigurationWarnings();
         }
         else

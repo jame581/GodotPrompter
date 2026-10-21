@@ -85,5 +85,5 @@ Godot_v4.3-stable_win64_console.exe --editor --path /path/to/project
 | Forgot to remove a dock in `_exit_tree` | Dock orphan survives disable; duplicate docks appear on next enable | Always null-check and `queue_free()` in `_exit_tree` |
 | Custom type still listed after removal | Usually a missing `remove_custom_type()` in `_exit_tree()` | Add the call; restart the editor if the entry persists |
 | `@tool` script crashes on property set | Editor shows the error but the script stops updating | Guard with `if Engine.is_editor_hint()` and validate inputs |
-| C# plugin not compiling | Entire plugin silently fails to load | Check the **Mono → Build Project** output and fix C# errors first |
+| C# plugin not compiling | Plugin fails to load with "Unable to load addon script from path …" | Check the **Mono → Build Project** output and fix C# errors first |
 | `add_inspector_plugin` called twice | Inspector plugin fires twice per property | Track and guard with a null-check before `add_inspector_plugin` |
