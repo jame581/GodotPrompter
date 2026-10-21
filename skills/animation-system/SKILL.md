@@ -181,17 +181,9 @@ Two approaches for 2D character animation: `AnimatedSprite2D` (quick, frames-onl
 
 ### Ping-Pong Playback (Godot 4.7+)
 
-`SpriteFrames` gains a `LoopMode` enum — `LOOP_NONE = 0`, `LOOP_LINEAR = 1`, `LOOP_PINGPONG = 2` — set per animation with `set_animation_loop_mode(anim, loop_mode)` and read back with `get_animation_loop_mode(anim)`. The old bool `set_animation_loop()` / `get_animation_loop()` are deprecated. Ping-pong alternates direction each time the animation reaches the end or start, and works with both `AnimatedSprite2D` and `AnimatedSprite3D`.
+`SpriteFrames` replaces the bool `set_animation_loop()` (deprecated) with `set_animation_loop_mode(anim, SpriteFrames.LOOP_PINGPONG)` (also `LOOP_NONE`, `LOOP_LINEAR`); works with `AnimatedSprite2D` and `AnimatedSprite3D`.
 
-```gdscript
-var frames: SpriteFrames = $AnimatedSprite2D.sprite_frames
-frames.set_animation_loop_mode(&"sway", SpriteFrames.LOOP_PINGPONG)
-```
-
-```csharp
-var frames = GetNode<AnimatedSprite2D>("AnimatedSprite2D").SpriteFrames;
-frames.SetAnimationLoopMode("sway", SpriteFrames.LoopMode.Pingpong);
-```
+> See [references/sprite-animation.md](references/sprite-animation.md#ping-pong-playback-godot-47) for the GDScript + C# snippet.
 
 ---
 
@@ -217,39 +209,17 @@ The canonical pattern: cache `AnimationNodeStateMachinePlayback` from `anim_tree
 
 ### Blend Trees — BlendSpace1D / BlendSpace2D
 
-For continuous blending (walk↔run on a speed parameter; 4/8-directional movement on a 2D vector). Set the root to **AnimationNodeBlendTree**, add a **BlendSpace1D** or **BlendSpace2D**, place animations at compass positions (e.g., walk @ 0.0, run @ 1.0; idle_down @ (0,1), idle_right @ (1,0)). Drive the blend each frame:
+For continuous blending (walk↔run on speed, 4/8-directional movement on a 2D vector), set the root to **AnimationNodeBlendTree**, add a **BlendSpace1D** or **BlendSpace2D**, and set `anim_tree["parameters/BlendSpace2D/blend_position"]` from gameplay code every frame.
 
-```gdscript
-# 1D — speed blend
-var blend_amount := inverse_lerp(walk_speed, run_speed, velocity.length())
-anim_tree["parameters/BlendSpace1D/blend_position"] = blend_amount
-
-# 2D — direction blend
-anim_tree["parameters/BlendSpace2D/blend_position"] = input_dir
-```
-
-```csharp
-_animTree.Set("parameters/BlendSpace1D/blend_position", blendAmount);
-_animTree.Set("parameters/BlendSpace2D/blend_position", inputDir);
-```
+> See [references/blend-spaces.md](references/blend-spaces.md) for blend point placement and the GDScript + C# code that drives a 1D speed blend and a 2D direction blend.
 
 ### Named Blend Points (Godot 4.7+)
 
-`AnimationNodeBlendSpace1D/2D.add_blend_point()` gains an optional `name: StringName = &""` parameter, and blend point names/indices can be set and displayed in the editor. Passing a name explicitly is recommended (empty names will be deprecated); look points up with `find_blend_point_by_name()`.
+`add_blend_point()` gains an optional `name` parameter (pass one: empty names will be deprecated); look points up with `find_blend_point_by_name()`.
 
-```gdscript
-blend_space.add_blend_point(walk_node, 0.0, -1, &"walk")
-blend_space.add_blend_point(run_node, 1.0, -1, &"run")
-var run_index := blend_space.find_blend_point_by_name(&"run")
-```
+> See [references/blend-spaces.md](references/blend-spaces.md#named-blend-points-godot-47) for the GDScript + C# snippet.
 
-```csharp
-blendSpace.AddBlendPoint(walkNode, 0.0f, -1, "walk");
-blendSpace.AddBlendPoint(runNode, 1.0f, -1, "run");
-int runIndex = blendSpace.FindBlendPointByName("run");
-```
-
-> ⚠️ **Changed in Godot 4.7:** `AnimationNodeBlendSpace1D/2D` replace the bool `sync` property (now deprecated) with a `sync_mode` `SyncMode` enum: `SYNC_MODE_NONE = 0` (default — inactive animations are frozen), `SYNC_MODE_INDEPENDENT = 1` (the old `sync = true` behavior), `SYNC_MODE_CYCLIC_MUTABLE = 2` (cycle length computed dynamically from blend weights), `SYNC_MODE_CYCLIC_CONSTANT = 3` (one cycle per `cyclic_length` seconds — must be > 0). If an AnimationTree that blended correctly in 4.6 stops transitioning correctly, set `sync_mode` on each blend space. See the [4.7 migration guide](https://docs.godotengine.org/en/latest/tutorials/migrating/upgrading_to_godot_4.7.html).
+> ⚠️ **Changed in Godot 4.7:** the bool `sync` on `AnimationNodeBlendSpace1D/2D` is deprecated, replaced by the `sync_mode` property (C#: `SyncMode`), which takes an enum: `SYNC_MODE_NONE` (default — inactive animations frozen), `SYNC_MODE_INDEPENDENT` (the old `sync = true`), `SYNC_MODE_CYCLIC_MUTABLE`, `SYNC_MODE_CYCLIC_CONSTANT`. If a tree that blended correctly in 4.6 stops transitioning correctly, set `sync_mode` on each blend space. Full enum semantics: [references/blend-spaces.md](references/blend-spaces.md#sync-mode-godot-47).
 
 ---
 
@@ -261,7 +231,7 @@ Procedurally rotates a bone to look at a world-space target. Ideal for head trac
 
 > See [references/skeleton-modifiers.md](references/skeleton-modifiers.md) for the full GDScript and C# example with angle limits and influence blending.
 
-> ⚠️ **Changed in Godot 4.7:** `LookAtModifier3D.relative` now defaults to `false` — the rotation is applied relative to the rest pose instead of the current pose. The default was `true` only in 4.6.0; the change was also backported to 4.6.1, so projects coming from 4.6.1 or later see no difference. Set `relative = true` to restore the 4.6.0 behavior. See the [4.7 migration guide](https://docs.godotengine.org/en/latest/tutorials/migrating/upgrading_to_godot_4.7.html).
+> ⚠️ **Changed in Godot 4.7:** `LookAtModifier3D.relative` defaults to `false` (rotation relative to the rest pose); only 4.6.0 used `true`. Set `relative = true` to restore it — details in [references/skeleton-modifiers.md](references/skeleton-modifiers.md).
 
 ### BoneConstraint3D (Godot 4.5+)
 
@@ -277,7 +247,9 @@ Simulates spring physics on bones — hair, capes, tails, antennas bounce and sw
 
 ### Animation Markers (Godot 4.4+)
 
-Markers define named points/regions within an animation clip — use them for subregion loops, section-based playback, and audio-synced events without splitting clips. Right-click the animation timeline → **Insert Marker...** → name it (e.g., `hit_frame`, `loop_start`). Play a region with `anim_player.play_section_with_markers(&"attack", &"loop_start", &"loop_end")`, or compare `animation.get_marker_time(&"hit_frame")` with `anim_player.current_animation_position`.
+Named points/regions inside a clip (timeline → **Insert Marker...**) for subregion loops and frame-exact events without splitting clips; play a region with `play_section_with_markers()`.
+
+> See [references/animation-markers.md](references/animation-markers.md) for the workflow and GDScript + C# code.
 
 ### Animation Retargeting (Godot 4.3+)
 

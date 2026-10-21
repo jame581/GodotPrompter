@@ -130,6 +130,8 @@
       ],
       "addon": null,
       "references": [
+        "skills/animation-system/references/animation-markers.md",
+        "skills/animation-system/references/blend-spaces.md",
         "skills/animation-system/references/bone-constraints.md",
         "skills/animation-system/references/common-pitfalls.md",
         "skills/animation-system/references/common-recipes.md",
@@ -1098,9 +1100,11 @@
       "references": [
         "skills/xr-development/references/controllers-and-input.md",
         "skills/xr-development/references/godot-4-5-features.md",
+        "skills/xr-development/references/godot-4-7-features.md",
         "skills/xr-development/references/grabbing-objects.md",
         "skills/xr-development/references/hand-tracking.md",
         "skills/xr-development/references/passthrough.md",
+        "skills/xr-development/references/spatial-entities.md",
         "skills/xr-development/references/xr-ui.md"
       ],
       "source": "skills/xr-development/SKILL.md"
