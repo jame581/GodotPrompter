@@ -139,3 +139,5 @@ invocations, one per case name. Clean runs, about $3.3 together, no errors or ti
 - skill-16: the skill fired in 1 of 3 runs for a plain HTTPRequest download question. Description-only routing does not reliably pick it; per the plan the description was left alone this release and the gap is carried to the v1.16.0 follow-ups.
 - skill-17 with-arm 0.92: one `upscaling-code-correct` run failed 3/3 votes on an answer that suggested MetalFX Spatial on Mobile (valid on 4.4+); the code grader is the noisy one. The without-arm answers are the real signal.
 - skill-18 first run (`…069Z`, with 0.75 / without 1.00) was grader wording, not the model: the key grader demanded the full header names and the regex missed "Thread Support". Both now accept COOP/COEP and the UI label; re-run 1.00 in both arms.
+
+- **Re-run 2026-10-22 (`results/2026-10-21T23-30-37-310Z`):** skill-16 again 1.00 / 1.00, `web-services` fired 1/3. This case runs in an empty workspace, so the SessionStart card is not injected; the v1.16.0 card's new `web-services` row cannot affect it. The routing gap is in the skill's `description`.
