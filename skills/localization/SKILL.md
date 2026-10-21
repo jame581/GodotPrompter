@@ -1,0 +1,346 @@
+---
+name: localization
+description: Use when implementing localization (i18n/l10n) — TranslationServer, CSV/PO translation files, locale switching, RTL support, and pluralization in Godot 4.3+
+---
+
+# Localization in Godot 4.3+
+
+All examples target Godot 4.3+ with no deprecated APIs; GDScript first, then C#.
+
+> **Related skills:** **godot-ui** for Control nodes and theme management, **save-load** for persisting language settings, **responsive-ui** for layout adjustments per locale.
+
+---
+
+## 1. Core Concepts
+
+### How Godot Localization Works
+
+1. **Wrap all user-facing strings** in `tr()` — Godot's translation function
+2. **Create translation files** (CSV or PO) mapping keys to translated strings
+3. **Import translation files** as `Translation` resources
+4. **Switch locale at runtime** via `TranslationServer.set_locale()`
+
+All `Control` nodes with `text`, `tooltip_text`, or `placeholder_text` properties auto-translate when the value matches a translation key.
+
+### Translation Key Strategies
+
+| Strategy | Example Key | Pros | Cons |
+|----------|-------------|------|------|
+| Semantic keys | `MENU_START_GAME` | Clear intent, easy to find | Needs a default language fallback |
+| English-as-key | `Start Game` | Readable code, no mapping file for English | Breaks if English text changes |
+
+> **Recommendation:** Use semantic keys (`MENU_START_GAME`) for production; English-as-key only for prototypes or solo projects.
+
+---
+
+## 2. Translation Files
+
+### CSV Format
+
+The simplest format. First column is the key, subsequent columns are locale codes.
+
+```csv
+keys,en,cs,de,ja
+MENU_START,Start Game,Začít hru,Spiel starten,ゲームスタート
+MENU_OPTIONS,Options,Nastavení,Optionen,オプション
+MENU_QUIT,Quit,Ukončit,Beenden,終了
+PLAYER_HEALTH,Health: %d,Zdraví: %d,Gesundheit: %d,体力: %d
+ITEM_COLLECTED,%s collected!,%s sebráno!,%s gesammelt!,%sを入手！
+```
+
+Save as `translations.csv` in your project. Godot auto-detects the format on import.
+
+**Import settings** (Import dock):
+- **Delimiter**: Comma (default) or Tab
+- **Translations** section: enable/disable individual locales
+
+### PO Format (Gettext)
+
+Industry-standard format, preferred by translation teams and tools like Poedit, Weblate, Crowdin.
+
+**Create a POT template** (`messages.pot`):
+
+```
+msgid "MENU_START"
+msgstr ""
+
+msgid "MENU_OPTIONS"
+msgstr ""
+
+msgid "MENU_QUIT"
+msgstr ""
+
+msgid "PLAYER_HEALTH"
+msgstr ""
+```
+
+**Create locale files** (e.g., `cs.po` for Czech):
+
+```
+msgid "MENU_START"
+msgstr "Začít hru"
+
+msgid "MENU_OPTIONS"
+msgstr "Nastavení"
+
+msgid "MENU_QUIT"
+msgstr "Ukončit"
+
+msgid "PLAYER_HEALTH"
+msgstr "Zdraví: %d"
+```
+
+### Registering Translations
+
+**Project Settings → Localization → Translations → Add...** → select your `.csv` or `.po` files.
+
+Or register at runtime:
+
+```gdscript
+var translation := load("res://translations/cs.po") as Translation
+TranslationServer.add_translation(translation)
+```
+
+```csharp
+var translation = GD.Load<Translation>("res://translations/cs.po");
+TranslationServer.AddTranslation(translation);
+```
+
+> ⚠️ **Changed in Godot 4.7:** `OptimizedTranslation.generate()` now returns `bool` (was `void`). GDScript- and C#-source-compatible, but binary-incompatible — recompile precompiled C# plugins calling it. See the [4.7 migration guide](https://docs.godotengine.org/en/latest/tutorials/migrating/upgrading_to_godot_4.7.html).
+
+### POT Generation Hooks (Godot 4.7+)
+
+A custom `EditorTranslationParserPlugin` can override `_customize_strings()` — called once after all files are parsed during POT generation — to add or remove entries from the final extracted-string list:
+
+```gdscript
+@tool
+extends EditorTranslationParserPlugin
+
+func _customize_strings(strings: Array[PackedStringArray]) -> Array[PackedStringArray]:
+    strings.append(PackedStringArray(["Test 1", "context", "test 1 plurals", "test 1 comment"]))
+    # Drop internal strings that begin with "$".
+    return strings.filter(func(s): return not s[0].begins_with("$"))
+```
+
+```csharp
+#if TOOLS
+using System.Linq;
+using Godot;
+
+public partial class CommentAwareParser : EditorTranslationParserPlugin
+{
+    public override Godot.Collections.Array<string[]> _CustomizeStrings(Godot.Collections.Array<string[]> strings)
+    {
+        strings.Add(new[] { "Test 1", "context", "test 1 plurals", "test 1 comment" });
+        // Drop internal strings that begin with "$".
+        return new Godot.Collections.Array<string[]>(strings.Where(s => !s[0].StartsWith("$")));
+    }
+}
+#endif
+```
+
+> **Godot 4.7+:** The POT generator also extracts `Control.accessibility_name` and `accessibility_description`, making accessibility strings translatable without manual listing. ([GH-117134](https://github.com/godotengine/godot/pull/117134))
+
+---
+
+## 3. Using tr() in Code
+
+### GDScript
+
+```gdscript
+# Basic translation
+var label_text: String = tr("MENU_START")  # "Start Game" or translated equivalent
+
+# With format arguments
+var health_text: String = tr("PLAYER_HEALTH") % current_health
+# "Health: 85" or "Zdraví: 85"
+
+# With string arguments
+var collected_text: String = tr("ITEM_COLLECTED") % item_name
+# "Sword collected!" or "Meč sebráno!"
+
+# Pluralization (Godot 4.x)
+var count := 5
+var msg: String = tr_n("ONE_ENEMY", "MANY_ENEMIES", count)
+# Needs plural forms in the translation: PO, or CSV `?plural` rows on Godot 4.6+ (§10)
+```
+
+### C#
+
+```csharp
+string labelText = Tr("MENU_START");
+string healthText = string.Format(Tr("PLAYER_HEALTH"), currentHealth);
+
+// Pluralization
+string msg = TrN("ONE_ENEMY", "MANY_ENEMIES", count);
+```
+
+### Automatic Control Translation
+
+`Label`, `Button`, `RichTextLabel`, and other Control nodes auto-translate their `text` property when it matches a translation key. Set the text to the key:
+
+```
+Button.text = "MENU_START"   → displays "Start Game" (en) or "Začít hru" (cs)
+```
+
+> **Tip:** To disable automatic translation on a specific Control, set `auto_translate_mode` to `DISABLED`.
+
+> **Godot 4.7+:** `Control.translation_context: StringName` sets a per-control translation context, used both to translate displayed text and to generate translation templates — the property equivalent of `tr()`'s context argument (C#: `TranslationContext`). ([GH-115340](https://github.com/godotengine/godot/pull/115340))
+
+---
+
+## 4. Switching Locale at Runtime
+
+### GDScript
+
+```gdscript
+# Switch language
+func set_language(locale_code: String) -> void:
+    TranslationServer.set_locale(locale_code)
+    # All Control nodes with translation keys update automatically
+
+# Get current locale
+var current: String = TranslationServer.get_locale()  # e.g. "en", "cs", "de"
+
+# Get available locales
+var locales: PackedStringArray = TranslationServer.get_loaded_locales()
+```
+
+### C#
+
+```csharp
+public void SetLanguage(string localeCode)
+{
+    TranslationServer.SetLocale(localeCode);
+}
+
+string current = TranslationServer.GetLocale();
+```
+
+### Language Selection Menu
+
+```gdscript
+extends Control
+
+@onready var language_button: OptionButton = %LanguageButton
+
+var _locales: Array[Dictionary] = [
+    {"code": "en", "name": "English"},
+    {"code": "cs", "name": "Čeština"},
+    {"code": "de", "name": "Deutsch"},
+    {"code": "ja", "name": "日本語"},
+]
+
+func _ready() -> void:
+    for locale in _locales:
+        language_button.add_item(locale["name"])
+
+    # Set current selection
+    var current_locale: String = TranslationServer.get_locale()
+    for i in _locales.size():
+        if _locales[i]["code"] == current_locale:
+            language_button.selected = i
+            break
+
+    language_button.item_selected.connect(_on_language_selected)
+
+func _on_language_selected(index: int) -> void:
+    TranslationServer.set_locale(_locales[index]["code"])
+    # Save preference — SettingsManager is a user-created autoload (see save-load skill)
+    SettingsManager.set_setting("general", "locale", _locales[index]["code"])
+```
+
+---
+
+## 5. Right-to-Left (RTL) Support
+
+Arabic, Hebrew, and Persian need `layout_direction` on Controls (`LOCALE` auto-follows the current locale), `structured_text_type` so URLs and paths do not fully reverse, and a font covering the script — Godot's default font does not. Re-apply layout direction whenever the locale changes. `TranslationServer` has **no signals** — override `_notification` and watch for `NOTIFICATION_TRANSLATION_CHANGED` (defined on `MainLoop`, inherited by `Node`). Since you never subscribe, there is no handler to disconnect.
+
+Full recipes, per-control property table, BBCode for mixed direction, and the C# `LocaleAwarePanel`: [references/rtl-support.md](references/rtl-support.md)
+
+---
+
+## 6. Locale-Aware Formatting
+
+GDScript has no locale-aware number or date formatting — `"%d" % 1234567` is always `1234567`, so you group digits by hand. C# does have it: look up a `CultureInfo` from `TranslationServer.GetLocale()` (swap `_` for `-`) and use `ToString("N"/"C"/"d", culture)`.
+
+Both helpers in full: [references/locale-formatting.md](references/locale-formatting.md)
+
+---
+
+## 7. Project Organization
+
+### Recommended File Structure
+
+```
+res://
+├── translations/
+│   ├── game.csv           # Main game translations
+│   ├── ui.csv             # UI-specific translations
+│   └── items.csv          # Item names and descriptions
+├── fonts/
+│   ├── default_font.ttf   # Latin, Cyrillic
+│   └── cjk_font.ttf       # Chinese, Japanese, Korean
+└── themes/
+    └── default_theme.tres  # Font assignments per locale
+```
+
+### Translation Keys Convention
+
+```
+# Category_Context_Description
+MENU_MAIN_START          # Main menu, start button
+MENU_MAIN_QUIT           # Main menu, quit button
+HUD_HEALTH_LABEL         # In-game HUD, health label
+DIALOGUE_NPC_GREETING    # NPC dialogue, greeting line
+ITEM_SWORD_NAME          # Inventory item name
+ITEM_SWORD_DESC          # Inventory item description
+```
+
+---
+
+## 8. Common Pitfalls
+
+| Symptom | Cause | Fix |
+|---------|-------|-----|
+| Translation key shows instead of text | Translation file not registered in Project Settings | Add to Project Settings → Localization → Translations |
+| Text doesn't update on locale switch | Using string literals instead of `tr()` | Wrap all user-facing strings in `tr()` |
+| Label shows key after scene change | Translation resource not loaded yet | Register translations in Project Settings (not at runtime) |
+| RTL text renders LTR | `layout_direction` not set | Set to `RTL` or `LOCALE` on root Control |
+| Font doesn't display characters | Missing Unicode range in font | Import a font covering the target script (Noto Sans recommended) |
+| Pluralization doesn't work with CSV | Before Godot 4.6 CSV has no plural forms; on 4.6+ the `?plural` column or continuation rows are missing | On 4.6+ add a `?plural` column (§10); before 4.6 use PO |
+| `%s` in translation shows literal `%s` | Using `tr()` result as key instead of formatting it | Use `tr("KEY") % value`, not `tr("KEY" % value)` |
+
+---
+
+## 9. Editor Locale Preview (Godot 4.5+)
+
+Godot 4.5 adds a **Preview Translation** submenu to the 2D editor's **View** menu: the editor viewport re-renders in any loaded locale, so you catch overflow from longer translations and verify RTL layout without entering Play mode. Editor-only — it does not affect exported builds.
+
+Steps and QA benefits: [references/editor-preview.md](references/editor-preview.md)
+
+---
+
+## 10. CSV Plural and Context Support (Godot 4.6+)
+
+Godot 4.6 extends CSV translation with two optional header columns — `?context` and `?plural` — plus an optional `?pluralrule` row, bringing context disambiguation and plurals (previously PO-only) to CSV. Extra plural forms go on continuation rows with an empty key, so languages with 3+ forms (Russian, Polish, Arabic) work too. Automatic Control translation skips these rows — call `tr()` / `tr_n()` yourself.
+
+Column reference, example CSV, and `tr()` / `tr_n()` usage (GDScript + C#): [references/csv-plural-context.md](references/csv-plural-context.md).
+
+---
+
+## 11. Implementation Checklist
+
+- [ ] All user-facing strings use `tr()` (or are set as translation keys on Control nodes)
+- [ ] Translation files (CSV or PO) are registered in Project Settings → Localization → Translations
+- [ ] Language can be switched at runtime via `TranslationServer.set_locale()`
+- [ ] Language preference is saved and restored on game launch
+- [ ] Fonts cover all target language character sets (Latin, CJK, Arabic, etc.)
+- [ ] RTL languages have `layout_direction` set to `RTL` or `LOCALE` on root UI containers
+- [ ] Format strings (`%s`, `%d`) are applied AFTER `tr()`, not before
+- [ ] Translation keys follow a consistent naming convention
+- [ ] UI layout adapts to longer/shorter text in different languages (no hardcoded widths)
+- [ ] Plural forms are provided for every target language — PO, or CSV `?plural` rows on Godot 4.6+
+- [ ] Editor Locale Preview (2D editor View → Preview Translation) used for translation QA instead of test runs (Godot 4.5+)
+- [ ] CSV `?context` column used when the same key has different meanings in different UI contexts (Godot 4.6+)
+- [ ] CSV plurals use a `?plural` column with one continuation row per extra plural form (`?pluralrule` row only to override a locale's rule) (Godot 4.6+)

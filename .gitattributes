@@ -1,0 +1,4 @@
+* text=auto eol=lf
+hooks/session-start text eol=lf
+*.cmd text eol=lf
+*.png binary

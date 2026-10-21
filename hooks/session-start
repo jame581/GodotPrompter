@@ -1,0 +1,296 @@
+#!/usr/bin/env bash
+# SessionStart hook for the GodotPrompter plugin.
+#
+# Fires only inside a Godot project (project.godot found within 4 levels up from CWD);
+# elsewhere it is a silent no-op. Injects the SESSION-CARD region from the bootstrap skill,
+# the detected Godot version/renderer, and the MENTOR-CARD region when mentor mode is on.
+#
+# Adapted from the Superpowers plugin (MIT, Jesse Vincent) — the JSON escaper and the
+# three-way platform output branching originate there. https://github.com/obra/superpowers
+
+set -euo pipefail
+
+SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
+PLUGIN_ROOT="$(cd "${SCRIPT_DIR}/.." && pwd)"
+
+# --- 1. Locate the Godot project -------------------------------------------------------------
+# Two passes, in this order:
+#   up   — CWD then 4 ancestors, for a session opened inside the game itself
+#   down — up to 3 levels below the session root, for the very common layout where the repo root
+#          holds docs/ and scripts/ and the engine project lives in source/ (or game/, godot/).
+# Up wins: a session opened inside a project must resolve to that project and not to some
+# fixture nested under it, which would also churn the mentor state key.
+find_godot_project_up() {
+  local dir="$PWD" depth=0 parent
+  while [ "$depth" -le 4 ]; do
+    if [ -f "${dir}/project.godot" ]; then
+      printf '%s' "$dir"
+      return 0
+    fi
+    parent="$(dirname "$dir")"
+    [ "$parent" = "$dir" ] && break
+    dir="$parent"
+    depth=$((depth + 1))
+  done
+  return 1
+}
+
+# Depth is capped and heavy trees are pruned so this stays instant on a large repo — SessionStart
+# blocks the user. addons/ and dot-directories are pruned for correctness too, not just speed:
+# vendored plugins ship demo project.godot files, and picking one would report the wrong engine
+# version and aim mentor state at a directory the user never edits.
+find_godot_project_down() {
+  local root="$1" hit
+  [ -d "$root" ] || return 1
+
+  # The root itself, before the pruned descent: `find` tests the starting directory against the
+  # prune list too, so a project living in a directory legitimately named build/, bin/, target/
+  # or any dot-directory would prune its own root and find nothing. -mindepth 1 below stops that
+  # for the descent; this line covers the root.
+  if [ -f "${root}/project.godot" ]; then
+    printf '%s' "$root"
+    return 0
+  fi
+
+  # -maxdepth counts the file, so 4 admits a project directory 3 levels down (a/b/c/project.godot).
+  # `head -n 1` can make `sort` die on SIGPIPE, which under `pipefail` fails the whole pipeline —
+  # harmless only because every caller guards this function with `|| …`. Keep it that way.
+  hit="$(find "$root" -mindepth 1 -maxdepth 4 \
+      \( -name '.*' -o -name 'node_modules' -o -name 'addons' -o -name 'build' -o -name 'builds' \
+         -o -name 'bin' -o -name 'obj' -o -name 'target' -o -name 'export' -o -name 'vendor' \
+         -o -name 'third_party' -o -name 'examples' -o -name 'samples' -o -name 'demo' \) -prune \
+      -o -name 'project.godot' -type f -print 2>/dev/null \
+    | awk -F/ '{ print NF "\t" $0 }' | sort -t"$(printf '\t')" -k1,1n -k2,2 \
+    | head -n 1 | cut -f2-)"
+  [ -n "$hit" ] || return 1
+  printf '%s' "$(dirname "$hit")"
+}
+
+# The host names the session root; it is where CLAUDE.md lives and may sit above CWD.
+SESSION_ROOT="${CLAUDE_PROJECT_DIR:-${COPILOT_PROJECT_DIR:-$PWD}}"
+
+# Hosts hand back a native path ("D:\game"), which never string-equals bash's "/d/game" for the
+# same directory — so without normalizing, the fallback below always rescans the CWD it just
+# searched. Kept separate from SESSION_ROOT, which stays native for display.
+session_root_fs() {
+  if command -v cygpath >/dev/null 2>&1; then
+    cygpath -u "$SESSION_ROOT" 2>/dev/null || printf '%s' "$SESSION_ROOT"
+  else
+    printf '%s' "$SESSION_ROOT"
+  fi
+}
+
+SESSION_ROOT_FS="$(session_root_fs)"
+
+PROJECT_ROOT="$(find_godot_project_up)" || PROJECT_ROOT="$(find_godot_project_down "$PWD")" || true
+if [ -z "${PROJECT_ROOT:-}" ] && [ "$SESSION_ROOT_FS" != "$PWD" ]; then
+  PROJECT_ROOT="$(find_godot_project_down "$SESSION_ROOT_FS")" || true
+fi
+[ -n "${PROJECT_ROOT:-}" ] || exit 0
+
+# --- 2. Extract a marked card region ---------------------------------------------------------
+extract_card() {
+  local file="$1" marker="$2"
+  [ -f "$file" ] || return 0
+  # awk, not a sed range: sed restarts the range on a second START marker (concatenating
+  # regions and leaking raw markers) and runs to EOF when the END marker is missing.
+  awk -v s="<!-- ${marker}-START -->" -v e="<!-- ${marker}-END -->" '
+    !seen && index($0, s) { inside=1; seen=1; next }
+    inside && index($0, e) { inside=0; done=1; next }
+    inside { buf = buf $0 "\n" }
+    END { if (done) printf "%s", buf }
+  ' "$file"
+}
+
+SESSION_CARD="$(extract_card "${PLUGIN_ROOT}/skills/using-godot-prompter/SKILL.md" 'SESSION-CARD')"
+[ -z "$SESSION_CARD" ] && exit 0
+
+# --- 3. Detect Godot version and renderer ----------------------------------------------------
+# config/features=PackedStringArray("4.5", "C#", "Forward Plus")
+GODOT_VERSION=""
+GODOT_RENDERER=""
+GODOT_USES_CSHARP=""
+if features_line="$(grep -m1 '^config/features=' "${PROJECT_ROOT}/project.godot" 2>/dev/null)"; then
+  tokens="$(printf '%s' "$features_line" | grep -o '"[^"]*"' | tr -d '"' || true)"
+  # Token 1 is always the engine version branch.
+  GODOT_VERSION="$(printf '%s\n' "$tokens" | sed -n '1p')"
+  # The renderer is whichever token NAMES a rendering method — never token 2, which is
+  # "C#" in .NET projects and "Double Precision" in double-precision builds.
+  GODOT_RENDERER="$(printf '%s\n' "$tokens" | grep -m1 -E '^(Forward Plus|Forward Mobile|Mobile|GL Compatibility)$' || true)"
+  printf '%s\n' "$tokens" | grep -qx 'C#' && GODOT_USES_CSHARP=1
+fi
+
+VERSION_LINE=""
+if [ -n "$GODOT_VERSION" ]; then
+  if [ -n "$GODOT_RENDERER" ]; then
+    VERSION_LINE="This project targets **Godot ${GODOT_VERSION}** (${GODOT_RENDERER} renderer). Prefer APIs and advice valid for that version and renderer."
+  else
+    # Say nothing about a renderer we did not detect — a stray mention reads as a claim.
+    VERSION_LINE="This project targets **Godot ${GODOT_VERSION}**. Prefer APIs and advice valid for that version."
+  fi
+  [ -n "$GODOT_USES_CSHARP" ] && VERSION_LINE="${VERSION_LINE} This is a **C# project** — lead with C# examples."
+fi
+
+# --- 4. Mentor mode (state lives in HOME, never in the user's repo) ---------------------------
+# The state key must be identical whether bash or the agent computes it. Under Git Bash the
+# same directory is "/c/Users/x/game" to bash but "C:\Users\x\game" to Node — hashing the raw
+# path would produce two different keys and mentor mode would silently never restore on
+# Windows. Canonical form: absolute, forward slashes, native drive letter (C:/Users/x/game).
+canonical_path() {
+  if command -v cygpath >/dev/null 2>&1; then
+    cygpath -m "$1"
+  else
+    printf '%s' "$1"
+  fi
+}
+
+MENTOR_CARD=""
+STATE_FILE=""
+# Everything in this block is best-effort: a sanitized environment with no HOME, or a system
+# with neither sha256sum nor shasum, must never cost the user the session card. Under `set -u`
+# a bare ${HOME} aborts the whole hook, so it is defaulted explicitly.
+if [ -n "${HOME:-}" ]; then
+  state_key="$(canonical_path "$PROJECT_ROOT")"
+  state_hash=""
+  if command -v sha256sum >/dev/null 2>&1; then
+    state_hash="$(printf '%s' "$state_key" | sha256sum 2>/dev/null | cut -c1-16 || true)"
+  elif command -v shasum >/dev/null 2>&1; then
+    state_hash="$(printf '%s' "$state_key" | shasum -a 256 2>/dev/null | cut -c1-16 || true)"
+  fi
+  if [ -n "$state_hash" ]; then
+    # Canonical HOME, not the raw one: the agent is told to WRITE this path, and under Git Bash
+    # $HOME is "/c/Users/you" — a spelling every non-bash tool the agent might reach for fails on.
+    STATE_FILE="$(canonical_path "$HOME")/.godot-prompter/state/${state_hash}.json"
+    # Match the "mode" key specifically — a loose grep false-positives on
+    # {"mode":"normal","last_mode":"mentor"}.
+    if [ -f "$STATE_FILE" ] && grep -qE '"mode"[[:space:]]*:[[:space:]]*"mentor"' "$STATE_FILE"; then
+      MENTOR_CARD="$(extract_card "${PLUGIN_ROOT}/skills/godot-mentor/SKILL.md" 'MENTOR-CARD')"
+      # Name the file in the injected card. After a /clear the agent has the card but NOT the
+      # skill, so without this it cannot find the state file to honour the off-ramp.
+      [ -n "$MENTOR_CARD" ] && MENTOR_CARD="${MENTOR_CARD}"$'\n\n'"Mentor state file for this project: \`${STATE_FILE}\`"
+    fi
+  fi
+fi
+
+# --- 5. Subagent reach: offer the instructions section once per project ------------------------
+# Every file a supported host loads as project instructions counts as wired, not CLAUDE.md alone:
+# a repo that keeps its instructions in AGENTS.md (Codex, Copilot, Cursor, OpenCode) or GEMINI.md
+# (Antigravity) has already documented the rule, and probing one filename nagged it at every
+# session start forever.
+INSTRUCTION_FILES=(CLAUDE.md CLAUDE.local.md .claude/CLAUDE.md AGENTS.md GEMINI.md
+                   .github/copilot-instructions.md)
+INSTRUCTION_DIRS=(.claude/rules .cursor/rules)
+
+# When the engine project sits in a subdirectory, the instructions the agent actually loads are
+# the ones at the session root — so both are consulted, or an already-wired repo gets nagged.
+has_godot_prompter_section() {
+  local dir="$1" f d
+  for f in "${INSTRUCTION_FILES[@]}"; do
+    if [ -f "${dir}/${f}" ] && grep -q '^## GodotPrompter' "${dir}/${f}" 2>/dev/null; then
+      return 0
+    fi
+  done
+  # Rule directories hold one topic per file; the section may be in any of them.
+  for d in "${INSTRUCTION_DIRS[@]}"; do
+    if [ -d "${dir}/${d}" ] && grep -rqs '^## GodotPrompter' "${dir}/${d}" 2>/dev/null; then
+      return 0
+    fi
+  done
+  return 1
+}
+
+is_ancestor_or_same() {  # $1 = candidate ancestor, $2 = candidate descendant
+  [ "$1" = "$2" ] || [ "${2#"$1"/}" != "$2" ]
+}
+
+# Which file the offer should NAME, most preferred first — whichever of these the repo already
+# keeps. Naming a file it does not keep asks the user to start a second instructions file they
+# deliberately do not maintain, which is #15 again, just aimed at a different host.
+# CLAUDE.local.md is detected but never a target: it is personal and gitignored, so a team-shared
+# routing rule does not belong there. `CLAUDE.md` is also the fallback when the repo keeps none.
+OFFER_TARGETS=(CLAUDE.md .claude/CLAUDE.md AGENTS.md GEMINI.md .github/copilot-instructions.md)
+
+offer_target_file() {
+  local dir="$1" f
+  for f in "${OFFER_TARGETS[@]}"; do
+    if [ -f "${dir}/${f}" ]; then
+      printf '%s' "$f"
+      return 0
+    fi
+  done
+  printf 'CLAUDE.md'
+}
+
+# The session root is right only when it sits at or above the project — the nested-project case
+# this fallback exists for. When the session was opened *inside* the project instead, the session
+# root is some subdirectory of it, and naming that path would aim the offer at a file the host
+# never loads.
+INSTRUCTIONS_DIR="$PROJECT_ROOT"
+if is_ancestor_or_same "$SESSION_ROOT_FS" "$PROJECT_ROOT"; then
+  INSTRUCTIONS_DIR="$SESSION_ROOT"
+fi
+
+# A refusal has to survive the session, or "offer once" is unenforceable: SessionStart fires again
+# on every start, resume, /clear and compaction, and the agent has no memory of last time.
+OFFER_DECLINED=""
+if [ -n "$STATE_FILE" ] && [ -f "$STATE_FILE" ] \
+   && grep -qE '"section_offer"[[:space:]]*:[[:space:]]*"declined"' "$STATE_FILE"; then
+  OFFER_DECLINED=1
+fi
+
+OFFER_LINE=""
+if [ -z "$OFFER_DECLINED" ] \
+   && ! has_godot_prompter_section "$PROJECT_ROOT" \
+   && ! has_godot_prompter_section "$INSTRUCTIONS_DIR"; then
+  offer_file="$(offer_target_file "$INSTRUCTIONS_DIR")"
+  # Canonical, for the same reason STATE_FILE is: this path is one the agent WRITES. Both spellings
+  # that reach here are wrong to hand over as-is — PROJECT_ROOT is bash's ("/c/Users/you/game"), and
+  # a native SESSION_ROOT concatenated with a filename yields the mixed "D:\game/CLAUDE.md".
+  offer_path="$(canonical_path "$INSTRUCTIONS_DIR")/${offer_file}"
+  OFFER_LINE="No agent instructions file in this project carries a \`## GodotPrompter\` section (\`CLAUDE.md\`, \`AGENTS.md\`, \`GEMINI.md\`, \`.github/copilot-instructions.md\` and the rule directories were all checked). Subagents do not receive this card — that file is what they read. Offer once, and only with the user's agreement, to add a short section telling agents to check for a matching \`godot-prompter:*\` skill before implementing any Godot system; add it to \`${offer_path}\`. Do not add it silently."
+  # Claude Code loads the two CLAUDE.md locations and nothing else. Say so only when the target is
+  # neither of them, and only on Claude Code — on Copilot or Cursor the remark would be noise about
+  # a file the host never opens.
+  case "$offer_file" in
+    CLAUDE.md|.claude/CLAUDE.md) ;;
+    *)
+      if [ -n "${CLAUDE_PLUGIN_ROOT:-}" ] && [ -z "${CURSOR_PLUGIN_ROOT:-}" ] \
+         && [ -z "${COPILOT_CLI:-}" ]; then
+        OFFER_LINE="${OFFER_LINE} Claude Code itself loads \`CLAUDE.md\`, not \`${offer_file}\` — mention that a one-line \`CLAUDE.md\` containing \`@${offer_file}\` makes this repo's instructions load here too, but only add it if the user asks."
+      fi
+      ;;
+  esac
+  if [ -n "$STATE_FILE" ]; then
+    OFFER_LINE="${OFFER_LINE} If the user declines, do not ask again — merge \`\"section_offer\": \"declined\"\` into \`${STATE_FILE}\` (create the file and its directory if absent, and keep any existing keys), which suppresses this offer from the next session on."
+  else
+    OFFER_LINE="${OFFER_LINE} Do not ask again if declined."
+  fi
+fi
+
+# --- 6. Assemble and emit ---------------------------------------------------------------------
+escape_for_json() {
+  local s="$1"
+  s="${s//\\/\\\\}"
+  s="${s//\"/\\\"}"
+  s="${s//$'\n'/\\n}"
+  s="${s//$'\r'/\\r}"
+  s="${s//$'\t'/\\t}"
+  printf '%s' "$s"
+}
+
+payload="${SESSION_CARD}"
+[ -n "$VERSION_LINE" ]    && payload="${payload}"$'\n\n'"${VERSION_LINE}"
+[ -n "$MENTOR_CARD" ]     && payload="${payload}"$'\n\n'"${MENTOR_CARD}"
+[ -n "$OFFER_LINE" ]      && payload="${payload}"$'\n\n'"${OFFER_LINE}"
+
+context="<GODOT-PROJECT-CONTEXT>\n$(escape_for_json "$payload")\n</GODOT-PROJECT-CONTEXT>"
+
+if [ -n "${CURSOR_PLUGIN_ROOT:-}" ]; then
+  printf '{\n  "additional_context": "%s"\n}\n' "$context" | cat
+elif [ -n "${CLAUDE_PLUGIN_ROOT:-}" ] && [ -z "${COPILOT_CLI:-}" ]; then
+  printf '{\n  "hookSpecificOutput": {\n    "hookEventName": "SessionStart",\n    "additionalContext": "%s"\n  }\n}\n' "$context" | cat
+else
+  printf '{\n  "additionalContext": "%s"\n}\n' "$context" | cat
+fi
+
+exit 0
