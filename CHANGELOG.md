@@ -28,6 +28,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 - **export-pipeline** told readers to disable web threads with `rendering/threads/thread_model=0`.
   Threads are an export preset option (`variant/thread_support`, off by default since 4.3).
+- **3d-essentials** said LightmapGI requires Forward+. It plays on all three renderers and only
+  bakes in a Forward+ or Mobile editor; the renderer comparison now shows SSAO in Compatibility from 4.6.
 
 ## [1.15.1] - 2026-10-12
 

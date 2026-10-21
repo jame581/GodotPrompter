@@ -24,7 +24,8 @@ location /game/ {
     add_header Cross-Origin-Opener-Policy "same-origin" always;
     add_header Cross-Origin-Embedder-Policy "require-corp" always;
 
-    types { application/wasm wasm; }
+    # Current nginx mime.types already maps .wasm to application/wasm. Don't add a
+    # `types { }` block here: it replaces the whole map and breaks .html and .js.
     gzip_static on;          # Serves index.wasm.gz when present.
     # brotli_static on;      # With the ngx_brotli module.
 }
@@ -60,7 +61,7 @@ The `.wasm` engine binary and the `.pck` are most of the download and compress w
 
 | File | Serve with | Cache |
 |---|---|---|
-| `index.wasm` | `Content-Type: application/wasm`, Brotli or gzip | Long-lived; only changes when you change Godot version |
+| `index.wasm` | `Content-Type: application/wasm`, Brotli or gzip | `no-cache` with ETag, or long-lived only if CI versions the filenames — the `.js` and `.wasm` must always match |
 | `index.pck` | Brotli or gzip | Short, or version the filename per release |
 | `index.html`, `index.js` | Brotli or gzip | Short (`no-cache`), so players pick up new builds |
 
@@ -81,7 +82,7 @@ If players report the old version after an update, it is almost always a cached 
 Browsers refuse to run WebAssembly from `file://`, so always serve the folder over HTTP.
 
 - **Editor:** the **Remote Debug → Run in Browser** button exports and starts a local server that already sends COOP/COEP.
-- **Any folder:** `python3 -m http.server 8000 --directory build/web` works for **no-threads** builds only (it sends no isolation headers).
+- **Any folder:** `python3 -m http.server 8000 --directory build/web` works for **no-threads** builds only (it sends no isolation headers). For threaded builds, Godot's repository ships `platform/web/serve.py`, which adds them.
 - **Threaded build, own server:** use a small server that adds the two headers, or test on the real staging host.
 
 Open the browser's developer console when the page is blank — Godot prints its startup errors there, not in the page.

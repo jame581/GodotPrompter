@@ -55,7 +55,7 @@ CLI export works as on desktop: `godot --headless --export-release "Web" build/w
 
 ## 3. Threads or No Threads
 
-Threaded builds use `SharedArrayBuffer`, which browsers only enable on a **cross-origin isolated** page. The server must send both headers on the HTML page:
+Threaded builds use `SharedArrayBuffer`, which browsers only enable on a **cross-origin isolated** page. The server must send both headers on every file of the export (the page, its scripts, and the worker scripts):
 
 ```
 Cross-Origin-Opener-Policy: same-origin
@@ -67,10 +67,11 @@ Cross-Origin-Embedder-Policy: require-corp
 | Hosting | Any static host | Needs the two headers above, or the PWA workaround |
 | Audio | Sample playback, low latency | Sample playback by default; stream mode crackles more |
 | Embeds, ads, third-party iframes | Work | Break unless they also send CORP/CORS headers (`require-corp` blocks them) |
-| `Thread`, `WorkerThreadPool` | Run on the main thread, so heavy work stalls frames | Real background threads |
+| `WorkerThreadPool` | Tasks run inline on the main thread, so heavy work stalls frames | Real background threads |
+| `Thread` | **`start()` returns `OK` but the function never runs** | Real background threads |
 | Feature tag | `nothreads` | `threads` |
 
-**Default to no threads.** Turn them on only when profiling shows a real need (heavy procedural generation, physics on background threads), and you control the server or use a host that sets the headers. Code that must behave differently can check `OS.has_feature("threads")`.
+**Default to no threads.** Turn them on only when profiling shows a real need (heavy procedural generation, physics on background threads), and you control the server or use a host that sets the headers. Code that must behave differently can check `OS.has_feature("threads")` — and any `Thread`-based code (level generation, loaders) **must**, or it silently does nothing on the default build. `WorkerThreadPool` is the portable choice.
 
 Godot's own **Remote Debug → Run in Browser** server sends the headers, so a threaded build can work locally and fail once uploaded. Test on the real host.
 
@@ -127,7 +128,7 @@ func _on_browser_resize(args: Array) -> void:
 
 
 func export_save_file(data: PackedByteArray) -> void:
-    # Must run from an input event (button press), or the browser blocks the download.
+    # Call from an input event (button press): browsers may block downloads that aren't.
     JavaScriptBridge.download_buffer(data, "savegame.dat")
 ```
 

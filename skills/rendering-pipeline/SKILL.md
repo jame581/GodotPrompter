@@ -43,7 +43,7 @@ public static bool IsForwardPlus()
 }
 ```
 
-Full feature table: see the renderer comparison in **3d-essentials** (`references/renderer-comparison.md`).
+Short feature table: see the renderer comparison in **3d-essentials** (`references/renderer-comparison.md`).
 
 ---
 
@@ -64,7 +64,7 @@ Decide where light comes from before placing lights. Baked light is nearly free 
 |---|---|---|
 | Forward+ | 512 clustered elements (omni + spot lights + decals + reflection probes) in view | `rendering/limits/cluster_builder/max_clustered_elements` |
 | Mobile | 8 omni + 8 spot lights per mesh | — split large meshes so lights don't compete |
-| Compatibility | 8 lights per object, 32 renderable lights total | `rendering/limits/opengl/max_lights_per_object`, `max_renderable_lights` |
+| Compatibility | 8 omni + 8 spot lights per object, 32 renderable lights total | `rendering/limits/opengl/max_lights_per_object`, `max_renderable_lights` |
 
 Rules that hold everywhere:
 
@@ -278,7 +278,7 @@ Full preset table, apply code, and persistence in GDScript and C#: [references/g
 - [ ] Renderer chosen per target platform; `.mobile` / `.web` overrides reviewed
 - [ ] The look is checked on the lightest renderer that ships
 - [ ] Lighting plan written down: what is baked, what is real-time, which lights cast shadows
-- [ ] Light counts within the renderer's budget (512 clustered / 8+8 per mesh / 8 per object)
+- [ ] Light counts within the renderer's budget (512 clustered / 8+8 per mesh on Mobile and Compatibility)
 - [ ] AA method matches the renderer; menu hides unsupported options
 - [ ] 3D resolution scaling offered as presets (FSR 2 on Forward+, bilinear elsewhere)
 - [ ] Every SubViewport has a deliberate update mode, size, and its own AA settings

@@ -10,6 +10,8 @@ Reference for `skills/web-services/SKILL.md` — downloading to disk with progre
 
 Setting `download_file` streams the body to that path instead of returning it in `body`. Make sure the directory exists first, or the request fails with `RESULT_DOWNLOAD_FILE_CANT_OPEN`.
 
+Don't set `timeout` here: it limits the **whole** transfer, so a large file on a slow connection would always end in `RESULT_TIMEOUT`. Leave it at `0.0` and give the player a cancel button (or cancel when `get_downloaded_bytes()` stops growing for, say, 30 s). Download to a temporary name and rename on success, so a failed transfer never leaves a truncated file at the real path.
+
 ```gdscript
 extends Node
 
@@ -20,17 +22,21 @@ var _http: HTTPRequest
 
 func download(url: String, path: String) -> bool:
     DirAccess.make_dir_recursive_absolute(path.get_base_dir())
+    var tmp_path := path + ".part"
     _http = HTTPRequest.new()
-    _http.download_file = path
-    _http.timeout = 120.0
+    _http.download_file = tmp_path # timeout stays 0.0: it would cap the whole transfer.
     add_child(_http)
     if _http.request(url) != OK:
         _http.queue_free()
+        _http = null
         return false
     var res: Array = await _http.request_completed
     _http.queue_free()
     _http = null
-    return res[0] == HTTPRequest.RESULT_SUCCESS and res[1] == 200
+    if res[0] != HTTPRequest.RESULT_SUCCESS or res[1] != 200:
+        DirAccess.remove_absolute(tmp_path)
+        return false
+    return DirAccess.rename_absolute(tmp_path, path) == OK
 
 
 func _process(_delta: float) -> void:
@@ -55,17 +61,24 @@ public partial class Downloader : Node
     public async Task<bool> Download(string url, string path)
     {
         DirAccess.MakeDirRecursiveAbsolute(path.GetBaseDir());
-        _http = new HttpRequest { DownloadFile = path, Timeout = 120.0 };
+        string tmpPath = path + ".part";
+        _http = new HttpRequest { DownloadFile = tmpPath }; // Timeout stays 0: it would cap the whole transfer.
         AddChild(_http);
         if (_http.Request(url) != Error.Ok)
         {
             _http.QueueFree();
+            _http = null;
             return false;
         }
         Variant[] res = await ToSignal(_http, HttpRequest.SignalName.RequestCompleted);
         _http.QueueFree();
         _http = null;
-        return res[0].AsInt64() == (long)HttpRequest.Result.Success && res[1].AsInt64() == 200;
+        if (res[0].AsInt64() != (long)HttpRequest.Result.Success || res[1].AsInt64() != 200)
+        {
+            DirAccess.RemoveAbsolute(tmpPath);
+            return false;
+        }
+        return DirAccess.RenameAbsolute(tmpPath, path) == Error.Ok;
     }
 
     public override void _Process(double delta)
@@ -79,7 +92,7 @@ public partial class Downloader : Node
 }
 ```
 
-Cancelling a download removes the partial file. Downloaded `.pck` content packs can then be mounted with `ProjectSettings.load_resource_pack()`.
+From Godot 4.7, cancelling also deletes the partial file; on 4.3–4.6 it stays behind, which is why the recipe downloads to a `.part` name. Downloaded `.pck` content packs can then be mounted with `ProjectSettings.load_resource_pack()`.
 
 ---
 

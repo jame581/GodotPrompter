@@ -7,7 +7,7 @@ description: Use when calling web APIs or backends from Godot — HTTPRequest, R
 
 Talk to REST APIs, leaderboards, analytics, login services, and other HTTP/WebSocket backends. All examples target Godot 4.3+ with no deprecated APIs. GDScript is shown first, then C#.
 
-> **Related skills:** **multiplayer-basics** for real-time game networking with WebSocketMultiplayerPeer, **save-load** for persisting tokens and cached responses, **web-export** for CORS and browser limits, **mobile-development** for the Android INTERNET permission, **multithreading** for heavy response parsing off the main thread.
+> **Related skills:** **multiplayer-basics** for real-time game networking with WebSocketMultiplayerPeer, **save-load** for persisting tokens and cached responses, **web-export** for CORS and browser limits, **mobile-development** for Android export permissions, **multithreading** for heavy response parsing off the main thread.
 
 ---
 
@@ -229,7 +229,7 @@ Image, form-encoded, and multipart recipes with C#: [references/downloads-and-up
 - **Anything in the export is readable.** API keys in scripts, `project.godot`, or an encrypted PCK can be pulled out by a determined player. Keep privileged keys (payment, admin, third-party paid APIs) on a server you control and have the game call that server.
 - **Per-player tokens** (session or refresh tokens) can live in `user://`; treat them as revocable, not secret.
 - **Send credentials in headers or a POST body**, never as GET query parameters — URLs end up in logs.
-- Only TLS 1.2 and 1.3 are supported; older servers fail with `RESULT_TLS_HANDSHAKE_ERROR`.
+- TLS 1.2 is supported everywhere and TLS 1.3 from **Godot 4.4**; on 4.3 a TLS 1.3-only server fails with `RESULT_TLS_HANDSHAKE_ERROR`, as does any server limited to TLS 1.1 or older.
 
 ---
 
@@ -324,7 +324,7 @@ public partial class LiveEvents : Node
 ```
 
 - Use `wss://` with the server's real hostname (not an IP) so the certificate matches; Web exports require it on `https` pages.
-- `handshake_headers` (for an auth header) is ignored on Web — pass the token as the first message or a query parameter over `wss://` there.
+- `handshake_headers` (for an auth header) is ignored on Web — authenticate with the first message after connecting. If a URL parameter is unavoidable, use a short-lived single-use ticket, never the long-lived token (URLs end up in logs).
 - **Godot 4.4+:** `heartbeat_interval` sends automatic ping frames to keep idle connections alive (no effect on Web).
 - Reconnect with backoff on `STATE_CLOSED` rather than spinning `connect_to_url()` every frame.
 
@@ -336,7 +336,7 @@ public partial class LiveEvents : Node
 |---|---|---|
 | `request()` returns `ERR_BUSY` (44) | Reused one `HTTPRequest` for overlapping calls | One node per in-flight request |
 | `request()` returns `ERR_UNCONFIGURED` | Node not in the tree yet | `add_child()` before `request()` |
-| Request hangs forever | `timeout` left at `0.0` | Set `timeout` (5–15 s for API calls) |
+| Request hangs forever | `timeout` left at `0.0` | Set `timeout` (5–15 s) on API calls; big downloads need a stall check instead (`timeout` covers the whole transfer) |
 | Works in editor, fails on Android | Missing INTERNET permission | Tick it in the export preset |
 | Works on desktop, fails on Web | CORS or mixed content | Fix server headers; use HTTPS/WSS |
 | `id` is `5.0`, not `5` | JSON numbers are floats | Cast with `int()` |
@@ -348,7 +348,7 @@ public partial class LiveEvents : Node
 ## 10. Checklist
 
 - [ ] One `HTTPRequest` per concurrent request; each is `queue_free()`d after completion
-- [ ] `timeout` set on every request
+- [ ] `timeout` set on API calls; large downloads use a stall check or cancel button instead
 - [ ] Both the transport `result` and the HTTP `response_code` are checked
 - [ ] JSON numbers cast to `int` where integers are expected; parsed data shape validated
 - [ ] No privileged API keys in the client build; a server proxies paid or admin APIs

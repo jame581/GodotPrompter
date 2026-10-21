@@ -20,13 +20,18 @@ Facts behind the three new skills, checked against the engine source at the `4.3
 | `audio/general/default_playback_type.web` = Sample; AudioEffects unsupported in Sample | `doc/classes/ProjectSettings.xml` |
 | `HTTPRequest.cancel_request()` does not emit `request_completed` | `scene/main/http_request.cpp`, 4.7.2 |
 | JSON numbers parse via `String.to_float()` | `doc/classes/JSON.xml` |
-| `HTTPClient.get_body_size()` always -1 on Web; CORS note; TLS 1.2/1.3 only | `doc/classes/HTTPClient.xml` |
+| `HTTPClient.get_body_size()` always -1 on Web; CORS note; TLS 1.2/1.3 (4.7 text) | `doc/classes/HTTPClient.xml` |
 | `WebSocketPeer.heartbeat_interval` is 4.4+, no effect on Web; `handshake_headers` unsupported on Web | `modules/websocket/doc_classes/WebSocketPeer.xml`, 4.3 vs 4.4 |
 | FSR 1, FSR 2, MetalFX Temporal, TAA: Forward+ only. MetalFX Spatial: Forward+/Mobile. Compatibility: bilinear/nearest only, no FXAA/SMAA | `servers/rendering/renderer_viewport.cpp` 4.7.2 (`viewport_set_scaling_3d_mode`, `viewport_set_screen_space_aa`, `viewport_set_use_taa`); 4.3 has the same FSR/TAA checks |
 | MetalFX modes 4.4+, SMAA 4.5+, Nearest scaling 4.7+ | `doc/classes/Viewport.xml` enums across tags |
 | `RenderingServer.get_current_rendering_method()` is 4.4+ (skill uses `get_setting_with_override` for 4.3) | `doc/classes/RenderingServer.xml` |
-| Compatibility light limits 8 per object / 32 total; Forward+ 512 clustered elements | `doc/classes/ProjectSettings.xml` |
+| Compatibility 32 renderable lights total; Forward+ 512 clustered elements | `doc/classes/ProjectSettings.xml` |
 | LightmapGI bakes only from Forward+/Mobile capable devices | `doc/classes/LightmapGI.xml` |
+| TLS 1.3 is 4.4+ (4.3 `#undef MBEDTLS_SSL_PROTO_TLS1_3`) | `thirdparty/mbedtls/include/godot_module_mbedtls_config.h` at 4.3 vs 4.4 |
+| `cancel_request()` deletes a partial `download_file` only from 4.7 | `scene/main/http_request.cpp` at 4.6 vs 4.7.2 |
+| `HTTPRequest.timeout` covers the whole request, not idle time | `scene/main/http_request.cpp` (timer started in `request()`) |
+| No-threads Web: `Thread.start()` is a stub that never runs the callable; `WorkerThreadPool` runs tasks inline | `core/os/thread.h` (no-threads branch), `core/object/worker_thread_pool.cpp` |
+| Compatibility light limit is 8 omni + 8 spot per object | `ProjectSettings.xml` `rendering/limits/opengl/max_lights_per_object` |
 
 ## Example checks
 
@@ -35,6 +40,9 @@ fragments wrapped in a function and missing helpers stubbed. One error was fixed
 (`var forward_plus :=` on a Variant comparison in `graphics-settings.md`). Every `csharp` block was
 compiled against `Godot.NET.Sdk` 4.7.2 (net8.0), with partial-class wrappers for fragments: 0
 errors, 0 warnings. Nothing was run in a game or a browser.
+
+A review pass after the first draft corrected the last five rows above, an nginx `types {}` block that
+would have replaced the MIME map, and graphics presets that could switch on effects a level never used.
 
 ## Not verified
 

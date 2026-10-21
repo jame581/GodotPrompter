@@ -49,6 +49,8 @@ public async Task<ApiResult> RequestJsonWithRetry(string path, HttpClient.Method
 }
 ```
 
+`code == 0` also covers failures a retry cannot fix (a malformed URL, a rejected certificate). If that matters, add the `HTTPRequest.Result` to the result and retry only `RESULT_CANT_CONNECT`, `RESULT_CANT_RESOLVE`, `RESULT_CONNECTION_ERROR`, `RESULT_NO_RESPONSE`, and `RESULT_TIMEOUT`.
+
 If the server sends a `Retry-After` header on a `429`, prefer its value over the computed delay. The headers are element `[2]` of the `request_completed` result — each entry is a `"Name: value"` string.
 
 ---

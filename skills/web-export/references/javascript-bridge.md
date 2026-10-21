@@ -80,7 +80,7 @@ func track(event_name: String, value: float) -> void:
         analytics.track(event_name, value)
 ```
 
-`get_interface()` returns `null` when the property doesn't exist on `window`, so a missing script doesn't crash the game. Prefer this over `eval()`: no string building, and nothing to inject into.
+`get_interface()` returns `null` when the property doesn't exist on `window`, so a missing script doesn't crash the game (it does log a "No interface registered" error). Prefer this over `eval()`: no string building, and nothing to inject into.
 
 ---
 
@@ -104,6 +104,8 @@ func _ready() -> void:
 
 
 func notify_parent(kind: String) -> void:
+    if not OS.has_feature("web"):
+        return
     var window := JavaScriptBridge.get_interface("window")
     window.parent.postMessage(JSON.stringify({"kind": kind}), PARENT_ORIGIN)
 

@@ -14,14 +14,14 @@ A starting point for a Forward+ project. Mobile and Compatibility builds should 
 |---|---|---|---|---|
 | 3D scale (FSR 2 on Forward+) | 0.5 | 0.67 | 0.77 | 1.0 |
 | MSAA 3D | Off | Off | 2× | 4× |
-| Screen-space AA | FXAA | FXAA | Off (FSR 2 handles it) | Off |
+| Screen-space AA | FXAA without FSR 2 | FXAA without FSR 2 | Off (FSR 2 handles it) | Off |
 | Directional shadow size | 1024 | 2048 | 4096 | 8192 |
 | Shadow max distance (m) | 40 | 60 | 100 | 150 |
-| SSAO / SSIL | Off / Off | On / Off | On / On | On / On |
-| SDFGI / volumetric fog | Off | Off | On | On |
+| SSAO / SSIL (if the level uses them) | Off / Off | On / Off | On / On | On / On |
+| SDFGI / volumetric fog (if the level uses them) | Off | Off | On | On |
 | Mesh LOD threshold (px) | 4.0 | 2.0 | 1.0 | 0.5 |
 
-Directional shadow atlas size and mesh LOD apply through `RenderingServer` and the root `Viewport`; SSAO, SSIL, SDFGI, and volumetric fog are toggles on the active `Environment`.
+Directional shadow atlas size and mesh LOD apply through `RenderingServer` and the root `Viewport`; SSAO, SSIL, SDFGI, and volumetric fog are toggles on the active `Environment`. Presets only ever switch those **off**: each level's `Environment` keeps what its designer authored, and the preset can disable an effect but never turn on one the level was not lit for.
 
 ---
 
@@ -60,7 +60,8 @@ func apply_preset(preset_name: String) -> void:
     vp.scaling_3d_mode = Viewport.SCALING_3D_MODE_FSR2 if forward_plus and p.scale < 1.0 else Viewport.SCALING_3D_MODE_BILINEAR
     vp.scaling_3d_scale = p.scale
     vp.msaa_3d = p.msaa
-    vp.screen_space_aa = Viewport.SCREEN_SPACE_AA_FXAA if p.fxaa else Viewport.SCREEN_SPACE_AA_DISABLED
+    var fsr2 := vp.scaling_3d_mode == Viewport.SCALING_3D_MODE_FSR2
+    vp.screen_space_aa = Viewport.SCREEN_SPACE_AA_FXAA if p.fxaa and not fsr2 else Viewport.SCREEN_SPACE_AA_DISABLED
     vp.mesh_lod_threshold = p.lod
     RenderingServer.directional_shadow_atlas_set_size(p.shadow_size, true)
 
@@ -69,10 +70,15 @@ func apply_preset(preset_name: String) -> void:
 
     var env := vp.find_world_3d().environment
     if env:
-        env.ssao_enabled = p.ssao and forward_plus
-        env.ssil_enabled = p.ssil and forward_plus
-        env.sdfgi_enabled = p.sdfgi and forward_plus
-        env.volumetric_fog_enabled = p.sdfgi and forward_plus
+        # Remember what the level authored the first time we see this Environment.
+        if not env.has_meta("authored_effects"):
+            env.set_meta("authored_effects", {"ssao": env.ssao_enabled, "ssil": env.ssil_enabled,
+                    "sdfgi": env.sdfgi_enabled, "fog": env.volumetric_fog_enabled})
+        var authored: Dictionary = env.get_meta("authored_effects")
+        env.ssao_enabled = authored.ssao and p.ssao
+        env.ssil_enabled = authored.ssil and p.ssil
+        env.sdfgi_enabled = authored.sdfgi and p.sdfgi
+        env.volumetric_fog_enabled = authored.fog and p.sdfgi
 
     var cfg := ConfigFile.new()
     cfg.set_value("graphics", "preset", preset_name)
@@ -119,7 +125,8 @@ public partial class GraphicsSettings : Node
         vp.Scaling3DMode = forwardPlus && p.Scale < 1.0f ? Viewport.Scaling3DModeEnum.Fsr2 : Viewport.Scaling3DModeEnum.Bilinear;
         vp.Scaling3DScale = p.Scale;
         vp.Msaa3D = p.Msaa;
-        vp.ScreenSpaceAA = p.Fxaa ? Viewport.ScreenSpaceAAEnum.Fxaa : Viewport.ScreenSpaceAAEnum.Disabled;
+        bool fsr2 = vp.Scaling3DMode == Viewport.Scaling3DModeEnum.Fsr2;
+        vp.ScreenSpaceAA = p.Fxaa && !fsr2 ? Viewport.ScreenSpaceAAEnum.Fxaa : Viewport.ScreenSpaceAAEnum.Disabled;
         vp.MeshLodThreshold = p.Lod;
         RenderingServer.DirectionalShadowAtlasSetSize(p.ShadowSize, true);
 
@@ -129,10 +136,20 @@ public partial class GraphicsSettings : Node
         Environment env = vp.FindWorld3D().Environment;
         if (env != null)
         {
-            env.SsaoEnabled = p.Ssao && forwardPlus;
-            env.SsilEnabled = p.Ssil && forwardPlus;
-            env.SdfgiEnabled = p.Sdfgi && forwardPlus;
-            env.VolumetricFogEnabled = p.Sdfgi && forwardPlus;
+            // Remember what the level authored the first time we see this Environment.
+            if (!env.HasMeta("authored_effects"))
+            {
+                env.SetMeta("authored_effects", new Godot.Collections.Dictionary
+                {
+                    { "ssao", env.SsaoEnabled }, { "ssil", env.SsilEnabled },
+                    { "sdfgi", env.SdfgiEnabled }, { "fog", env.VolumetricFogEnabled },
+                });
+            }
+            var authored = env.GetMeta("authored_effects").AsGodotDictionary();
+            env.SsaoEnabled = authored["ssao"].AsBool() && p.Ssao;
+            env.SsilEnabled = authored["ssil"].AsBool() && p.Ssil;
+            env.SdfgiEnabled = authored["sdfgi"].AsBool() && p.Sdfgi;
+            env.VolumetricFogEnabled = authored["fog"].AsBool() && p.Sdfgi;
         }
 
         var cfg = new ConfigFile();
@@ -146,6 +163,7 @@ Notes:
 
 - `find_world_3d().environment` is the environment set by the scene's `WorldEnvironment`. Re-apply the preset after changing levels (connect to your scene-change signal), since each scene brings its own `Environment`.
 - The camera's own `Camera3D.environment`, if set, wins over the world's — apply to that one too if your project uses it.
+- The `Environment` is usually a shared `.tres`. The changes above are in memory only (never call `ResourceSaver.save()` on it from the game), and the stored metadata travels with it, so a level reloaded later still restores to its authored look.
 - Put sun lights in a `sun` group so the preset can reach them in any level.
 - In C#, `Environment` here is `Godot.Environment`; add `using Environment = Godot.Environment;` if `System` is also imported.
 

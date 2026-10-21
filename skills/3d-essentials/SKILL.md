@@ -135,7 +135,7 @@ Configure global rendering — sky background, tonemapping, glow, SSR, SSAO/SSIL
 
 ## 5. Global Illumination
 
-Five GI options trade quality for cost: none (ambient only) → ReflectionProbe (localized) → LightmapGI (best quality, baked) → VoxelGI (small/medium dynamic) → SDFGI (large open-world). VoxelGI/SDFGI/LightmapGI require Forward+. The 4.5+ subsections below (Specular Occlusion, Bent Normal Maps) stay inline because they apply across GI methods.
+Five GI options trade quality for cost: none (ambient only) → ReflectionProbe (localized) → LightmapGI (best quality, baked) → VoxelGI (small/medium dynamic) → SDFGI (large open-world). VoxelGI and SDFGI require Forward+; LightmapGI plays on all three renderers but bakes only in a Forward+ or Mobile editor. The 4.5+ subsections below (Specular Occlusion, Bent Normal Maps) stay inline because they apply across GI methods.
 
 > See [references/global-illumination.md](references/global-illumination.md) for the methods comparison table, ReflectionProbe scene + code recipe, LightmapGI bake workflow, and SDFGI configuration.
 
