@@ -55,6 +55,8 @@ func load_all_items(dir_path: String) -> Array[ItemData]:
     dir.list_dir_begin()
     var file_name := dir.get_next()
     while file_name != "":
+        # Exported builds list text resources as "name.tres.remap"; load() follows the remap.
+        file_name = file_name.trim_suffix(".remap")
         if not dir.current_is_dir() and (file_name.ends_with(".tres") or file_name.ends_with(".res")):
             var res := load(dir_path.path_join(file_name))
             if res is ItemData:
@@ -102,6 +104,8 @@ public static class ItemDatabaseLoader
         string fileName = dir.GetNext();
         while (fileName != string.Empty)
         {
+            // Exported builds list text resources as "name.tres.remap"; Load() follows the remap.
+            fileName = fileName.TrimSuffix(".remap");
             if (!dir.CurrentIsDir() && (fileName.EndsWith(".tres") || fileName.EndsWith(".res")))
             {
                 var res = ResourceLoader.Load(dirPath.PathJoin(fileName));

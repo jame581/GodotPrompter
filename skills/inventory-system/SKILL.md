@@ -90,15 +90,15 @@ If your game needs something else — a weight-based bag with no slots, a grid i
 
 ## 3. Equipment Extension
 
-Add equipment slots (`HEAD`, `CHEST`, `WEAPON`, etc.) by extending the `Inventory` class with a typed slot map. Stat aggregation runs by summing `ItemData.stats` across equipped items; signal `equipment_changed` when slots change.
+Add equipment slots (`HEAD`, `CHEST`, `WEAPON`, etc.) with an `Equipment` node beside the `Inventory`, holding a slot map keyed by a `SlotType` enum. Stat aggregation sums a `stats` Dictionary (a property you add to `ItemData`) across equipped items; signal `equipment_changed` when slots change.
 
-> See [references/equipment.md](references/equipment.md) for the full GDScript and C# `Equipment` class with `EquipmentSlotType` enum, equip / unequip API, and stat aggregation.
+> See [references/equipment.md](references/equipment.md) for the full GDScript and C# `Equipment` class with `SlotType` enum, equip / unequip API, and stat aggregation.
 
 ---
 
 ## 4. UI Binding
 
-Slot-grid UI: a `GridContainer` of `Panel` slot widgets, each rendering one `InventorySlot`. Drag-and-drop uses `_get_drag_data` / `_drop_data` / `_can_drop_data` on the slot widget. The Inventory emits `inventory_changed`; the UI re-renders affected slots.
+Slot-grid UI: a `GridContainer` of `Button` slot widgets, each rendering one `InventorySlot`. Drag-and-drop uses `_get_drag_data` / `_drop_data` / `_can_drop_data` on the slot widget. The Inventory emits `inventory_changed`; the UI re-renders affected slots.
 
 > See [references/ui-binding.md](references/ui-binding.md) for the full GDScript and C# slot widget (drag/drop, hover preview), inventory grid layout, and tooltip wiring.
 
@@ -106,9 +106,9 @@ Slot-grid UI: a `GridContainer` of `Panel` slot widgets, each rendering one `Inv
 
 ## 5. Serialization
 
-Persist Inventory + Equipment as a Dictionary keyed by item resource path (since ItemData lives at `res://items/<name>.tres`). Reload by `load(path)` and reconstructing the slot list. Version field gates migration on load.
+Persist each slot as an `{id, qty}` pair (`null` for an empty slot), never the `ItemData` itself or its path. An `ItemRegistry` autoload loads `res://items/` at startup and resolves ids back to items on load.
 
-> See [references/serialization.md](references/serialization.md) for the GDScript and C# save/load implementation with `version` field and ConfigFile / JSON variants.
+> See [references/serialization.md](references/serialization.md) for the GDScript and C# `ItemRegistry` with `serialize_inventory` / `deserialize_inventory`; put the result in your save file (see **save-load** for its `version` field).
 
 ---
 

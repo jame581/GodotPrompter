@@ -1,6 +1,6 @@
 # Equipment Extension
 
-Reference for `skills/inventory-system/SKILL.md` — equipment slot system (paperdoll), `EquipmentSlotType` enum, GDScript + C# implementations.
+Reference for `skills/inventory-system/SKILL.md` — equipment slot system (paperdoll), `SlotType` enum, GDScript + C# implementations.
 
 > ← Back to [SKILL.md](../SKILL.md)
 
@@ -138,8 +138,9 @@ public partial class Equipment : Node
         foreach (var item in _equipmentSlots.Values)
         {
             if (item == null) continue;
-            // Expects ItemData to expose a Stats Dictionary property
-            if (item.Get("stats").Obj is Godot.Collections.Dictionary stats
+            // Expects ItemData to expose a Stats Dictionary property. Get() takes the
+            // C# member name ("Stats"); C# members are not renamed to snake_case.
+            if (item.Get("Stats").Obj is Godot.Collections.Dictionary stats
                 && stats.ContainsKey(statName))
                 total += stats[statName].As<float>();
         }

@@ -9,6 +9,8 @@ Reference for `skills/camera-system/SKILL.md` — SubViewport-based split-screen
 
 Each player gets their own `SubViewport` with a dedicated `Camera2D`/`Camera3D`. A `SubViewportContainer` renders the viewport into the 2D canvas.
 
+Every `Viewport` creates its own `World2D`, so two 2D SubViewports start as two separate worlds: put the level in P1's viewport and give P2 the same world (`p2_viewport.world_2d = p1_viewport.world_2d`). A 3D SubViewport renders its parent's `World3D` unless `own_world_3d` or `world_3d` is set.
+
 ### Scene Tree
 
 ```
@@ -32,6 +34,8 @@ extends Node
 @export var player_scene: PackedScene
 
 func _ready() -> void:
+    # Share P1's World2D so both cameras see the same level and players
+    $HBoxContainer/P2Container/P2Viewport.world_2d = $HBoxContainer/P1Container/P1Viewport.world_2d
     _setup_viewport($HBoxContainer/P1Container/P1Viewport, Vector2i(0, 0))
     _setup_viewport($HBoxContainer/P2Container/P2Viewport, Vector2i(1, 0))
 
@@ -62,6 +66,9 @@ public partial class SplitScreenSetup : Node
 
     public override void _Ready()
     {
+        // Share P1's World2D so both cameras see the same level and players
+        GetNode<SubViewport>("HBoxContainer/P2Container/P2Viewport").World2D =
+            GetNode<SubViewport>("HBoxContainer/P1Container/P1Viewport").World2D;
         SetupViewport(GetNode<SubViewport>("HBoxContainer/P1Container/P1Viewport"), new Vector2I(0, 0));
         SetupViewport(GetNode<SubViewport>("HBoxContainer/P2Container/P2Viewport"), new Vector2I(1, 0));
     }
@@ -87,7 +94,8 @@ public partial class SplitScreenSetup : Node
 
 | Property | Value | Reason |
 |---|---|---|
-| `own_world_3d` | `true` (3D only) | Separate physics world per viewport |
+| `world_2d` | P1's `world_2d` (2D only) | Each viewport otherwise has its own world |
+| `own_world_3d` | `false` (default, 3D only) | `true` gives the viewport a separate copy of the world |
 | `audio_listener_enable_2d/3d` | `true` on primary | Only one viewport drives audio |
 | `transparent_bg` | `false` | Avoid alpha blending overhead |
 | `handle_input_locally` | `false` | Let the root scene handle input routing |

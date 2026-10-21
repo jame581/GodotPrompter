@@ -11,7 +11,7 @@ Reference for `skills/math-essentials/SKILL.md` — global random functions, `Ra
 
 ```gdscript
 var f: float = randf()                    # 0.0 to 1.0
-var i: int = randi()                      # full int range
+var i: int = randi()                      # 0 to 2^32 - 1 (unsigned 32-bit)
 var ranged: float = randf_range(1.0, 10.0)  # 1.0 to 10.0
 var ranged_int: int = randi_range(1, 6)   # 1 to 6 (inclusive)
 ```

@@ -132,3 +132,97 @@ repeated a corrected claim.
 
 **Not changed:** `dependency-injection` `references/testing-with-di.md` assigns a `StubAudio extends Node` to an
 `AudioManager`-typed export — already on the Task 4 deferred list.
+
+## Batch B — gameplay
+
+Skills: `player-controller`, `state-machine`, `ability-system`, `inventory-system`,
+`dialogue-system`, `save-load`, `camera-system`, `input-handling`, `math-essentials`. Every
+SKILL.md and every reference file was read in full (prose and code comments; code bodies were
+read for the engine APIs they call).
+
+| Skill | Claims checked (SKILL.md + references) | Wrong | Softened |
+|---|---|---|---|
+| `player-controller` | 14 + 4 | 4 | 1 |
+| `state-machine` | 8 + 2 | 0 | 0 |
+| `ability-system` | 6 + 15 | 2 | 0 |
+| `inventory-system` | 10 + 14 | 6 | 0 |
+| `dialogue-system` | 12 + 14 | 8 | 0 |
+| `save-load` | 12 + 13 | 2 | 0 |
+| `camera-system` | 15 + 13 | 5 | 0 |
+| `input-handling` | 30 + 12 | 9 | 0 |
+| `math-essentials` | 28 + 10 | 2 | 0 |
+| **Total** | **252** | **38** | **1** |
+
+The worst errors were three examples that fail outright. The hand-rolled `DialogueManager` declared
+`class_name DialogueManager` and was registered as an autoload of the same name, which is a parse
+error. Its condition evaluator could not resolve `GameState.has_item(...)` either, because
+`Expression` does not see autoload names. The inventory `ItemRegistry` scanned `res://items/` for
+`.tres` files, which an exported build lists as `.tres.remap`, so the registry came up empty in every
+export.
+
+| Skill file | Was | Is | Source |
+|---|---|---|---|
+| `player-controller` SKILL.md:55, 81 | `Input.get_vector()` returns a "normalized 4-directional vector" | an analog vector, length capped at 1 | 4.3 `doc/classes/Input.xml:193` |
+| `player-controller` SKILL.md:23 | `CharacterBody2D` row lists FPS | `CharacterBody2D/3D` | — (an FPS controller is `CharacterBody3D`, §4) |
+| `player-controller` SKILL.md:372 | "Player sticks to walls" → set `floor_block_on_wall = false` | the property (default `true`) stops floor movement climbing walls and lets the body slide down them; keep it on | 4.3 `doc/classes/CharacterBody2D.xml:150-151`; `scene/2d/physics/character_body_2d.cpp:180-200` |
+| `player-controller` SKILL.md:375 | sliding down slopes fixed by `floor_snap_length` > 0 | `floor_stop_on_slope` (default `true`) stops idle sliding; snap keeps the body on slopes going down | 4.3 `CharacterBody2D.xml:160-166` |
+| `ability-system` `references/stat-modifiers.md:62` | C# `Operation` "serializes as `operation` (snake_case)" | serializes as `Operation` — C# members keep their C# names | 4.3 `modules/mono/editor/Godot.NET.Sdk/Godot.SourceGenerators/ScriptPropertiesGenerator.cs:138-150` |
+| `ability-system` `references/tags-and-conditions.md:556` | `new StringName("…")` in C# avoids per-frame allocations | it allocates on every call; cache in `static readonly StringName` fields | 4.3 `modules/mono/glue/GodotSharp/GodotSharp/Core/StringName.cs:16, 68-72` (sealed class, native string-name per construction) |
+| `inventory-system` SKILL.md:93 | equipment by "extending the `Inventory` class"; sums `ItemData.stats` | an `Equipment` node beside the `Inventory`; `stats` is a property you add to `ItemData` | `references/equipment.md:16-17`; `references/core-classes.md:16-31` |
+| `inventory-system` SKILL.md:95; `references/equipment.md:3` | `EquipmentSlotType` enum | `SlotType` | `references/equipment.md:21` |
+| `inventory-system` SKILL.md:101 | slot widgets are `Panel`s | `Button`s | `references/ui-binding.md:15, 63` |
+| `inventory-system` SKILL.md:109, 111; `references/serialization.md:3` | saves keyed by resource path, a `version` field, ConfigFile / JSON variants | `{id, qty}` per slot resolved through `ItemRegistry`; the version field lives in the save file (**save-load**) | `references/serialization.md:48-75` |
+| `inventory-system` `references/serialization.md:33-34, 110-111` | registry loads files whose name ends in `.tres` | strip `.remap` first: exported builds list text resources as `name.tres.remap`; `load()` follows the remap | 4.3 `doc/classes/DirAccess.xml:187`; `editor/export/editor_export_platform.cpp:1399`; `core/io/resource_loader.cpp:1064` |
+| `inventory-system` `references/equipment.md:141-143` | C# `item.Get("stats")` for a `Stats` property | `item.Get("Stats")` — C# members keep their C# names | 4.3 `ScriptPropertiesGenerator.cs:138-150` |
+| `dialogue-system` `references/dialogue-manager.md:17-19`; `references/ui-presentation.md:32-34` | autoload script declares `class_name DialogueManager`; the UI exports a `DialogueManager`-typed field | no `class_name` — the same name as an autoload is a parse error; the UI takes `@onready var manager := DialogueManager` (the autoload) | 4.3 `modules/gdscript/gdscript_analyzer.cpp:373`; 4.7.2 run: `Class "DialogueManager" hides an autoload singleton.`; fixed scripts compile and run with the autoloads |
+| `dialogue-system` SKILL.md:189, 227; `references/branching-and-conditions.md:48, 113-118`; `references/dialogue-manager.md:110-114, 238-242` | conditions such as `"GameState.has_item('key')"` evaluated with `GameState` (or `self`) as the base instance | register `GameState` as an input name: `parse(cond, ["GameState"])`, `execute([GameState])`; a base instance only resolves bare calls | 4.3 `core/math/expression.cpp:666-725` (identifier → input or named index on self), `:1326`; 4.7.2 run: "Invalid named index 'GameState' for base type Object" with a base instance, `true` with an input |
+| `dialogue-system` `references/branching-and-conditions.md:122-126` | `Expression` is "GDScript-native" and "does not support C# objects as base instances" | `Expression` is a core class and calls C# methods by their C# names; the prefix mapping stays as a typed alternative | 4.3 `core/math/expression.cpp:1457` (`base.callp`) |
+| `dialogue-system` SKILL.md:57 | `choices` is an `Array[Dictionary]` | an untyped `Array` of Dictionaries | SKILL.md:76 (`@export var choices: Array = []`) |
+| `dialogue-system` SKILL.md:181 | `start(data)`, `advance(choice_index)`, signals `line_changed`, `choices_presented` | `start_dialogue(data)`, `advance()`, `choose(choice_index)`; `dialogue_started`, `line_displayed`, `choice_presented`, `dialogue_ended` | `references/dialogue-manager.md:22-25, 35-52` |
+| `dialogue-system` SKILL.md:197 | typewriter driven by a `Tween` | by a `Timer` | `references/ui-presentation.md:22, 243` |
+| `dialogue-system` SKILL.md:213 | C# uses `string.Format` with named-tag preprocessing | a `string.Replace` per placeholder | `references/variable-interpolation.md:44-66` |
+| `dialogue-system` `references/ui-presentation.md:233` | C# `gs.Get("player_name")` | `gs.Get("PlayerName")` | 4.3 `ScriptPropertiesGenerator.cs:138-150` |
+| `save-load` SKILL.md:49 | components declare `save_callable` / `load_callable`, iterated "by ID" | `serialize` / `deserialize` callables, a `save_id`, the `saveable` group | `references/save-architecture.md:39-53` (`save_id`, `serialize`, `deserialize`, `add_to_group("saveable")`) |
+| `save-load` `references/json-saves.md:215-306` | C# `Get`/`Set("current_health")` on a C# `HealthComponent` | `"CurrentHealth"` (the repo's C# `HealthComponent`s), with a note for GDScript components | 4.3 `ScriptPropertiesGenerator.cs:138-150`; `scene-organization` SKILL.md:95 |
+| `camera-system` SKILL.md:159, 219 | trauma shake sets `rotation` on the `Camera2D` | add `ignore_rotation = false` — it defaults to `true`, so the roll never shows | 4.3 `doc/classes/Camera2D.xml:139-140` |
+| `camera-system` SKILL.md:138 | shake script has no `class_name`; the usage snippet casts to `ScreenShakeCamera` | `class_name ScreenShakeCamera` added | — (the C# class is `ScreenShakeCamera`) |
+| `camera-system` SKILL.md:285 | transitions tween "the next camera's position/zoom from the current camera's" | tween the current camera to the next camera's values, then `make_current()` | `references/transitions.md:10, 29-40` |
+| `camera-system` `references/split-screen.md:12, 37-38, 69-71, 97-98` | each player in its own `SubViewport`; `own_world_3d = true` for a "separate physics world per viewport" | every `Viewport` makes its own `World2D`, so P2 shares P1's `world_2d`; a 3D SubViewport renders its parent's world unless `own_world_3d` is set, so leave it `false` | 4.3 `scene/main/viewport.cpp:4985, 1225-1234, 4377-4388`; `doc/classes/Viewport.xml:301-302` |
+| `camera-system` `references/transitions.md:121` | GDScript `await` "only operates on Godot signals" | on signals and GDScript coroutines, not on a C# `Task` | 4.3 `modules/gdscript/gdscript_vm.cpp:2356-2374` |
+| `input-handling` SKILL.md:23-31, 39 | `_shortcut_input()` runs after `_input` and before the UI | `_input` → GUI (`_gui_input`) → `_shortcut_input` → `_unhandled_key_input` → `_unhandled_input` | 4.3 `scene/main/viewport.cpp:3253, 3258, 3303, 3309, 3315` |
+| `input-handling` SKILL.md:49-64 | `InputEventKey`, mouse, touch and gesture events as direct children of `InputEvent` | under `InputEventFromWindow` / `InputEventWithModifiers` / `InputEventMouse`; `InputEventShortcut` added | 4.7.2 `ClassDB.get_parent_class` run |
+| `input-handling` SKILL.md:183 | `get_vector()` returns a normalized vector | length capped at 1 | 4.3 `Input.xml:193` |
+| `input-handling` SKILL.md:187, 191, 244; `references/input-buffering.md:3, 10` | `is_action_just_pressed()` in `_physics_process()` "can miss inputs" at a low tick rate; buffering exists so presses "aren't lost between physics frames" | a press is reported on the next physics tick even if already released; only presses inside one tick merge. Buffering keeps an early press (jump before landing) alive | 4.3 `core/input/input.cpp:325-326, 761-763`, `legacy_just_pressed_behavior` default `false` (`:1681`); 4.7.2 run at 10 ticks/s: 20 taps → 20 hits one per tick, 20 taps → 5 hits four per tick |
+| `input-handling` SKILL.md:233; `references/event-propagation.md:33, 35` | reverse tree order means "deepest child first"; "move it deeper" to get input first | the node lowest in the Scene dock (last in tree order) first; move it lower | 4.3 `scene/main/scene_tree.cpp:1193` |
+| `input-handling` SKILL.md:233 | while paused only `PROCESS_MODE_ALWAYS` nodes receive input | `ALWAYS` or `WHEN_PAUSED` | 4.3 `scene/main/scene_tree.cpp:1203`; `scene/main/node.cpp:857-863` |
+| `input-handling` SKILL.md:251 | symptom "Input fires during pause" with cause `INHERIT` | "Pause menu ignores input while paused" (an `INHERIT` node gets none) | same as the row above |
+| `input-handling` SKILL.md:265 | Input Map deadzone "default 0.2" | 0.5 on 4.3, 0.2 from 4.4 | 4.3 `editor/project_settings_editor.cpp:393`, `core/input/input_map.h:77`; 4.7.2 `input_map.h:55, 74` (compat for PR 97281) |
+| `input-handling` `references/gamepad.md:83` | weak motor = low-frequency, strong = high-frequency | weak = high-frequency, strong = low-frequency | 4.3 `platform/windows/joypad_windows.cpp:511-512` (strong → XInput left motor, the low-frequency one) |
+| `math-essentials` SKILL.md:312 | `normalized()` on a zero vector "crashes" | returns `(0, 0)` | 4.3 `core/math/vector2.cpp:52-58`; `Vector2.xml:327` |
+| `math-essentials` `references/random-numbers.md:14` | `randi()` returns the "full int range" | 0 to 2^32 - 1 | 4.3 `doc/classes/@GlobalScope.xml:1046` |
+
+**Softened (no source either way):** `player-controller` SKILL.md:374 "Inconsistent jump height"
+caused by "fixed velocity ignores frame timing" (in `_physics_process` the step is fixed). Now: "Jump
+height can't be varied | Jump sets one fixed velocity", same fix.
+
+**Checked and correct (selection):** `PhysicsBody2D.get_gravity()` exists in 4.3 (`PhysicsBody2D.xml:26`);
+`physics/2d/default_gravity` / `physics/3d/default_gravity`; a `Dictionary` keyed by a node's
+`StringName` name answers `has()` for the `String` (4.7.2 run); `Camera2D.position_smoothing_speed`
+default `5.0` (`Camera2D.xml:165`); `TextureProgressBar` range defaults `0..100`; GDScript has no set
+type; `Input.get_vector` / `get_axis`; `emulate_touch_from_mouse` default `false`,
+`emulate_mouse_from_touch` `true` (`main/main.cpp:2939, 2947`); `var_to_str` / `str_to_var`
+round-trips an `InputEventKey` (4.7.2 run); `angle_difference` / `Mathf.AngleDifference` exist in
+4.3; GodotSharp 4.7.2 has no `Basis.IsOrthonormal()`; `user://` paths per platform; `res://` is
+read-only in exports.
+
+**Sweep:** each correction's key nouns were grepped in `skills/`, `agents/`, `.codex/`. One hit outside
+batch B was fixed: `resource-pattern` `references/collections.md:58-59, 107-108` (batch A) scanned a
+folder for `.tres`/`.res` the same way as `ItemRegistry`; it now strips `.remap`. No other skill
+rotates a `Camera2D` for shake, uses `own_world_3d` for split screen, declares a `class_name` equal to
+an autoload name, or evaluates `Expression` against an autoload name (`beehave` passes its blackboard
+as the base instance and calls bare `get_value(...)`, which is correct). The other C# `Get`/`Set`
+calls with snake_case names (`gdextension`, `phantom-camera`) target GDExtension or GDScript classes,
+where snake_case is right. No agent or Codex file repeated a corrected claim.
+
+**Not changed:** `dialogue-system` `references/variable-interpolation.md` uses `GameState.Instance`
+(autoload-as-static) — already on the Task 4 deferred list.

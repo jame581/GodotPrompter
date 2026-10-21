@@ -1,13 +1,13 @@
 # Input Buffering
 
-Reference for `skills/input-handling/SKILL.md` — buffering discrete actions so they aren't lost between physics frames.
+Reference for `skills/input-handling/SKILL.md` — buffering discrete actions so a press made just before it can take effect still counts.
 
 > ← Back to [SKILL.md](../SKILL.md)
 
 ---
 ## 3. Reading Input — Input Buffering
 
-Buffer discrete actions so they aren't lost between physics frames.
+Buffer discrete actions so a press made shortly before it can take effect (jump just before landing) still counts.
 
 ```gdscript
 var _jump_buffered: bool = false

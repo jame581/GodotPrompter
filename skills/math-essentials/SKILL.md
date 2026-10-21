@@ -309,7 +309,7 @@ Five recipes: **look at target** (2D `Vector2.angle_to_point`), **orbit around a
 | Rotation jumps at 180°               | Using `lerp` instead of `lerp_angle`         | Always use `lerp_angle()` for angle interpolation                |
 | Object faces wrong direction (3D)    | Forgot Godot uses -Z as forward              | Forward direction is `-global_transform.basis.z`                 |
 | Distance check too slow              | Calling `distance_to` on many objects        | Use `distance_squared_to` and compare against `range * range`    |
-| Normalized zero vector crashes       | Calling `normalized()` on `Vector2.ZERO`     | Check `length() > 0` first, or use `direction_to()`             |
+| Direction is `(0, 0)` unexpectedly   | `normalized()` of a zero vector returns zero | Check `length() > 0` (or `is_zero_approx()`) before using it     |
 | Transform interpolation looks wrong  | Lerping euler angles instead of quaternions  | Use `Quaternion.slerp()` or `Transform3D.interpolate_with()`    |
 | Random results repeat after restart  | Using `RandomNumberGenerator` with fixed seed | Godot 4.x auto-seeds global RNG; for `RandomNumberGenerator` use `randomize()` or set `seed` |
 | Noise values are all ~0              | `frequency` too low                          | Increase `FastNoiseLite.frequency` (try 0.01–0.1)               |
