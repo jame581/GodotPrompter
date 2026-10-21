@@ -64,7 +64,7 @@ Decide where light comes from before placing lights. Baked light is nearly free 
 |---|---|---|
 | Forward+ | 512 clustered elements (omni + spot lights + decals + reflection probes) in view | `rendering/limits/cluster_builder/max_clustered_elements` |
 | Mobile | 8 omni + 8 spot lights per mesh | — split large meshes so lights don't compete |
-| Compatibility | 8 omni + 8 spot lights per object, 32 renderable lights total | `rendering/limits/opengl/max_lights_per_object`, `max_renderable_lights` |
+| Compatibility | 8 omni + 8 spot lights per object; 32 renderable lights per type (omni, spot) per frame | `rendering/limits/opengl/max_lights_per_object`, `max_renderable_lights` |
 
 Rules that hold everywhere:
 
@@ -106,7 +106,7 @@ public void ApplyAntialiasing(Viewport.Msaa msaa, bool useFxaa, bool useTaa)
 }
 ```
 
-Setting an unsupported mode does not crash; Godot prints a warning and ignores it. Gate the options in the UI instead. 2D has its own `msaa_2d`, which smooths 2D geometry edges such as lines and polygons.
+Setting an unsupported mode does not crash; Godot ignores it and logs a warning (an editor error on 4.3–4.5). Gate the options in the UI instead. 2D has its own `msaa_2d`, which smooths 2D geometry edges such as lines and polygons.
 
 ---
 
@@ -122,7 +122,7 @@ Render 3D below native resolution and upscale it — the biggest single GPU savi
 | MetalFX Spatial / Temporal (Godot 4.4+) | Apple Metal: spatial on Forward+/Mobile, temporal on Forward+ | Falls back to FSR when unavailable |
 | Nearest (Godot 4.7+) | All | Crisp pixel look; use integer divisors (`0.5`, `0.333`, `0.25`) |
 
-For FSR, AMD recommends offering presets rather than a raw slider: **Ultra Quality 0.77, Quality 0.67, Balanced 0.59, Performance 0.5**.
+Offer presets rather than a raw slider. These are AMD's FSR 1 scales, which work as well with FSR 2: **Ultra Quality 0.77, Quality 0.67, Balanced 0.59, Performance 0.5**.
 
 ```gdscript
 const FSR_PRESETS := {"ultra_quality": 0.77, "quality": 0.67, "balanced": 0.59, "performance": 0.5}

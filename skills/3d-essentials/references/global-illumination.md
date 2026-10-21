@@ -13,7 +13,7 @@ Reference for `skills/3d-essentials/SKILL.md` — GI methods comparison, Reflect
 |-----------------|-----------|-------------|---------|-----------|----------------------------|
 | None (ambient)  | Low       | Free        | Yes     | All       | Simple/stylized games      |
 | `ReflectionProbe` | Medium  | Low         | Optional | All      | Localized reflections      |
-| `LightmapGI`   | High      | Free at runtime | No   | Forward+  | Static scenes (archviz)    |
+| `LightmapGI`   | High      | Free at runtime | No   | All (bake: Forward+/Mobile editor) | Static scenes (archviz)    |
 | `VoxelGI`       | High      | High        | Yes     | Forward+  | Small-medium dynamic scenes |
 | `SDFGI`         | Medium-High | Medium    | Yes     | Forward+  | Large open-world scenes    |
 

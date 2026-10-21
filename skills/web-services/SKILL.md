@@ -205,7 +205,7 @@ Retries with exponential backoff, request cancellation on scene change, and an a
 - **Every JSON number parses as `float`.** `{"id": 5}` gives `5.0`. Cast before using it as an index, enum, or dictionary key: `int(data["id"])` in GDScript, `data["id"].AsInt32()` in C#. `==` compares `5.0 == 5` as true, but `match` patterns are type-strict, and a dictionary keyed by `5` has no entry for `5.0`.
 - **`JSON.parse_string()` returns `null` on bad input** and logs an error. When you need the line and message, use an instance: `var json := JSON.new(); if json.parse(text) != OK: print(json.get_error_message(), json.get_error_line())`.
 - **Validate shape before indexing.** Check `data is Dictionary and data.has("items")` — a server error page in HTML parses to `null`, and an empty array is still `ok`.
-- **Stringify converts ints to floats** too, and `JSON.stringify(obj)` only works on Variant types — convert custom objects or Resources to a Dictionary first.
+- **A stringify → parse round trip turns ints into floats** (`stringify` itself writes `5`, the parse brings back `5.0`), and `JSON.stringify(obj)` only works on Variant types — convert custom objects or Resources to a Dictionary first.
 
 ---
 
