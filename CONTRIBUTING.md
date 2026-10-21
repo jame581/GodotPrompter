@@ -201,6 +201,8 @@ When publishing a new version (e.g., v1.8.1):
    - Verifies tag and manifest versions are consistent
    - Runs `scripts/validate-skills.mjs`
    - Creates the GitHub Release from the matching `CHANGELOG.md` section
+   - Commits the plugin-only bundle (`scripts/build-directory-bundle.mjs`) to the `plugin-bundle`
+     branch, which Anthropic's plugin directory follows
    - Opens marketplace bump PRs when `MARKETPLACE_TOKEN` is configured
 8. **If marketplace PRs are skipped** (missing `MARKETPLACE_TOKEN`), manually bump:
    - `skillsmith/.claude-plugin/marketplace.json` (primary distribution)

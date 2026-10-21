@@ -23,8 +23,9 @@ Full command sequence lives in `CONTRIBUTING.md`.
      v1.11.0 through three releases.
 3. Update `CHANGELOG.md` with the new section.
 4. Commit, tag (`v<version>`), push with tags — `.github/workflows/release.yml`
-   then validates, creates the GitHub release, and opens marketplace PRs
-   (when `MARKETPLACE_TOKEN` is configured).
+   then validates, creates the GitHub release, commits the plugin-only bundle to
+   the `plugin-bundle` branch (what Anthropic's plugin directory follows), and opens
+   marketplace PRs (when `MARKETPLACE_TOKEN` is configured).
 5. If the workflow's marketplace step is skipped, manually bump
    `skillsmith/.claude-plugin/marketplace.json` (primary) and the legacy
    `godot-prompter-marketplace/.claude-plugin/marketplace.json`.
