@@ -6,7 +6,7 @@ Reference for `skills/physics-system/SKILL.md` — smooth follow-camera that use
 
 ---
 
-Cameras often need special handling under physics interpolation. For a smooth follow camera:
+Cameras often need special handling under physics interpolation. 3D physics interpolation and `Node3D.get_global_transform_interpolated()` need **Godot 4.4+** (4.3 interpolates 2D only). For a smooth follow camera:
 
 1. Make camera independent (not a child of the followed node) or set `top_level = true`
 2. Update camera in `_process()` (not `_physics_process()`)

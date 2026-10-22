@@ -239,3 +239,26 @@ plugin's own approval gate.
   (scope, dimension, language, authority). It cannot catch a grill that asks a root the project
   has already answered — `skills/godot-grill/SKILL.md` §2 says to skip those, but no grader checks
   it.
+
+## v1.16.0 card check — 2026-10-22 (`results/2026-10-21T23-30-31-845Z`; old-card control in a worktree of `8c28fea`, `…T23-39-03-962Z`)
+
+The v1.16.0 card adds `rendering-pipeline`, `web-services` and `web-export` and drops "Skills carry
+trade-offs — surface them." from the report rule (the `godot-grill` sentence is unchanged). The
+in-project cases were re-run on the new card, then grill-05 on the old card as a control.
+
+| Case | Card | With | Without | `trigger-grill` |
+|---|---|---|---|---|
+| grill-05-plain-request-in-project | v1.16.0 | 0.33 | 0.33 | 0/3 |
+| grill-05-plain-request-in-project | pre-change (`8c28fea`) | 0.56 | 0.33 | 1/3 (that run 1.00) |
+| grill-06-neg-bugfix-in-project | v1.16.0 | 1.00 | 1.00 | 0/3 (correct: a bug fix) |
+| grill-07-skip-questions-in-project | v1.16.0 | 0.89 | 0.89 | 0/3 (correct: user said skip) |
+
+- **Both arms fell, not only the new card.** On 2026-10-09 grill-05 scored 0.87 / 0.87 with
+  `godot-grill` firing 4/5. Now the old card fires 1/3 and the without arm is 0.33 too
+  (`bounded-or-builds` FAIL in every without run). Something outside the card moved — the agent
+  model or the judge — and the base answer no longer passes by building on stated assumptions.
+- 1/3 vs 0/3 between the two cards is one run, inside the noise this file already describes for
+  three runs per arm. The dropped sentence is not shown to matter, but it is not ruled out either.
+- grill-06 and grill-07 behave as intended on the new card: no grill on a bug fix or when told to
+  skip questions.
+- Open: re-baseline grill-05 with 5 runs per arm on both cards before the next card change.

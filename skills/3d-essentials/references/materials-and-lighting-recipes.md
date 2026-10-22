@@ -84,7 +84,7 @@ _mesh.MaterialOverride = (Material)_mesh.MaterialOverride.Duplicate();
 
 | Property | Type | Default | Notes |
 |---|---|---|---|
-| `light_color` | `Color` | white | Drive day/night with a Tween or `Environment.sun_position` |
+| `light_color` | `Color` | white | Drive day/night with a Tween on the color and the light's rotation |
 | `light_energy` | `float` | 1.0 | HDR; values >1 are valid |
 | `shadow_enabled` | `bool` | false | Big perf hit when enabled |
 | `directional_shadow_mode` | enum | 4 splits | `ORTHOGONAL` / `PARALLEL_2_SPLITS` / `PARALLEL_4_SPLITS` |
@@ -118,9 +118,9 @@ sun.DirectionalShadowMaxDistance = 100.0f;
 
 | Mode     | Description                                               | Use For                             |
 |----------|-----------------------------------------------------------|-------------------------------------|
-| Disabled | Not included in lightmap baking; fully real-time (default) | Moving lights, player flashlight    |
+| Disabled | Not included in GI baking; fully real-time               | Moving lights, player flashlight    |
 | Static   | Fully baked into lightmaps — no runtime cost              | Architecture, terrain, fixed lights |
-| Dynamic  | Indirect light baked, direct light stays real-time        | Lights that change color/intensity  |
+| Dynamic (default) | Indirect light baked into lightmaps, direct light stays real-time; VoxelGI/SDFGI update its GI live | Lights that change color/intensity |
 
 ## AreaLight3D (Godot 4.7+)
 

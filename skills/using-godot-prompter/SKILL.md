@@ -17,6 +17,8 @@ GodotPrompter provides Godot 4.x domain-specific skills for AI coding agents. Sk
 
 **In Gemini CLI:** Deprecated (succeeded by Antigravity CLI).
 
+**In Grok Build:** Skills are discovered from the installed plugin (`grok plugin install jame581/GodotPrompter --trust`); invoke them by name.
+
 **In Cursor:** Skills are loaded via custom instructions / rules system.
 
 **In Codex:** Skills load natively via the AGENTS.md re-export. Follow skill instructions directly; see `references/codex-tools.md` for tool mapping.
@@ -75,7 +77,7 @@ Applies to subagents writing Godot code too.
 | New system, or the requirements are unclear | `godot-grill` — settle decisions, then design and build |
 | Known change, explicit ask, bug fix | the domain skill below — build |
 
-**Then report before you build:** name the pattern you picked, the alternative you rejected, and why. Skills carry trade-offs — surface them. The choice is the developer's. A report states; it never ends on your own questions. A design decision needs the developer's answer or go-ahead first? Invoke `godot-grill`.
+**Then report before you build:** name the pattern you picked, the alternative you rejected, and why. The choice is the developer's. A report states; it never ends on your own questions. A design decision needs the developer's answer or go-ahead first? Invoke `godot-grill`.
 
 | Building… | Start with |
 |---|---|
@@ -86,13 +88,13 @@ Applies to subagents writing Godot code too.
 | UI, HUD, i18n | `godot-ui`, `hud-system`, `responsive-ui`, `localization` |
 | Animation, tweens, audio | `animation-system`, `tween-animation`, `audio-system` |
 | Physics, 2D, 3D | `physics-system`, `2d-essentials`, `3d-essentials` |
-| Shaders, VFX, procgen, math | `shader-basics`, `particles-vfx`, `procedural-generation`, `math-essentials` |
-| Multiplayer | `multiplayer-basics`, `multiplayer-sync`, `dedicated-server` |
+| Shaders, rendering, VFX, procgen, math | `shader-basics`, `rendering-pipeline`, `particles-vfx`, `procedural-generation`, `math-essentials` |
+| Networking | `multiplayer-basics`, `multiplayer-sync`, `dedicated-server`, `web-services` |
 | Mobile, XR, native, threads | `mobile-development`, `xr-development`, `gdextension`, `multithreading` |
 | Editor tools, assets | `addon-development`, `assets-pipeline` |
 | GDScript / C# idioms | `gdscript-patterns`, `gdscript-advanced`, `csharp-godot`, `csharp-signals` |
 | Test, debug, profile, review | `godot-testing`, `godot-debugging`, `godot-optimization`, `godot-code-review` |
-| Setup, design, export | `godot-project-setup`, `godot-grill`, `godot-brainstorming`, `export-pipeline` |
+| Setup, design, export | `godot-project-setup`, `godot-grill`, `godot-brainstorming`, `export-pipeline`, `web-export` |
 | Teaching while building | `godot-mentor` |
 | Addons (if installed) | `limboai`, `beehave`, `popochiu`, `dialogue-manager`, `phantom-camera` |
 

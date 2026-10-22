@@ -104,7 +104,7 @@ jobs:
             --notes-file /tmp/release-body.md \
             --latest
 
-  # Anthropic's plugin directory follows the plugin-bundle branch, not master. Master's root is
+  # Anthropic's plugin directory and both marketplaces follow the plugin-bundle branch, not master. Master's root is
   # the plugin folder for every other host, and with evals/, docs/ and tests/ it is over the
   # directory's 512-file limit, which holds each version for a reviewer. The bundle carries only
   # what Claude Code loads plus README/LICENSE (scripts/build-directory-bundle.mjs). Each tag
@@ -151,9 +151,11 @@ jobs:
           git commit -q -m "GodotPrompter $GITHUB_REF_NAME plugin bundle" -m "Built from $GITHUB_SHA by scripts/build-directory-bundle.mjs."
           git push origin plugin-bundle
 
+  # Both marketplaces install from the plugin-bundle branch, the same tree Anthropic's directory
+  # follows: release-only content, no evals/docs/tests. Wait for that branch to carry this tag.
   marketplace-prs:
     name: Open marketplace bump PRs
-    needs: release
+    needs: [release, directory-bundle]
     runs-on: ubuntu-latest
     continue-on-error: true
     steps:
@@ -213,6 +215,7 @@ jobs:
             if(i<0){console.error('godot-prompter plugin not found in skillsmith marketplace');process.exit(1);}
             j.plugins[i].version='$V';
             j.plugins[i].description=desc;
+            j.plugins[i].source={source:'url',url:'https://github.com/jame581/GodotPrompter.git',ref:'plugin-bundle'};
             fs.writeFileSync(p, JSON.stringify(j,null,2)+'\n');
           "
           node "$GITHUB_WORKSPACE/scripts/sync-marketplace-readme.mjs" README.md
@@ -247,6 +250,7 @@ jobs:
             if(i<0){console.error('godot-prompter plugin not found in legacy marketplace');process.exit(1);}
             j.plugins[i].version='$V';
             j.plugins[i].description=desc;
+            j.plugins[i].source={source:'url',url:'https://github.com/jame581/GodotPrompter.git',ref:'plugin-bundle'};
             fs.writeFileSync(p, JSON.stringify(j,null,2)+'\n');
           "
           node "$GITHUB_WORKSPACE/scripts/sync-marketplace-readme.mjs" README.md

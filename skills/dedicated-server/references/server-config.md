@@ -22,9 +22,10 @@ var log_level: int   = 1   # 0 = quiet, 1 = info, 2 = verbose
 
 
 func _ready() -> void:
-    _parse_args()
+    # Precedence: defaults < config file < environment < CLI — later steps win.
     _load_config_file("user://server.cfg")
     _apply_env_vars()
+    _parse_args()
 
     if OS.has_feature("dedicated_server") or DisplayServer.get_name() == "headless":
         print("[Config] port=%d  max_players=%d  tick_rate=%d" % [port, max_players, tick_rate])
@@ -113,9 +114,10 @@ public partial class ServerConfig : Node
 
     public override void _Ready()
     {
-        ParseArgs();
+        // Precedence: defaults < config file < environment < CLI — later steps win.
         LoadConfigFile("user://server.cfg");
         ApplyEnvVars();
+        ParseArgs();
 
         if (OS.HasFeature("dedicated_server") || DisplayServer.GetName() == "headless")
             GD.Print($"[Config] port={Port}  max_players={MaxPlayers}  tick_rate={TickRate}");

@@ -1,7 +1,7 @@
 # GodotPrompter — Design Specification
 
 **Date:** 2026-04-03
-**Status:** Complete (All Phases)
+**Status:** shipped in v1.0.0 (2026-04-06)
 
 ## Overview
 

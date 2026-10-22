@@ -118,7 +118,7 @@ public partial class CameraTransitionManager : Node
 }
 ```
 
-**Note for cross-language use:** GDScript's `await` only operates on Godot signals, so a GDScript caller cannot `await` a C# `async Task` directly. If you need to await this transition from GDScript, emit a `[Signal] delegate void TransitionFinishedEventHandler()` at the end of each method and `await camera_manager.transition_finished` on the GDScript side instead.
+**Note for cross-language use:** GDScript's `await` works on signals and GDScript coroutines, not on a C# `Task`, so a GDScript caller cannot `await` a C# `async Task` directly. If you need to await this transition from GDScript, emit a `[Signal] delegate void TransitionFinishedEventHandler()` at the end of each method and `await camera_manager.transition_finished` on the GDScript side instead.
 
 **Usage:**
 

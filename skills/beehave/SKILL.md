@@ -147,9 +147,10 @@ func tick(actor: Node, blackboard: Blackboard) -> int:
     blackboard.set_value("attack_elapsed", elapsed)
     return RUNNING
 
-func after_run(actor: Node, blackboard: Blackboard) -> void:
-    # Clean up any per-run state when the tree interrupts this action
+func interrupt(actor: Node, blackboard: Blackboard) -> void:
+    # Clean up per-run state when the tree interrupts this action (after_run is not called then)
     blackboard.erase_value("attack_elapsed")
+    super(actor, blackboard)  # keeps the debugger's interrupt message
 ```
 
 **Return codes** (defined on `BeehaveNode`):
@@ -159,7 +160,7 @@ func after_run(actor: Node, blackboard: Blackboard) -> void:
 
 **Optional overrides:**
 - `before_run(actor, blackboard)` — called once before the first tick of a run.
-- `after_run(actor, blackboard)` — called when the child finishes (`SUCCESS`/`FAILURE`) or is interrupted.
+- `after_run(actor, blackboard)` — called after the tick that returns `SUCCESS`/`FAILURE`; not called on an interrupt.
 - `interrupt(actor, blackboard)` — called when the tree interrupts a running node.
 
 ---
@@ -190,7 +191,7 @@ func tick(actor: Node, blackboard: Blackboard) -> int:
     return SUCCESS
 ```
 
-> **Named namespaces:** every method accepts an optional `blackboard_name: String` parameter (default `"default"`). Use this to keep separate namespaces on one `Blackboard` node without name collisions (e.g., per-enemy state vs. shared world state).
+> **Named namespaces:** `set_value`, `get_value`, `has_value` and `erase_value` accept an optional `blackboard_name: String` parameter (default `"default"`). Use this to keep separate namespaces on one `Blackboard` node without name collisions (e.g., per-enemy state vs. shared world state).
 
 > **Built-in expression leaves:** `BlackboardSetAction`, `BlackboardEraseAction`, `BlackboardHasCondition`, and `BlackboardCompareCondition` let you manipulate the Blackboard entirely via Inspector exports (no GDScript required). Expressions run via Godot's `Expression.execute([], blackboard)` — so you can call `get_value("key")` directly in the expression string.
 
@@ -219,7 +220,7 @@ For a walkthrough of writing custom decorators and conditions, see [references/c
 - [ ] `tick_rate` tuned — increase for background NPCs (e.g., `3`) to reduce per-frame cost
 - [ ] Every `tick()` override returns `SUCCESS`, `FAILURE`, or `RUNNING` — never `void`/`null`
 - [ ] `ConditionLeaf` subclasses never return `RUNNING`
-- [ ] Per-run state written to the `Blackboard`, not stored on the leaf node itself (leaf nodes are shared)
+- [ ] Per-run state written to the `Blackboard`, not stored on the leaf node itself
 - [ ] `after_run` or `interrupt` cleans up any Blackboard keys the action wrote
 - [ ] External `Blackboard` node exported and shared when multiple `BeehaveTree` nodes need the same data
 - [ ] Visual debugger checked at runtime to verify tick flow before shipping AI logic

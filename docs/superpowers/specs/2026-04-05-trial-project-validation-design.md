@@ -1,5 +1,7 @@
 # Trial Project Validation Design
 
+**Status:** shipped in v1.0.0 (2026-04-06)
+
 **Goal:** Validate GodotPrompter skills by building a minimal top-down 2D action RPG that exercises 13+ skills end-to-end, then porting 3 systems to C#.
 
 **Location:** `tests/trial-project/` — a standalone Godot 4.3+ project inside this repo.

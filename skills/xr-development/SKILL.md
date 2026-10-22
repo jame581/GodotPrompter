@@ -15,7 +15,7 @@ All examples target Godot 4.3+ with no deprecated APIs. GDScript is shown first,
 
 ### Enabling OpenXR
 
-1. **Project Settings → Plugins → Enable:** `OpenXR` (or `OpenXR Plugin` depending on version)
+1. OpenXR is built into the engine — there is no plugin to enable.
 2. **Project Settings → XR → OpenXR → Enabled** → `true`
 3. **Project Settings → XR → Shaders → Enabled** → `true` (for XR shader support)
 4. **Rendering:**
@@ -69,7 +69,7 @@ public partial class XRMain : Node3D
 
 ## 2. Controllers and Input
 
-`XRController3D` nodes (one per hand, child of `XROrigin3D`) expose buttons via the OpenXR action map. Common buttons: trigger (`select_button`), grip (`grip_button`), thumbstick (`primary_axis` Vector2). Apply thumbstick locomotion velocity to `XROrigin3D` (not the camera).
+`XRController3D` nodes (one per hand, child of `XROrigin3D`) expose buttons via the OpenXR action map. Default action map names: trigger (`trigger` float, `trigger_click`), grip (`grip`, `grip_click`), thumbstick (`primary` Vector2, `primary_click`). Apply thumbstick locomotion velocity to `XROrigin3D` (not the camera).
 
 > See [references/controllers-and-input.md](references/controllers-and-input.md) for full XRController3D wiring, OpenXR button reference, and thumbstick locomotion recipe.
 
@@ -77,7 +77,7 @@ public partial class XRMain : Node3D
 
 ## 3. Hand Tracking
 
-When the headset supports hand tracking (Quest 2+, Pico 4, some SteamVR setups), `XRController3D` nodes can be configured to track hand joints. Sample finger positions for gesture detection, or bind to standard select / grip events when the user pinches.
+When the headset supports hand tracking (Quest 2+, Pico 4, some SteamVR setups), the runtime publishes `XRHandTracker`s (`/user/hand_tracker/left` / `right`); an `XRHandModifier3D` poses a hand skeleton from them, and `XRController3D` still gets select / grip actions through the hand interaction profiles. Sample finger joints for gesture detection.
 
 > See [references/hand-tracking.md](references/hand-tracking.md) for hand-tracking node setup, joint sampling, and gesture-driven interactions.
 
@@ -101,7 +101,7 @@ For UI in VR, render a `Control` tree to a `SubViewport`, map its texture onto a
 
 ## 6. Passthrough (Mixed Reality)
 
-For headsets that support it (Quest 2+, Pico 4), set `OpenXRInterface.environment_blend_mode = XR_ENVIRONMENT_BLEND_MODE_ALPHA_BLEND` and clear the `WorldEnvironment` background to transparent. The user sees the real world with virtual content composited on top.
+For headsets that support it (Quest 2+, Pico 4), set the interface's `environment_blend_mode` to `XRInterface.XR_ENV_BLEND_MODE_ALPHA_BLEND` and clear the `WorldEnvironment` background to transparent. The user sees the real world with virtual content composited on top.
 
 > See [references/passthrough.md](references/passthrough.md) for the full enabling steps and Quest-specific notes.
 
@@ -116,10 +116,9 @@ For headsets that support it (Quest 2+, Pico 4), set `OpenXRInterface.environmen
 3. **Export → Add → Android**
 4. In the Android export preset:
    - **XR Features → XR Mode** → `OpenXR`
-   - **XR Features → Hand Tracking** → `Optional` or `Required`
-   - **XR Features → Passthrough** → `Optional` (if needed)
+   - **Meta XR Features → Hand Tracking** / **Passthrough** (added by the vendors plugin; shown once the matching OpenXR extension is enabled)
    - **Architectures → arm64** → enabled (Quest is ARM)
-5. Set minimum API level to 29+
+5. Set the min SDK to what Meta's store requires (29+ when this was written)
 
 ### Performance Settings for Quest
 

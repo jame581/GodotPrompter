@@ -1,5 +1,7 @@
 # Trial Project Validation Implementation Plan
 
+**Status:** shipped in v1.0.0 (2026-04-06)
+
 > **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
 
 **Goal:** Build a minimal top-down 2D action RPG at `tests/trial-project/` that validates 13+ GodotPrompter skills end-to-end, then port 3 systems to C#.

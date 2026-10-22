@@ -1,6 +1,6 @@
 # scripts/
 
-Local helpers for the GodotPrompter repo. All scripts are Node.js 20+ ES modules with no external dependencies (stdlib only).
+Local helpers for the GodotPrompter repo. All scripts are Node.js 20+ ES modules using only Node's standard library, with one exception: `count-tokens.mjs --tokenizer` needs the tokenizer packages declared in `scripts/package.json` (`npm ci --prefix scripts`). The repository root deliberately has no dependencies or lockfile.
 
 ## validate-skills.mjs
 
@@ -22,7 +22,7 @@ Bumps the version string across all in-repo files that track it:
 - `.cursor-plugin/plugin.json`
 - `plugin.json` (at root, for Antigravity CLI)
 
-If sibling marketplace repos are present at `../skillsmith` and `../godot-prompter-marketplace`, also bumps their `.claude-plugin/marketplace.json`. Otherwise prints manual instructions.
+Also syncs the live skill count into the "N domain-specific skills" text of each manifest description. If sibling marketplace repos are present at `../skillsmith` and `../godot-prompter-marketplace`, also bumps their `.claude-plugin/marketplace.json` (version and description) and syncs the skill and agent counts in their `README.md` via `sync-marketplace-readme.mjs`. Otherwise prints manual instructions.
 
 ```bash
 node scripts/bump-version.mjs 1.5.0
@@ -58,6 +58,31 @@ references files that exist.
 node scripts/validate-platform-metadata.mjs
 ```
 
+## build-directory-bundle.mjs
+
+Builds the plugin-only tree that Anthropic's plugin directory follows: skills, agents, the SessionStart hook, the manifest and icon, README, LICENSE, PRIVACY and SECURITY. The repository root is the plugin folder, and its `evals/`, `docs/`, `tests/` and workflows push it past the directory's 512-file limit.
+
+```bash
+node scripts/build-directory-bundle.mjs <out-dir> [--ref <git-ref>]   # --ref: where README links to omitted files point (default master)
+node scripts/build-directory-bundle.mjs --check                       # build to a temp dir, enforce file-count and size limits, clean up
+```
+
+## sync-marketplace-readme.mjs
+
+Rewrites the skill and agent counts in the marketplace repos' READMEs, between the `godot-prompter-skills` / `godot-prompter-agents` comment markers.
+
+```bash
+node scripts/sync-marketplace-readme.mjs ../skillsmith/README.md ../godot-prompter-marketplace/README.md
+```
+
+## count-tokens.mjs
+
+Reports byte size and token cost for every skill, reference and agent. `--tokenizer` adds real Claude and GPT token counts (run `npm ci --prefix scripts` first); `--markdown` prints the table pasted between the `TOKEN-TABLE` markers in `docs/token-budget.md`; `--json` is machine-readable.
+
+```bash
+node scripts/count-tokens.mjs --tokenizer --markdown
+```
+
 ## Release workflow
 
 `.github/workflows/release.yml` runs automatically on tag pushes matching `v*.*.*`. It:
@@ -66,7 +91,8 @@ node scripts/validate-platform-metadata.mjs
 2. Runs `validate-skills.mjs`
 3. Runs hook, validator, and metadata tests
 4. Creates the GitHub release using the matching CHANGELOG section as the body
-5. Opens marketplace PRs against `skillsmith` and `godot-prompter-marketplace` (requires `MARKETPLACE_TOKEN` secret)
+5. Builds the plugin-only bundle (`build-directory-bundle.mjs`) and commits it to the `plugin-bundle` branch (the `directory-bundle` job), which Anthropic's plugin directory and both marketplaces install from
+6. After the bundle job, opens marketplace PRs against `skillsmith` and `godot-prompter-marketplace` that point the entry at `"ref": "plugin-bundle"`, with the skill and agent counts in their READMEs synced by `sync-marketplace-readme.mjs` (requires `MARKETPLACE_TOKEN` secret)
 
 If `MARKETPLACE_TOKEN` is not set, the marketplace step logs a warning and is skipped — the release itself still succeeds. Bump the marketplaces manually per `CONTRIBUTING.md` in that case.
 

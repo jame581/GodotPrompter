@@ -9,7 +9,7 @@ Reference for `skills/multiplayer-basics/SKILL.md` — timeout detection, server
 
 ### Timeout Detection
 
-ENet detects broken connections automatically after a configurable timeout (~30 s by default). `peer_disconnected` fires on both sides when the timeout expires.
+ENet drops an unresponsive peer automatically — by default after 5 to 30 s, depending on round-trip time (configurable with `ENetPacketPeer.set_timeout()`). `peer_disconnected` fires on both sides when the timeout expires, and a client also gets `server_disconnected`.
 
 ### GDScript
 
@@ -48,13 +48,17 @@ func _on_server_disconnected() -> void:
 
 
 # Reconnection: simply call NetworkManager.join_game() again.
-# Godot does not have built-in reconnect; implement a retry loop:
+# Godot does not have built-in reconnect; implement a retry loop.
+# Poll the peer's status: awaiting connected_to_server alone would hang on a failed attempt.
 func attempt_reconnect(address: String, port: int, max_attempts: int = 3) -> void:
 	for attempt in range(max_attempts):
 		print("Reconnect attempt %d / %d" % [attempt + 1, max_attempts])
 		NetworkManager.join_game(address, port)
-		await multiplayer.connected_to_server
-		return   # Success — connected_to_server fired.
+		var peer: ENetMultiplayerPeer = NetworkManager.peer   # the peer join_game() just created
+		while peer.get_connection_status() == MultiplayerPeer.CONNECTION_CONNECTING:
+			await get_tree().process_frame
+		if peer.get_connection_status() == MultiplayerPeer.CONNECTION_CONNECTED:
+			return   # Success.
 	push_error("Failed to reconnect after %d attempts" % max_attempts)
 ```
 

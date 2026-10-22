@@ -1,5 +1,7 @@
 # godot-grill Implementation Plan
 
+**Status:** shipped in v1.14.0 (2026-09-20)
+
 > **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
 
 **Goal:** Ship `godot-grill`, a skill that settles a Godot feature's open design decisions in batched frontier rounds (scope first, each question with a recommended answer) and records them, and route new-or-unclear work through it.

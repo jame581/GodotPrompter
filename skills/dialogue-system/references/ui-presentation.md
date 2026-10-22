@@ -29,7 +29,9 @@ DialogueUI (Control)
 class_name DialogueUI
 extends Control
 
-@export var manager: DialogueManager  # assign the autoload or a node ref
+# The DialogueManager autoload. Its script has no class_name (an autoload's name
+# cannot also be a class_name), so the type is inferred from the autoload.
+@onready var manager := DialogueManager
 
 @onready var speaker_label:    Label          = $PanelContainer/HBoxContainer/VBoxContainer/Label
 @onready var dialogue_text:    RichTextLabel  = $PanelContainer/HBoxContainer/VBoxContainer/RichTextLabel
@@ -41,8 +43,6 @@ const TYPEWRITER_INTERVAL := 0.04  # seconds per character
 
 
 func _ready() -> void:
-    if manager == null:
-        manager = get_node("/root/DialogueManager")
     manager.line_displayed.connect(_on_line_displayed)
     manager.choice_presented.connect(_on_choice_presented)
     manager.dialogue_ended.connect(_on_dialogue_ended)
@@ -198,12 +198,12 @@ public partial class DialogueUI : Control
             _typewriterTimer.Stop();
     }
 
-    private void OnChoicePresented(Array<Dictionary> choices)
+    private void OnChoicePresented(Array choices)
     {
         ClearChoices();
         for (int i = 0; i < choices.Count; i++)
         {
-            var choice = choices[i];
+            var choice = choices[i].AsGodotDictionary();
             var btn = new Button();
             btn.Text = choice.TryGetValue("text", out var t) ? t.AsString() : "";
             int captured = i;
@@ -230,7 +230,7 @@ public partial class DialogueUI : Control
     private string Interpolate(string text)
     {
         var gs = GetNode<GameState>("/root/GameState");
-        var playerName = gs.Get("player_name").AsString();
+        var playerName = gs.Get("PlayerName").AsString(); // C# member name, not snake_case
         if (string.IsNullOrEmpty(playerName)) playerName = "Hero";
         return text.Replace("{player_name}", playerName);
     }

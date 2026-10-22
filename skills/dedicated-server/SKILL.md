@@ -23,20 +23,20 @@ Pass `--headless` on the command line to suppress the display and audio drivers 
 ./my_game.x86_64 --headless
 ```
 
-This is distinct from the `server` platform — `--headless` is a runtime flag that works on any exported binary. The `server` export template strips rendering entirely from the binary, reducing its size.
+`--headless` is a runtime flag that works on any exported binary. Godot 4 has no separate server platform or server export template: a dedicated-server export uses the regular template, so the binary keeps its rendering code (a smaller binary needs a custom-compiled template). What the export changes is the PCK and a feature tag — see below.
 
 ### Server Export Preset
 
-In the Godot editor, create a dedicated **Linux/X11** (or **Linux Server**) export preset:
+In the Godot editor, create a dedicated **Linux** export preset:
 
 1. Open **Project → Export**.
-2. Add a **Linux/X11** preset and name it `Linux Server`.
-3. Under **Options → Binary**, enable **Export As Dedicated Server** (Godot 4.2+). This uses the server export template that omits rendering and audio code.
-4. Under **Resources**, use the **Exclude** list to strip client-only assets (shaders, high-res textures, audio files) from the server PCK.
+2. Add a **Linux** preset and name it `Linux Server`.
+3. On the **Resources** tab, set **Export Mode** to **Export as dedicated server**. This adds the `dedicated_server` feature tag — which makes the binary start with the headless display and dummy audio drivers even without `--headless` — and marks `res://` as **Strip Visuals**: visual resources are exported as placeholders (e.g. a texture keeps only its size). Set folders the server needs intact to **Keep**.
+4. Use the **Exclude** filter on the same tab to drop client-only files (audio, client-only scenes) from the server PCK entirely.
 
 ### Feature Tags
 
-Use `OS.has_feature()` to branch between server and client code at runtime. Define a custom `server` feature in the export preset (Project Settings → Export → Custom Features) or rely on the built-in `dedicated_server` feature that the server template sets automatically:
+Use `OS.has_feature()` to branch between server and client code at runtime. Define a custom `server` feature on the export preset's **Features** tab (**Custom (comma-separated)** field) or rely on the built-in `dedicated_server` feature that a dedicated-server export sets automatically:
 
 ```gdscript
 # boot.gd — autoload, runs before any scene loads
@@ -75,14 +75,14 @@ public partial class Boot : Node
 }
 ```
 
-> **Note:** the export preset configuration (custom features, exclude list, "Export As Dedicated Server" flag) is identical regardless of language — see the GDScript section above for preset settings.
+> **Note:** the export preset configuration (custom features, exclude filter, "Export as dedicated server" mode) is identical regardless of language — see the GDScript section above for preset settings.
 
 **Feature tag summary:**
 
 | Tag | Set by | Notes |
 |-----|--------|-------|
-| `dedicated_server` | Server export template | Most reliable way to detect a server binary |
-| `headless` | `--headless` CLI flag | Set at runtime, not baked into the binary |
+| `dedicated_server` | Dedicated-server export | Most reliable way to detect a server binary |
+| *(no tag)* `--headless` | CLI flag | Not a feature tag — `OS.has_feature("headless")` is `false`; check `DisplayServer.get_name() == "headless"` |
 | Custom `server` | Your export preset's Custom Features | Useful when sharing a binary between roles |
 
 ---
@@ -250,7 +250,7 @@ public partial class World : Node
 
 ## 7. Checklist
 
-- [ ] Export preset uses the **server** export template (`dedicated_server` feature is set automatically)
+- [ ] Export preset is exported as a dedicated server (`dedicated_server` feature is set automatically)
 - [ ] Client-only assets (shaders, audio, high-res textures) are excluded from the server PCK
 - [ ] Boot script checks `OS.has_feature("dedicated_server")` or `DisplayServer.get_name() == "headless"` to branch server vs client startup
 - [ ] `RenderingServer.set_render_loop_enabled(false)` called on the server to prevent any render work
@@ -264,7 +264,7 @@ public partial class World : Node
 - [ ] Ready states are reset when `MatchState` returns to `LOBBY` so players must re-confirm each round
 - [ ] `MatchManager` only runs `_physics_process` on the server (`SetPhysicsProcess(false)` on clients)
 - [ ] Countdown and results timers are driven by `_physics_process` delta, not `Timer` nodes (avoids scene dependency)
-- [ ] Dockerfile copies both the binary and the `.pck` file to the image
+- [ ] Dockerfile copies the binary and the `.pck` file (plus the `data_<project>_<platform>_<arch>` folder for C#) to the image
 - [ ] UDP port is opened in the VPS firewall before the first test run
 - [ ] systemd service has `Restart=on-failure` so the server recovers from crashes automatically
 - [ ] Logs are routed to the systemd journal and inspectable with `journalctl -u <service> -f`
@@ -295,7 +295,7 @@ Parse CLI flags from `OS.get_cmdline_args()` for `--port`, `--max-players`, `--t
 
 ## 6. Deployment
 
-A Linux VPS with a `Dockerfile` and `systemd` service file is the standard production layout. The Dockerfile bundles the headless export template, the exported PCK, and the .NET runtime (for C# projects). systemd handles auto-restart, log rotation via `journald`, and resource limits.
+A Linux VPS with a `Dockerfile` and `systemd` service file is the standard production layout. The Dockerfile bundles the exported binary, its PCK, and for C# projects the `data_*` folder that holds the assemblies and the bundled .NET runtime. systemd handles auto-restart, log rotation via `journald`, and resource limits.
 
 > See [references/deployment.md](references/deployment.md) for the Dockerfile, the Linux VPS setup steps, the systemd unit file, and log-rotation configuration.
 

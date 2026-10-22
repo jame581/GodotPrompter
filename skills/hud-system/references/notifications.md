@@ -7,7 +7,7 @@ Reference for `skills/hud-system/SKILL.md` — VBoxContainer-based notification 
 ---
 ## 5. Notification System
 
-Toast-style notifications appear for a short time then auto-dismiss. A `VBoxContainer` holds all visible toasts; a max-visible cap drops the oldest when the queue overflows.
+Toast-style notifications appear for a short time then auto-dismiss. A `VBoxContainer` holds all visible toasts; a max-visible cap holds extra messages in a queue until a visible toast is dismissed.
 
 ### GDScript
 
@@ -44,8 +44,8 @@ func _show_next() -> void:
     var message: String = _queue.pop_front()
     var toast: Control = notification_scene.instantiate()
 
-    # Expect the toast scene to have a child Label named "MessageLabel"
-    toast.get_node("MessageLabel").text = message
+    # Expect the toast scene's Label at MarginContainer/MessageLabel (see the tree below)
+    toast.get_node("MarginContainer/MessageLabel").text = message
     toast.modulate.a = 0.0
     add_child(toast)
     _active.append(toast)
@@ -92,7 +92,7 @@ public partial class NotificationStack : VBoxContainer
 
     public override void _Ready()
     {
-        EventBus.Instance.NotificationRequested += Push;
+        GetNode<EventBus>("/root/EventBus").NotificationRequested += Push;
     }
 
     public void Push(string message)
@@ -111,7 +111,7 @@ public partial class NotificationStack : VBoxContainer
     {
         string message = _queue.Dequeue();
         var toast = NotificationScene.Instantiate<Control>();
-        toast.GetNode<Label>("MessageLabel").Text = message;
+        toast.GetNode<Label>("MarginContainer/MessageLabel").Text = message;
         toast.Modulate = new Color(1, 1, 1, 0);
         AddChild(toast);
         _active.Add(toast);

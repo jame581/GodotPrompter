@@ -15,7 +15,7 @@ All examples target Godot 4.3+ with no deprecated APIs. GDScript is shown first,
 
 ### Why CanvasLayer
 
-A `CanvasLayer` renders its children in a fixed screen-space layer that is completely independent of any `Camera2D` or `Camera3D` transform. Without it, HUD nodes attached to the scene root still move with the camera when you pan or zoom. Wrapping all HUD nodes in a `CanvasLayer` (layer `≥ 1`) ensures the HUD always stays in place regardless of camera movement.
+A `CanvasLayer` renders its children with its own transform, independent of the `Camera2D` (unless `follow_viewport_enabled` is on); a `Camera3D` never moves 2D nodes. Without it, HUD nodes on the scene root's default canvas (layer 0) move with a `Camera2D` when you pan or zoom, because the camera sets that canvas's transform. Wrapping all HUD nodes in a `CanvasLayer` keeps the HUD in place; layer `≥ 1` (the default is 1) draws it above the world.
 
 ### Scene Tree
 
@@ -46,7 +46,7 @@ World (Node2D / Node3D)
 **Key rules:**
 - Keep all HUD scenes under a single `CanvasLayer`. Do not mix HUD nodes into the game world tree.
 - Use `layer = 1` for the main HUD. Use higher values (e.g. `10`) for overlays or pause menus that must appear above the HUD.
-- Damage numbers are an exception — they can live in a `Node2D` child of the `CanvasLayer` and use `get_viewport().get_screen_transform()` to convert world positions to screen positions.
+- Damage numbers are an exception — they can live in a `Node2D` child of the `CanvasLayer` and use `get_viewport().get_canvas_transform()` to convert world positions to screen positions.
 
 ---
 
@@ -59,7 +59,7 @@ World (Node2D / Node3D)
 | `ProgressBar` | Prototyping, plain-colour bars |
 | `TextureProgressBar` | Pixel-art or stylised bars using sprite sheets |
 
-Both expose `min_value`, `max_value`, and `value`. Set `step = 0` so tweening produces a smooth animation rather than snapping to integer steps.
+Both expose `min_value`, `max_value`, and `value`. Set `step = 0` so tweening produces a smooth animation rather than snapping to steps (`TextureProgressBar` defaults `step` to 1, `ProgressBar` to 0.01).
 
 ### GDScript
 
@@ -226,7 +226,7 @@ public partial class ScoreDisplay : Label
 
     public override void _Ready()
     {
-        EventBus.Instance.ScoreChanged += OnScoreChanged;
+        GetNode<EventBus>("/root/EventBus").ScoreChanged += OnScoreChanged;
         Text = "0";
     }
 
@@ -278,7 +278,7 @@ EventBus.score_changed.emit(GameState.score)
 
 ```csharp
 // Inside a collectible or enemy death handler
-EventBus.Instance.EmitSignal(EventBus.SignalName.ScoreChanged, GameState.Score);
+GetNode<EventBus>("/root/EventBus").EmitSignal(EventBus.SignalName.ScoreChanged, GameState.Score);
 ```
 
 ---
@@ -317,8 +317,8 @@ Screen-space "Press [E] to interact" prompt — a `Label` inside the HUD that fo
 
 ## 8. Checklist
 
-- [ ] All HUD nodes are children of a `CanvasLayer` with `layer >= 1` so they are unaffected by camera transforms
-- [ ] `ProgressBar.step` is set to `0.0` for smooth tween animation rather than integer snapping
+- [ ] All HUD nodes are children of a `CanvasLayer` (unaffected by `Camera2D`) with `layer >= 1` so they draw above the world
+- [ ] `step` is set to `0.0` for smooth tween animation (`TextureProgressBar` snaps to whole values by default)
 - [ ] Health bar binds to `HealthComponent.health_changed` signal — does not poll in `_process`
 - [ ] Tween is killed (`_tween.kill()`) before starting a new one so rapid damage does not stack animations
 - [ ] Score counter uses `tween_method` to interpolate the displayed integer — not a jump cut
@@ -327,7 +327,7 @@ Screen-space "Press [E] to interact" prompt — a `Label` inside the HUD that fo
 - [ ] Notification stack enforces `max_visible` and re-checks the queue after each dismissal
 - [ ] Toast auto-dismiss uses a `Timer` node — not `await get_tree().create_timer()`
 - [ ] `SubViewport` for minimap has `render_target_update_mode = UPDATE_ALWAYS`
-- [ ] Minimap `Camera2D` zoom and cull mask are configured so only the intended layers are visible
+- [ ] Minimap `Camera2D` zoom and the `SubViewport`'s `canvas_cull_mask` are configured so only the intended visibility layers are visible
 - [ ] Interaction prompt converts the interactable's world position each frame — not cached at spawn time
 - [ ] `InputMap.action_get_events()` is used to display the correct key for the player's current binding
 - [ ] HUD nodes that do not need input set `mouse_filter = MOUSE_FILTER_IGNORE` to avoid blocking game clicks

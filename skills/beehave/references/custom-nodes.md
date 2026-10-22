@@ -139,13 +139,13 @@ var speed: float = blackboard.get_value("move_speed", 200.0)
 2. Set **use_weights = true** in the Inspector.
 3. Per-child `Weights/<child_name>` integer properties (1–100) appear dynamically in the Inspector.
 
-There is no GDScript API to set weights at runtime — weight configuration is inspector-only in v2.9.2.
+There is no dedicated method for weights, but each `Weights/<child_name>` property goes through `_set()`, so `composite.set("Weights/Attack", 5)` changes it at runtime (with `use_weights` on).
 
 ---
 
 ## Known issues (v2.9.2)
 
-- **`RepeaterDecorator.get_class_name()` bug:** The method returns `&"LimiterDecorator"` instead of `&"RepeaterDecorator"` due to a copy-paste error in the source. The actual GDScript `class_name` is `RepeaterDecorator` (autocomplete and `is` checks work correctly); only `get_class_name()` returns the wrong value. Avoid `get_class_name()` for identity checks on this node.
+- **`RepeaterDecorator.get_class_name()` bug:** The method returns an `Array[StringName]` whose last entry is `&"LimiterDecorator"` instead of `&"RepeaterDecorator"`, a copy-paste error in the source. The actual GDScript `class_name` is `RepeaterDecorator` (autocomplete and `is` checks work correctly); only `get_class_name()` returns the wrong value. Avoid `get_class_name()` for identity checks on this node.
 
 ---
 

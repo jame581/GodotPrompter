@@ -9,7 +9,7 @@ Reference for `skills/dependency-injection/SKILL.md` — exposing dependencies a
 
 The most Godot-idiomatic DI pattern. Declare a dependency as `@export` and wire it in the editor Inspector — or assign it from a parent in code. The node never needs to know *where* its dependency lives in the tree.
 
-This is preferred over `get_node("../../SomeNode")` hard-coded paths, which break silently when the scene tree is reorganised.
+This is preferred over `get_node("../../SomeNode")` hard-coded paths, which fail at runtime with `Node not found` when the scene tree is reorganised.
 
 ### GDScript
 

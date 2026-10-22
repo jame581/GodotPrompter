@@ -8,31 +8,29 @@ Reference for `skills/multiplayer-sync/SKILL.md` — sync only changed propertie
 
 ## 7. Bandwidth Optimization
 
-## 7. Bandwidth Optimization
-
 ### Sync Only Changed Properties
 
-Use `delta_interval` on `MultiplayerSynchronizer` so only dirty properties are sent each tick. Combine with a short `replication_interval` for a full-state heartbeat.
+Set rarely-changing properties to **On Change** in the replication config: they are sent (reliably) only when they change, at most every `delta_interval`. Properties set to **Always** are sent every `replication_interval` whether they changed or not — a slower interval cuts their cost, but it does not resend the On Change properties.
 
 ```gdscript
 func _ready() -> void:
     var sync := $MultiplayerSynchronizer
-    sync.replication_interval = 1.0   # Full state every 1 s as fallback
-    sync.delta_interval        = 0.05  # Changed properties every 50 ms
+    sync.replication_interval = 0.1   # "Always" properties every 100 ms
+    sync.delta_interval        = 0.05  # changed "On Change" properties every 50 ms
 ```
 
 ```csharp
 public override void _Ready()
 {
     var sync = GetNode<MultiplayerSynchronizer>("MultiplayerSynchronizer");
-    sync.ReplicationInterval = 1.0;  // Full state every 1 s as fallback
-    sync.DeltaInterval       = 0.05; // Changed properties every 50 ms
+    sync.ReplicationInterval = 0.1;  // "Always" properties every 100 ms
+    sync.DeltaInterval       = 0.05; // changed "On Change" properties every 50 ms
 }
 ```
 
 ### Quantize Floats
 
-Reduce float precision before sending. A 16-bit integer covers ±32767 cm — more than enough for most game worlds.
+Reduce float precision before sending. A 16-bit integer covers ±32767 cm — more than enough for most game worlds. RPC arguments and synced properties compress an `int` to 1, 2, 4 or 8 bytes plus a 1-byte type tag, so a value in the 16-bit range costs 3 bytes; a `float` is not compressed and costs 8 (12 if it is not exactly representable as a 32-bit float). Optionally, writing many values into one `PackedByteArray` (`encode_s16()`) also drops the per-value type byte, at the cost of the array's 8-byte header.
 
 ```gdscript
 # Encode a position component to a 16-bit integer (1 cm precision, ±327 m range).
@@ -99,14 +97,14 @@ public void UpdateSyncIntervals(Node2D localPlayer)
 
 ### Reliable vs Unreliable Channels
 
-| Data Type | Channel | Why |
+| Data Type | Transfer mode | Why |
 |---|---|---|
 | Position, velocity | `unreliable` | Timeliness matters; a dropped packet will be superseded by the next one |
 | Health, score, kills | `reliable` | Must arrive and in order; gaps cause incorrect state |
 | Spawn / despawn events | `reliable` | One-time events that must not be missed |
 | Chat messages | `reliable` | Ordering and delivery matter to the user |
 
-In Godot, set the channel per `@rpc` annotation:
+In Godot, set the transfer mode per `@rpc` annotation (an optional trailing integer picks the channel):
 
 ```gdscript
 @rpc("any_peer", "call_remote", "unreliable")

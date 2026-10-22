@@ -6,7 +6,7 @@ Deeper coverage for the **multithreading** skill: deadlocks, data races, the "do
 
 ## 1. Deadlocks: the `ERR_BUSY` nested-wait case
 
-`WorkerThreadPool.wait_for_task_completion(task_id)` returns one of `OK`, `ERR_INVALID_PARAMETER`, or `ERR_BUSY`. You get `ERR_BUSY` when you wait for a task **from inside another running pool task** in a way that could deadlock — e.g. task A waits on task B while B is queued behind A on the same pool.
+`WorkerThreadPool.wait_for_task_completion(task_id)` returns one of `OK`, `ERR_INVALID_PARAMETER`, or `ERR_BUSY`. You get `ERR_BUSY` when you wait for a task **from inside another running pool task** in a way that could deadlock — e.g. a task waiting on an older task that sits lower in the same worker's call stack and so cannot progress.
 
 Rules to avoid it:
 
@@ -49,4 +49,4 @@ The same applies to GDScript: don't `await` a node signal or coroutine from insi
 
 ## 5. Separate rendering thread model — known bugs
 
-Setting `Rendering > Driver > Thread Model = Separate` lets you instance render nodes (Sprite2D, MeshInstance3D) off the main thread, but this mode **has known bugs** and is not the default. Prefer the server APIs (RenderingServer with thread-safe operation enabled) for thread-driven instancing, and treat the separate render thread as advanced/experimental. Physics has the analogous `Run on Separate Thread` setting per dimension; enable it explicitly before doing physics work off-thread.
+Setting `Rendering > Driver > Threads > Thread Model = Separate` (`Multi-Threaded` on 4.3) lets you instance render nodes (Sprite2D, MeshInstance3D) off the main thread, but this mode **has known bugs** and is not the default. Prefer the server APIs (RenderingServer with thread-safe operation enabled) for thread-driven instancing, and treat the separate render thread as advanced/experimental. Physics has the analogous `Run on Separate Thread` setting per dimension; enable it explicitly before doing physics work off-thread.

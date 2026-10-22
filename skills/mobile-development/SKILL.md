@@ -21,7 +21,7 @@ keytool -v -genkey -keystore mygame.keystore -alias mygame -keyalg RSA -validity
 
 Preset fields: **Release / Release User / Release Password** (keystore and key passwords must currently match); uncheck **Export With Debug**. **AAB is mandatory for new Play uploads.** CI env overrides: `GODOT_ANDROID_KEYSTORE_RELEASE_{PATH,USER,PASSWORD}`.
 
-**iOS:** macOS + Xcode. Export needs an **App Store Team ID** + a reverse-DNS bundle **Identifier**; Godot generates an `.xcodeproj` you build from Xcode. The iOS **simulator supports the Compatibility renderer only**.
+**iOS:** macOS + Xcode. Export needs an **App Store Team ID** + a reverse-DNS bundle **Identifier**; Godot generates an `.xcodeproj` you build from Xcode. Test on the iOS **simulator with the Compatibility renderer** — Forward+/Mobile support there depends on the simulator's Metal.
 
 A **custom Gradle build** (*Project → Install the Gradle Build template*) is **required for v2 plugins and IAP** (Godot 4.2+). Since Godot 4.7 the **Use Gradle Build** export option is no longer marked experimental ([GH-119172](https://github.com/godotengine/godot/pull/119172)) — treat it as the standard path when you need plugins or IAP.
 
@@ -234,7 +234,7 @@ public override void _Ready()
 
 Native file dialogs (`DisplayServer.file_dialog_show()`) are supported on Android; since Godot 4.7 the native file picker works on all devices — the Android version check gating `FEATURE_NATIVE_DIALOG_FILE` support was removed ([GH-115257](https://github.com/godotengine/godot/pull/115257)).
 
-> **Godot 4.7+:** For on-screen touch joysticks, use the built-in `VirtualJoystick` Control node instead of a hand-rolled `TouchScreenButton` rig — see **input-handling** (§ 6, "VirtualJoystick (Godot 4.7+)") for the full API.
+> **Godot 4.7+:** For on-screen touch joysticks, use the built-in `VirtualJoystick` Control node instead of a hand-rolled `TouchScreenButton` rig — see **input-handling** (`references/touch.md`, "VirtualJoystick (Godot 4.7+)") for the full API.
 
 ### Device Orientation Signal (Godot 4.7+)
 
@@ -260,13 +260,13 @@ public override void _Ready()
 
 ## 6. Mobile performance & renderer
 
-Use the **Mobile** (or **Compatibility**) renderer; the iOS simulator is Compatibility-only. Enable `rendering/textures/vram_compression/import_etc2_astc = true` (ETC2/ASTC) for Android texture compression. Keep single-arch APKs small; AABs split per-device automatically. Defer deep draw-call/batching tuning to **godot-optimization**.
+Use the **Mobile** (or **Compatibility**) renderer; prefer Compatibility on the iOS simulator. Enable `rendering/textures/vram_compression/import_etc2_astc = true` (ETC2/ASTC) for Android texture compression. Keep single-arch APKs small; AABs split per-device automatically. Defer deep draw-call/batching tuning to **godot-optimization**.
 
 ---
 
 ## 7. C# on mobile
 
-C# Android/iOS export is **Godot 4.2+ but experimental**. **Android C# export requires .NET 9+** (with Godot 4.5); iOS export only from macOS, and the simulator templates are x64-only. **C# cannot export to Web.** Test the C# export pipeline early — it is the riskiest part of a C# mobile project.
+C# Android/iOS export is **Godot 4.2+ but experimental**. **Android C# export requires .NET 9+** (with Godot 4.5); iOS export only from macOS (the export also builds arm64 + x86_64 simulator assemblies). **C# cannot export to Web.** Test the C# export pipeline early — it is the riskiest part of a C# mobile project.
 
 > **Deeper:** [Plugins (Android v2 / iOS)](references/plugins.md) · [In-app purchases & ads](references/iap-and-ads.md) · [Crash debugging](references/crash-debugging.md)
 

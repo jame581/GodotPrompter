@@ -50,7 +50,7 @@ private void OnEnemyDied()
 ```gdscript
 # Quick isolation — disable a node's script temporarily at runtime
 func _ready() -> void:
-    $SuspectNode.set_script(null)  # removes script, node becomes a plain Node
+    $SuspectNode.set_script(null)  # removes the script; the node keeps its built-in type
 ```
 
 ```csharp
@@ -102,7 +102,7 @@ public void TakeDamage(int amount)
 ### Step 6 — Verify
 
 - Reproduce the original steps — confirm the bug is gone.
-- Run any existing tests: `gut -gdir=res://tests` or `gdunit4_runner`.
+- Run any existing tests (GUT or gdUnit4 command lines below).
 - Check for regressions in related functionality.
 
 ```bash
@@ -110,7 +110,7 @@ public void TakeDamage(int amount)
 godot --headless --script res://addons/gut/gut_cmdln.gd -gdir=res://tests -gexit
 
 # Run gdUnit4 tests headless
-godot --headless -s res://addons/gdUnit4/bin/GdUnit4CmdTool.gd
+godot --headless --path . -s -d res://addons/gdUnit4/bin/GdUnitCmdTool.gd -a res://tests --ignoreHeadlessMode
 ```
 
 ### Step 7 — Add a Test

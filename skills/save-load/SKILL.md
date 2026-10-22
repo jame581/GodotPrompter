@@ -46,7 +46,7 @@ When you recommend a strategy, name the one you rejected and the factor that dec
 
 ## 4. Save Architecture Pattern
 
-For larger games, attach a `SaveableComponent` to each persistent node. Each component declares `save_callable` and `load_callable`. The save manager iterates components by ID, calls each one's save callable, builds a master Dictionary.
+For larger games, attach a `SaveableComponent` to each persistent node. Each component holds a stable `save_id` and two callables, `serialize` and `deserialize`, and joins the `saveable` group. The save manager walks that group, calls each `serialize`, and builds a master Dictionary keyed by `save_id`.
 
 > See [references/save-architecture.md](references/save-architecture.md) for the full `SaveableComponent` + save-manager implementation.
 

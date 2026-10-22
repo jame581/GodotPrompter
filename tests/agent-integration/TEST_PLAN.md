@@ -150,6 +150,56 @@ func take_damage(amount):
 
 ---
 
+### Test 2.6: HTTP request to a backend
+
+**Prompt:** "My game needs to fetch a player's leaderboard from a REST API and show it. How do I do the HTTP call in Godot?"
+
+**Expected skill:** `web-services`
+
+**Expected behavior:**
+- Uses an `HTTPRequest` node with `await` on `request_completed`, one node per in-flight request
+- Distinguishes the transport result from the HTTP status code
+- Parses JSON with `JSON.parse_string()` and notes that numbers arrive as floats
+- Sets a `timeout` and mentions the INTERNET permission on Android and CORS on Web
+- Does not reach for `HTTPClient` for an ordinary REST call
+
+**Pass criteria:** Uses the skill's single-request or autoload client pattern and names at least two of the pitfalls (float numbers, `ERR_BUSY` on reuse, no timeout, CORS).
+
+---
+
+### Test 2.7: Renderer and FSR choice
+
+**Prompt:** "I want to use FSR to upscale my 3D game so it runs faster on weaker GPUs. Which renderer do I need and how do I turn it on?"
+
+**Expected skill:** `rendering-pipeline`
+
+**Expected behavior:**
+- States that FSR 1 and FSR 2 need the Forward+ renderer, not Mobile or Compatibility
+- Sets `scaling_3d_mode` and `scaling_3d_scale` (below `1.0` to gain speed)
+- Offers the renderer trade-off (Forward+ vs Mobile vs Compatibility) instead of assuming one
+- Does not suggest FSR on Web (Compatibility only)
+
+**Pass criteria:** Correctly ties FSR to Forward+ and names the `scaling_3d_*` settings.
+
+---
+
+### Test 2.8: Web export with threads
+
+**Prompt:** "I exported my game to the web and want to use threads for loading. It's going on GitHub Pages. What do I need to know?"
+
+**Expected skill:** `web-export`
+
+**Expected behavior:**
+- Explains that thread support is a preset option (`variant/thread_support`), off by default
+- Names the COOP/COEP headers (cross-origin isolation) that threads require
+- Notes GitHub Pages cannot send custom headers, and offers the no-threads build or the PWA cross-origin isolation workaround
+- Warns that `Thread` and `WorkerThreadPool` do not run in the background without threads
+- Does not mention C# as an option for Web
+
+**Pass criteria:** Names the header requirement and a workable GitHub Pages path.
+
+---
+
 ## Category 3: Full Workflow (End-to-End Build)
 
 ### Test 3.1: Project + Player
@@ -280,23 +330,6 @@ sits next to) and answers with the addon's real API.
 - Uses the trigger-area pattern from the skill
 
 **Pass criteria:** Answer uses the addon's priority model rather than the hand-rolled `camera-system` approach.
-
----
-
-## How to Run
-
-Use `host-smoke-matrix.json` as the machine-readable release checklist for Claude Code, GitHub Copilot CLI, Cursor, Codex, Antigravity, OpenCode, and Grok Build. The numbered steps below remain the detailed Claude-first workflow.
-
-1. Start a fresh Claude Code session
-2. Install GodotPrompter: `claude plugins add ./GodotPrompter`
-3. Navigate to an empty test directory
-4. Run each test sequentially, recording results in RESULTS.md
-5. For Category 3, keep the same session (tests build on each other)
-
-**Note on Category 4:** a newly added skill is not in the installed plugin cache until the release ships,
-so pre-release runs test the skill *as it exists in the working tree* (agent reads `skills/<name>/SKILL.md`)
-rather than plugin-cache routing. Re-run Category 4 against the installed plugin after release to
-validate description-based routing end to end.
 
 ---
 
@@ -535,3 +568,21 @@ decision record is written.
 
 **Pass criteria:** `godot-grill` is not invoked for a bug fix, even one that needs a fact. No eval
 case covers this path.
+
+---
+
+## How to Run
+
+Use `host-smoke-matrix.json` as the machine-readable release checklist for Claude Code, GitHub Copilot CLI, Cursor, Codex, Antigravity, OpenCode, and Grok Build. The numbered steps below remain the detailed Claude-first workflow.
+
+1. Start a fresh Claude Code session
+2. Install GodotPrompter: `claude plugins marketplace add ./GodotPrompter` then `claude plugins install godot-prompter@godot-prompter-marketplace`
+3. Navigate to an empty test directory
+4. Run each test sequentially, recording results in RESULTS.md
+5. For Category 3, keep the same session (tests build on each other)
+6. Categories 5 and 6 need a Godot project (a `project.godot`) so the SessionStart card is injected
+
+**Note on Category 4:** a newly added skill is not in the installed plugin cache until the release ships,
+so pre-release runs test the skill *as it exists in the working tree* (agent reads `skills/<name>/SKILL.md`)
+rather than plugin-cache routing. Re-run Category 4 against the installed plugin after release to
+validate description-based routing end to end.

@@ -54,12 +54,13 @@ func test_death_signal_emitted_at_zero() -> void:
 
 ```csharp
 // tests/unit/HealthComponentTest.cs
+using System.Threading.Tasks;
 using Godot;
 using GdUnit4;
 using static GdUnit4.Assertions;
 
 [TestSuite]
-public partial class HealthComponentTest : GdUnit4.GdUnitTestSuite
+public class HealthComponentTest // a plain class: gdUnit4Net has no test-suite base class
 {
     private HealthComponent _health = default!;
 
@@ -71,7 +72,7 @@ public partial class HealthComponentTest : GdUnit4.GdUnitTestSuite
     {
         _health = AutoFree(new HealthComponent());
         _health.MaxHealth = 100;
-        AddChild(_health);
+        ((SceneTree)Engine.GetMainLoop()).Root.AddChild(_health); // runs _Ready
     }
 
     [TestCase]
@@ -108,12 +109,11 @@ public partial class HealthComponentTest : GdUnit4.GdUnitTestSuite
     }
 
     [TestCase]
-    public async GdUnitAwaiter DeathSignalEmittedAtZero()
+    public async Task DeathSignalEmittedAtZero()
     {
-        var monitor = MonitorSignals(_health);
+        AssertSignal(_health).StartMonitoring();
         _health.TakeDamage(100);
-        await monitor.AwaitSignal("died").WithTimeout(500);
-        AssertSignal(monitor).IsEmitted("died");
+        await AssertSignal(_health).IsEmitted(HealthComponent.SignalName.Died).WithTimeout(500);
     }
 }
 ```
@@ -172,7 +172,7 @@ public partial class HealthComponent : Node
         CurrentHealth = MaxHealth;
     }
 
-    public void TakeDamage(int amount)
+    public virtual void TakeDamage(int amount) // virtual so a test fake can override it
     {
         int old = CurrentHealth;
         CurrentHealth = Mathf.Max(0, CurrentHealth - amount);

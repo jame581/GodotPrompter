@@ -11,16 +11,15 @@ Godot 4.3 introduced specialized AudioStream types for dynamic music that respon
 
 ### AudioStreamPlaylist
 
-Plays a sequence of audio streams in order. Use for level music with intro → loop → outro structure, or for jukebox-style playlists.
+Plays a sequence of audio streams in order (or shuffled). Use for sequenced level music or jukebox-style playlists. With `loop = true` (the default) the whole list repeats, first stream included — for an intro that plays once before a loop, use an `AudioStreamInteractive` clip with auto-advance.
 
 ```gdscript
-# Create a playlist with intro and loop
+# Create a two-track playlist (both tracks repeat)
 var playlist := AudioStreamPlaylist.new()
 playlist.stream_count = 2
-playlist.set_list_stream(0, preload("res://audio/music/boss_intro.ogg"))
-playlist.set_list_stream(1, preload("res://audio/music/boss_loop.ogg"))
-# BPM sync ensures transitions land on beat boundaries
-playlist.bpm = 120.0
+playlist.set_list_stream(0, preload("res://audio/music/track_a.ogg"))
+playlist.set_list_stream(1, preload("res://audio/music/track_b.ogg"))
+# No bpm property: get_bpm() reads each stream's BPM (set it in the file's import options)
 playlist.shuffle = false
 playlist.loop = true    # loop the entire playlist
 
@@ -31,8 +30,8 @@ $MusicPlayer.play()
 ```csharp
 var playlist = new AudioStreamPlaylist();
 playlist.StreamCount = 2;
-playlist.SetListStream(0, GD.Load<AudioStream>("res://audio/music/boss_intro.ogg"));
-playlist.SetListStream(1, GD.Load<AudioStream>("res://audio/music/boss_loop.ogg"));
+playlist.SetListStream(0, GD.Load<AudioStream>("res://audio/music/track_a.ogg"));
+playlist.SetListStream(1, GD.Load<AudioStream>("res://audio/music/track_b.ogg"));
 playlist.Shuffle = false;
 playlist.Loop = true;
 
@@ -62,11 +61,12 @@ $MusicPlayer.play()
 
 # When combat starts — fade in drums layer
 func _on_combat_started() -> void:
-    var playback := $MusicPlayer.get_stream_playback() as AudioStreamPlaybackSynchronized
+    # The playback has no volume API; it reads the stream's layer volumes live.
+    var layers := $MusicPlayer.stream as AudioStreamSynchronized
     # Tween the volume of layer 1 from silent to audible
     var tween := create_tween()
     tween.tween_method(
-        func(db: float) -> void: playback.set_stream_volume(1, db),
+        func(db: float) -> void: layers.set_sync_stream_volume(1, db),
         -80.0, 0.0, 1.5
     )
 ```
@@ -87,9 +87,10 @@ GetNode<AudioStreamPlayer>("MusicPlayer").Play();
 // When combat starts — fade in drums layer
 public void OnCombatStarted()
 {
-    var playback = GetNode<AudioStreamPlayer>("MusicPlayer").GetStreamPlayback() as AudioStreamPlaybackSynchronized;
+    // The playback has no volume API; it reads the stream's layer volumes live.
+    var layers = (AudioStreamSynchronized)GetNode<AudioStreamPlayer>("MusicPlayer").Stream;
     var tween = CreateTween();
-    tween.TweenMethod(Callable.From<float>(db => playback.SetStreamVolume(1, db)), -80.0f, 0.0f, 1.5);
+    tween.TweenMethod(Callable.From<float>(db => layers.SetSyncStreamVolume(1, db)), -80.0f, 0.0f, 1.5);
 }
 ```
 
@@ -144,7 +145,7 @@ The same option is available in the Inspector's transition editor.
 
 | Stream Type | Use For |
 |---|---|
-| `AudioStreamPlaylist` | Sequential tracks (intro → loop), jukeboxes |
+| `AudioStreamPlaylist` | Sequential or shuffled tracks, jukeboxes |
 | `AudioStreamSynchronized` | Layered music with volume blending |
 | `AudioStreamInteractive` | State-based music with designed transitions |
 

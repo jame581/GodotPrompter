@@ -3,7 +3,7 @@
 **Date:** YYYY-MM-DD
 **Platform:** Claude Code
 **Model:** [model used]
-**GodotPrompter version:** v1.0.0-rc
+**GodotPrompter version:** vX.Y.Z
 
 ## Category 1: Cold Start
 
@@ -22,6 +22,9 @@
 | 2.3 Enemy AI request | | |
 | 2.4 Save/load request | | |
 | 2.5 Code review request | | |
+| 2.6 HTTP request to a backend | | |
+| 2.7 Renderer and FSR choice | | |
+| 2.8 Web export with threads | | |
 
 ## Category 3: Full Workflow
 
@@ -33,9 +36,43 @@
 | 3.4 Code Review | | |
 | 3.5 Save/Load | | |
 
+## Category 4: Third-Party Addon Skills
+
+| Test | Status | Notes |
+|------|--------|-------|
+| 4.1 Popochiu | | |
+| 4.2 Dialogue Manager (C#) | | |
+| 4.3 Phantom Camera | | |
+
+## Category 5: Mentor Mode & Presence
+
+| Test | Status | Notes |
+|------|--------|-------|
+| 5.1 Mentor mode wraps, never replaces | | |
+| 5.2 Editor beat boundary holds | | |
+| 5.2b Click-paths are for beginner level | | |
+| 5.3 Off-ramp | | |
+| 5.4 Coexistence regression | | |
+| 5.5 Hook stays silent outside Godot | | |
+| 5.6 Subagent reach via the agent instructions file | | |
+| 5.6b The offer respects an agent-agnostic repo | | |
+| 5.7 No state written into the game repo | | |
+| 5.8 C# project leads with C# | | |
+
+## Category 6: Decision-first design
+
+| Test | Status | Notes |
+|------|--------|-------|
+| 6.1 Off-ramp mid-grill | | |
+| 6.2 The record shortens the grill | | |
+| 6.3 No grill for a bug fix | | |
+| 6.4 The card's gate row routes a plain request | | |
+| 6.5 A report never ends on its own questions | | |
+| 6.6 The grill sentence stays scoped to design decisions | | |
+
 ## Summary
 
-- **Total tests:** 13
+- **Total tests:** 35
 - **PASS:**
 - **PARTIAL:**
 - **FAIL:**

@@ -32,7 +32,7 @@ using Godot.Collections;
 var askLine = new DialogueLine();
 askLine.Speaker = "Guard";
 askLine.Text    = "What brings you here, traveller?";
-askLine.Choices = new Array<Dictionary>
+askLine.Choices = new Array // DialogueLine.Choices is an untyped Array
 {
     new Dictionary { { "text", "I seek the king." },      { "next_line_id", "seek_king" } },
     new Dictionary { { "text", "Just passing through." }, { "next_line_id", "passing_through" } },
@@ -45,7 +45,7 @@ The third choice only appears when `GameState.has_item('royal_letter')` is true.
 
 ### Condition Evaluator
 
-`DialogueManager._evaluate_condition()` uses Godot's built-in `Expression` class, which can call methods on any object passed as the base instance. Wire it to a `GameState` autoload for clean condition strings:
+`DialogueManager._evaluate_condition()` uses Godot's built-in `Expression` class, which calls methods on the objects you pass in — as named inputs, or as the base instance for bare calls like `has_item(...)`. Pass a `GameState` autoload in as the input `GameState` for clean condition strings:
 
 ```gdscript
 # game_state.gd — autoload named GameState
@@ -110,19 +110,20 @@ public partial class GameState : Node
 }
 ```
 
-Pass `GameState` as the expression base to resolve method calls:
+Register `GameState` as an input name — `Expression` does not resolve autoload names, so without it `GameState.has_item(...)` fails with "Invalid named index 'GameState' for base type Object":
 
 ```gdscript
 # In DialogueManager._evaluate_condition():
-var result = expr.execute([], GameState)   # ← pass autoload as base instance
+expr.parse(condition, ["GameState"])
+var result = expr.execute([GameState])   # ← inputs in the same order as the names
 ```
 
 ```csharp
 // In DialogueManager.EvaluateCondition():
-// Godot's Expression class is GDScript-native; in C# call the autoload directly.
-// Map condition strings to typed method calls on the GameState singleton instead
-// of using Expression.Execute(), which does not support C# objects as base instances.
-// Example mapping:
+// Expression is a core class and calls C# methods by their C# names, so the same
+// evaluator works from C#: expr.Parse(condition, new[] { "GameState" }), then
+// expr.Execute(new Array { gs }) with "GameState.HasItem(\"royal_letter\")".
+// For typed checks without expression strings, map a prefix format instead:
 private bool EvaluateCondition(string condition)
 {
     var gs = GetNode<GameState>("/root/GameState");

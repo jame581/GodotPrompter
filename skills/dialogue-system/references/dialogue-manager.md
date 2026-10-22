@@ -14,8 +14,9 @@ Reference for `skills/dialogue-system/SKILL.md` — full DialogueManager impleme
 ### GDScript
 
 ```gdscript
-# dialogue_manager.gd
-class_name DialogueManager
+# dialogue_manager.gd — registered as the autoload "DialogueManager".
+# No class_name: a class_name equal to an autoload's name is a parse error
+# ("Class "DialogueManager" hides an autoload singleton").
 extends Node
 
 signal dialogue_started
@@ -106,11 +107,12 @@ func _visible_choices(choices: Array) -> Array:
 # See section 5 for a full condition evaluator example.
 func _evaluate_condition(expression: String) -> bool:
     var expr := Expression.new()
-    var err   := expr.parse(expression)
+    # Expression does not see autoload names: pass GameState in as a named input.
+    var err   := expr.parse(expression, ["GameState"])
     if err != OK:
         push_error("DialogueManager: bad condition '%s' — %s" % [expression, expr.get_error_text()])
         return false
-    var result = expr.execute([], self)
+    var result = expr.execute([GameState], self)
     if expr.has_execute_failed():
         push_error("DialogueManager: condition execute failed for '%s'" % expression)
         return false
@@ -233,13 +235,14 @@ public partial class DialogueManager : Node
     private bool EvaluateCondition(string expression)
     {
         var expr = new Expression();
-        var err  = expr.Parse(expression);
+        // Expression does not see autoload names: pass GameState in as a named input.
+        var err  = expr.Parse(expression, new[] { "GameState" });
         if (err != Error.Ok)
         {
             GD.PushError($"DialogueManager: bad condition '{expression}' — {expr.GetErrorText()}");
             return false;
         }
-        var result = expr.Execute(Array.From(System.Array.Empty<Variant>()), this);
+        var result = expr.Execute(new Array { GetNode("/root/GameState") }, this);
         if (expr.HasExecuteFailed())
         {
             GD.PushError($"DialogueManager: condition execute failed for '{expression}'");

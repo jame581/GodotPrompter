@@ -73,6 +73,7 @@ func _on_connection_failed() -> void:
 | `peer_disconnected` | Server + clients | A peer disconnects or times out |
 | `connected_to_server` | Client only | This client successfully connected |
 | `connection_failed` | Client only | This client could not connect |
+| `server_disconnected` | Client only | The server closed the connection or timed out (handler: [disconnect-handling.md](disconnect-handling.md)) |
 
 ## C#
 

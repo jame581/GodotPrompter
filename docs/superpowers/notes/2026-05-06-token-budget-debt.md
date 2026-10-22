@@ -1,5 +1,7 @@
 # Token Budget Debt — v1.7.0 baseline
 
+> **Closed in v1.7.3 (2026-05-07).** The deferred list is empty; every `SKILL.md` is at or below the 16 KB budget. Kept as the history of the initiative.
+
 The validator (`token-budget-exceeded` warning, added in v1.7.0) flags every `skills/*/SKILL.md` ≥ 16 KB. v1.7.0 restructured the top 10 plus `addon-development` using **Pattern X** (core SKILL.md + `references/<topic>.md`). The remaining **24 skills** are still over budget and tracked here for v1.7.x point releases.
 
 ## The Pattern X recipe

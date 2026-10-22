@@ -4,18 +4,26 @@ All notable changes to GodotPrompter will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
-## [Unreleased]
+## [1.16.0] - 2026-10-22
+
+Three new skills (59 in all), a C# method-body check of every code block, and a first prose audit of
+the 56 existing skills. 61 C# errors and 349 wrong prose claims were fixed.
 
 ### Added
 
 - **A plugin-only branch for Anthropic's plugin directory.** The directory held every version for
   a reviewer (`BINARIES_NOT_INSPECTED`) because the repository root, which is the plugin folder,
-  tracks 613 files and the limit is 512. The release workflow now commits a bundle of only what
+  tracks more than 600 files and the limit is 512. The release workflow now commits a bundle of only what
   Claude Code loads (skills, agents, the SessionStart hook, the manifest and icon, README, LICENSE,
-  PRIVACY, SECURITY: 280 files) to the `plugin-bundle` branch, and the directory submission follows
+  PRIVACY, SECURITY: 295 files) to the `plugin-bundle` branch, and the directory submission follows
   that branch. README links to files left out of the bundle point at the release tag on GitHub.
-  `npm test` checks the bundle against the directory's file-count and file-size limits. Other hosts
-  still install from `master`, unchanged.
+  `npm test` checks the bundle against the directory's file-count and file-size limits.
+- **Marketplace installs follow the release bundle.** The marketplace PRs that `release.yml` opens
+  now set `"ref": "plugin-bundle"` on the `godot-prompter` entry in `skillsmith` and the legacy
+  `godot-prompter-marketplace`, and wait for the bundle job. Claude Code and Copilot CLI installs
+  from either marketplace get the released tree instead of whatever is on `master` between
+  releases. Both hosts were checked installing from the branch. Cursor, Codex, OpenCode,
+  Antigravity, Grok and local clones still install from `master`.
 - **`web-services`** — calling HTTP and WebSocket backends: one `HTTPRequest` per request with
   `await`, a reusable JSON API client autoload, transport result vs HTTP status, JSON numbers
   parsing as floats, downloads with progress, image loading, form and multipart uploads, TLS and
@@ -32,12 +40,60 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
   autoplay and sample playback, input gestures, and load size. GDScript only, because C# projects
   cannot export to Web in Godot 4. References: `hosting.md`, `javascript-bridge.md`.
 
+- **export-pipeline** gained `references/steam-release-planning.md` (#32, closes #30): the release
+  side of shipping on Steam, which the upload-focused distribution reference left out. The 21-day
+  app-fee wait, the two-week Coming Soon minimum, store page and build review lead times, a
+  backwards timeline from a launch date, store and library asset sizes, demo and Next Fest rules,
+  discount cooldowns and wishlist emails, and when a Godot game needs the Steamworks API at all.
+  Each section names the Steamworks page its values come from.
+- **Issue auto-assignment.** `.github/workflows/auto-assign-issues.yml` assigns the repository owner
+  to every newly opened issue, so a new issue produces a notification instead of arriving unassigned.
+- **Marketplace README count sync.** The skillsmith and godot-prompter-marketplace READMEs had
+  drifted to 41 and 44 skills because a release only bumped `marketplace.json`.
+  `scripts/sync-marketplace-readme.mjs` rewrites the skill and agent counts between comment markers;
+  `release.yml` runs it in both marketplace PR steps and `bump-version.mjs` runs it for local sibling clones.
+
 ### Fixed
 
 - **export-pipeline** told readers to disable web threads with `rendering/threads/thread_model=0`.
   Threads are an export preset option (`variant/thread_support`, off by default since 4.3).
 - **3d-essentials** said LightmapGI requires Forward+. It plays on all three renderers and only
   bakes in a Forward+ or Mobile editor; the renderer comparison now shows SSAO in Compatibility from 4.6.
+- **C# method-body check.** 513 of 517 C# blocks were compiled to method bodies against
+  `Godot.NET.Sdk` 4.7.2 (the other 4 are pseudo-code or deliberately wrong) and every "name does not
+  exist" error was triaged. **61 real errors were fixed in 13 skills**; the worst were
+  `godot-testing` and `event-bus` calling gdUnit4 APIs that do not exist (a `GdUnit4.GdUnitTestSuite`
+  base class, a mocking API, `.WithArgs` on `IsEmitted`), `limboai` using `LimboHSM` / `Anystate` for
+  the generated `LimboHsm` / `ANYSTATE`, and a `Basis.IsOrthonormal()` call GodotSharp does not have.
+  `gdUnit4.api` is pinned to 4.3.1 for Godot 4.3 (5.x needs 4.4+). Method and counts:
+  `docs/superpowers/notes/2026-10-21-csharp-body-check.md`.
+- **Prose audit.** 2,338 claims in the 56 existing skills were checked against the engine source and
+  class reference, in seven batches: **349 were wrong and fixed, 16 softened** where they could not
+  be verified. The worst: `scene-organization` put `Sprite2D` and `CollisionShape2D` under plain
+  `Node` containers, which breaks transform inheritance and leaves a body with no shape; the
+  hand-rolled `DialogueManager` autoload had a `class_name` clashing with its own autoload name; the
+  inventory registry scanned for `.tres` files that an exported build lists as `.tres.remap`;
+  `godot-optimization` recommended `CanvasGroup` for batching, which breaks batching;
+  `multiplayer-basics` set authority on the server only, so clients never agreed; `godot-testing`
+  documented gdUnit4 and GUT command lines that do not exist. Claims and sources per batch:
+  `docs/superpowers/notes/2026-10-21-prose-audit.md`.
+
+### Changed
+
+- **Pattern X moves** to keep the tightest skills clear of the 16 KB budget (bytes, validator count):
+  `web-services` 15,800 → 13,259 (WebSocket client to `references/websocket-client.md`),
+  `rendering-pipeline` 15,633 → 14,088 (SubViewports to `references/subviewports.md`),
+  `shader-basics` 15,344 → 13,507 (Visual Shaders to `references/visual-shaders.md`), `input-handling`
+  15,268 → 13,419 (the VirtualJoystick recipe merged into `references/touch.md`). Earlier in the
+  cycle `animation-system`, `xr-development` and `3d-essentials` were moved the same way.
+
+### Tests
+
+- Three new `claude plugin eval` cases in `evals/SKILLS.md`, each fact checked against the engine
+  source first: `skill-17-rendering-pipeline` 0.92 with the skill vs 0.50 without (Δ +0.42,
+  discriminating: the bare model recommends FSR 1 on the Mobile renderer);
+  `skill-16-web-services` 1.00 / 1.00 (ceiling; the skill fired in 1 of 3 runs, a routing gap
+  carried to the follow-ups); `skill-18-web-export` 1.00 / 1.00 (ceiling).
 
 ## [1.15.1] - 2026-10-12
 

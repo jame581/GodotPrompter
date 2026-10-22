@@ -19,9 +19,9 @@ A `Resource` is a reference-counted data object that:
 - Is editable directly in the Godot Inspector
 - Is **loaded once and shared by default** — every node that loads the same path gets the same in-memory object
 - Can be nested inside other Resources and PackedScenes
-- Survives scene changes (unlike Node state, which is discarded on scene reload)
+- Outlives a scene change only while something still references it (an autoload, a static var) — it is `RefCounted`, so the last reference going away frees it
 
-Because Resources are shared by default, they are ideal for read-only data (item definitions, audio settings, ability blueprints). For per-instance mutable state, call `make_unique()` or `duplicate()` — see section 8.
+Because Resources are shared by default, they are ideal for read-only data (item definitions, audio settings, ability blueprints). For per-instance mutable state, call `duplicate()` (or set `resource_local_to_scene`) — see section 8.
 
 ---
 
@@ -100,7 +100,7 @@ GD.Print(potion.Value);  // 50
 
 ## 4. Editor Integration
 
-Use `class_name`, `@tool`, and `@icon` to make custom Resources first-class in the Inspector — they appear in the Resource picker, can be created via right-click "New Resource", show a custom icon. `@export_group` and `@export_subgroup` organize properties.
+Use `class_name` and `@icon` to make custom Resources first-class in the Inspector (add `@tool` only when setters must run in the editor) — they appear in the Resource picker, can be created via right-click "New Resource", show a custom icon. `@export_group` and `@export_subgroup` organize properties.
 
 > See [references/editor-integration.md](references/editor-integration.md) for the full GDScript + C# pattern with `class_name`, `@icon`, `@export_group`.
 
@@ -128,7 +128,7 @@ The strongest use case: data-driven game content. Loot tables, enemy stats, abil
 |---|---|---|
 | Purpose | Data storage and configuration | Behavior, rendering, physics, input |
 | Scene tree | Not in the tree | Lives in the scene tree |
-| Lifecycle hooks | None (`_init` only) | `_ready`, `_process`, `_physics_process`, etc. |
+| Lifecycle hooks | No tree callbacks (`_init`, `_setup_local_to_scene`) | `_ready`, `_process`, `_physics_process`, etc. |
 | Sharing | Shared by default (same path = same object) | Each instance is independent |
 | Serialization | Saved as `.tres` / `.res`, Inspector-editable | Saved inside `.tscn` |
 | Signals | Supported | Supported |
@@ -141,7 +141,7 @@ The strongest use case: data-driven game content. Loot tables, enemy stats, abil
 
 ## 8. Sharing vs Unique
 
-By default, Resources are shared by reference. Two scenes referencing `res://items/sword.tres` see the SAME instance — mutating one mutates both. Use `.duplicate()` (shallow) or `.duplicate(true)` (deep) for instance-local state.
+By default, Resources are shared by reference. Two scenes referencing `res://items/sword.tres` see the SAME instance — mutating one mutates both. Use `.duplicate()` (shallow) or `.duplicate(true)` (deep — with version-specific limits, see the reference) for instance-local state.
 
 > See [references/sharing-vs-unique.md](references/sharing-vs-unique.md) for the full pattern (v1.6.0 C# parity preserved).
 

@@ -51,8 +51,8 @@ ITEM_COLLECTED,%s collected!,%s sebráno!,%s gesammelt!,%sを入手！
 Save as `translations.csv` in your project. Godot auto-detects the format on import.
 
 **Import settings** (Import dock):
-- **Delimiter**: Comma (default) or Tab
-- **Translations** section: enable/disable individual locales
+- **Delimiter**: Comma (default), Semicolon, or Tab
+- **Compress**: on by default — stores an `OptimizedTranslation`, skipped for files that use `?context`/`?plural` (§10)
 
 ### PO Format (Gettext)
 
@@ -169,7 +169,8 @@ var msg: String = tr_n("ONE_ENEMY", "MANY_ENEMIES", count)
 
 ```csharp
 string labelText = Tr("MENU_START");
-string healthText = string.Format(Tr("PLAYER_HEALTH"), currentHealth);
+// string.Format ignores GDScript-style %d — substitute it yourself.
+string healthText = Tr("PLAYER_HEALTH").Replace("%d", currentHealth.ToString());
 
 // Pluralization
 string msg = TrN("ONE_ENEMY", "MANY_ENEMIES", count);
@@ -254,7 +255,7 @@ func _on_language_selected(index: int) -> void:
 
 ## 5. Right-to-Left (RTL) Support
 
-Arabic, Hebrew, and Persian need `layout_direction` on Controls (`LOCALE` auto-follows the current locale), `structured_text_type` so URLs and paths do not fully reverse, and a font covering the script — Godot's default font does not. Re-apply layout direction whenever the locale changes. `TranslationServer` has **no signals** — override `_notification` and watch for `NOTIFICATION_TRANSLATION_CHANGED` (defined on `MainLoop`, inherited by `Node`). Since you never subscribe, there is no handler to disconnect.
+Arabic, Hebrew, and Persian need `layout_direction` on Controls (`LOCALE` auto-follows the current locale), `structured_text_type` so URLs and paths do not fully reverse, and a font covering the script — Godot's default font does not. Re-apply layout direction whenever the locale changes. `TranslationServer` has **no signals** — override `_notification` and watch for `Node.NOTIFICATION_TRANSLATION_CHANGED` (`MainLoop` has a constant of the same name). Since you never subscribe, there is no handler to disconnect.
 
 Full recipes, per-control property table, BBCode for mixed direction, and the C# `LocaleAwarePanel`: [references/rtl-support.md](references/rtl-support.md)
 
@@ -262,7 +263,7 @@ Full recipes, per-control property table, BBCode for mixed direction, and the C#
 
 ## 6. Locale-Aware Formatting
 
-GDScript has no locale-aware number or date formatting — `"%d" % 1234567` is always `1234567`, so you group digits by hand. C# does have it: look up a `CultureInfo` from `TranslationServer.GetLocale()` (swap `_` for `-`) and use `ToString("N"/"C"/"d", culture)`.
+GDScript has no locale-aware digit grouping or date formatting — `"%d" % 1234567` is always `1234567`, so you group digits by hand (`TextServer.format_number()` only converts the digits to the locale's numeral system). C# does have it: look up a `CultureInfo` from `TranslationServer.GetLocale()` (swap `_` for `-`) and use `ToString("N"/"C"/"d", culture)`.
 
 Both helpers in full: [references/locale-formatting.md](references/locale-formatting.md)
 
@@ -305,7 +306,7 @@ ITEM_SWORD_DESC          # Inventory item description
 |---------|-------|-----|
 | Translation key shows instead of text | Translation file not registered in Project Settings | Add to Project Settings → Localization → Translations |
 | Text doesn't update on locale switch | Using string literals instead of `tr()` | Wrap all user-facing strings in `tr()` |
-| Label shows key after scene change | Translation resource not loaded yet | Register translations in Project Settings (not at runtime) |
+| Label shows key after scene change | Translation added at runtime by code that has not run yet in this scene | Register translations in Project Settings (not at runtime) |
 | RTL text renders LTR | `layout_direction` not set | Set to `RTL` or `LOCALE` on root Control |
 | Font doesn't display characters | Missing Unicode range in font | Import a font covering the target script (Noto Sans recommended) |
 | Pluralization doesn't work with CSV | Before Godot 4.6 CSV has no plural forms; on 4.6+ the `?plural` column or continuation rows are missing | On 4.6+ add a `?plural` column (§10); before 4.6 use PO |

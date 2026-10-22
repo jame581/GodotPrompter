@@ -1,5 +1,7 @@
 # godot-grill — decision-first design interrogation
 
+**Status:** shipped in v1.14.0 (2026-09-20)
+
 **Date:** 2026-08-13
 **Baseline:** v1.13.2 (55 skills, validator 0 errors / 53 warnings)
 **Target:** 56 skills; the questioning half of the process layer

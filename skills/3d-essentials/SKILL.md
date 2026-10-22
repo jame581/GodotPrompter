@@ -68,7 +68,7 @@ World (Node3D)
 
 ### Key StandardMaterial3D Properties
 
-The PBR core: `albedo_color` / `albedo_texture` (base color), `metallic` (0 dielectric → 1 metal), `roughness` (0 mirror → 1 matte), `normal_map` (surface detail), `ao_texture` (ambient occlusion). Add `emission` + `emission_energy_multiplier` for self-illumination, `heightmap_texture` for parallax, `rim` / `clearcoat` for material flair.
+The PBR core: `albedo_color` / `albedo_texture` (base color), `metallic` (0 dielectric → 1 metal), `roughness` (0 mirror → 1 matte), `normal_texture` with `normal_enabled` (surface detail), `ao_texture` (ambient occlusion). Add `emission` + `emission_energy_multiplier` for self-illumination, `heightmap_texture` for parallax, `rim` / `clearcoat` for material flair.
 
 ### Transparency Modes
 
@@ -117,7 +117,7 @@ Spawn an `OmniLight3D` at runtime, drive its energy with a tween, queue-free on 
 
 ### Shadow Configuration & Bake Modes
 
-Prefer `shadow_normal_bias` over `shadow_bias` against acne; keep `directional_shadow_max_distance` at the minimum needed (50–100 m typical). Bake modes: Disabled (fully real-time, default), Static (fully baked, no runtime cost), Dynamic (indirect baked, direct real-time).
+Prefer `shadow_normal_bias` over `shadow_bias` against acne; keep `directional_shadow_max_distance` at the minimum needed (50–100 m typical). Bake modes: Disabled (fully real-time, ignored by GI), Static (fully baked, no runtime cost), Dynamic (the default; indirect baked into lightmaps, direct real-time).
 
 > See [references/materials-and-lighting-recipes.md](references/materials-and-lighting-recipes.md#shadow-configuration-tips) for the shadow-tuning table and the bake-modes table.
 
@@ -125,7 +125,7 @@ Prefer `shadow_normal_bias` over `shadow_bias` against acne; keep `directional_s
 
 ## 4. Environment & Post-Processing
 
-Configure global rendering — sky background, tonemapping, glow, SSR, SSAO/SSIL/SDFGI, depth-of-field — through a `WorldEnvironment` node holding an `Environment` resource. Pick a tonemap (`Linear`, `Reinhard`, `Filmic`, `ACES`, or `AgX`) on the Environment resource. Forward+ enables SSAO, SSIL, SSR, and SDFGI; the Mobile renderer omits them, and Compatibility has only SSAO (since 4.6).
+Configure global rendering — sky background, tonemapping, glow, SSR, SSAO/SSIL/SDFGI, depth-of-field — through a `WorldEnvironment` node holding an `Environment` resource. Pick a tonemap (`Linear`, `Reinhard`, `Filmic`, `ACES`, or `AgX` from Godot 4.4) on the Environment resource. Forward+ enables SSAO, SSIL, SSR, and SDFGI; the Mobile renderer omits them, and Compatibility has only SSAO (since 4.6).
 
 > See [references/environment-and-post.md](references/environment-and-post.md) for the full setup recipes (sky options, tonemap modes, all post-processing effects, the 4.6+ glow blend and default changes, AgX `tonemap_agx_white` / `tonemap_agx_contrast` controls, and the 4.6+ SSR quality upgrade).
 
@@ -155,7 +155,7 @@ Three layers: depth/height fog set on `WorldEnvironment.environment` (cheap, all
 
 ## 7. Decals
 
-`Decal` nodes project a texture onto whatever surfaces fall within their bounding box — bullet holes, blood splatter, ground details, signage. All renderers support decals; performance scales with overdraw and decal count.
+`Decal` nodes project a texture onto whatever surfaces fall within their bounding box — bullet holes, blood splatter, ground details, signage. Forward+ and Mobile render decals; Compatibility does not. Performance scales with overdraw and decal count.
 
 > See [references/decals.md](references/decals.md) for the scene setup, runtime spawning recipe (GDScript + C#), and the per-renderer decal limits.
 
@@ -187,7 +187,7 @@ Quick symptom → cause → fix table covering black scenes, dark objects withou
 
 - [ ] Scene has Camera3D, at least one light source, and WorldEnvironment
 - [ ] Environment has a sky material (procedural or HDR panorama) for ambient and reflected light
-- [ ] Tonemap mode is set (Filmic or ACES for realistic look, AgX for physically accurate)
+- [ ] Tonemap mode is set (Filmic or ACES for realistic look, AgX (4.4+) for physically accurate)
 - [ ] DirectionalLight3D has shadows enabled with `shadow_normal_bias` tuned to prevent acne
 - [ ] `directional_shadow_max_distance` is set to the minimum needed (50–100m typical)
 - [ ] Static geometry uses StandardMaterial3D with appropriate PBR textures (albedo, normal, roughness, metallic)

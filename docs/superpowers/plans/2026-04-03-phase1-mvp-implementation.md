@@ -1,5 +1,7 @@
 # GodotPrompter Phase 1 (MVP) Implementation Plan
 
+**Status:** shipped in v1.0.0 (2026-04-06)
+
 > **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
 
 **Goal:** Create the 7 remaining Phase 1 skills for GodotPrompter, covering project setup, testing, code review, scene organization, state machines, player controllers, and save/load systems.

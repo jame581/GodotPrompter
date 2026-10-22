@@ -74,7 +74,7 @@ public partial class AudioManager : Node
     }
 
     /// <summary>Plays a one-shot sound effect by key.</summary>
-    public void PlaySfx(string key)
+    public virtual void PlaySfx(string key) // virtual: a test stub overrides it
     {
         if (!_sfxLibrary.TryGetValue(key, out AudioStream stream))
         {

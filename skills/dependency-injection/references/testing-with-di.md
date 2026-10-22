@@ -63,19 +63,22 @@ func test_died_signal_emitted_at_zero_health() -> void:
 
 ### C# (using GdUnit4)
 
-GdUnit4 supports C# since v4.4. Note: GdUnit4 signal assertions use `AssertSignal` rather than GUT's `watch_signals` / `assert_signal_emitted`. If a node emits a Godot signal from a C# `async Task` method, GDScript callers cannot `await` that task directly — emit a Godot signal at completion and `await` the signal instead.
+GdUnit4 supports C# since v4.4. Pin `gdUnit4.api` 4.3.x on Godot 4.3; 5.x needs Godot 4.4+, and these suites create nodes, so on 5.x mark them `[RequireGodotRuntime]`. Note: GdUnit4 signal assertions use `AssertSignal` rather than GUT's `watch_signals` / `assert_signal_emitted`. If a node emits a Godot signal from a C# `async Task` method, GDScript callers cannot `await` that task directly — emit a Godot signal at completion and `await` the signal instead.
 
 ```csharp
 using GdUnit4;
 using static GdUnit4.Assertions;
 
-// StubAudio.cs — a lightweight stand-in for AudioManager
-public partial class StubAudio : Node
+// StubAudio.cs — a lightweight stand-in for AudioManager.
+// It must be an AudioManager to fit the typed Audio property, so PlaySfx is virtual there.
+public partial class StubAudio : AudioManager
 {
     public string LastSfx { get; private set; } = "";
     public int PlayCount { get; private set; } = 0;
 
-    public void PlaySfx(string key)
+    public override void _Ready() { }   // skip loading the real sfx library
+
+    public override void PlaySfx(string key)
     {
         LastSfx = key;
         PlayCount++;
@@ -84,6 +87,7 @@ public partial class StubAudio : Node
 ```
 
 ```csharp
+using System.Threading.Tasks;
 using GdUnit4;
 using static GdUnit4.Assertions;
 
@@ -122,13 +126,13 @@ public partial class HealthComponentTest
     }
 
     [TestCase]
-    public void TakeDamage_AtZeroHealth_EmitsDiedSignal()
+    public async Task TakeDamage_AtZeroHealth_EmitsDiedSignal()
     {
-        var signalAssert = AssertSignal(_health).IsEmitted(nameof(HealthComponent.SignalName.Died));
+        AssertSignal(_health).StartMonitoring();
 
         _health.TakeDamage(100);
 
-        signalAssert.WithTimeout(100);
+        await AssertSignal(_health).IsEmitted(HealthComponent.SignalName.Died).WithTimeout(100);
     }
 }
 ```

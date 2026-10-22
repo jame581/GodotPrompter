@@ -35,18 +35,18 @@ public partial class VersionLabel : Label
 
 ### Auto-Versioning from Git Tags
 
-Tag your release commit, then inject the version at export time. The CI workflow in [ci-cd-github-actions.md](ci-cd-github-actions.md) does this via `sed`, but you can also run a pre-export GDScript tool (EditorScript) if you prefer to keep it in-engine:
+Tag your release commit, then inject the version at export time. The CI workflow in [ci-cd-github-actions.md](ci-cd-github-actions.md) does this via `sed`, but you can also run a GDScript tool if you prefer to keep it in-engine. `--script` only runs a script that extends `SceneTree` or `MainLoop` — an `EditorScript` fails there with "Class 'EditorScript' can only be instantiated by editor":
 
 ```gdscript
 # tools/inject_version.gd  — run with: godot --headless --script tools/inject_version.gd
-@tool
-extends EditorScript
+extends SceneTree
 
-func _run() -> void:
+func _init() -> void:
     var git_output: Array = []
     var exit_code := OS.execute("git", ["describe", "--tags", "--always", "--dirty"], git_output)
     if exit_code != 0:
         push_error("inject_version: git describe failed")
+        quit(1)
         return
 
     var version: String = (git_output[0] as String).strip_edges()
@@ -54,8 +54,10 @@ func _run() -> void:
     var err := ProjectSettings.save()
     if err != OK:
         push_error("inject_version: failed to save project.godot — error %d" % err)
-    else:
-        print("inject_version: set version to '%s'" % version)
+        quit(1)
+        return
+    print("inject_version: set version to '%s'" % version)
+    quit()
 ```
 
 Run it as part of a CI step before the export step:

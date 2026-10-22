@@ -11,7 +11,7 @@ Reference for `skills/godot-ui/SKILL.md` — main menu scene, settings screen wi
 
 ```
 MainMenu (Control — LayoutPreset: Full Rect)
-└── Background (TextureRect — stretch: EXPAND_FIT, anchor: Full Rect)
+└── Background (TextureRect — expand_mode: EXPAND_IGNORE_SIZE, stretch_mode: STRETCH_KEEP_ASPECT_COVERED, anchor: Full Rect)
 └── CenterContainer (anchor: Full Rect)
     └── VBoxContainer
         ├── TitleLabel (Label)
@@ -250,7 +250,7 @@ var _pause_menu_scene := preload("res://scenes/ui/pause_menu.tscn")
 var _pause_menu: Control = null
 
 func _unhandled_input(event: InputEvent) -> void:
-    if event.is_action_just_pressed("ui_cancel"):
+    if event.is_action_pressed("ui_cancel"):  # InputEvent has no is_action_just_pressed()
         if get_tree().paused:
             return  # PauseMenu handles its own resume
         _pause_menu = _pause_menu_scene.instantiate()

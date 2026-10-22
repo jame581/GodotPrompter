@@ -278,20 +278,19 @@ public partial class Hud : CanvasLayer
 
 ```
 Enemy (CharacterBody2D)
-├── Visuals
+├── CollisionShape2D          # stays a direct child of the body
+├── Visuals (Node2D)
 │   ├── Sprite2D
 │   └── AnimationPlayer
-├── Collision
-│   └── CollisionShape2D
-├── Components
+├── Components (Node2D)
 │   ├── HealthComponent
 │   └── HitboxComponent
-└── AI
+└── AI (Node)
     ├── NavigationAgent2D
     └── StateMachine
 ```
 
-Group by concern using plain `Node` containers (`Visuals`, `Collision`, `Components`, `AI`). Each sub-group can be collapsed in the editor and worked on independently.
+Group by concern (`Visuals`, `Components`, `AI`); each sub-group can be collapsed in the editor and worked on independently. Use a `Node2D` container for anything with a position: a plain `Node` breaks transform inheritance, so a `Sprite2D` or `Area2D` hitbox under it stops following the body. A `CollisionShape2D` only shapes its direct parent, so it cannot go in a container.
 
 ### UI Scene Pattern
 
@@ -307,7 +306,7 @@ HUD (CanvasLayer)
 └── PauseMenu
 ```
 
-`CanvasLayer` ensures HUD elements are always rendered on top. `MarginContainer` handles safe-area padding. `TopBar`, `BottomBar`, and `PauseMenu` are separate instantiated scenes so each can be edited without opening the root HUD scene.
+`CanvasLayer` draws the HUD above the default canvas layer (layer `1` over `0`). `MarginContainer` gives fixed edge margins — it does not read the device safe area (see **responsive-ui**). `TopBar`, `BottomBar`, and `PauseMenu` are separate instantiated scenes so each can be edited without opening the root HUD scene.
 
 ### Level Scene Pattern
 

@@ -87,8 +87,8 @@ In **Project > Project Settings > Debug > GDScript**:
 |-------------------------|---------------------------------------------|
 | `UNTYPED_DECLARATION` | Warns on any untyped variable/parameter |
 | `INFERRED_DECLARATION` | Warns on `:=` (prefers explicit types) |
-| `UNSAFE_CAST` | Warns on unsafe `as` casts |
-| `UNSAFE_CALL_ARGUMENT` | Warns when passing wrong type to a function |
+| `UNSAFE_CAST` | Warns when an untyped (`Variant`) value is cast to a type |
+| `UNSAFE_CALL_ARGUMENT` | Warns when an argument's type is a supertype of the parameter's (`Node` into a `Node2D` parameter) |
 
 > Set warnings to **Error** for strict enforcement in team projects.
 
@@ -331,7 +331,7 @@ The recurring small patterns: ternary expressions (`value if cond else other`), 
 | `@export_group` | Group heading in Inspector |
 | `@export_subgroup` | Subgroup heading |
 | `@export_category` | Category divider |
-| `@onready` | Initialize when node enters tree, just before `_ready()` body runs |
+| `@onready` | Initialize when the node is ready, just before its `_ready()` body runs |
 | `@tool` | Run script in editor |
 | `@icon` | Custom icon for the script |
 | `@warning_ignore` | Suppress specific warning on next line |
@@ -347,7 +347,7 @@ The recurring small patterns: ternary expressions (`value if cond else other`), 
 | Await never resumes | Signal never emitted, or this node was freed (coroutine dropped) | Check the condition before awaiting; race slow signals against a timer |
 | Lambda's change to a variable is lost | Locals are captured by value | Keep shared state in a member, `Array` or `Dictionary` |
 | `UNTYPED_DECLARATION` warnings flood | Warning enabled but codebase isn't typed | Type incrementally; use `@warning_ignore` for legacy code |
-| Typed array rejects valid items | Item type doesn't match exactly | Ensure items match the declared type (no implicit upcasting) |
+| Typed array assignment fails | An untyped `Array` or an `Array[Subclass]` assigned to an `Array[Type]` variable (no covariance; subclass *elements* are accepted) | Declare it typed from the start, or `typed.assign(other)` |
 | `@onready` is `null` | Accessed before `_ready()` runs | Never access `@onready` vars in `_init()` or variable declarations |
 | Match doesn't enter any branch | No matching pattern and no `_:` wildcard | Always add `_:` default branch |
 | `class_name` conflict | Two scripts with same `class_name` | Use unique names; check for duplicates in Project |

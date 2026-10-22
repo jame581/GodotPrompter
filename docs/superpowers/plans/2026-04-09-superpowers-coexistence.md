@@ -1,5 +1,7 @@
 # Superpowers Coexistence Fix — Implementation Plan
 
+**Status:** shipped in v1.4.1 (2026-04-09)
+
 > **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
 
 **Goal:** Make GodotPrompter skills reliably invoked during Godot development even when Superpowers drives the workflow, by asserting skill priority in the bootstrap, injecting CLAUDE.md rules, and annotating plan tasks with skill references.

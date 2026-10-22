@@ -20,7 +20,7 @@ All examples target Godot 4.3+ with no deprecated APIs. GDScript is shown first,
 | `CharacterBody2D/3D` | Player, enemies, NPCs       | Manual (full)   | You control velocity; `move_and_slide()` handles collisions |
 | `RigidBody2D/3D`  | Projectiles, props, debris     | Engine-driven   | Physics engine applies forces; harder to control precisely  |
 | `RigidBody2D/3D`  | Projectiles with bouncing      | Engine-driven   | Set `linear_velocity` once; let physics resolve bounces  |
-| `CharacterBody2D` | Platformers, top-down, FPS    | Manual (full)   | Reliable and predictable; best for responsive game feel  |
+| `CharacterBody2D/3D` | Platformers, top-down, FPS | Manual (full)   | Reliable and predictable; best for responsive game feel  |
 
 **Rule of thumb:** Use `CharacterBody` when you need tight, responsive control. Use `RigidBody` when you want realistic physics simulation.
 
@@ -52,7 +52,7 @@ extends CharacterBody2D
 @export var friction: float = 1200.0
 
 func _physics_process(delta: float) -> void:
-    # 1. Read input (normalized 4-directional vector)
+    # 1. Read input (analog vector, length capped at 1)
     var input_dir: Vector2 = Input.get_vector("ui_left", "ui_right", "ui_up", "ui_down")
 
     # 2 & 3. Apply acceleration or friction to velocity
@@ -78,7 +78,7 @@ public partial class TopDownPlayer : CharacterBody2D
 
     public override void _PhysicsProcess(double delta)
     {
-        // 1. Read input (normalized 4-directional vector)
+        // 1. Read input (analog vector, length capped at 1)
         Vector2 inputDir = Input.GetVector("ui_left", "ui_right", "ui_up", "ui_down");
 
         // 2 & 3. Apply acceleration or friction
@@ -369,10 +369,10 @@ See [references/common-movement-recipes.md](references/common-movement-recipes.m
 
 | Symptom                        | Cause                                        | Fix                                                              |
 |-------------------------------|----------------------------------------------|------------------------------------------------------------------|
-| Player sticks to walls        | Default wall blocking behavior               | Set `floor_block_on_wall = false` on the CharacterBody           |
+| Player climbs steep walls     | `floor_block_on_wall` turned off             | Keep it `true` (default): blocks floor movement up walls, lets the body slide down them |
 | Jittery or frame-rate-dependent movement | Movement in `_process`              | Move all physics/velocity code to `_physics_process(delta)`      |
-| Inconsistent jump height      | Fixed velocity ignores frame timing          | Use variable jump (cut `velocity.y` on button release)           |
-| Player slides down slopes     | No snap or angle limits                      | Set `floor_snap_length` > 0 and tune `floor_max_angle`           |
+| Jump height can't be varied   | Jump sets one fixed velocity                 | Use variable jump (cut `velocity.y` on button release)           |
+| Player slides down slopes     | `floor_stop_on_slope` off, or slope steeper than `floor_max_angle` | Keep `floor_stop_on_slope = true` (default), tune `floor_max_angle`; `floor_snap_length` keeps the body on slopes going down |
 | Mouse look inverted           | Wrong sign on rotation delta                 | Negate `event.relative.x` for yaw and/or `event.relative.y` for pitch |
 
 ---

@@ -400,7 +400,7 @@ When you enable C# support Godot generates a `.csproj`. Keep it minimal and set 
 </Project>
 ```
 
-Replace `MyGame` with your project name. The namespace must match across all C# scripts to avoid registration errors.
+Replace `MyGame` with your project name. Namespaces are free-form; what Godot needs is a class whose name matches its file name (`Player.cs` → `class Player`).
 
 ### partial class Requirement
 
@@ -410,7 +410,7 @@ Every C# class that extends a Godot type **must** be declared `partial`. Godot's
 // Correct
 public partial class Player : CharacterBody2D { }
 
-// Wrong — will not register with Godot
+// Wrong — build error GD0001: missing partial modifier
 public class Player : CharacterBody2D { }
 ```
 

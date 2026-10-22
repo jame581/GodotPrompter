@@ -23,7 +23,7 @@ func _ready() -> void:
     # Shallow duplicate — nested Resources are still shared
     stats = stats.duplicate()
 
-    # Deep duplicate — all nested Resources are also copied
+    # Deep duplicate — nested sub-resources are copied too, with limits (below)
     stats = stats.duplicate(true)
 ```
 
@@ -39,7 +39,7 @@ public partial class Enemy : CharacterBody3D
         _stats = (EnemyStats)StatsTemplate.Duplicate();
 
         // Deep duplicate — sub-resources are also duplicated. Use only when needed (cost scales).
-        // _stats = (EnemyStats)StatsTemplate.Duplicate(subresources: true);
+        // _stats = (EnemyStats)StatsTemplate.Duplicate(true);
 
         _stats.CurrentHealth = _stats.MaxHealth;
     }
@@ -48,7 +48,9 @@ public partial class Enemy : CharacterBody3D
 
 `duplicate()` (`Duplicate()` in C#) returns a new Resource with the same property values. The original `.tres` file is untouched.
 
-**`make_unique()` in the editor:** In the Inspector, any sub-resource slot shows a **Make Unique** button. Clicking it embeds a private copy of the sub-resource into the parent scene instead of referencing the shared file. Use this when one scene needs different values than the shared default.
+**Deep-copy limits differ by version.** On Godot 4.3, `duplicate(true)` never copies Resources held inside `Array` or `Dictionary` properties. On 4.7, it copies only embedded (built-in) sub-resources; ones saved to their own file stay shared unless you call `duplicate_deep(Resource.DEEP_DUPLICATE_ALL)`.
+
+**Make Unique in the editor:** In the Inspector, any sub-resource slot shows a **Make Unique** button. Clicking it embeds a private copy of the sub-resource into the parent scene instead of referencing the shared file. Use this when one scene needs different values than the shared default.
 
 **Guideline:**
 - Read-only data (item definitions, level config) — share freely, no duplication needed.

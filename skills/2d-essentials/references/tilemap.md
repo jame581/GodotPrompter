@@ -33,7 +33,7 @@ Reference for `skills/2d-essentials/SKILL.md` — TileSet setup, atlas propertie
 | `Margins` | Edge margins in pixels |
 | `Separation` | Gap between tiles in pixels |
 | `Texture Region Size` | Size of each tile on the atlas |
-| `Use Texture Padding` | 1px transparent border to prevent bleeding (recommended ON) |
+| `Use Texture Padding` | Adds a 1px border copied from each tile's edge pixels to prevent bleeding (default ON) |
 
 ### Physics on Tiles
 
@@ -88,7 +88,7 @@ Level
 ```gdscript
 # Read custom data from a tile at runtime
 var tile_map: TileMapLayer = $TileMapLayer
-var cell: Vector2i = tile_map.local_to_map(global_position)
+var cell: Vector2i = tile_map.local_to_map(tile_map.to_local(global_position))
 var tile_data: TileData = tile_map.get_cell_tile_data(cell)
 if tile_data:
     var damage: float = tile_data.get_custom_data("damage")
@@ -96,7 +96,7 @@ if tile_data:
 
 ```csharp
 var tileMap = GetNode<TileMapLayer>("TileMapLayer");
-Vector2I cell = tileMap.LocalToMap(GlobalPosition);
+Vector2I cell = tileMap.LocalToMap(tileMap.ToLocal(GlobalPosition));
 TileData tileData = tileMap.GetCellTileData(cell);
 if (tileData != null)
 {

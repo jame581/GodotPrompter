@@ -18,7 +18,7 @@ All examples target Godot 4.3+ with no deprecated APIs. GDScript is shown first,
 ### What It Does
 
 - Sends property values from the **authority** peer to all others at a configured interval
-- Supports both **delta sync** (only changed values) and **full sync** (all values every tick)
+- Supports both **delta sync** ("On Change" properties, sent reliably when changed) and **full sync** ("Always" properties, sent unreliably every interval)
 - Allows **visibility filters** to control which peers receive updates
 
 ### Replication Config in the Editor
@@ -27,25 +27,25 @@ All examples target Godot 4.3+ with no deprecated APIs. GDScript is shown first,
 2. In the Inspector, open **Replication** and click **Add Property**.
 3. Pick the parent node path and property name (e.g. `position`, `velocity`).
 4. Set **Sync** (send every interval) or **Spawn** (send only on spawn) per property.
-5. Set the **Replication Interval** (seconds). `0` means every physics frame.
+5. Set the **Replication Interval** (seconds). `0` means every network process frame (the multiplayer API polls once per process frame, not per physics tick).
 
 ### Key Properties
 
 | Property | Description |
 |---|---|
-| `replication_interval` | Seconds between full sync updates. `0` = every physics frame |
-| `delta_interval` | Seconds between delta sync updates. `0` = disabled |
+| `replication_interval` | Seconds between full sync updates. `0` (default) = every network process frame |
+| `delta_interval` | Seconds between delta sync updates. `0` (default) = every network process frame |
 | `public_visibility` | When `true`, updates go to all peers (default) |
-| `visibility_filters` | Array of `Callable`s; each returns `true` if a peer should receive updates |
+| `add_visibility_filter(callable)` | Method, not a property: adds a `Callable` that takes a peer ID and returns `true` if that peer should receive updates |
 
 ### Delta vs Full Sync
 
 | Mode | How It Works | Best For |
 |---|---|---|
-| **Full sync** | Sends all configured properties every `replication_interval` | Simple objects, low property count |
-| **Delta sync** | Sends only properties that changed since last sync, every `delta_interval` | Objects with many properties that change infrequently |
+| **Full sync** | Sends every "Always" property every `replication_interval`, unreliably | Continuously changing values (position, velocity) |
+| **Delta sync** | Sends the "On Change" properties that changed, every `delta_interval`, reliably | Values that change rarely but must arrive (health, state) |
 
-Use both together: set `replication_interval` for periodic full state and `delta_interval` for frequent change-only bursts.
+Each property uses one mode, so the two intervals govern different property sets — `replication_interval` is not a full-state refresh of the "On Change" properties.
 
 ### Visibility Filters (GDScript)
 
@@ -177,9 +177,9 @@ public partial class SyncedPlayer : CharacterBody2D
 
 ## 3. Interpolation
 
-`MultiplayerSynchronizer` updates target properties at sync intervals (e.g., 30 Hz), but rendering runs at frame rate (60+ Hz). Without interpolation, remote players appear to teleport between snapshots. The fix: store position snapshots with timestamps and lerp in `_process` toward the latest snapshot using a small offset (interpolation buffer ~100 ms).
+`MultiplayerSynchronizer` updates target properties at sync intervals (e.g., 30 Hz), but rendering runs at frame rate (60+ Hz). Without interpolation, remote players appear to teleport between snapshots. The fix: on each `synchronized` signal keep the previous and the new position, and lerp between them in `_process` by the time elapsed since the update divided by the sync interval; a timestamped snapshot buffer (render ~100 ms behind) is the more robust version.
 
-> See [references/interpolation.md](references/interpolation.md) for the full GDScript and C# interpolation buffer pattern (snapshot ring, latest-snapshot interpolation, render-time lerp).
+> See [references/interpolation.md](references/interpolation.md) for the full GDScript and C# previous/current-snapshot interpolation (`synchronized` signal, elapsed-time lerp in `_process`).
 
 ---
 
@@ -220,7 +220,7 @@ Choose the synchronization model that fits your game's needs:
 
 ## 7. Bandwidth Optimization
 
-Four levers: **sync only changed properties** (replication-config flag per property), **quantize floats** (Vector3 components in mm not floats — 16-bit cuts bytes by 2×), **distance-based sync rate** (far-away objects sync at 5 Hz, close at 30 Hz), and **channel selection** (reliable for state changes that must arrive, unreliable for position streams that get superseded).
+Four levers: **sync only changed properties** (replication-config flag per property), **quantize floats** (components as 16-bit centimetres instead of floats — RPC arguments and synced properties compress ints to 1/2/4/8 bytes plus a type byte, so a 16-bit int costs 3 bytes against 8 for a float), **distance-based sync rate** (far-away objects sync at 5 Hz, close at 30 Hz), and **channel selection** (reliable for state changes that must arrive, unreliable for position streams that get superseded).
 
 > See [references/bandwidth-optimization.md](references/bandwidth-optimization.md) for full GDScript + C# recipes for each lever, plus the reliable-vs-unreliable channel decision tree.
 
@@ -233,7 +233,7 @@ Four levers: **sync only changed properties** (replication-config flag per prope
 - [ ] `set_multiplayer_authority()` is called at spawn time with the correct peer ID
 - [ ] `replication_interval` and `delta_interval` are tuned for the object's update rate
 - [ ] Remote player visuals use interpolation in `_process`, not `_physics_process`
-- [ ] Interpolation stores previous and current state and blends using `Engine.get_physics_interpolation_fraction()`
+- [ ] Interpolation stores previous and current state and blends by the time since the last update (not `Engine.get_physics_interpolation_fraction()`, which tracks physics ticks, not network updates)
 - [ ] Client-side prediction is applied only to the local player's own character
 - [ ] Pending input buffer is bounded (max ~128 ticks) to prevent memory growth
 - [ ] Reconciliation threshold prevents jitter from micro-corrections

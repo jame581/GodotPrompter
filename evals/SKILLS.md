@@ -11,7 +11,7 @@ claude plugin eval . --case "skill-*" -j 3 --ablation with-without --judge-model
 
 Roughly $1.30-$3.40 a case (runs: 3), so a case per skill across the whole plugin would cost
 over $100 a run. Cases carry a tag: `--tag discriminating` selects the ones that separate the
-arms (nine cases, about $17 a run), `--tag ceiling` the ones both arms pass, kept as routing checks.
+arms (the count changes — see the latest section), `--tag ceiling` the ones both arms pass, kept as routing checks.
 
 ## Pilot — v1.15.0 + branch fixes, 2026-10-09 (`results/2026-10-09T18-30-04-722Z`)
 
@@ -122,3 +122,22 @@ Every skill fired 3/3.
 - skill-05-limboai came out at ceiling this time (the bare model used the `updated` signal in
   all three runs); it was +0.11 before. Treat it as borderline.
 - skill-04's -0.07 is one `review-actionable` vote split in one run; the case is a routing check.
+
+## New-skill cases — v1.16.0, 2026-10-21 (`results/2026-10-21T16-26-47-217Z`, `…-122Z`, `…-069Z`; skill-18 re-run `…T16-38-49-218Z`)
+
+Three cases for `web-services`, `rendering-pipeline` and `web-export`, each fact checked against the
+`4.3-stable` / `4.7.2-stable` source and the 4.7.2 binary first. The `--case` glob has no bracket
+or brace support (`skill-1[678]-*` matches nothing), so the three cases ran as three concurrent
+invocations, one per case name. Clean runs, about $3.3 together, no errors or timeouts.
+
+| Case | Skill | With | Without | Δ | Skill fired | Tag | What separated the arms |
+|---|---|---|---|---|---|---|---|
+| skill-17-rendering-pipeline | `rendering-pipeline` | 0.92 | 0.50 | **+0.42** | 3/3 | discriminating | `fsr-forward-plus-only` 3/3 vs **0/3**: the bare model recommends FSR 1 on the Mobile renderer |
+| skill-16-web-services | `web-services` | 1.00 | 1.00 | 0.00 | **1/3** | ceiling | nothing: the bare model knows `timeout` covers the whole transfer |
+| skill-18-web-export | `web-export` | 1.00 | 1.00 | 0.00 | 3/3 | ceiling | nothing: the bare model knows the thread/COOP/COEP cause |
+
+- skill-16: the skill fired in 1 of 3 runs for a plain HTTPRequest download question. Description-only routing does not reliably pick it; per the plan the description was left alone this release and the gap is carried to the v1.16.0 follow-ups.
+- skill-17 with-arm 0.92: one `upscaling-code-correct` run failed 3/3 votes on an answer that suggested MetalFX Spatial on Mobile (valid on 4.4+); the code grader is the noisy one. The without-arm answers are the real signal.
+- skill-18 first run (`…069Z`, with 0.75 / without 1.00) was grader wording, not the model: the key grader demanded the full header names and the regex missed "Thread Support". Both now accept COOP/COEP and the UI label; re-run 1.00 in both arms.
+
+- **Re-run 2026-10-22 (`results/2026-10-21T23-30-37-310Z`):** skill-16 again 1.00 / 1.00, `web-services` fired 1/3. This case runs in an empty workspace, so the SessionStart card is not injected; the v1.16.0 card's new `web-services` row cannot affect it. The routing gap is in the skill's `description`.

@@ -11,47 +11,47 @@ For Arabic, Hebrew, Persian, and other RTL languages.
 control.layout_direction = Control.LAYOUT_DIRECTION_RTL
 
 # Or set globally in Project Settings:
-# Internationalization → Rendering → Text Direction → RTL
+# Internationalization → Rendering → Root Node Layout Direction → Right-to-Left
 ```
 
 ```csharp
 // On any Control node — note the enum is nested, not a flat constant.
 control.LayoutDirection = Control.LayoutDirectionEnum.Rtl;
 
-// Usually better than hard-coding Rtl: derive it from the app's own locale.
-// (LayoutDirectionEnum.Locale is DEPRECATED — it is an alias for this one.)
+// Usually better than hard-coding Rtl: derive it from the app's own locale (Godot 4.4+;
+// on 4.3 use LayoutDirectionEnum.Locale, which 4.4+ keeps as a deprecated alias).
 control.LayoutDirection = Control.LayoutDirectionEnum.ApplicationLocale;
 
 // The Project Settings route is identical:
-// Internationalization → Rendering → Text Direction → RTL
+// Internationalization → Rendering → Root Node Layout Direction → Right-to-Left
 ```
 
 ## Per-Control Settings
 
 | Property | Purpose |
 |----------|---------|
-| `layout_direction` | `INHERITED`, `APPLICATION_LOCALE` (auto, from the loaded translation), `LTR`, `RTL`, `SYSTEM_LOCALE` (auto, from the OS). `LOCALE` is **deprecated** — it is an alias for `APPLICATION_LOCALE` |
+| `layout_direction` | `INHERITED`, `APPLICATION_LOCALE` (auto, from the loaded translation), `LTR`, `RTL`, `SYSTEM_LOCALE` (auto, from the OS). `APPLICATION_LOCALE` and `SYSTEM_LOCALE` are 4.4+; 4.3 has `LOCALE`, which 4.4+ keeps as a **deprecated** alias for `APPLICATION_LOCALE` |
 | `text_direction` | On Label/RichTextLabel: override text direction |
 | `structured_text_type` | Handles special structures (URLs, paths, email) that shouldn't fully reverse |
 
 ## RichTextLabel BBCode for Mixed Direction
 
 ```gdscript
-# Force LTR for a number or URL inside RTL text
-rich_text.text = "النتيجة: [ltr]100/200[/ltr]"
+# Isolate a number or URL as LTR inside RTL text ([lri] … [pdi]; there is no [ltr] tag)
+rich_text.text = "النتيجة: [lri]100/200[pdi]"
 ```
 
 ```csharp
 // Same BBCode from C# — it is markup in the string, not an API difference.
 // BbcodeEnabled must be true or the tag renders literally.
 richText.BbcodeEnabled = true;
-richText.Text = "النتيجة: [ltr]100/200[/ltr]";
+richText.Text = "النتيجة: [lri]100/200[pdi]";
 ```
 
 ## Reacting to a locale change
 
 `TranslationServer` has **no signals** — there is nothing to connect to. Godot delivers
-`NOTIFICATION_TRANSLATION_CHANGED` (defined on `MainLoop` and inherited by `Node`) instead, so
+`Node.NOTIFICATION_TRANSLATION_CHANGED` (`MainLoop` has a constant of the same name) instead, so
 override `_notification` and re-apply layout from there. Because you never subscribed, there is
 no handler to disconnect and nothing to leak when the scene is freed.
 

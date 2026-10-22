@@ -30,9 +30,9 @@ public override void _UnhandledInput(InputEvent @event)
 
 ### Node Processing Order
 
-Input propagates in **reverse scene tree order** (deepest child first, root last). To control which node gets input first:
+Input propagates in **reverse scene tree order** (the node lowest in the Scene dock first, root last). To control which node gets input first:
 
-- Move it deeper in the tree, or
+- Move it lower in the tree (later in tree order), or
 - Use `Node.set_process_input(true/false)` to enable/disable input on specific nodes
 - Call `get_viewport().set_input_as_handled()` to stop propagation
 

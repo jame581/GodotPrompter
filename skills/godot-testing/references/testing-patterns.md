@@ -40,7 +40,7 @@ public void BeforeTest()
 {
     var scene = GD.Load<PackedScene>("res://scenes/player.tscn");
     _player = AutoFree(scene.Instantiate<Player>());
-    AddChild(_player);
+    ((SceneTree)Engine.GetMainLoop()).Root.AddChild(_player); // suites are not Nodes
 }
 ```
 
@@ -70,24 +70,24 @@ func test_health_emits_signal() -> void:
     var monitor := monitor_signals(_health)
     _health.take_damage(10)
 
-    assert_signal(monitor).is_emitted("health_changed")
-    assert_signal(monitor).is_emitted("health_changed").with_parameters([100, 90])
-    assert_signal(monitor).is_not_emitted("died")
+    # is_emitted() waits for the signal, so it must be awaited.
+    await assert_signal(monitor).is_emitted("health_changed")
+    await assert_signal(monitor).is_emitted("health_changed", [100, 90])
+    await assert_signal(monitor).is_not_emitted("died")
 ```
 
 #### gdUnit4 (C#)
 
 ```csharp
 [TestCase]
-public async GdUnitAwaiter HealthEmitsSignal()
+public async Task HealthEmitsSignal()
 {
-    var monitor = MonitorSignals(_health);
+    AssertSignal(_health).StartMonitoring();
     _health.TakeDamage(10);
 
-    AssertSignal(monitor).IsEmitted("health_changed");
-    AssertSignal(monitor).IsEmitted("health_changed").WithArgs(100, 90);
-    AssertSignal(monitor).IsNotEmitted("died");
-    await Task.CompletedTask;
+    await AssertSignal(_health).IsEmitted(HealthComponent.SignalName.HealthChanged).WithTimeout(100);
+    await AssertSignal(_health).IsEmitted(HealthComponent.SignalName.HealthChanged, 100, 90).WithTimeout(100);
+    await AssertSignal(_health).IsNotEmitted(HealthComponent.SignalName.Died).WithTimeout(100);
 }
 ```
 
@@ -99,25 +99,26 @@ Use doubles/mocks to isolate the unit under test from dependencies.
 
 ```gdscript
 func test_player_uses_health_component() -> void:
-    # Create a test double (all methods stubbed to return null/0)
-    var mock_health := double(HealthComponent)
+    # double() returns a doubled class; .new() makes the instance.
+    # Methods of a full double do nothing and return null.
+    var mock_health = double(HealthComponent).new()
     stub(mock_health, "take_damage")  # no-op stub
-    stub(mock_health, "current_health").to_return(75)
+    # Only methods can be stubbed — current_health is a property.
 
     _player.health_component = mock_health
     _player.take_hit(25)
 
     # Verify the method was called
     assert_called(mock_health, "take_damage")
-    assert_called_with_parameters(mock_health, "take_damage", [25])
+    assert_called(mock_health, "take_damage", [25])  # with these arguments
 ```
 
 #### gdUnit4 (GDScript) — `mock()`
 
 ```gdscript
 func test_player_uses_health_component() -> void:
-    var mock_health := mock(HealthComponent)
-    do_return(75).on(mock_health).current_health
+    var mock_health = mock(HealthComponent)
+    # do_return(x).on(mock).method() stubs methods only — current_health is a property.
 
     _player.health_component = mock_health
     _player.take_hit(25)
@@ -125,19 +126,26 @@ func test_player_uses_health_component() -> void:
     verify(mock_health).take_damage(25)
 ```
 
-#### gdUnit4 (C#) — `Mock<T>()`
+#### gdUnit4 (C#) — hand-rolled fake
+
+gdUnit4Net has no `mock()`, `spy()` or `verify()`; those are GDScript-only. Subclass the dependency (its methods must be `virtual`) or inject an interface:
 
 ```csharp
+public partial class FakeHealth : HealthComponent
+{
+    public int LastDamage { get; private set; } = -1;
+    public override void TakeDamage(int amount) => LastDamage = amount;
+}
+
 [TestCase]
 public void PlayerUsesHealthComponent()
 {
-    var mockHealth = Mock<HealthComponent>();
-    mockHealth.MockProperty(h => h.CurrentHealth, 75);
+    var fakeHealth = AutoFree(new FakeHealth());
 
-    _player.HealthComponent = mockHealth;
+    _player.HealthComponent = fakeHealth;
     _player.TakeHit(25);
 
-    Verify(mockHealth).TakeDamage(25);
+    AssertThat(fakeHealth.LastDamage).IsEqual(25);
 }
 ```
 
@@ -171,10 +179,10 @@ func test_tween_completes() -> void:
 
 ```csharp
 [TestCase(Timeout = 1000)]
-public async GdUnitAwaiter TweenCompletes()
+public async Task TweenCompletes()
 {
     _player.StartMoveTween();
-    await ISceneRunner.SimulateFrames(30);
+    await _player.ToSignal(_player.GetTree().CreateTimer(0.5), SceneTreeTimer.SignalName.Timeout);
     AssertThat(_player.Position).IsEqual(new Vector2(100, 0));
 }
 ```

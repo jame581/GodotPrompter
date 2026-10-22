@@ -24,8 +24,8 @@ func _enter_tree() -> void:
     # Load a scene or instantiate a Control directly.
     _dock = preload("res://addons/my_plugin/my_dock.tscn").instantiate()
 
-    # DOCK_SLOT_LEFT_UL = upper-left dock area (same as Scene/Import panel).
-    # Other slots: DOCK_SLOT_LEFT_BL, DOCK_SLOT_RIGHT_UL, DOCK_SLOT_RIGHT_BL
+    # DOCK_SLOT_LEFT_UL = upper slot of the far-left column (empty by default;
+    # Scene/Import sit in DOCK_SLOT_LEFT_UR). See the slot table below.
     add_control_to_dock(DOCK_SLOT_LEFT_UL, _dock)
 
 
@@ -77,10 +77,10 @@ public partial class MyPlugin : EditorPlugin
 
 | Constant | Location |
 |---|---|
-| `DOCK_SLOT_LEFT_UL` | Left column, upper (Scene / Import) |
-| `DOCK_SLOT_LEFT_BL` | Left column, lower (FileSystem) |
-| `DOCK_SLOT_RIGHT_UL` | Right column, upper (Inspector / Node) |
-| `DOCK_SLOT_RIGHT_BL` | Right column, lower |
+| `DOCK_SLOT_LEFT_UL` / `DOCK_SLOT_LEFT_BL` | Far-left column, upper / lower (empty by default) |
+| `DOCK_SLOT_LEFT_UR` / `DOCK_SLOT_LEFT_BR` | Second-left column, upper (Scene / Import) / lower (FileSystem) |
+| `DOCK_SLOT_RIGHT_UL` / `DOCK_SLOT_RIGHT_BL` | First right column, upper (Inspector / Node) / lower |
+| `DOCK_SLOT_RIGHT_UR` / `DOCK_SLOT_RIGHT_BR` | Far-right column, upper / lower (empty by default) |
 
 ---
 

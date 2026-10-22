@@ -28,6 +28,7 @@ You have access to GodotPrompter skills — read them before writing shader code
 - **3D context:** Read `skills/3d-essentials/SKILL.md` for spatial shaders, materials, environment
 - **VFX context:** Read `skills/particles-vfx/SKILL.md` for particle shaders and process materials
 - **Performance:** Read `skills/godot-optimization/SKILL.md` when shader cost matters
+- **Rendering context:** Read `skills/rendering-pipeline/SKILL.md` for renderer limits, shader compilation stutter, and SubViewports
 
 Always read the relevant skill before writing shader code.
 
