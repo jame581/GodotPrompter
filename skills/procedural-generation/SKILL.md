@@ -29,7 +29,8 @@ func generate_level(level_seed: int) -> void:
     var enemy_count: int = rng.randi_range(3, 8)
     var treasure_chance: float = rng.randf_range(0.05, 0.15)
 
-# AVOID: Global randf()/randi() — not reproducible across calls
+# AVOID: Global randf()/randi() — one shared generator, randomized at startup
+# and advanced by every other caller, so a sequence is hard to reproduce
 # USE: rng.randf(), rng.randi(), rng.randf_range(), rng.randi_range()
 ```
 
@@ -49,7 +50,7 @@ public void GenerateLevel(ulong levelSeed)
 }
 ```
 
-> **Tip:** Generate a seed from a string for shareable level codes: `var seed: int = "MyLevel".hash()`
+> **Tip:** Generate a seed from a string for shareable level codes: `var level_seed: int = "MyLevel".hash()` (C#: `GD.Hash("MyLevel")`)
 
 ---
 
@@ -90,7 +91,7 @@ WFC is a constraint solver: given a tile set with adjacency rules, pick the lowe
 | Symptom | Cause | Fix |
 |---------|-------|-----|
 | Same level every time | Not seeding the RNG | Set `rng.seed` before generation |
-| Different results on different platforms | Using global `randf()` / `randi()` | Use a dedicated `RandomNumberGenerator` instance |
+| Same seed gives a different level | Global `randf()` / `randi()` — randomized at startup and shared with any other code that calls them | Use a dedicated `RandomNumberGenerator` instance |
 | Noise looks blocky | Frequency too high | Lower `frequency` (try 0.01–0.05) |
 | Caves are all wall or all floor | `fill_chance` too extreme or too few iterations | Use fill_chance 0.40–0.50 and 4–6 iterations |
 | BSP rooms overlap | Split position too close to edge | Ensure `min_room_size` buffer in split calculation |

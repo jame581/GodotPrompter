@@ -82,8 +82,8 @@ public partial class XRControllerHandler : XRController3D
 | `grip` | Side grip (analog float) |
 | `ax_button` | A (right) or X (left) |
 | `by_button` | B (right) or Y (left) |
-| `primary` | Thumbstick click |
-| `primary_x/y` | Thumbstick axes (-1 to 1) |
+| `primary` | Thumbstick axes (Vector2, -1 to 1) — read with `get_vector2()` |
+| `primary_click` | Thumbstick click |
 
 ### Thumbstick Locomotion
 
@@ -99,10 +99,7 @@ extends XROrigin3D
 
 func _physics_process(delta: float) -> void:
     # Smooth locomotion from left thumbstick
-    var input := Vector2(
-        left_controller.get_float("primary_x"),
-        left_controller.get_float("primary_y")
-    )
+    var input: Vector2 = left_controller.get_vector2("primary")
 
     if input.length() > 0.1:
         # Move in camera's forward direction (ignore vertical)

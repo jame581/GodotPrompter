@@ -196,7 +196,7 @@ public partial class SimpleWFC : RefCounted
 }
 ```
 
-> **For production WFC**, consider the community addon [godot-wfc](https://github.com/AlexeyBond/godot-wfc) which provides editor integration, TileMap support, and 3D grid WFC.
+> **For production WFC**, consider the community addon [godot-constraint-solving](https://github.com/AlexeyBond/godot-constraint-solving) (Asset Library: "Wave Function Collapse (WFC)"), which adds backtracking, rule learning from an example map, `TileMapLayer`/`TileMap` support and flat `GridMap` layers — full 3D generation is not implemented.
 
 ---
 

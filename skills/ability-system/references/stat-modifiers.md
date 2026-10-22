@@ -59,7 +59,7 @@ public partial class StatModifier : Resource
     }
 
     [Export] public string StatName  { get; set; } = "";
-    [Export] public ModOp Operation  { get; set; } = ModOp.Add; // serializes as "operation" (snake_case of the property name) — matches the GDScript field
+    [Export] public ModOp Operation  { get; set; } = ModOp.Add; // serializes as "Operation" — C# members keep their C# names, so .tres files differ from the GDScript version
     [Export] public float Value      { get; set; } = 0.0f;
     [Export] public StringName Source { get; set; } = "";
 }

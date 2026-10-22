@@ -58,7 +58,9 @@ tween.set_speed_scale(0.5)
 tween.set_speed_scale(2.0)
 ```
 
-### Ignore Time Scale
+### Ignore Time Scale (Godot 4.4+)
+
+On 4.3, compensate instead: `tween.set_speed_scale(1.0 / Engine.time_scale)` while `Engine.time_scale > 0` (set it again whenever the time scale changes). At a time scale of 0 (hit-stop) the speed scale would be infinite and the tween's delta becomes NaN, so skip the compensation then.
 
 ```gdscript
 # Tween runs at normal speed even when Engine.time_scale is changed

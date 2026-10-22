@@ -1,12 +1,12 @@
 # Popochiu — Inventory Items
 
-> Deep dive for [../SKILL.md](../SKILL.md) §5. Source: `addons/popochiu/engine/objects/inventory_item/popochiu_inventory_item.gd` (`PopochiuInventoryItem extends Node` — **not** a `PopochiuClickable`) and `addons/popochiu/engine/interfaces/i_inventory.gd` (`I` singleton).
+> Deep dive for [../SKILL.md](../SKILL.md) §5. Source: `addons/popochiu/engine/objects/inventory_item/popochiu_inventory_item.gd` (`PopochiuInventoryItem extends TextureRect` — **not** a `PopochiuClickable`) and `addons/popochiu/engine/interfaces/i_inventory.gd` (`I` singleton).
 
 ## Item creation
 
 Dock "Create inventory item" button generates `res://game/inventory_items/<name>/inventory_item_<name>.gd` (+ `.tscn`, + `inventory_item_<name>_state.gd` extending `PopochiuInventoryItemData`), registered in `popochiu_data.cfg` under `inventory_items`.
 
-**Gotcha:** `PopochiuInventoryItem` extends `Node`, not `Area2D` via `PopochiuClickable` — even though it shares the same virtual-method *names* as Props/Hotspots/Characters (`_on_click`, `_on_right_click`, `_on_middle_click`, `_on_item_used`) by convention, plus its own `_on_added_to_inventory()` / `_on_discard()`. Don't treat it as a `PopochiuClickable` subtype when writing generic clickable-handling code.
+**Gotcha:** `PopochiuInventoryItem` extends `TextureRect` (a `Control`), not `Area2D` via `PopochiuClickable` — even though it shares the same virtual-method *names* as Props/Hotspots/Characters (`_on_click`, `_on_right_click`, `_on_middle_click`, `_on_item_used`) by convention, plus its own `_on_added_to_inventory()` / `_on_discard()`. Don't treat it as a `PopochiuClickable` subtype when writing generic clickable-handling code.
 
 ## `I` (`PopochiuIInventory`) API
 
@@ -38,10 +38,10 @@ func discard(animate := false) -> void                       # queue_discard() t
 
 ## Combining items
 
-Pattern from the addon's own doc comment on `queue_replace` — this is the script of `InventoryItemHook.gd`, i.e. the item reachable as `I.Hook`:
+Pattern from the addon's own doc comment on `queue_replace` — this is the script of `InventoryItemHook.gd`, i.e. the item reachable as `I.Hook`. The doc comment overrides the public `on_item_used()`; override `_on_item_used()` instead, since the public wrapper also clears `I.active` afterwards:
 
 ```gdscript
-func on_item_used(item: PopochiuInventoryItem) -> void:
+func _on_item_used(item: PopochiuInventoryItem) -> void:
     if item == I.Rope:
         E.queue([
             I.Rope.queue_remove(),
@@ -63,7 +63,7 @@ func _on_item_used(item: PopochiuInventoryItem) -> void:
 
 ## Item virtual lifecycle
 
-`_on_click()`, `_on_right_click()`, `_on_middle_click()`, `_on_item_used(item)` (item-on-item combining), `_on_added_to_inventory()`, `_on_discard()` — the latter two call `super()` to preserve default GUI feedback when overridden.
+`_on_click()`, `_on_right_click()`, `_on_middle_click()`, `_on_item_used(item)` (item-on-item combining), `_on_added_to_inventory()`, `_on_discard()` — the base implementations of all six are empty, so there is nothing to `super()`.
 
 ## Prop `link_to_item`
 

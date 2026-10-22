@@ -12,8 +12,8 @@ Common UI signals and the nodes that emit them:
 | Signal | Node(s) | When emitted | Signature |
 |---|---|---|---|
 | `pressed` | `Button`, `LinkButton` | Mouse click or keyboard/gamepad confirm | `()` |
-| `toggled` | `Button` (toggle mode), `CheckButton`, `CheckBox` | Toggle state changes | `(button_pressed: bool)` |
-| `text_changed` | `LineEdit`, `TextEdit` | User edits text | `(new_text: String)` |
+| `toggled` | `Button` (toggle mode), `CheckButton`, `CheckBox` | Toggle state changes | `(toggled_on: bool)` |
+| `text_changed` | `LineEdit` / `TextEdit` | User edits text | `(new_text: String)` / `()` — read `text` on `TextEdit` |
 | `text_submitted` | `LineEdit` | User presses Enter | `(new_text: String)` |
 | `value_changed` | `HSlider`, `VSlider`, `SpinBox`, `ScrollBar` | Value changes | `(value: float)` |
 | `item_selected` | `OptionButton`, `ItemList` | User selects an item | `(index: int)` |
@@ -24,7 +24,7 @@ Common UI signals and the nodes that emit them:
 | `focus_entered` | `Control` (all) | Node receives focus | `()` |
 | `focus_exited` | `Control` (all) | Node loses focus | `()` |
 | `resized` | `Control` (all) | Node's `size` property changes | `()` |
-| `gui_input` | `Control` (all) | Any `InputEvent` within the node's rect | `(event: InputEvent)` |
+| `gui_input` | `Control` (all) | An `InputEvent` the node receives (mouse over its rect; keys while it has focus) | `(event: InputEvent)` |
 
 **Connecting signals in GDScript:**
 

@@ -93,7 +93,7 @@ public override void _PhysicsProcess(double delta)
 
 ## Code-Based Raycasting (PhysicsDirectSpaceState)
 
-For on-demand queries, access the space state. **Only safe inside `_physics_process()`** — the physics space is locked during rendering.
+For on-demand queries, access the space state. **Query inside `_physics_process()`** — the space is locked while the physics step runs, and with physics on a separate thread it is only accessible there.
 
 ```gdscript
 func _physics_process(_delta: float) -> void:

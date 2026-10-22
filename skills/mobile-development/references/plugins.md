@@ -44,7 +44,7 @@ func _exit_tree() -> void:
 ```
 
 ```gdscript
-@tool
+# Inner class in plugin.gd — it inherits the script's @tool (an inner class cannot take its own).
 class MyAndroidExportPlugin extends EditorExportPlugin:
     func _supports_platform(platform) -> bool:
         return platform is EditorExportPlatformAndroid
@@ -102,7 +102,7 @@ public partial class MyAndroidExportPlugin : EditorExportPlugin
 #endif
 ```
 
-**GDExtension Android plugin:** a `plugin.gdextension` file with `android_aar_plugin = true` ships native code as an Android plugin.
+**GDExtension Android plugin:** when an Android AAR plugin bundles a GDExtension's `.so` files, set `android_aar_plugin = true` under `[configuration]` in its `.gdextension` file; the export then skips the extension's own Android libraries and uses the AAR's.
 
 Starter templates: `m4gr3d/Godot-Android-Plugin-Template`, `m4gr3d/GDExtension-Android-Plugin-Template`.
 
@@ -142,7 +142,7 @@ Documented recipes:
 - **Constructors** — call a method with the same name as the class.
 - **Intents** — build `android.content.Intent` and `startActivity` via the activity.
 
-Gradle exports auto-include any `.jar`/`.aar` dropped in the project `addons` dir, making those classes usable through `JavaClassWrapper`.
+Since Godot 4.4 (not 4.3), Gradle exports auto-include any `.jar`/`.aar` placed directly in `res://addons/` (not in subfolders), making those classes usable through `JavaClassWrapper`.
 
 ## iOS plugins
 

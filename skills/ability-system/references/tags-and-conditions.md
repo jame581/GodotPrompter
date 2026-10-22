@@ -553,4 +553,4 @@ private void OnPlayerHitByStun()
 - [ ] `EffectHolder.apply_effect` checks the immunity tag before calling `on_apply`
 - [ ] `StunEffect` (or equivalent) adds the status tag in `on_apply` and removes it in `on_expire`
 - [ ] `ability_failed` signal connected to HUD or log to surface "conditions_unmet" failures
-- [ ] Tag strings use `StringName` literals (`&"status.stunned"` in GDScript; `new StringName("status.stunned")` in C#) to avoid per-frame allocations
+- [ ] Tag strings use `StringName` literals (`&"status.stunned"`) in GDScript; in C#, cache them in `static readonly StringName` fields — `new StringName("status.stunned")` allocates on every call

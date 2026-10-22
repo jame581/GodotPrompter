@@ -95,7 +95,7 @@ void fragment() {
 | `ROUGHNESS` | `float`| Roughness value (0.0–1.0) |
 | `NORMAL` | `vec3` | Surface normal (for normal mapping) |
 | `EMISSION` | `vec3` | Emissive color |
-| `ALPHA` | `float`| Transparency (enable in render mode) |
+| `ALPHA` | `float`| Transparency (writing it moves the material to the transparent pass) |
 | `VERTEX` | `vec3` | Vertex position (in `vertex()`) |
 
 ### Uniforms (Shader Parameters)
@@ -163,44 +163,9 @@ Spatial-shader recipes: **toon/cel shading** (banded NdotL), **rim lighting / Fr
 
 ## 5. Visual Shaders
 
-Visual shaders provide a node-based graph editor — no code required.
+Visual shaders are a node-based graph editor (New ShaderMaterial → New VisualShader). Use them for quick prototypes, artist-tweakable values, and simple effects; use code for complex math, branching, or loops. Both compile to the same GPU code, so performance is identical.
 
-### When to Use Visual Shaders
-
-| Use Visual Shaders When | Use Code Shaders When |
-|--------------------------------|------------------------------------|
-| Prototyping effects quickly | Complex math or branching logic |
-| Artists need to tweak values | Need precise control over every line |
-| Learning shader concepts | Performance-critical shaders |
-| Simple effects (color adjust, UV scroll) | Loops or advanced techniques |
-
-### Creating a Visual Shader
-
-1. Select node → Inspector → Material → New ShaderMaterial
-2. Shader → New VisualShader
-3. Click the shader to open the Visual Shader editor
-4. Add nodes from the palette, connect pins
-5. Output nodes (Output, FragmentOutput) are pre-placed
-
-### Key Visual Shader Nodes
-
-| Node | Purpose |
-|---------------------|--------------------------------------|
-| `Texture2D` | Sample a texture |
-| `ColorConstant` | Solid color value |
-| `VectorOp` | Math operations on vectors |
-| `ScalarOp` | Math operations on floats |
-| `Mix` | Lerp between two values |
-| `Step` / `SmoothStep` | Threshold / smooth threshold |
-| `Time` | Current time (for animation) |
-| `UV` | Texture coordinates |
-| `Input` (custom) | Expose a uniform to Inspector |
-
-> Visual shaders compile to the same GPU code as written shaders. There is no performance difference.
-
-> **Godot 4.7+:** Two new spatial `Input` nodes — `in_shadow_pass` (vertex/fragment; maps to the `IN_SHADOW_PASS` built-in, `true` when the shader is being rendered in a shadow mapping pass — render objects differently in shadow maps than in the regular pass) and `specular_amount` (`light()`; maps to `SPECULAR_AMOUNT` — `2.0` × `light_specular` for OmniLight3D/SpotLight3D, `1.0` for DirectionalLight3D).
-
-> ⚠️ **Changed in Godot 4.7:** The `LinearToSRGB` visual shader node no longer clamps its output to `[0.0, 1.0]` when using the Forward+ or Mobile renderer — HDR values above `1.0` now pass through. Graphs that relied on the implicit clamp produce different output; add an explicit `Clamp` node to restore the old behavior. See the [4.7 migration guide](https://docs.godotengine.org/en/latest/tutorials/migrating/upgrading_to_godot_4.7.html).
+> See [references/visual-shaders.md](references/visual-shaders.md) for the choice table, steps, key nodes, and 4.7 node changes.
 
 ---
 
@@ -214,7 +179,7 @@ The standard pattern: full-rect `ColorRect` with a canvas_item shader on top of 
 
 ## 7. Compositor Effects (Godot 4.3+)
 
-`CompositorEffect` runs custom render passes within Godot's render pipeline (post-tonemap or pre-tonemap). Use when ColorRect overlays aren't enough — multi-pass effects, depth-aware effects, custom AO/SSR variants. Heavier setup than a screen-space shader; reach for it only when needed.
+`CompositorEffect` runs custom render passes at five points in the 3D render pipeline, from before the opaque pass to after the transparent pass — all before the built-in post effects and tonemapping. Use when ColorRect overlays aren't enough — multi-pass effects, depth-aware effects, custom AO/SSR variants. Heavier setup than a screen-space shader; reach for it only when needed.
 
 > See [references/compositor-effects.md](references/compositor-effects.md) for setup, a custom CompositorEffect GDScript example, and built-in Compositor use cases.
 

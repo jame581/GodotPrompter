@@ -54,7 +54,7 @@ All examples target Godot 4.3+ with no deprecated APIs. GDScript is shown first,
 
 ## 2. DialogueLine Resource
 
-`DialogueLine` holds all data for a single beat of dialogue. Choices is an `Array[Dictionary]` so each entry can carry a `text`, `next_line_id`, and optional `condition` without a separate class.
+`DialogueLine` holds all data for a single beat of dialogue. Choices is an untyped `Array` of Dictionaries so each entry can carry a `text`, `next_line_id`, and optional `condition` without a separate class.
 
 ### GDScript
 
@@ -178,7 +178,7 @@ public partial class DialogueData : Resource
 
 ## 4. DialogueManager
 
-A singleton autoload owns the active `DialogueData` and tracks current line ID. `start(data)` sets the data and emits the first line; `advance(choice_index)` moves forward. Wires three signals: `line_changed(line)`, `choices_presented(choices)`, `dialogue_ended()`.
+A singleton autoload owns the active `DialogueData` and tracks the current line. `start_dialogue(data)` sets the data and emits the first line; `advance()` moves forward and `choose(choice_index)` picks a choice. Signals: `dialogue_started`, `line_displayed(line)`, `choice_presented(choices)`, `dialogue_ended`.
 
 > See [references/dialogue-manager.md](references/dialogue-manager.md) for the full GDScript and C# manager (line traversal, choice handling, condition evaluation hooks, signals).
 
@@ -186,7 +186,7 @@ A singleton autoload owns the active `DialogueData` and tracks current line ID. 
 
 ## 5. Branching and Conditions
 
-Choices live on `DialogueLine.choices` (an Array of Dictionary). Each choice has `text`, `next_line_id`, optional `condition`. Conditions are GDScript expressions evaluated via the `Expression` class — passed a context object with project state (e.g. `GameState`).
+Choices live on `DialogueLine.choices` (an Array of Dictionary). Each choice has `text`, `next_line_id`, optional `condition`. Conditions are expression strings evaluated via the `Expression` class, with project state (e.g. the `GameState` autoload) passed in as a named input.
 
 > See [references/branching-and-conditions.md](references/branching-and-conditions.md) for the full choice-handling and condition-evaluator implementations (GDScript + C#), plus security notes on Expression input.
 
@@ -194,7 +194,7 @@ Choices live on `DialogueLine.choices` (an Array of Dictionary). Each choice has
 
 ## 6. Dialogue UI
 
-A `CanvasLayer` with a `RichTextLabel` for the line body (BBCode-enabled), a `Label` for speaker name, and a `VBoxContainer` for choice buttons. Typewriter effect via `RichTextLabel.visible_characters` driven by a `Tween`. UI subscribes to `DialogueManager` signals.
+A `CanvasLayer` with a `RichTextLabel` for the line body (BBCode-enabled), a `Label` for speaker name, and a `VBoxContainer` for choice buttons. Typewriter effect via `RichTextLabel.visible_characters` driven by a `Timer`. UI subscribes to `DialogueManager` signals.
 
 > See [references/ui-presentation.md](references/ui-presentation.md) for the scene-tree fragment, typewriter recipe, choice-button spawning, and full GDScript + C# wiring.
 
@@ -210,7 +210,7 @@ Load dialogue from JSON for designer-friendly editing — map JSON keys to `Dial
 
 ## 8. Variable Interpolation
 
-Dialogue text supports `{player_name}`-style placeholders. Resolve via a small templater: `text.format(vars)` (GDScript) or `string.Format` with named-tag preprocessing (C#).
+Dialogue text supports `{player_name}`-style placeholders. Resolve via a small templater: `text.format(vars)` (GDScript) or a `string.Replace` per placeholder (C#).
 
 > See [references/variable-interpolation.md](references/variable-interpolation.md) for the GDScript and C# interpolation helpers.
 
@@ -224,7 +224,7 @@ Dialogue text supports `{player_name}`-style placeholders. Resolve via a small t
 - [ ] `advance()` guards against being called when choices are pending
 - [ ] `choose()` operates on the filtered visible-choices list, not the raw `choices` array
 - [ ] Condition strings reference only stable autoload method names — avoid referencing scene-local nodes
-- [ ] `_evaluate_condition()` passes a known base instance (`GameState`) to `Expression.execute()` to resolve method calls
+- [ ] `_evaluate_condition()` registers `GameState` as an `Expression` input name (`parse(cond, ["GameState"])`, `execute([GameState])`) — `Expression` does not resolve autoload names
 - [ ] Typewriter timer uses `visible_characters`, not frame-by-frame string slicing, for BBCode compatibility
 - [ ] Pressing `ui_accept` mid-typewriter reveals full text; a second press advances the line
 - [ ] Choice buttons are freed (`queue_free`) before creating new ones — never accumulate stale children

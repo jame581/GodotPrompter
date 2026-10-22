@@ -88,9 +88,9 @@ Areas detect overlaps and override physics properties within their bounds. They 
 | `Circle` / `Sphere` | Balls, projectiles, simple characters, trigger zones |
 | `Capsule` (2D & 3D) | Characters — rounded, slides over edges |
 | `Segment2D` / — | Thin walls, laser beams |
-| `SeparationRay2D` / — | Character ground snapping |
-| `WorldBoundary2D` / — | Infinite floor/wall/ceiling |
-| — / `Cylinder3D` | Pillars, barrels (Jolt only — unstable on GodotPhysics) |
+| `SeparationRay2D` / `3D` | Character ground snapping |
+| `WorldBoundary2D` / `3D` | Infinite floor/wall/ceiling |
+| — / `Cylinder3D` | Pillars, barrels (known bugs on GodotPhysics — prefer Jolt) |
 
 Prefer primitives for dynamic bodies. `ConvexPolygonShape` is fast but cannot express holes or inward curves; `ConcavePolygonShape` is accurate for level geometry but is **StaticBody-only** and the slowest. Never translate, rotate, or scale a CollisionShape node — an untransformed shape unlocks a broad-phase optimization. Godot 4.7+ adds `one_way_collision_direction` for sideways one-way platforms.
 
@@ -123,7 +123,7 @@ Add a `RayCast2D` / `RayCast3D` as a child node — it casts every physics frame
 
 ### Code-Based Raycasting (PhysicsDirectSpaceState)
 
-For on-demand queries, access the space state via `get_world_2d().direct_space_state` (or `get_world_3d()`) and call `intersect_ray(query)` with `PhysicsRayQueryParameters2D/3D.create(from, to)`. Set `query.exclude = [get_rid()]` to skip self, `query.collision_mask` to filter layers. **Only safe inside `_physics_process()`** — the physics space is locked during rendering.
+For on-demand queries, access the space state via `get_world_2d().direct_space_state` (or `get_world_3d()`) and call `intersect_ray(query)` with `PhysicsRayQueryParameters2D/3D.create(from, to)`. Set `query.exclude = [get_rid()]` to skip self, `query.collision_mask` to filter layers. **Query inside `_physics_process()`** — the space is locked while the physics step runs, and with physics on a separate thread it is only accessible there.
 
 > See [references/raycasting-recipes.md](references/raycasting-recipes.md) for the full GDScript + C# code-based raycast example with self-exclusion and mask filtering, plus the 3D mouse-picking recipe.
 
@@ -145,7 +145,7 @@ Jolt is a built-in alternative physics engine, available since Godot 4.4 as an e
 
 ### Why & Differences
 
-**Wins:** better stacking stability, reliable `CylinderShape3D`, better `SoftBody3D`, optional thread-safe mode, active-edge detection (fixes ghost collisions).
+**Wins:** better stacking stability, `CylinderShape3D` without GodotPhysics' known cylinder bugs, better `SoftBody3D`, active-edge detection (reduces ghost collisions).
 
 > See [references/jolt-differences.md](references/jolt-differences.md) for the behavioral differences from GodotPhysics (stabilization, collision margins, single-body joints, `face_index`, unsupported joint properties).
 
@@ -155,7 +155,7 @@ Jolt is a built-in alternative physics engine, available since Godot 4.4 as an e
 
 ## 9. Physics Interpolation
 
-Smooths visual motion between physics ticks, eliminating "staircase" jitter when tick rate ≠ frame rate. Enable in **Project Settings → Physics → Common → Physics Interpolation**. **Godot 4.5+** restructured the 3D interpolation pipeline (`RenderingServer` → `SceneTree`) for more accurate results in nested transforms — no API change, automatic improvement on upgrade.
+Smooths visual motion between physics ticks, eliminating "staircase" jitter when tick rate ≠ frame rate. Enable in **Project Settings → Physics → Common → Physics Interpolation** (4.3 interpolates 2D only; 3D from 4.4). **Godot 4.5+** restructured the 3D interpolation pipeline (`RenderingServer` → `SceneTree`) for more accurate results in nested transforms — no API change, automatic improvement on upgrade.
 
 ### Core Rules
 
@@ -167,7 +167,7 @@ Smooths visual motion between physics ticks, eliminating "staircase" jitter when
 
 ### Camera Interpolation
 
-Cameras need special handling under physics interpolation. Make the camera independent (or `top_level = true`), update it in `_process()` (not `_physics_process()`), and read the target's smooth position with `get_global_transform_interpolated()`.
+Cameras need special handling under physics interpolation. Make the camera independent (or `top_level = true`), update it in `_process()` (not `_physics_process()`), and read the target's smooth position with `Node3D.get_global_transform_interpolated()` (4.4+).
 
 > See [references/interpolation-camera.md](references/interpolation-camera.md) for the full smooth-follow Camera3D recipe (GDScript + C#).
 

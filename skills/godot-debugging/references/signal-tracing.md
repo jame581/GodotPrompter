@@ -71,7 +71,7 @@ enemy.dead.connect(_on_enemy_dead)
 
 ```csharp
 // WRONG — connecting to a signal that does not exist (typo or wrong node type)
-enemy.Connect("Dead", new Callable(this, MethodName.OnEnemyDead)); // silent failure
+enemy.Connect("Dead", new Callable(this, MethodName.OnEnemyDead)); // logs "Attempt to connect nonexistent signal", returns InvalidParameter
 
 // RIGHT — verify signal exists before connecting
 System.Diagnostics.Debug.Assert(
@@ -86,7 +86,7 @@ enemy.Connect(Enemy.SignalName.Dead, new Callable(this, MethodName.OnEnemyDead))
 # Signal declared with one argument
 signal item_picked_up(item: Item)
 
-# WRONG receiver — missing argument causes "Expected 1 arguments" error
+# WRONG receiver — missing argument logs "Method expected 0 argument(s), but called with 1"
 func _on_item_picked_up() -> void:
     print("picked up something")
 

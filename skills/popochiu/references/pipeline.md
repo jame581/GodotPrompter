@@ -4,7 +4,7 @@
 
 ## Aseprite importer
 
-`res://addons/popochiu/editor/importers/` ships as its own plugin ("PopochiuImporters", enabled independently in Project Settings from the main Popochiu plugin). It provides dedicated import docks per object type (`aseprite_importer_dock_{character,inventory,room}.gd`) that shell out to the `aseprite` CLI executable to export a sprite sheet + JSON tag/frame data from a `.aseprite`/`.ase` file, then build Godot `SpriteFrames`/`AnimationLibrary` resources from the tags. This is the recommended way to bring animated characters, props, and room art into a room/character/item's generated scene without manually slicing sprite sheets.
+`res://addons/popochiu/editor/importers/` ships as its own plugin ("PopochiuImporters"), which the main Popochiu plugin enables automatically. It provides dedicated import docks per object type (`aseprite_importer_dock_{character,inventory,room}.gd`) that shell out to the `aseprite` CLI executable to export a sprite sheet + JSON tag/frame data from a `.aseprite`/`.ase` file, then build `AnimationPlayer` animations (in an `AnimationLibrary`) from the tags that drive the target's `Sprite2D`/`TextureRect` frames. This is the recommended way to bring animated characters, props, and room art into a room/character/item's generated scene without manually slicing sprite sheets.
 
 ## Audio (`A`)
 
@@ -36,7 +36,7 @@ func get_predefined_transitions_list() -> PackedStringArray
 func get_custom_transitions_list() -> PackedStringArray
 ```
 
-`T.PLAY_MODE` re-exports `PopochiuTransitionLayer.PLAY_MODE`, including at least `IN_OUT` and `PLAY_AND_REVERSE`. `R.goto_room()` automatically plays the project's default transition unless called with `use_transition := false` — you only need `T.play_transition()` directly for cutscene-driven or non-room-change transitions (e.g. a curtain around a dialog-heavy scripted sequence).
+`T.PLAY_MODE` re-exports `PopochiuTransitionLayer.PLAY_MODE`: `IN`, `OUT`, `IN_OUT`. `R.goto_room()` automatically plays the project's default transition unless called with `use_transition := false` — you only need `T.play_transition()` directly for cutscene-driven or non-room-change transitions (e.g. a curtain around a dialog-heavy scripted sequence).
 
 ## Save/load
 
@@ -53,8 +53,8 @@ func load_game(slot := 1) -> void                        # emits game_load_start
 Up to 4 slots by default, written as flat JSON to `user://save_N.json`.
 
 **Persistence model:**
-- **Auto-persisted built-ins** per room object: `position`, `visible`, `modulate`/`self_modulate`, `clickable`, `walk_to_point`/`look_at_point`, `baseline`, `interaction_polygon`(+`_position`), click counters. Characters additionally persist facing, `light_mask`, `dialog_pos`, face/follow settings. Rooms track `visited`/`visited_first_time`/`visited_times`.
-- **Custom state**: add fields to the generated `*_state.gd` (extends `PopochiuRoomData` / `PopochiuCharacterData` / `PopochiuInventoryItemData`) — auto-saved only if JSON-safe (`bool`/`int`/`float`/`String`, or `Array`/`Dictionary` of those).
+- **Auto-persisted built-ins**: props, hotspots, regions and walkable areas store their script variables of the basic types listed below, minus per-type ignore lists (`baseline`, `clickable`, `link_to_item`, … for props). Characters in a room store position, facing, `visible`, `modulate`/`self_modulate`, `light_mask`, `baseline`, `walk_to_point`/`look_at_point`/`dialog_pos`, face/follow settings. Rooms track `visited`/`visited_first_time`/`visited_times`.
+- **Custom state**: add fields to the generated `*_state.gd` (extends `PopochiuRoomData` / `PopochiuCharacterData` / `PopochiuInventoryItemData`) — auto-saved only if their type is `bool`/`int`/`float`/`String`, `Array`, or a packed string/int/float array — a `Dictionary` is skipped.
 - **Complex types**: override `_on_save() -> Dictionary` / `_on_load(data: Dictionary) -> void` on the data resource (stubbed in every generated `*_state.gd`, and in dialog scripts too) to flatten/rebuild `Vector2`, `Color`, custom inner classes, etc.
 - **`Globals` persistence**: safe-typed properties on `Globals` auto-persist; complex data needs **public** (no-underscore) `on_save()`/`on_load()` methods added manually to `res://game/popochiu_globals.gd` — these are not stubbed by default, unlike the underscore-prefixed virtuals on data resources.
 - Two independent mechanisms coexist: cross-room persistence (in-memory, via data resources staying loaded while the game runs) vs. save/load-to-disk (JSON at `user://save_N.json`, up to 4 slots). Don't conflate them — a bug in `_on_save`/`_on_load` only breaks disk saves, not cross-room state during a single play session.

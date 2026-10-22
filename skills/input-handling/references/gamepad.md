@@ -80,7 +80,7 @@ public Vector2 GetStickInput(float deadzone = 0.2f)
 ### Gamepad Vibration
 
 ```gdscript
-# weak motor = low frequency rumble, strong motor = high frequency rumble
+# weak motor = high-frequency buzz, strong motor = low-frequency rumble
 # Duration in seconds; 0 = until stopped
 Input.start_joy_vibration(0, 0.5, 0.3, 0.2)  # device 0, weak 0.5, strong 0.3, 0.2s
 

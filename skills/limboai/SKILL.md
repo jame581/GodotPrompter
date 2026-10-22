@@ -19,7 +19,7 @@ description: Use when using the LimboAI addon — behavior trees and hierarchica
 | **Beehave** (GDScript addon) | Lightweight BT, GDScript-only projects |
 | **LimboAI** | BT **and** HSM together, visual editor, C++ performance, C# support (module build) |
 
-Choose LimboAI when you need a behavior tree with a polished visual debugger, want to combine it with a hierarchical state machine (`BTState` bridges them), or need C++ task execution speed. Note: LimboAI requires **Godot 4.6+** and is not usable on 4.3–4.5. For a simpler GDScript-only behavior tree, Beehave is a lighter alternative. For plain state machines without a BT, use the built-in `state-machine` skill instead.
+Choose LimboAI when you need a behavior tree with a polished visual debugger, want to combine it with a hierarchical state machine (`BTState` bridges them), or need C++ task execution speed. Note: LimboAI v1.8.0 requires **Godot 4.6+**; on 4.3 the matching line is 1.2.0–1.3.x, whose API this skill does not cover. For a simpler GDScript-only behavior tree, Beehave is a lighter alternative. For plain state machines without a BT, use the built-in `state-machine` skill instead.
 
 ---
 
@@ -29,7 +29,7 @@ Choose LimboAI when you need a behavior tree with a polished visual debugger, wa
 
 1. **Godot AssetLib** → search "LimboAI" → Download → Reload project.  
    Or download from GitHub Releases and place `addons/limboai/` in `res://addons/limboai/`.
-2. Enable the plugin: **Project → Project Settings → Plugins** → tick LimboAI.
+2. No plugin toggle: there is no `plugin.cfg` — the extension registers its editor plugin itself once the project reloads.
 3. The `.gdextension` manifest ships at `res://addons/limboai/bin/`:
 
 ```ini
@@ -47,7 +47,7 @@ macos.release          = "res://addons/limboai/bin/liblimboai.macos.template_rel
 # ... (additional platform entries for linux arm64/rv64, android, iOS, web)
 ```
 
-**GDExtension limitations:** no in-editor documentation tooltips; `BBParam` property editor not available in the inspector.
+**GDExtension limitations:** the LimboAI task palette shows no documentation tooltips (module-only in v1.8.0). The `BBParam` property editor was ported to GDExtension in 2025, although the docs still list it as missing. C# needs the module build (below).
 
 ### Module version (C# or full editor integration)
 
@@ -74,12 +74,13 @@ extends CharacterBody2D
 
 func _ready() -> void:
     # BTPlayer starts executing automatically (active = true by default).
-    # Connect to updated(status) to react when the tree finishes.
+    # updated(status) fires after every tree update, not only when it finishes.
     bt_player.updated.connect(_on_bt_updated)
 
 func _on_bt_updated(status: int) -> void:
     if status == BT.SUCCESS:
-        bt_player.restart()  # loop the tree
+        # A finished tree starts over on the next update by itself; stop it instead.
+        bt_player.active = false
 ```
 
 ### C#
@@ -97,10 +98,10 @@ public partial class EnemyAI : CharacterBody2D
         _btPlayer.Updated += OnBtUpdated;
     }
 
-    private void OnBtUpdated(int status)
+    private void OnBtUpdated(long status) // int signal args are long in C#
     {
-        if (status == (int)BT.Status.Success)
-            _btPlayer.Restart();
+        if (status == (long)BT.Status.Success)
+            _btPlayer.Active = false; // a finished tree starts over on its own
     }
 }
 ```
@@ -158,10 +159,10 @@ func _setup() -> void:
     _max_sq = distance_max * distance_max
 
 func _tick(_delta: float) -> Status:
-    var target: Node2D = blackboard.get_var(target_var, null)
+    var target = blackboard.get_var(target_var, null)  # untyped: see §5
     if not is_instance_valid(target):
         return FAILURE
-    var in_range := agent.global_position.distance_squared_to(
+    var in_range: bool = agent.global_position.distance_squared_to(
         target.global_position) <= _max_sq
     return SUCCESS if in_range else FAILURE
 ```
@@ -317,14 +318,14 @@ using Godot;
 
 public partial class Character : CharacterBody2D
 {
-    [Export] private LimboHSM _hsm;
+    [Export] private LimboHsm _hsm; // C# name of LimboHSM
     [Export] private LimboState _idle;
     [Export] private LimboState _move;
 
     public override void _Ready()
     {
-        _hsm.AddTransition(_idle, _move, _idle.EventFinished);
-        _hsm.AddTransition(_move, _idle, _move.EventFinished);
+        _hsm.AddTransition(_idle, _move, _idle.EVENTFINISHED);
+        _hsm.AddTransition(_move, _idle, _move.EVENTFINISHED);
         _hsm.Initialize(this);
         _hsm.SetActive(true);
     }
@@ -371,7 +372,7 @@ public partial class IdleState : LimboState
     public override void _Update(double delta)
     {
         if (Input.GetVector("ui_left", "ui_right", "ui_up", "ui_down").Length() > 0.1f)
-            Dispatch(EventFinished);
+            Dispatch(EVENTFINISHED);
     }
 }
 ```
@@ -390,4 +391,3 @@ public partial class IdleState : LimboState
 - [ ] HSM: all `LimboState` nodes wired with `add_transition` before `initialize()`
 - [ ] HSM: `set_active(true)` called after `initialize()`
 - [ ] HSM transitions are exhaustive — every reachable state has an exit path
-- [ ] `BBParam` inspector binding: use module build; GDExtension lacks the param editor UI

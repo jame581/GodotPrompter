@@ -22,7 +22,7 @@ All examples target Godot 4.3+ with no deprecated APIs. GDScript is shown first,
 | `CPUParticles2D`    | CPU        | Simpler, no trails/attractors           | Low-end devices, few particles |
 | `CPUParticles3D`    | CPU        | Simpler, no trails/attractors           | Low-end devices, few particles |
 
-**Rule of thumb:** Use GPU particles by default. Switch to CPU particles only for low-end/web targets or when you need CPU-side particle positions (e.g., spawning objects at particle locations).
+**Rule of thumb:** Use GPU particles by default. Switch to CPU particles only for low-end/web targets. Neither node exposes per-particle positions to scripts, so spawning objects at particle locations needs your own simulation.
 
 > You can convert between GPU and CPU particles in the editor: select the node → toolbar → **Convert to CPUParticles2D/3D** (or vice versa).
 
@@ -185,7 +185,7 @@ Set `trail_enabled = true` on `GPUParticles2D/3D` and assign a `Mesh` (`RibbonTr
 
 ## 6. Subemitters
 
-A particle can spawn another particle scene at lifecycle events (birth, collision, death, manual). Configure via `ParticleProcessMaterial.SubEmitterMode` + `subemitter` property on the parent particles node.
+A particle can make another particle system emit at a constant rate, at collision, at its death, or (Godot 4.4+) at its birth. Configure via `ParticleProcessMaterial.sub_emitter_mode` + the `sub_emitter` property on the parent particles node.
 
 > See [references/subemitters.md](references/subemitters.md) for trigger modes, scene setup, GDScript and C# (v1.6.0 parity), and limitations.
 
@@ -195,7 +195,7 @@ A particle can spawn another particle scene at lifecycle events (birth, collisio
 
 ## 7. Attractors & Collision (3D)
 
-`GPUParticlesAttractor*3D` (Box / Sphere / Vector Field) pulls particles toward a region. `GPUParticlesCollision*3D` (Box / Sphere / SDF / HeightField) lets particles bounce off geometry. Both Forward+/Mobile only; no 2D equivalents.
+`GPUParticlesAttractor*3D` (Box / Sphere / Vector Field) pulls particles toward a region. `GPUParticlesCollision*3D` (Box / Sphere / SDF / HeightField) lets particles bounce off geometry. Compatibility runs box/sphere attractors and box/sphere/height-field colliders; vector-field attractors and SDF colliders need Forward+ or Mobile. 2D has no attractor nodes, but `GPUParticles2D` collide with `LightOccluder2D` nodes when `collision_mode` is set.
 
 > See [references/attractors-and-collision.md](references/attractors-and-collision.md) for full setup of each attractor and collision type.
 
@@ -203,7 +203,7 @@ A particle can spawn another particle scene at lifecycle events (birth, collisio
 
 ## 8. Turbulence
 
-Set `turbulence_enabled = true` on `ParticleProcessMaterial` and tune `turbulence_noise_strength` (0.5–2.0 typical), `turbulence_noise_scale` (lower = larger swirls), `turbulence_noise_speed` (animate the noise field). Cheap effect for "alive" smoke, fire, dust.
+Set `turbulence_enabled = true` on `ParticleProcessMaterial` and tune `turbulence_noise_strength` (0.5–2.0 typical), `turbulence_noise_scale` (higher = larger, smoother swirls), `turbulence_noise_speed` (animate the noise field). Cheap effect for "alive" smoke, fire, dust.
 
 ---
 
@@ -217,9 +217,9 @@ Sprite-sheet animated particles via `ParticleProcessMaterial.AnimSpeedMin/Max` +
 
 ## 10. Performance and Common Pitfalls
 
-The biggest wins are the obvious ones: keep `amount` at the minimum that reads well, set `fixed_fps = 30` for ambient systems, always set `visibility_rect` on 2D particles, and expose `amount_ratio` as a quality slider. Godot 4.7+ adds `request_particles_process()` for seeking a paused timeline.
+The biggest wins are the obvious ones: keep `amount` at the minimum that reads well, keep `fixed_fps` at its default 30 for ambient systems (0 updates every frame), always set `visibility_rect` on 2D particles, and expose `amount_ratio` as a quality slider. Godot 4.7+ adds `request_particles_process()` for seeking a paused timeline.
 
-Most "broken particles" reports are one of eleven known causes — invisible (no texture / no draw-pass mesh), vanishing (`lifetime` too short), one-shot not re-firing (needs `restart()` first), wrong direction (2D Y is inverted), or a base `color` silently overriding `color_ramp`.
+Most "broken particles" reports are one of eleven known causes — invisible (no texture / no draw-pass mesh), vanishing (`lifetime` too short), one-shot not re-firing (`emitting = true` is ignored until the last burst's particles finish; `restart()` re-fires at once), wrong direction (2D Y is inverted), or a dark base `color`, which multiplies `color_ramp`.
 
 Full performance table, the 4.7+ timeline-seek API, dynamic quality scaling (GDScript + C#), and the complete symptom/cause/fix table: [references/performance-and-pitfalls.md](references/performance-and-pitfalls.md)
 

@@ -9,7 +9,7 @@ Reference for `skills/dedicated-server/SKILL.md` — Dockerfile, Linux VPS setup
 
 ### Dockerfile
 
-The server binary must be the Linux server export (`dedicated_server` feature enabled). Build a minimal container from the exported binary and its PCK file.
+The server binary is the Linux export made with the **Export as dedicated server** mode (`dedicated_server` feature enabled). Build a minimal container from the exported binary and its PCK file (for C#, also the `data_*` folder — see the end of this page).
 
 ```dockerfile
 # Dockerfile
@@ -130,7 +130,7 @@ func log_error(msg: String) -> void:
     push_error("[ERROR] %s  %s" % [Time.get_datetime_string_from_system(), msg])
 ```
 
-When exporting a C# dedicated server, ensure the .NET runtime is bundled in the export preset (Project → Export → Dotnet → Include Scripts Content = enabled, and the target system has the matching `dotnet` runtime installed).
+A C# export is published self-contained: the assemblies and the .NET runtime go into a `data_<ProjectName>_<platform>_<arch>` folder next to the binary (inside the binary instead with the `dotnet/embed_build_outputs` export option). Copy that folder with the binary and PCK; the target system needs no `dotnet` install. (`dotnet/include_scripts_content` only controls whether the `.cs` source files go into the PCK.)
 
 ```csharp
 using Godot;

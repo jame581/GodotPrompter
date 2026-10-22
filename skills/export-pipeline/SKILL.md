@@ -7,7 +7,7 @@ description: Use when exporting and distributing Godot games — export presets,
 
 All examples target Godot 4.3+ with no deprecated APIs. GDScript is shown first, C# follows where applicable.
 
-> **Related skills:** **godot-testing** for CI/CD test integration, **godot-optimization** for pre-export performance checks, **responsive-ui** for platform-specific resolution settings, **mobile-development** for Android/iOS export specifics.
+> **Related skills:** **godot-testing** for CI/CD test integration, **godot-optimization** for pre-export performance checks, **responsive-ui** for platform-specific resolution settings, **mobile-development** for Android/iOS export specifics, **web-export** for browser builds and hosting.
 
 ---
 
@@ -23,7 +23,7 @@ Required one-time setup per platform:
 
 ### export_presets.cfg
 
-Godot writes `export_presets.cfg` to the project root. Commit this file — it is safe and contains no secrets. Secrets (codesigning passwords, keystore passwords) must **never** be committed; use environment variables instead.
+Godot writes `export_presets.cfg` to the project root. Commit this file: options marked secret (keystore and codesign paths and passwords, the encryption key) go to `.godot/export_credentials.cfg` instead, which must **never** be committed. In CI, supply them via env vars such as `GODOT_ANDROID_KEYSTORE_RELEASE_PASSWORD`.
 
 Example preset structure (Windows release):
 
@@ -54,8 +54,6 @@ texture_format/s3tc_bptc=true
 texture_format/etc2_astc=false
 binary_format/architecture="x86_64"
 codesign/enable=false
-codesign/identity=""
-codesign/password=""
 codesign/timestamp=true
 codesign/timestamp_server_url=""
 codesign/digest_algorithm=1
@@ -83,7 +81,7 @@ ssh_remote_deploy/run_script="#!/usr/bin/env bash\nexport DISPLAY=:0\n\"{temp_di
 ssh_remote_deploy/cleanup_script="#!/usr/bin/env bash\nkill $(pgrep -x -f \"{temp_dir}/{exe_name} {cmd_args}\")\nrm -rf \"{temp_dir}\""
 ```
 
-> Godot regenerates `export_presets.cfg` on every editor save. Do not hand-edit it while the editor is open.
+> The editor rewrites `export_presets.cfg` whenever a preset changes. Do not hand-edit it while the editor is open.
 
 > ⚠️ **Changed in Godot 4.7:** The "runnable" flag moved out of export presets — `runnable=` (shown in the example above for 4.3–4.6) is no longer a per-preset property in `export_presets.cfg`; a 4.7 editor writes a top-level `[runnable_presets]` section (platform name → preset name) in the same file, and still reads the legacy key. Don't be surprised when the line disappears from the file after saving in a 4.7 editor. See [GH-114930](https://github.com/godotengine/godot/pull/114930).
 
@@ -96,11 +94,11 @@ ssh_remote_deploy/cleanup_script="#!/usr/bin/env bash\nkill $(pgrep -x -f \"{tem
 | Platform  | Key Setting / Consideration                                                                                                                      |
 |-----------|--------------------------------------------------------------------------------------------------------------------------------------------------|
 | **Windows** | Set `application/icon` (.ico file). Codesigning requires a `.pfx` certificate; set `codesign/enable=true` and supply `codesign/identity` + `codesign/password` via env vars. Without codesigning, Windows SmartScreen will warn users. |
-| **Linux**   | No codesigning required. After export, run `chmod +x MyGame.x86_64` on the binary. Ship as a tarball or AppImage for distribution. |
-| **macOS**   | Requires notarization for Gatekeeper to allow launch without warning. Set `codesign/enable=true` and `notarization/enable=true`. Provide the `codesign/identity` (Apple Developer ID). The `Info.plist` entries (bundle ID, version, display name, privacy usage descriptions) are set under `application/*` options in the preset. Notarization is done post-export via `xcrun notarytool`. |
-| **Web**     | Requires `SharedArrayBuffer` for multi-threading — the web server must send `Cross-Origin-Opener-Policy: same-origin` and `Cross-Origin-Embedder-Policy: require-corp` headers. Disable threads (`rendering/threads/thread_model=0`) if hosting on a server you cannot configure. Exported output is a `.html` + `.js` + `.wasm` + `.pck` bundle. |
+| **Linux**   | No codesigning required. The binary is written executable (0755); re-run `chmod +x` if an upload or archive step drops the bit. Ship as a tarball or AppImage for distribution. |
+| **macOS**   | Requires notarization for Gatekeeper to allow launch without warning. Set `codesign/codesign` (rcodesign, or Xcode codesign on a Mac) and `notarization/notarization` (rcodesign or Xcode notarytool); the export submits for notarization. `Info.plist` entries are `application/*` (bundle ID, version) and `privacy/*` (usage descriptions). |
+| **Web**     | Compatibility renderer only, and no C#. The preset's `variant/thread_support` is off by default (Godot 4.3+), so the build runs on any static host; a threaded build needs `Cross-Origin-Opener-Policy: same-origin` and `Cross-Origin-Embedder-Policy: require-corp` headers. Exported output is a `.html` + `.js` + `.wasm` + `.pck` bundle. Details: **web-export**. |
 | **Android** | Requires a keystore for release signing. Set `keystore/release` to the `.keystore` path and supply `keystore/release_user` + `keystore/release_password` via env vars. Declare permissions in the preset under `permissions/*`. Set `package/unique_name` to a reverse-DNS string (e.g., `com.studio.mygame`). |
-| **iOS**     | Requires a valid Apple provisioning profile (`.mobileprovision`). Set `application/bundle_identifier`, `codesign/identity`, and `application/provisioning_profile`. Distribution builds require an App Store distribution certificate. |
+| **iOS**     | Requires a valid Apple provisioning profile (`.mobileprovision`). Set `application/bundle_identifier`, `application/code_sign_identity_release`, and `application/provisioning_profile_uuid_release`. Distribution builds require an App Store distribution certificate. |
 
 ---
 
@@ -158,7 +156,7 @@ packer.Flush();
 | `--export-release "Preset Name" path` | Export using release template |
 | `--export-debug "Preset Name" path` | Export using debug template |
 | `--export-pack "Preset Name" path` | Export .pck resource pack only |
-| `--quit-after N` | Quit after N milliseconds (rarely needed for export) |
+| `--quit-after N` | Quit after N main-loop iterations (rarely needed for export) |
 
 > The preset name in the CLI flag must match `name=` in `export_presets.cfg` exactly, including capitalisation and spaces.
 
@@ -174,7 +172,7 @@ See [references/ci-cd-github-actions.md](references/ci-cd-github-actions.md) for
 
 ## 5. Versioning
 
-Set the version in `application/config/version` and read it at runtime with `ProjectSettings.get_setting()`. To inject a version from git at export time, run an `EditorScript` that calls `git describe --tags --always --dirty` through `OS.execute()` before the export step. Tags follow Semantic Versioning (`v1.2.3`).
+Set the version in `application/config/version` and read it at runtime with `ProjectSettings.get_setting()`. To inject a version from git at export time, run a `--script` tool (a script extending `SceneTree`) that calls `git describe --tags --always --dirty` through `OS.execute()` before the export step. Tags follow Semantic Versioning (`v1.2.3`).
 
 > See [references/versioning.md](references/versioning.md) for the runtime version label, the `inject_version.gd` tool, and the tag convention.
 
@@ -253,9 +251,9 @@ Before Godot 4.5, modifying `.exe` metadata (version info, icon, copyright, comp
 - [ ] Secrets (keystore passwords, codesign passwords, API keys) stored in env vars or CI secrets, never in the file
 - [ ] Each preset has a unique `name=` that matches the CLI `--export-release` argument exactly
 - [ ] Output directories created before the export command runs (`mkdir -p`)
-- [ ] Linux binary marked executable after export (`chmod +x`)
+- [ ] Linux binary still executable after packaging (`chmod +x` if the bit was lost)
 - [ ] `application/config/version` in project.godot is populated at export time from a git tag
-- [ ] Web export: hosting server sends `COOP` + `COEP` headers if threads are enabled
+- [ ] Web export: thread support left off, or the host sends `COOP` + `COEP` headers (see **web-export**)
 - [ ] Android release preset uses a signed keystore, not the debug keystore
 - [ ] macOS builds intended for distribution are codesigned and notarized
 - [ ] Artifacts are uploaded per-platform in CI so individual platform builds can be downloaded

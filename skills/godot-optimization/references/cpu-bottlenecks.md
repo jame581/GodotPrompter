@@ -10,7 +10,7 @@ Reference for `skills/godot-optimization/SKILL.md` — GDScript performance patt
 
 ### Avoid Allocations in _process
 
-Allocating new objects (Arrays, Dictionaries, Vector2/3 via constructor, Strings) inside `_process` or `_physics_process` triggers the garbage collector more frequently and creates per-frame heap pressure.
+Allocating new heap objects (Arrays, Dictionaries, Strings) inside `_process` or `_physics_process` costs an allocation and a free every frame. GDScript has no garbage collector (it frees by reference counting); in C#, managed allocations also feed the GC. `Vector2`/`Vector3` are stored inline and do not allocate.
 
 ```gdscript
 # WRONG — allocates a new Array every frame

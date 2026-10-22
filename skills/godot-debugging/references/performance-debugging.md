@@ -41,15 +41,16 @@ GD.Print($"RunExpensiveOperation took: {elapsed} µs");
 | `Time > FPS` | Below target (e.g. 60 fps) indicates frame budget overrun |
 | `Time > Process` | High value means `_process()` callbacks are expensive |
 | `Time > Physics Process` | High value means `_physics_process()` or physics sim is expensive |
-| `Render > Total Draw Calls` | Above ~500 on mobile or ~2000 on desktop may need batching |
-| `Render > Video RAM` | Steadily growing value indicates a memory leak (unfreed textures/meshes) |
-| `Object > Object Count` | Growing count across identical scenes indicates nodes are not freed |
-| `Physics 3D > Active Bodies` | Large count with simple scenes suggests objects are not sleeping |
+| `Raster > Total Draw Calls` | Above ~500 on mobile or ~2000 on desktop may need batching |
+| `Video > Video Mem` | Steadily growing value indicates a memory leak (unfreed textures/meshes) |
+| `Object > Objects` | Growing count across identical scenes indicates nodes are not freed |
+| `Physics 3D > Active Objects` | Large count with simple scenes suggests objects are not sleeping |
 
 ### Identifying Draw Call Bottlenecks
 
 ```gdscript
-# Reduce draw calls with VisibleOnScreenNotifier3D — pause processing when off-screen
+# Skip _process work while off-screen with VisibleOnScreenNotifier3D. This saves CPU,
+# not draw calls — the renderer already culls off-screen objects.
 @onready var _vis: VisibleOnScreenNotifier3D = $VisibleOnScreenNotifier3D
 
 func _ready() -> void:
@@ -64,7 +65,8 @@ func _on_screen_exited() -> void:
 ```
 
 ```csharp
-// Reduce draw calls with VisibleOnScreenNotifier3D — pause processing when off-screen
+// Skip _Process work while off-screen with VisibleOnScreenNotifier3D. This saves CPU,
+// not draw calls — the renderer already culls off-screen objects.
 private VisibleOnScreenNotifier3D _vis;
 
 public override void _Ready()
@@ -78,7 +80,7 @@ private void OnScreenEntered() => SetProcess(true);
 private void OnScreenExited() => SetProcess(false);
 ```
 
-- Enable **Rendering > Debug > Draw Calls** in the editor Viewport menu to visualise batching.
+- Turn on **View Information** in the 3D viewport's menu to see the editor view's draw-call count.
 - Use `RenderingServer.get_rendering_info(RenderingServer.RENDERING_INFO_TOTAL_DRAW_CALLS_IN_FRAME)` for runtime draw call counts.
 
 ### Physics Tick Monitoring

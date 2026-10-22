@@ -74,11 +74,11 @@ func _process(_delta: float) -> void:
     if not Engine.is_editor_hint():
         return
     # Draw debug primitives that only show in the editor
-    DebugDraw.draw_sphere(global_position, 1.0, Color.RED)
+    DebugDraw.draw_sphere(global_position, 1.0, Color.RED)  # addon (e.g. Debug Draw 3D) — Godot has no built-in debug-draw API
 ```
 
 ## 4. Common `@tool` bugs
 
-- **Editor freeze on script reload** — usually an infinite loop in a setter that triggers itself. Always guard setters with a `value != current` check.
-- **Crash on add to scene** — touching `get_tree()` or `get_viewport()` before the node is in the tree. Use `if is_inside_tree():` guards.
-- **Settings lost on reload** — using `@onready` for tool state. `@onready` doesn't fire reliably in editor — use `_ready` with `is_editor_hint()` checks.
+- **Editor freeze on script reload** — usually an expensive rebuild in a setter: it runs for every property as the scene loads and on every Inspector drag. Assigning the property inside its own setter does not recurse, but two setters that set each other do. Guard with an `if value == current: return` check.
+- **Errors on add to scene** — touching `get_tree()` or `get_viewport()` before the node is in the tree (exported setters run first); they return `null` with an error. Use `if is_inside_tree():` guards.
+- **Settings lost on reload** — using `@onready` for tool state. `@onready` values are set only when `_ready()` runs, and after a tool script is reloaded in the editor `_ready()` may not run again — fetch nodes on demand, or use `_ready` with `is_editor_hint()` checks.

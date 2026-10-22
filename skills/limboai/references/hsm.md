@@ -19,8 +19,8 @@ hsm.add_transition(hsm.ANYSTATE, dead_state, &"died")
 ### C#
 
 ```csharp
-_hsm.AddTransition(_hsm.Anystate, _stunnedState, "stunned");
-_hsm.AddTransition(_hsm.Anystate, _deadState, "died");
+_hsm.AddTransition(_hsm.ANYSTATE, _stunnedState, "stunned");
+_hsm.AddTransition(_hsm.ANYSTATE, _deadState, "died");
 ```
 
 ---
@@ -83,11 +83,11 @@ func _init_hsm() -> void:
 ### C#
 
 ```csharp
-// Fluent chaining (.Named()/.CallOnEnter()) is GDScript-only via LimboState builder methods.
-// In C# assign properties and connect signals instead.
+// The chained builders (Named(), CallOnEnter(), CallOnUpdate()) are bound methods, so the
+// module build's C# API has them too; this version sets Name and connects the signals directly.
 private void InitHsm()
 {
-    var hsm = new LimboHSM();
+    var hsm = new LimboHsm(); // C# name of LimboHSM
     AddChild(hsm);
 
     var idle = new LimboState { Name = "Idle" };
@@ -140,7 +140,7 @@ func _ready() -> void:
 ```csharp
 public override void _Ready()
 {
-    var hsm = new LimboHSM();
+    var hsm = new LimboHsm();
     AddChild(hsm);
 
     var patrol = new BTState();
@@ -175,7 +175,7 @@ hsm.dispatch(&"player_spotted")
 
 ```csharp
 // From inside a LimboState subclass:
-Dispatch(EventFinished);
+Dispatch(EVENTFINISHED);
 Dispatch("stunned", damageInfo);
 
 // From outside:

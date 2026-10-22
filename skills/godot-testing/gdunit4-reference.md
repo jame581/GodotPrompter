@@ -22,8 +22,10 @@ git submodule add https://github.com/MikeSchulze/gdUnit4.git addons/gdUnit4
 **C# projects — add NuGet package**
 
 ```bash
-dotnet add package gdUnit4.api
+dotnet add package gdUnit4.api --version 4.3.1   # Godot 4.3
 ```
+
+> **Version:** the examples here are written for `gdUnit4.api` 4.3.x, which works on Godot 4.3. `gdUnit4.api` 5.x requires Godot 4.4+ (it depends on GodotSharp 4.4.0) and runs tests without the engine by default: mark a suite or test that uses nodes, scenes or resources with `[RequireGodotRuntime]` (the attribute does not exist in 4.3.x).
 
 Then enable the plugin in **Project > Project Settings > Plugins**.
 
@@ -35,7 +37,7 @@ Then enable the plugin in **Project > Project Settings > Plugins**.
 
 | Convention   | Rule                                                                  |
 |--------------|-----------------------------------------------------------------------|
-| File name    | Must start with `test_` (e.g., `test_health_component.gd`)           |
+| File name    | Any; suites are found by `extends GdUnitTestSuite` (generated: `*_test.gd`) |
 | Class        | `extends GdUnitTestSuite`                                             |
 | Test method  | Must start with `func test_`                                          |
 
@@ -52,7 +54,7 @@ func test_example() -> void:
 | Convention   | Rule                                                                  |
 |--------------|-----------------------------------------------------------------------|
 | File name    | Any name; `*Test.cs` is the convention                               |
-| Class        | Decorated with `[TestSuite]`; inherits `GdUnit4.GdUnitTestSuite`     |
+| Class        | Decorated with `[TestSuite]`; a plain class, no base class          |
 | Test method  | Decorated with `[TestCase]`                                           |
 
 ```csharp
@@ -61,7 +63,7 @@ using GdUnit4;
 using static GdUnit4.Assertions;
 
 [TestSuite]
-public partial class HealthComponentTest : GdUnit4.GdUnitTestSuite
+public class HealthComponentTest
 {
     [TestCase]
     public void Example()
@@ -108,7 +110,7 @@ func after_test() -> void:
 
 ```csharp
 [TestSuite]
-public partial class ExampleTest : GdUnit4.GdUnitTestSuite
+public class ExampleTest
 {
     [Before]
     public void Before()
@@ -157,7 +159,7 @@ func before_test() -> void:
 public void BeforeTest()
 {
     _health = AutoFree(new HealthComponent());
-    AddChild(_health);
+    ((SceneTree)Engine.GetMainLoop()).Root.AddChild(_health); // suites are not Nodes
 }
 ```
 
@@ -188,7 +190,7 @@ assert_that(n).is_greater_equal(x)
 assert_that(n).is_less(x)
 assert_that(n).is_less_equal(x)
 assert_that(n).is_between(low, high)        # inclusive
-assert_that(n).is_approximately(expected, margin)
+assert_that(n).is_equal_approx(expected, margin)
 assert_that(n).is_negative()
 assert_that(n).is_zero()
 ```
@@ -212,7 +214,8 @@ assert_that(str).has_length(n)
 assert_that(arr).is_equal([1, 2, 3])
 assert_that(arr).contains([2, 3])           # subset check
 assert_that(arr).not_contains([4])
-assert_that(arr).contains_exactly([1, 2, 3]) # exact match, any order
+assert_that(arr).contains_exactly([1, 2, 3]) # same elements, same order
+assert_that(arr).contains_exactly_in_any_order([3, 1, 2])
 assert_that(arr).is_empty()
 assert_that(arr).is_not_empty()
 assert_that(arr).has_size(n)
@@ -225,10 +228,10 @@ func test_signal() -> void:
     var monitor := monitor_signals(_health)
     _health.take_damage(10)
 
-    assert_signal(monitor).is_emitted("health_changed")
-    assert_signal(monitor).is_emitted("health_changed").with_parameters([100, 90])
-    assert_signal(monitor).is_not_emitted("died")
-    assert_signal(monitor).is_emitted("health_changed").exactly(1)
+    # is_emitted() waits for the signal (default timeout 2000 ms), so await it.
+    await assert_signal(monitor).is_emitted("health_changed")
+    await assert_signal(monitor).is_emitted("health_changed", [100, 90])  # with these args
+    await assert_signal(monitor).wait_until(500).is_not_emitted("died")
 ```
 
 ---
@@ -262,7 +265,7 @@ AssertThat(n).IsGreaterEqual(x);
 AssertThat(n).IsLess(x);
 AssertThat(n).IsLessEqual(x);
 AssertThat(n).IsBetween(low, high);
-AssertThat(n).IsApproximately(expected, margin);
+AssertThat(n).IsEqualApprox(expected, margin);
 AssertThat(n).IsNegative();
 AssertThat(n).IsZero();
 ```
@@ -296,16 +299,14 @@ AssertThat(arr).HasSize(n);
 
 ```csharp
 [TestCase]
-public async GdUnitAwaiter SignalTest()
+public async Task SignalTest()
 {
-    var monitor = MonitorSignals(_health);
+    AssertSignal(_health).StartMonitoring(); // before the emit, or it is missed
     _health.TakeDamage(10);
 
-    AssertSignal(monitor).IsEmitted("health_changed");
-    AssertSignal(monitor).IsEmitted("health_changed").WithArgs(100, 90);
-    AssertSignal(monitor).IsNotEmitted("died");
-    AssertSignal(monitor).IsEmitted("health_changed").Exactly(1);
-    await Task.CompletedTask;
+    await AssertSignal(_health).IsEmitted(HealthComponent.SignalName.HealthChanged).WithTimeout(100);
+    await AssertSignal(_health).IsEmitted(HealthComponent.SignalName.HealthChanged, 100, 90).WithTimeout(100);
+    await AssertSignal(_health).IsNotEmitted(HealthComponent.SignalName.Died).WithTimeout(100);
 }
 ```
 
@@ -315,7 +316,7 @@ public async GdUnitAwaiter SignalTest()
 
 ```gdscript
 # Create a mock (all methods stubbed to return null/defaults)
-var mock_health := mock(HealthComponent)
+var mock_health = mock(HealthComponent)
 
 # Stub a return value
 do_return(75).on(mock_health).get_health()
@@ -329,15 +330,15 @@ _player.health = mock_health
 _player.receive_hit(10)
 
 verify(mock_health).take_damage(10)
-verify(mock_health, times(1)).take_damage(10)    # called exactly once
+verify(mock_health, 1).take_damage(10)           # called exactly once
 verify_no_interactions(mock_health)              # use before any calls
 
 # Spy — wraps a real object, keeps real behavior, but tracks calls
-var spy_health := spy(HealthComponent.new())
+var spy_health = spy(HealthComponent.new())
 add_child(auto_free(spy_health))
 spy_health.take_damage(10)
 
-assert_eq(spy_health.current_health, 90)         # real method ran
+assert_that(spy_health.current_health).is_equal(90)  # real method ran
 verify(spy_health).take_damage(10)               # call was tracked
 ```
 
@@ -345,85 +346,61 @@ verify(spy_health).take_damage(10)               # call was tracked
 
 ## Mocking API — C#
 
+gdUnit4Net (`gdUnit4.api`) has no mocking API: `mock()`, `spy()` and `verify()` are GDScript-only. In C#, hand-roll a fake — subclass the dependency (its methods must be `virtual`) or inject an interface — and assert on what it recorded:
+
 ```csharp
-// Create a mock (all methods stubbed)
-var mockHealth = Mock<HealthComponent>();
+public partial class FakeHealth : HealthComponent
+{
+    public int LastDamage { get; private set; } = -1;
+    public override void TakeDamage(int amount) => LastDamage = amount;
+}
 
-// Stub method return value
-mockHealth.MockMethod(h => h.GetHealth(), 75);
-mockHealth.MockProperty(h => h.CurrentHealth, 75);
-
-// Use the mock
-_player.HealthComponent = mockHealth;
+// In a [TestCase]
+var fakeHealth = AutoFree(new FakeHealth());
+_player.HealthComponent = fakeHealth;
 _player.ReceiveHit(10);
-
-// Verify calls
-Verify(mockHealth).TakeDamage(10);
-Verify(mockHealth, Times(1)).TakeDamage(10);
-VerifyNoInteractions(mockHealth);
-
-// Spy — real object with call tracking
-var spyHealth = Spy(new HealthComponent());
-AddChild(AutoFree(spyHealth));
-spyHealth.TakeDamage(10);
-
-AssertThat(spyHealth.CurrentHealth).IsEqual(90);  // real behavior
-Verify(spyHealth).TakeDamage(10);                 // call tracked
+AssertThat(fakeHealth.LastDamage).IsEqual(10);
 ```
 
 ---
 
 ## CLI Commands
 
-### GDScript tests only
+The plugin ships `addons/gdUnit4/runtest.sh` / `runtest.cmd` (set `GODOT_BIN` first), which run `res://addons/gdUnit4/bin/GdUnitCmdTool.gd`. The same tool runs C# suites too when Godot is the .NET build.
 
 ```bash
-godot --headless \
-  -s addons/gdUnit4/GdUnitRunner.gd \
-  -- \
-  --testsuites res://tests
+export GODOT_BIN=/path/to/godot
+./addons/gdUnit4/runtest.sh -a res://tests
 ```
 
-### C# tests (requires .NET Godot build)
-
-```bash
-godot --headless \
-  -s addons/gdUnit4/bin/GdUnit4CSharpApiLoader.cs \
-  -- \
-  --testsuites res://tests
-```
+gdUnit4 refuses to run under `--headless` (exit code 103) unless you pass `--ignoreHeadlessMode`; tests that send input events do not work headless.
 
 ### Common CLI flags
 
 | Flag                          | Description                                          |
 |-------------------------------|------------------------------------------------------|
-| `--testsuites <path>`         | Path to test directory or specific file              |
-| `--report-dir <path>`         | Output directory for HTML/XML reports                |
-| `--report-count <n>`          | Number of reports to keep (default: 20)              |
-| `--verbose`                   | Verbose output                                       |
-| `--ignore-pause`              | Skip `pause()` calls during CI runs                  |
+| `-a, --add <path>`            | Test directory or suite to run                       |
+| `-i, --ignore <suite[:test]>` | Skip a suite or a single test                        |
+| `-c, --continue`              | Keep running after the first failure                 |
+| `-rd, --report-directory <path>` | Output directory for HTML/XML reports             |
+| `-rc, --report-count <n>`     | Number of reports to keep                            |
+| `--ignoreHeadlessMode`        | Allow a `--headless` run                             |
 
 ### Minimal CI invocation
 
 ```bash
-# GDScript
-godot --headless \
-  -s addons/gdUnit4/GdUnitRunner.gd \
-  -- \
-  --testsuites res://tests \
-  --report-dir ./reports
-
-# C# (mixed project)
-godot --headless \
-  -s addons/gdUnit4/bin/GdUnit4CSharpApiLoader.cs \
-  -- \
-  --testsuites res://tests \
-  --report-dir ./reports
+godot --headless --path . \
+  -s -d res://addons/gdUnit4/bin/GdUnitCmdTool.gd \
+  -a res://tests \
+  -rd ./reports \
+  --ignoreHeadlessMode
 ```
 
 ### Exit codes
 
-| Code | Meaning                  |
-|------|--------------------------|
-| 0    | All tests passed         |
-| 1    | One or more tests failed |
+| Code | Meaning                          |
+|------|----------------------------------|
+| 0    | All tests passed                 |
+| 100  | One or more tests failed or errored |
+| 101  | Passed with warnings             |
+| 103  | Headless mode refused            |

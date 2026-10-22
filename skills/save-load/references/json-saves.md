@@ -212,11 +212,12 @@ public partial class SaveManager : Node
     private Godot.Collections.Dictionary SerializePlayer(Node player)
     {
         var p = (CharacterBody2D)player;
+        // "CurrentHealth": Get/Set take the C# member name ("current_health" only for a GDScript component).
         var health = p.GetNode<Node>("HealthComponent");
         return new Godot.Collections.Dictionary
         {
             ["position"]  = new Godot.Collections.Dictionary { ["x"] = p.GlobalPosition.X, ["y"] = p.GlobalPosition.Y },
-            ["health"]    = health.Get("current_health"),
+            ["health"]    = health.Get("CurrentHealth"),
         };
     }
 
@@ -231,7 +232,7 @@ public partial class SaveManager : Node
             {
                 ["scene_path"] = enemy.SceneFilePath,
                 ["position"]   = new Godot.Collections.Dictionary { ["x"] = e.GlobalPosition.X, ["y"] = e.GlobalPosition.Y },
-                ["health"]     = health.Get("current_health"),
+                ["health"]     = health.Get("CurrentHealth"),
             });
         }
         return new Godot.Collections.Dictionary { ["enemies"] = enemies };
@@ -279,7 +280,7 @@ public partial class SaveManager : Node
         var pos = data["position"].AsGodotDictionary();
         p.GlobalPosition = new Vector2(pos["x"].As<float>(), pos["y"].As<float>());
         var health = p.GetNode<Node>("HealthComponent");
-        health.Set("current_health", data["health"].As<int>());
+        health.Set("CurrentHealth", data["health"].As<int>());
     }
 
     private void DeserializeWorld(Node world, Godot.Collections.Dictionary data)
@@ -302,7 +303,7 @@ public partial class SaveManager : Node
             var node   = (Node2D)enemy;
             node.GlobalPosition = new Vector2(pos["x"].As<float>(), pos["y"].As<float>());
             var health = enemy.GetNode<Node>("HealthComponent");
-            health.Set("current_health", e["health"].As<int>());
+            health.Set("CurrentHealth", e["health"].As<int>());
         }
     }
 

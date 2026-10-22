@@ -2,7 +2,7 @@
   "schemaVersion": 1,
   "generatedBy": "scripts/generate-skill-index.mjs",
   "summary": {
-    "skillCount": 56,
+    "skillCount": 59,
     "agentCount": 9
   },
   "skills": [
@@ -33,6 +33,7 @@
       "title": "3D Essentials in Godot 4.3+",
       "description": "Use when working with 3D-specific systems — materials, lighting, shadows, environment, global illumination, fog, LOD, occlusion culling, and decals in Godot 4.3+",
       "relatedSkills": [
+        "rendering-pipeline",
         "player-controller",
         "physics-system",
         "camera-system",
@@ -129,6 +130,8 @@
       ],
       "addon": null,
       "references": [
+        "skills/animation-system/references/animation-markers.md",
+        "skills/animation-system/references/blend-spaces.md",
         "skills/animation-system/references/bone-constraints.md",
         "skills/animation-system/references/common-pitfalls.md",
         "skills/animation-system/references/common-recipes.md",
@@ -357,7 +360,8 @@
         "godot-testing",
         "godot-optimization",
         "responsive-ui",
-        "mobile-development"
+        "mobile-development",
+        "web-export"
       ],
       "addon": null,
       "references": [
@@ -876,6 +880,22 @@
       "source": "skills/procedural-generation/SKILL.md"
     },
     {
+      "name": "rendering-pipeline",
+      "title": "Rendering Pipeline in Godot 4.3+",
+      "description": "Use when choosing a renderer or planning a project's look and frame budget — renderer per platform, lighting strategy and light limits, anti-aliasing, 3D resolution scaling (FSR, MetalFX), SubViewports and render targets, shader stutter, graphics settings menus, and rendering stats",
+      "relatedSkills": [
+        "shader-basics",
+        "godot-optimization",
+        "web-export"
+      ],
+      "addon": null,
+      "references": [
+        "skills/rendering-pipeline/references/graphics-settings.md",
+        "skills/rendering-pipeline/references/subviewports.md"
+      ],
+      "source": "skills/rendering-pipeline/SKILL.md"
+    },
+    {
       "name": "resource-pattern",
       "title": "Resource Pattern in Godot 4.3+",
       "description": "Use when creating data containers in Godot — custom Resources for configuration, items, stats, and editor integration",
@@ -966,7 +986,8 @@
         "skills/shader-basics/references/compositor-effects.md",
         "skills/shader-basics/references/post-processing.md",
         "skills/shader-basics/references/shader-baker.md",
-        "skills/shader-basics/references/stencil-buffer.md"
+        "skills/shader-basics/references/stencil-buffer.md",
+        "skills/shader-basics/references/visual-shaders.md"
       ],
       "source": "skills/shader-basics/SKILL.md"
     },
@@ -1033,6 +1054,43 @@
       "source": "skills/using-godot-prompter/SKILL.md"
     },
     {
+      "name": "web-export",
+      "title": "Web Export in Godot 4.3+",
+      "description": "Use when shipping a Godot game to the browser — Web export preset options, threads vs no-threads and COOP/COEP headers, hosting on itch.io or your own server, PWA, JavaScriptBridge, user:// persistence, audio and input limits, and load size",
+      "relatedSkills": [
+        "export-pipeline",
+        "web-services",
+        "rendering-pipeline",
+        "audio-system",
+        "save-load"
+      ],
+      "addon": null,
+      "references": [
+        "skills/web-export/references/hosting.md",
+        "skills/web-export/references/javascript-bridge.md"
+      ],
+      "source": "skills/web-export/SKILL.md"
+    },
+    {
+      "name": "web-services",
+      "title": "Web Services in Godot 4.3+",
+      "description": "Use when calling web APIs or backends from Godot — HTTPRequest, REST/JSON clients, auth headers, downloads, TLS, WebSocketPeer clients, retries, and keeping secrets out of the build",
+      "relatedSkills": [
+        "multiplayer-basics",
+        "save-load",
+        "web-export",
+        "mobile-development",
+        "multithreading"
+      ],
+      "addon": null,
+      "references": [
+        "skills/web-services/references/downloads-and-uploads.md",
+        "skills/web-services/references/rest-client-patterns.md",
+        "skills/web-services/references/websocket-client.md"
+      ],
+      "source": "skills/web-services/SKILL.md"
+    },
+    {
       "name": "xr-development",
       "title": "XR Development in Godot 4.3+",
       "description": "Use when building VR/AR/XR applications — OpenXR setup, XROrigin3D, hand tracking, controllers, passthrough, and Meta Quest deployment in Godot 4.3+",
@@ -1045,9 +1103,11 @@
       "references": [
         "skills/xr-development/references/controllers-and-input.md",
         "skills/xr-development/references/godot-4-5-features.md",
+        "skills/xr-development/references/godot-4-7-features.md",
         "skills/xr-development/references/grabbing-objects.md",
         "skills/xr-development/references/hand-tracking.md",
         "skills/xr-development/references/passthrough.md",
+        "skills/xr-development/references/spatial-entities.md",
         "skills/xr-development/references/xr-ui.md"
       ],
       "source": "skills/xr-development/SKILL.md"

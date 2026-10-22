@@ -68,10 +68,10 @@ GD.Print($"RunExpensiveOperation: {elapsed} µs");
 | `Time > FPS` | Below target — frame budget overrun |
 | `Time > Process` | High — `_process()` callbacks are expensive |
 | `Time > Physics Process` | High — `_physics_process()` or physics sim is expensive |
-| `Render > Total Draw Calls` | Above ~500 (mobile) or ~2 000 (desktop) — needs batching |
-| `Render > Video RAM` | Steadily growing — unfreed textures or meshes (memory leak) |
-| `Object > Object Count` | Growing across scene reloads — nodes are not being freed |
-| `Physics 3D > Active Bodies` | Large count in simple scenes — bodies not sleeping |
+| `Raster > Total Draw Calls` | Above ~500 (mobile) or ~2 000 (desktop) — needs batching |
+| `Video > Video Mem` | Steadily growing — unfreed textures or meshes (memory leak) |
+| `Object > Objects` | Growing across scene reloads — nodes are not being freed |
+| `Physics 3D > Active Objects` | Large count in simple scenes — bodies not sleeping |
 
 ```gdscript
 # Query any monitor at runtime from code
@@ -95,9 +95,9 @@ GD.Print($"FPS: {fps:F0} | Draw calls: {drawCalls:F0} | VRAM: {videoRam / 1_048_
 
 ## 2. Draw Call Optimization
 
-Every distinct mesh, sprite, or canvas item that cannot be batched with its neighbours costs one draw call. Reducing draw calls is one of the highest-leverage optimisations, especially on mobile — wrap 2D groups sharing a texture in `CanvasGroup`, keep unique-material count low, atlas sprites, and cull off-screen work.
+Every distinct mesh, sprite, or canvas item that cannot be batched with its neighbours costs one draw call. Reducing draw calls is one of the highest-leverage optimisations, especially on mobile. 2D batching is automatic (Compatibility; Forward+/Mobile from 4.4) while neighbouring items share texture and material — so atlas sprites, keep unique-material count low, and cull off-screen work. `CanvasGroup` does not batch: it renders its children to a backbuffer.
 
-> See [references/draw-calls.md](references/draw-calls.md) for the full recipes (CanvasGroup batching constraints, shared shader-parameter materials, texture atlases, `VisibleOnScreenNotifier2D/3D` culling, and 3D LOD swapping).
+> See [references/draw-calls.md](references/draw-calls.md) for the full recipes (2D batch-breaking rules, shared materials with per-instance uniforms, texture atlases, `VisibleOnScreenNotifier2D/3D` culling, and 3D LOD swapping).
 
 ---
 
@@ -119,7 +119,7 @@ Hot-path GDScript wins come from eliminating per-frame allocations, comparing `S
 
 ## 5. Memory Management
 
-Watch `Performance.MEMORY_STATIC` and `OBJECT_COUNT` across scene reloads — steady growth means leaked references. Resources loaded by path are cached and shared; call `.duplicate()` when you need per-instance mutation. Always prefer `queue_free()` for nodes; `free()` inside a self-emitted signal will crash.
+Watch `Performance.MEMORY_STATIC` and `OBJECT_COUNT` across scene reloads — steady growth means leaked references. Resources loaded by path are cached and shared; call `.duplicate()` when you need per-instance mutation. Always prefer `queue_free()` for nodes; `free()` on a node that is emitting a signal is refused in the editor and debug exports ("Object is locked and can't be freed"), but release exports skip that check and free it mid-emission (undefined behaviour).
 
 > See [references/memory-management.md](references/memory-management.md) for the full recipes (Performance singleton queries, ResourceLoader cache semantics, `queue_free` vs `free` table, plus the full GDScript and C# **object pool** implementations for bullets/effects/particles).
 
@@ -129,14 +129,14 @@ Watch `Performance.MEMORY_STATIC` and `OBJECT_COUNT` across scene reloads — st
 
 | Problem | Diagnosis tool | Fix |
 |---|---|---|
-| Too many draw calls | Debugger > Monitors `Render > Total Draw Calls`; Viewport > Debug > Draw Calls overlay | Use `CanvasGroup` for 2D batching; merge meshes for 3D; use texture atlases; reduce unique materials |
-| Heavy GDScript in `_process` | Profiler > Self column shows script functions at top | Move logic to `_physics_process` (runs less often), cache queries, avoid per-frame allocations, consider C# for tight loops |
+| Too many draw calls | Debugger > Monitors `Raster > Total Draw Calls`; Viewport > Debug > Draw Calls overlay | Keep 2D neighbours on one texture and material so they batch; `MultiMeshInstance3D` or merged meshes for 3D; use texture atlases; reduce unique materials |
+| Heavy GDScript in `_process` | Profiler > Self column shows script functions at top | Move logic to `_physics_process` (fixed 60 ticks/s by default — less often than `_process` at high frame rates), cache queries, avoid per-frame allocations, consider C# for tight loops |
 | Excessive signal connections | Profiler shows signal dispatch overhead; manually audit `get_signal_connection_list()` | Remove redundant connections; prefer polling over per-frame signals for high-frequency data; use `CONNECT_ONE_SHOT` for fire-and-forget |
-| Unoptimised TileMap | Profiler shows `TileMap._process` or high draw call count | Split into fewer layers; use a single atlas texture per layer; disable `use_parent_material` if not needed; use `TileMapLayer` (Godot 4.3+) instead of legacy TileMap |
-| Large uncompressed textures | Monitors `Render > Video RAM` is high; check Import dock for texture settings | Enable texture compression (VRAM Compressed) in the Import dock; use mipmaps; halve resolution of assets not viewed up-close |
-| Too many active physics bodies | Monitors `Physics 3D > Active Bodies` is high; slow `_physics_process` in Profiler | Enable sleeping on `RigidBody3D` (`can_sleep = true`); lower physics tick rate; replace distant bodies with fake animations; use layers/masks to narrow collision checks |
-| String operations in hot paths | Profiler shows `String` allocation functions; high GC pressure | Replace `String` comparisons with `StringName` (`&"..."`); avoid `String` formatting in `_process`; build strings once and cache |
-| `instantiate()` in hot paths | Profiler shows `PackedScene.instantiate` with high Self time | Implement object pooling (see `references/memory-management.md`); preload scenes at startup; spawn during loading screens rather than during gameplay |
+| Unoptimised TileMap | High draw call count while the map is on screen | Split into fewer layers; use a single atlas texture per layer; use `TileMapLayer` (Godot 4.3+) instead of legacy TileMap |
+| Large uncompressed textures | Monitors `Video > Video Mem` is high; check Import dock for texture settings | Enable texture compression (VRAM Compressed) in the Import dock; use mipmaps; halve resolution of assets not viewed up-close |
+| Too many active physics bodies | Monitors `Physics 3D > Active Objects` is high; slow `_physics_process` in Profiler | Enable sleeping on `RigidBody3D` (`can_sleep = true`); lower physics tick rate; replace distant bodies with fake animations; use layers/masks to narrow collision checks |
+| String operations in hot paths | Profiler Self time in string-heavy functions; in C#, frequent GC pauses | Replace `String` comparisons with `StringName` (`&"..."`); avoid `String` formatting in `_process`; build strings once and cache |
+| `instantiate()` in hot paths | Profiler shows `PackedScene.instantiate` with high Self time (enable Editor Settings > Debugger > Profile Native Calls) | Implement object pooling (see `references/memory-management.md`); preload scenes at startup; spawn during loading screens rather than during gameplay |
 
 ---
 
@@ -161,7 +161,7 @@ Work through this list before shipping or when investigating a performance compl
 
 **Draw Calls**
 - [ ] Draw call count is within target (≤500 mobile, ≤2 000 desktop).
-- [ ] 2D sprite groups that share a texture are wrapped in `CanvasGroup`.
+- [ ] 2D sprites drawn next to each other share one atlas texture and material, so they batch.
 - [ ] Textures are atlas-packed where possible; duplicate materials are eliminated.
 - [ ] Off-screen nodes use `VisibleOnScreenNotifier2D/3D` to pause processing.
 - [ ] 3D meshes have LOD enabled via import settings or manual swap logic.

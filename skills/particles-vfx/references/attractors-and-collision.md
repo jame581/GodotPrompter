@@ -9,7 +9,7 @@ Reference for `skills/particles-vfx/SKILL.md` — `GPUParticlesAttractor*3D` typ
 
 ### Attractors
 
-Pull or repel particles. Enable **Attractor Interaction** on the ParticleProcessMaterial first.
+Pull or repel particles. **Attractor Interaction** on the ParticleProcessMaterial must stay enabled (it is on by default).
 
 | Node                              | Shape       | Notes                     |
 |-----------------------------------|-------------|---------------------------|
@@ -26,7 +26,7 @@ attractor.attenuation = 1.0   # falloff curve
 attractor.position = Vector3(0, 2, 0)
 add_child(attractor)
 
-# Don't forget to enable on the material!
+# On by default; shown here so a disabled material is easy to spot
 var mat: ParticleProcessMaterial = $GPUParticles3D.process_material
 mat.attractor_interaction_enabled = true
 ```
@@ -52,7 +52,7 @@ Make particles bounce or stop on surfaces.
 | `GPUParticlesCollisionBox3D`        | Box           | Simple, fast                   |
 | `GPUParticlesCollisionSphere3D`     | Sphere        | Simple, fast                   |
 | `GPUParticlesCollisionHeightField3D`| Height field  | Terrain — auto-updates         |
-| `GPUParticlesCollisionSDF3D`        | SDF (baked)   | Complex geometry, Forward+ only |
+| `GPUParticlesCollisionSDF3D`        | SDF (baked)   | Complex geometry; Forward+/Mobile only (not Compatibility) |
 
 Configure collision response on the ParticleProcessMaterial:
 
@@ -92,7 +92,7 @@ mat.TurbulenceInfluenceMin = 0.3f;
 mat.TurbulenceInfluenceMax = 0.8f;
 ```
 
-> **Performance:** 3D noise is GPU-intensive. Use sparingly on mobile/web targets. Higher `noise_scale` values are cheaper but produce weaker turbulence.
+> **Performance:** 3D noise is GPU-intensive. Use sparingly on mobile/web targets. Higher `turbulence_noise_scale` values give smoother noise with larger features; lower values give smaller, more detailed swirls.
 
 ---
 

@@ -8,7 +8,7 @@ Reference for `skills/animation-system/SKILL.md` — the full symptom → cause 
 
 | Symptom                                          | Cause                                                  | Fix                                                                |
 |--------------------------------------------------|--------------------------------------------------------|--------------------------------------------------------------------|
-| Animation snaps instead of blending              | Using `AnimationPlayer.play()` instead of AnimationTree | Switch to AnimationTree with state machine or blend tree           |
+| Animation snaps instead of blending              | `AnimationPlayer` blend time is 0 (the default)        | Set `playback_default_blend_time`, `set_blend_time()` or `play(name, custom_blend)`; use AnimationTree for state machines and blend spaces |
 | AnimationTree does nothing                       | `active` is `false`                                    | Set `anim_tree.active = true` in Inspector or `_ready()`           |
 | `travel()` doesn't transition                    | No transition path between states                      | Add transition arrows in the AnimationTree state machine editor    |
 | Animation plays but sprite doesn't change        | Track targets wrong node path                          | Verify the track's node path matches the actual scene tree         |

@@ -83,7 +83,7 @@ public partial class DialogueLoader : RefCounted
             var line  = new DialogueLine();
             line.Speaker    = entry.TryGetValue("speaker",      out var sp)  ? sp.AsString()                   : "";
             line.Text       = entry.TryGetValue("text",         out var tx)  ? tx.AsString()                   : "";
-            line.Choices    = entry.TryGetValue("choices",      out var ch)  ? ch.AsGodotArray<Dictionary>()   : new Array<Dictionary>();
+            line.Choices    = entry.TryGetValue("choices",      out var ch)  ? ch.AsGodotArray()               : new Array();
             line.NextLineId = entry.TryGetValue("next_line_id", out var nid) ? nid.AsString()                  : "";
             line.Condition  = entry.TryGetValue("condition",    out var cnd) ? cnd.AsString()                  : "";
             data.Lines[id.AsString()] = line;

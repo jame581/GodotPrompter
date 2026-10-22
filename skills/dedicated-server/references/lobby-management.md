@@ -196,6 +196,15 @@ public partial class LobbyManager : Node
         Rpc(MethodName.StartGame);
     }
 
+    // Used by MatchManager (match-flow.md) to clear ready flags between matches.
+    public List<long> GetPlayerIds() => new(_playerList.Keys);
+
+    public void SetPlayerReady(long peerId, bool isReady)
+    {
+        if (_playerList.TryGetValue(peerId, out var data))
+            _playerList[peerId] = data with { Ready = isReady };
+    }
+
     // ── RPCs to clients ────────────────────────────────────────────────────────
 
     [Rpc(MultiplayerApi.RpcMode.Authority, TransferMode = MultiplayerPeer.TransferModeEnum.Reliable)]

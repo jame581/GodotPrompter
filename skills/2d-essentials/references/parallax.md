@@ -9,7 +9,7 @@ Reference for `skills/2d-essentials/SKILL.md` — `Parallax2D` node setup, side-
 
 ### Parallax2D Node (Recommended)
 
-`Parallax2D` is the modern replacement for the deprecated `ParallaxBackground`/`ParallaxLayer` nodes.
+`Parallax2D` (Godot 4.3+) replaces the `ParallaxBackground`/`ParallaxLayer` nodes, which the class reference marks deprecated from Godot 4.5.
 
 **Core Properties:**
 
@@ -18,7 +18,7 @@ Reference for `skills/2d-essentials/SKILL.md` — `Parallax2D` node setup, side-
 | `scroll_scale` | Scroll speed multiplier per axis. `1` = camera speed, `<1` = farther, `>1` = closer, `0` = static |
 | `repeat_size` | Image size for infinite repeat. Set to texture dimensions for seamless tiling |
 | `repeat_times` | Extra repeats behind/in front (increase when zooming out) |
-| `scroll_offset` | Offset for the repeat canvas starting point |
+| `scroll_offset` | Manual offset that the camera does not override (loops when `repeat_size` is set) |
 
 ### Layer Setup Example (Side-Scroller)
 

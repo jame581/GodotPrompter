@@ -104,11 +104,11 @@ Godot uses C# source generators to emit the signal registration, property bindin
 ### Error When Forgotten
 
 ```
-Error CS0260: Missing partial modifier on declaration of type 'Player';
-another partial declaration of this type exists.
+error GD0001: Missing partial modifier on declaration of type 'Player'
+that derives from 'Godot.GodotObject'
 ```
 
-Or the class compiles but signals and `[Export]` properties silently fail to register.
+The build fails, so a missing `partial` cannot slip through.
 
 ### Rule
 
@@ -198,7 +198,7 @@ GDScript's `await` maps to C#'s `await ToSignal(...)`. Godot signals return a `S
 public async void StartCutscene()
 {
     // Wait for a timer to finish
-    await ToSignal(GetTree().CreateTimer(2.0), Timer.SignalName.Timeout);
+    await ToSignal(GetTree().CreateTimer(2.0), SceneTreeTimer.SignalName.Timeout);
 
     // Wait for an animation to finish
     var anim = GetNode<AnimationPlayer>("AnimationPlayer");
@@ -234,7 +234,7 @@ private int ComputeSomethingExpensive()
 
 | GDScript | C# |
 |---|---|
-| `await get_tree().create_timer(1.0).timeout` | `await ToSignal(GetTree().CreateTimer(1.0), Timer.SignalName.Timeout)` |
+| `await get_tree().create_timer(1.0).timeout` | `await ToSignal(GetTree().CreateTimer(1.0), SceneTreeTimer.SignalName.Timeout)` |
 | `await animation_player.animation_finished` | `await ToSignal(animPlayer, AnimationPlayer.SignalName.AnimationFinished)` |
 | `await signal_name` | `await ToSignal(this, SignalName.YourSignal)` |
 
@@ -266,7 +266,7 @@ C# calls into GDScript objects with `Call`, `Get`, and `Set`, and GDScript can u
 - Use C# for systems with tight loops: physics solvers, procedural generation, AI decision trees, data processing.
 - Use GDScript for editor plugins, `@tool` scripts, and rapid iteration on gameplay logic.
 - Mixing languages in the same project is supported — interop cost is minimal for occasional cross-language calls.
-- Avoid `Godot.Collections.Array` for hot paths; prefer typed arrays (`Array<T>`) or native C# arrays (`T[]`) converted at boundaries.
+- Avoid `Godot.Collections.Array` and `Array<T>` in hot paths — `Array<T>` wraps the same engine array, so every element access still marshals a `Variant`. Use `T[]` or `List<T>` and convert at boundaries.
 - `StringName` lookups are O(1) but `StringName` construction is not — cache them if created frequently.
 
 ---
@@ -275,15 +275,15 @@ C# calls into GDScript objects with `Call`, `Get`, and `Set`, and GDScript can u
 
 | Gotcha | Problem | Fix |
 |---|---|---|
-| `Variant` to C# type conversion | `(float)someVariant` throws if the underlying type is `int` | Use `.AsSingle()`, `.AsInt32()`, etc. instead of casts |
+| `Variant` to C# type conversion | `(float)v` is the same call as `v.AsSingle()`: neither throws — `int`, `bool` and numeric strings convert, any other type yields `0` | Check `v.VariantType` when the stored type matters |
 | `null` vs `default(Variant)` | Godot signals passing no value give `default(Variant)`, not C# `null` | Check `.VariantType == Variant.Type.Nil` |
-| `Godot.Collections` vs `System.Collections` | Godot API methods return `Godot.Collections.Array`; passing `List<T>` causes runtime error | Always use `Godot.Collections.Array`/`Dictionary` at Godot API boundaries |
+| `Godot.Collections` vs `System.Collections` | Godot API methods return `Godot.Collections.Array`; a `List<T>` does not convert to `Variant`, so passing one does not compile | Always use `Godot.Collections.Array`/`Dictionary` at Godot API boundaries |
 | Disposing native objects | Calling methods on a freed Godot object throws `ObjectDisposedException` | Check `IsInstanceValid(obj)` before use |
 | `StringName` construction in hot loops | `new StringName("my_signal")` allocates each call | Cache as `private static readonly StringName _signalName = "my_signal";` |
 | Export array types | `[Export] public Array Items;` exports untyped array | Use `[Export] public Godot.Collections.Array<MyResource> Items { get; set; }` |
-| Node path strings | `GetNode("../UI/Label")` fails silently if the path changes | Use `GetNode<Label>("%Label")` with unique names or typed `[Export]` node references |
-| `partial class` forgotten | Source generators silently fail; `[Export]` and `[Signal]` don't register | Every class extending a Godot type must be `partial` |
-| `async void` vs `async Task` | `async void` swallows exceptions | Use `async Task` except for top-level event handlers that Godot calls |
+| Node path strings | `GetNode("../UI/Label")` logs `Node not found` and returns `null` at runtime if the path changes | Use `GetNode<Label>("%Label")` with unique names or typed `[Export]` node references |
+| `partial class` forgotten | Build error GD0001 | Every class extending a Godot type must be `partial` |
+| `async void` vs `async Task` | `async void` cannot be awaited; an `async Task` nobody awaits hides its exception (Godot logs `async void` exceptions) | Return `Task` and await it; keep `async void` for top-level event handlers that Godot calls |
 
 > ⚠️ **Changed in Godot 4.7:** The 4.7 C# assemblies ship several compatibility breaks. Binary-incompatible only (source still compiles — a rebuild suffices): `OptimizedTranslation.Generate()` now returns `bool` instead of `void` (GH-119563). Binary- **and** source-incompatible (code changes required): `Animation.Length` changed type metadata from `float` to `double` (GH-116394) — the C# property is now `double`, so `float len = anim.Length;` no longer compiles — and `Control.AccessibilityLive` changed enum type from `DisplayServer.AccessibilityLiveMode` to `AccessibilityServer.AccessibilityLiveMode` (GH-116839) — update declarations to the `AccessibilityServer` enum. Source-incompatible (existing binaries still load): `RichTextLabel.ImageUpdateMask.WidthInPercent` was renamed to `WidthUnit` (GH-112617; `UPDATE_WIDTH_IN_PERCENT` → `UPDATE_WIDTH_UNIT` in GDScript), and the `EditorSceneFormatImporter` `IMPORT_*` constants moved into the `ImportFlags` enum (GH-115788). Removed: `AudioEffectSpectrumAnalyzer.TapBackPos` (GH-114355). Rebuild against 4.7 and fix the affected symbols. See the [4.7 migration guide](https://docs.godotengine.org/en/latest/tutorials/migrating/upgrading_to_godot_4.7.html).
 

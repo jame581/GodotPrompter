@@ -40,7 +40,7 @@ public partial class WeaponData : Resource
 ```gdscript
 # GDScript — works because WeaponData is a [GlobalClass]
 var data := WeaponData.new()
-data.damage = 50.0
+data.Damage = 50.0  # C# members keep their C# names — no snake_case conversion
 ```
 
 Non-`[GlobalClass]` C# types are not visible to GDScript by name but can still be passed as `Variant`/`Object` references.

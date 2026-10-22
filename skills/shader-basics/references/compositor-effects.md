@@ -100,12 +100,9 @@ public partial class CustomOutlineEffect : CompositorEffect
 
 > **Note:** CompositorEffect uses the low-level `RenderingDevice` API. This is an advanced feature — for most post-processing needs, use WorldEnvironment built-in effects or a SubViewport + shader approach.
 
-### Built-in Compositor Uses
+### Built-in Effects Are Not Compositor Effects
 
-Godot uses the Compositor internally for:
-- **SDFGI** (Signed Distance Field Global Illumination)
-- **VoxelGI** probes
-- **Screen-space reflections**
+SDFGI, VoxelGI, screen-space reflections and the other built-in effects are part of the renderer itself; a `Compositor` holds only the `CompositorEffect`s you add to it. Use the callback type to place your pass relative to them (for example, `POST_SKY` runs before SSR and subsurface scattering).
 
 You can stack multiple CompositorEffects in order. Lower array indices execute first.
 

@@ -40,7 +40,7 @@ var _current_health: int
 
 
 func _ready() -> void:
-    # make_unique() so this instance has its own mutable copy
+    # duplicate() so this instance has its own mutable copy
     stats = stats.duplicate()
     _current_health = stats.health
 

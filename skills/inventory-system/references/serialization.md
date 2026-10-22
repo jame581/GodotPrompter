@@ -1,6 +1,6 @@
 # Inventory Serialization
 
-Reference for `skills/inventory-system/SKILL.md` — save/load via Resource → JSON or ConfigFile, with versioning. GDScript + C#.
+Reference for `skills/inventory-system/SKILL.md` — save/load as `id + quantity` pairs resolved through an `ItemRegistry` autoload. GDScript + C#.
 
 > ← Back to [SKILL.md](../SKILL.md)
 
@@ -30,6 +30,8 @@ func _load_all(folder: String) -> void:
     dir.list_dir_begin()
     var file_name := dir.get_next()
     while file_name != "":
+        # Exported builds list text resources as "name.tres.remap"; load() follows the remap.
+        file_name = file_name.trim_suffix(".remap")
         if file_name.ends_with(".tres"):
             var item: ItemData = load(folder + file_name)
             if item and item.id != "":
@@ -105,6 +107,8 @@ public partial class ItemRegistry : Node
         string fileName = dir.GetNext();
         while (fileName != "")
         {
+            // Exported builds list text resources as "name.tres.remap"; Load() follows the remap.
+            fileName = fileName.TrimSuffix(".remap");
             if (fileName.EndsWith(".tres"))
             {
                 var item = GD.Load<ItemData>(folder + fileName);

@@ -99,7 +99,7 @@ func _get_configuration_warnings() -> PackedStringArray:
 ### C\#
 
 ```csharp
-#if TOOLS
+// No #if TOOLS here: it would remove this game node from exported builds.
 [Tool]
 public partial class EnemySpawner : Node3D
 {
@@ -113,7 +113,6 @@ public partial class EnemySpawner : Node3D
         return warnings.ToArray();
     }
 }
-#endif
 ```
 
 ---

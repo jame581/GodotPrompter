@@ -80,11 +80,11 @@ label.AddThemeFontSizeOverride("font_size", 32);
 Godot resolves theme properties by walking up the scene tree:
 
 1. Node's own `theme_override_*` properties (highest priority).
-2. The nearest ancestor `Control` that has a `theme` resource assigned.
+2. The `theme` of each ancestor `Control` or `Window` that has one, nearest first. The walk stops at the first parent that is neither — a `CanvasLayer`, `Node2D` or plain `Node` cuts the chain.
 3. The project default theme (`Project > Project Settings > GUI > Theme > Custom`).
 4. Godot's built-in fallback theme (lowest priority).
 
-Assign one `Theme` resource at the root `CanvasLayer` or root `Control` of each screen. Avoid assigning themes deep in the tree unless you intentionally want to override a sub-section.
+Assign one `Theme` resource at the root `Control` of each screen (a `CanvasLayer` has no `theme` property). Avoid assigning themes deep in the tree unless you intentionally want to override a sub-section.
 
 ### theme_override_ Methods for Per-Node Styling
 

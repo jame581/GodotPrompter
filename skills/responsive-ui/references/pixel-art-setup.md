@@ -12,7 +12,7 @@ Reference for `skills/responsive-ui/SKILL.md` — project settings for pixel art
 In `Project > Project Settings`:
 
 - `Display > Window > Stretch > Mode` → `viewport`
-- `Display > Window > Stretch > Scale` → `2` (or `3`, `4` — any integer)
+- `Display > Window > Stretch > Scale Mode` → `integer` (leave `Scale` at `1` — in `viewport` mode a scale of 2 halves the internal resolution)
 - `Rendering > Textures > Canvas Textures > Default Texture Filter` → `Nearest`
 
 Setting the texture filter to `Nearest` globally avoids blurry pixels without per-sprite configuration.
@@ -28,19 +28,14 @@ extends Node
 const BASE_SIZE := Vector2i(320, 180)  # pixel art design resolution
 
 func _ready() -> void:
-    get_window().content_scale_size = BASE_SIZE
-    get_window().content_scale_mode = Window.CONTENT_SCALE_MODE_VIEWPORT
-    get_window().content_scale_aspect = Window.CONTENT_SCALE_ASPECT_KEEP
-    _apply_integer_scale()
-    get_viewport().size_changed.connect(_apply_integer_scale)
-
-
-func _apply_integer_scale() -> void:
-    var screen_size := DisplayServer.screen_get_size()
-    var scale_x := screen_size.x / BASE_SIZE.x
-    var scale_y := screen_size.y / BASE_SIZE.y
-    var integer_scale := maxi(1, mini(scale_x, scale_y))
-    get_window().content_scale_factor = float(integer_scale)
+    var window := get_window()
+    window.content_scale_size = BASE_SIZE
+    window.content_scale_mode = Window.CONTENT_SCALE_MODE_VIEWPORT
+    window.content_scale_aspect = Window.CONTENT_SCALE_ASPECT_KEEP
+    # Scale by the largest whole multiple that fits the window; the rest is letterboxed.
+    # Recomputed by the engine on every resize. Do not use content_scale_factor for this:
+    # in viewport mode it divides the render resolution (a factor of 4 renders 80x45).
+    window.content_scale_stretch = Window.CONTENT_SCALE_STRETCH_INTEGER
 ```
 
 **C#:**
@@ -56,20 +51,11 @@ public partial class DisplayManager : Node
     public override void _Ready()
     {
         var window = GetWindow();
-        window.ContentScaleSize   = BaseSize;
-        window.ContentScaleMode   = Window.ContentScaleModeEnum.Viewport;
-        window.ContentScaleAspect = Window.ContentScaleAspectEnum.Keep;
-        ApplyIntegerScale();
-        GetViewport().SizeChanged += ApplyIntegerScale;
-    }
-
-    private void ApplyIntegerScale()
-    {
-        var screenSize  = DisplayServer.ScreenGetSize();
-        int scaleX      = screenSize.X / BaseSize.X;
-        int scaleY      = screenSize.Y / BaseSize.Y;
-        int intScale    = Mathf.Max(1, Mathf.Min(scaleX, scaleY));
-        GetWindow().ContentScaleFactor = intScale;
+        window.ContentScaleSize    = BaseSize;
+        window.ContentScaleMode    = Window.ContentScaleModeEnum.Viewport;
+        window.ContentScaleAspect  = Window.ContentScaleAspectEnum.Keep;
+        // Largest whole multiple that fits; recomputed by the engine on every resize.
+        window.ContentScaleStretch = Window.ContentScaleStretchEnum.Integer;
     }
 }
 ```

@@ -261,7 +261,7 @@ Each `tween_property()` call returns a `PropertyTweener` you can chain modifiers
 
 ## 6. Looping and Signals
 
-`tween.set_loops(N)` repeats N times (`0` = infinite). Signals: `finished` (whole tween done), `step_finished(idx)` (one step done), `loop_finished(loop_count)` (one full cycle done).
+`tween.set_loops(N)` repeats N times (`0` = infinite). Signals: `finished` (whole tween done), `step_finished(idx)` (one step done), `loop_finished(loop_count)` (one full cycle done; not emitted after the last loop, where `finished` fires).
 
 > See [references/looping-and-signals.md](references/looping-and-signals.md) for loop-count semantics and signal wiring.
 
@@ -269,7 +269,7 @@ Each `tween_property()` call returns a `PropertyTweener` you can chain modifiers
 
 ## 7. Tween Lifecycle
 
-Tweens are owned by their host SceneTree. Kill running tweens with `tween.kill()` before starting a new one to avoid stacking. Use `set_pause_mode`, `set_speed_scale`, `set_ignore_time_scale` for runtime control.
+Tweens are owned by their host SceneTree. Kill running tweens with `tween.kill()` before starting a new one to avoid stacking. Use `set_pause_mode`, `set_speed_scale` and (Godot 4.4+) `set_ignore_time_scale` for runtime control.
 
 > See [references/lifecycle.md](references/lifecycle.md) for kill/replace patterns, pause modes, speed scale, ignore-time-scale.
 
@@ -307,13 +307,13 @@ The patterns most projects need: fade in/out, UI panel slide in/out, button pres
 |-------------------------------------|---------------------------------------------------|--------------------------------------------------------------------|
 | Tween jumps or jitters              | Multiple tweens competing on the same property    | Kill the old tween before creating a new one                       |
 | Tween does nothing                  | Node was freed before tween finished              | Check `is_valid()` or use `tween_callback` instead of `await`      |
-| Tween runs during pause             | Default pause mode doesn't match expectation      | Set `set_pause_mode(TWEEN_PAUSE_PROCESS)` for pause-immune tweens  |
-| `from()` value ignored              | Called after `set_parallel()` changed ordering    | Call `from()` directly on the PropertyTweener, not on the Tween    |
+| Tween runs or stops during pause    | Default `TWEEN_PAUSE_BOUND` follows the bound node's `process_mode` | `TWEEN_PAUSE_STOP` to always pause, `TWEEN_PAUSE_PROCESS` to keep running |
+| `from()` value ignored              | The `from()` value is applied only when that tweener starts | Set the property to the start value first if it must show earlier |
 | Tween doesn't loop smoothly         | End value doesn't match start for seamless loop   | Use `as_relative()` for rotation, or match start/end values        |
 | Relative tween drifts over loops    | `as_relative()` accumulates each loop             | Use absolute values for looping; relative for one-shot moves       |
 | Callback fires at wrong time        | Callback added to parallel section                | Use `chain()` to switch back to sequential before the callback     |
 | Tween property path not found       | Typo or wrong path format                         | Use `"property:component"` — e.g., `"position:x"`, `"modulate:a"` |
-| Tween faster/slower than expected   | `Engine.time_scale` affects tween                 | Use `set_ignore_time_scale()` for UI tweens during slow-mo         |
+| Tween faster/slower than expected   | `Engine.time_scale` affects tween                 | Use `set_ignore_time_scale()` (4.4+) for UI tweens during slow-mo  |
 
 ---
 

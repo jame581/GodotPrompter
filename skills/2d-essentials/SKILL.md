@@ -21,8 +21,9 @@ Within a single canvas layer, nodes draw in **scene tree order** — nodes liste
 # Draw this node above siblings (default z_index is 0)
 z_index = 10
 
-# Make z_index relative to parent (default: false = global)
-z_as_relative = true
+# z_index is relative to the parent by default (z_as_relative = true);
+# set it false to make this node's z_index absolute
+z_as_relative = false
 ```
 
 ### CanvasLayer
@@ -40,7 +41,7 @@ z_as_relative = true
 # Scene tree example
 Main
 ├── ParallaxBackground (CanvasLayer, layer = -1)
-│   └── Parallax2D
+│   └── Parallax2D (follow_viewport = false — the layer doesn't follow the camera)
 ├── World (Node2D — default layer 0)
 │   ├── TileMapLayer
 │   └── Player
@@ -108,7 +109,7 @@ Vector2 screenPos = GetViewport().GetScreenTransform() * GetGlobalTransformWithC
 
 ## 5. 2D Particle Systems
 
-`GPUParticles2D` for high counts (≥ 50 particles, GPU-driven), `CPUParticles2D` for low counts or platforms without GPU support. Both share the same `ParticleProcessMaterial` interface; differences are mainly performance.
+`GPUParticles2D` for high counts (≥ 50 particles, GPU-driven), `CPUParticles2D` for low counts or platforms without GPU support. `GPUParticles2D` is driven by a `ParticleProcessMaterial`; `CPUParticles2D` exposes the same parameters as its own properties.
 
 > See [references/2d-particles.md](references/2d-particles.md) for the GPU-vs-CPU distinguishing choices, basic setup, ParticleProcessMaterial 2D properties, emission from textures, flipbook, visibility rect, common 2D recipes.
 
@@ -163,7 +164,7 @@ public override void _Draw()
 }
 ```
 
-`Line2D` has an `Antialiased` property in the inspector — set it via `line2D.Antialiased = true` in C# or as an Inspector toggle in the editor. This works by generating additional geometry — no MSAA needed.
+`Line2D` has an `antialiased` property (C#: `Antialiased`), but `Line2D` stores it without passing it to its draw call, so it has no visible effect; for smooth `Line2D` edges use MSAA 2D (below) or a texture with soft edges.
 
 > ⚠️ **Changed in Godot 4.7:** `CanvasItem` antialiased line drawing no longer adds the antialiasing feather. The feather made `draw_line()`-style lines appear thicker than intended, so antialiased lines render thinner after upgrading — projects that relied on the old look must draw a thicker `width`. See the [4.7 migration guide](https://docs.godotengine.org/en/latest/tutorials/migrating/upgrading_to_godot_4.7.html).
 

@@ -13,7 +13,7 @@ Client connects
             └── server sends initial world state to new peer  (RPC → new peer)
             └── server calls server_spawn_player(peer_id, spawn_pos)
                     └── MultiplayerSpawner replicates the new node to ALL clients
-                    └── server calls set_multiplayer_authority(peer_id) on the new node
+                    └── the spawn function sets set_multiplayer_authority(peer_id) on every peer
             └── server notifies existing clients of the new player  (optional RPC)
 ```
 

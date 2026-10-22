@@ -27,8 +27,8 @@ Choose Popochiu when you're building a classic point-and-click adventure and wan
 1. Get Popochiu from [itch.io](https://carenalgas.itch.io/popochiu) or [GitHub Releases](https://github.com/carenalgas/popochiu/releases); copy `addons/popochiu/` into your project.
 2. **Project → Project Settings → Plugins** → enable **Popochiu**. Godot prompts a restart — **Project → Reload Current Project**.
 3. On first run, `PopochiuResources.init_file_structure()` scaffolds `res://game/` (layout below) plus `popochiu_data.cfg` (a `ConfigFile` registry of every room/character/item/dialog) and `popochiu_globals.gd` (an empty `Globals` autoload — add your own state here).
-4. The **setup wizard** pops up automatically (re-open via the dock's "Setup" button): pick a **Game Type** (Custom/2D/Pixel — configures stretch mode), a **Resolution**, and a **GUI Template** (`9 Verb`, `Sierra`, `SimpleClick`, or Custom).
-5. A companion plugin, **PopochiuImporters**, adds Aseprite import docks — enabled separately in Project Settings.
+4. The **setup wizard** pops up automatically (re-open via the dock's "Setup" button): pick a **game type** (Retro / Pixel Art or Modern / Hi-Res — sets the stretch aspect and pixel-art texture filtering; the custom-settings form offers Custom / Pixel Art / High Resolution), a **Resolution**, and a **GUI Template** (9 Verb, the Sierra-style "Action Bar", Simple Click, or Custom).
+5. Two companion plugins, **PopochiuImporters** (Aseprite import docks) and **PopochiuGizmo**, are enabled automatically along with Popochiu.
 
 Dock-generated layout:
 ```
@@ -138,7 +138,7 @@ await C.player.walk_to_clicked()
 await C.player.say("What a mess.", "annoyed")
 ```
 
-Emotions map to `voice_cues` and `avatars` export arrays (emotion name → audio cue / GUI portrait); `say()` sets `emotion` for the duration of the line, then resets it to `""`.
+Emotions map to `voices` and `avatars` export arrays (emotion name → audio cue / GUI portrait); `say()` sets `emotion` for the duration of the line, then resets it to `""`.
 
 Start a named dialog tree from a click handler:
 

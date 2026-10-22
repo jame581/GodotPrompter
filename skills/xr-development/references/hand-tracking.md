@@ -22,7 +22,7 @@ func _process(_delta: float) -> void:
         return
 
     # Hand tracking data is accessed through the XRHandTracker
-    var left_tracker: XRHandTracker = XRServer.get_tracker("left_hand") as XRHandTracker
+    var left_tracker: XRHandTracker = XRServer.get_tracker("/user/hand_tracker/left") as XRHandTracker
     if left_tracker:
         # Check for pinch gesture
         if left_tracker.get_hand_joint_flags(XRHandTracker.HAND_JOINT_INDEX_FINGER_TIP) & XRHandTracker.HAND_JOINT_FLAG_POSITION_TRACKED:
@@ -42,7 +42,7 @@ public partial class XRHandTrackingOrigin : XROrigin3D
         if (xrInterface == null)
             return;
 
-        var leftTracker = XRServer.GetTracker("left_hand") as XRHandTracker;
+        var leftTracker = XRServer.GetTracker("/user/hand_tracker/left") as XRHandTracker;
         if (leftTracker != null)
         {
             var flags = leftTracker.GetHandJointFlags(XRHandTracker.HandJoint.IndexFingerTip);

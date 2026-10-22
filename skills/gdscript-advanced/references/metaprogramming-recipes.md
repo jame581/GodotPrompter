@@ -58,10 +58,15 @@ func dispatch_mod_event(event_name: String, args: Array) -> void:
 ## 4. `call_deferred` for thread/signal safety
 
 ```gdscript
-# Inside a worker thread or a signal handler that may run during physics:
+# Inside a physics callback (body_entered etc.) the physics state is locked:
 func _on_collision(other: Node) -> void:
-    other.queue_free()       # NOT safe inside collision callback
-    queue_free.call_deferred()  # safe — runs on idle frame
+    $CollisionShape2D.disabled = true                 # error: "Can't change this state while flushing queries"
+    $CollisionShape2D.set_deferred("disabled", true)  # safe — applied at the end of the frame
+    other.queue_free()                                # already safe — queue_free() is deferred
+
+# From a worker thread, hand results to the main thread:
+func _on_thread_done(result: Variant) -> void:
+    _apply_result.call_deferred(result)
 ```
 
 ## 5. Callable lifecycle pitfall

@@ -135,6 +135,7 @@ A trauma-based system produces more natural-looking shake than a simple sine wav
 ### GDScript
 
 ```gdscript
+class_name ScreenShakeCamera
 extends Camera2D
 
 ## Maximum pixel offset during maximum trauma
@@ -155,6 +156,7 @@ var _noise_time: float = 0.0
 @export var noise_speed: float = 60.0
 
 func _ready() -> void:
+    ignore_rotation = false  # Camera2D ignores its own rotation by default — the roll needs it
     _noise = FastNoiseLite.new()
     _noise.noise_type = FastNoiseLite.TYPE_SIMPLEX
     _noise.seed = randi()
@@ -214,6 +216,7 @@ public partial class ScreenShakeCamera : Camera2D
 
     public override void _Ready()
     {
+        IgnoreRotation = false; // Camera2D ignores its own rotation by default — the roll needs it
         _noise = new FastNoiseLite();
         _noise.NoiseType = FastNoiseLite.NoiseTypeEnum.Simplex;
         _noise.Seed = (int)GD.Randi();
@@ -279,7 +282,7 @@ Three canonical 3D camera setups: **third-person follow** with `SpringArm3D` (ha
 
 ## 6. Camera Transitions
 
-Async camera transitions via `Tween` + `await ToSignal`. The pattern: tween the next camera's position/zoom from the current camera's, then call `make_current()` on the next camera. Works for both 2D and 3D.
+Async camera transitions via `Tween` + `await` (`ToSignal` in C#). The pattern: tween the current camera's position and zoom (2D) or FOV (3D) to the next camera's values, then call `make_current()` on the next camera. Works for both 2D and 3D.
 
 > See [references/transitions.md](references/transitions.md) for the full `CameraTransitionManager` implementation (2D and 3D).
 

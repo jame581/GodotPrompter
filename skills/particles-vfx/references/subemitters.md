@@ -20,8 +20,8 @@ Subemitters are child particle systems that spawn in response to parent particle
 ### Setup
 
 1. Create two GPUParticles3D nodes in the same scene
-2. On the parent's ParticleProcessMaterial → Sub Emitter → assign the child system
-3. Set the sub emitter **Mode** and amount/frequency
+2. On the parent particles node, set **Sub Emitter** (`sub_emitter`) to the child system
+3. On the parent's ParticleProcessMaterial, set the sub emitter **Mode** and amount/frequency
 
 ```gdscript
 # Parent material setup
@@ -56,7 +56,7 @@ public partial class Explosion : GpuParticles3D
 }
 ```
 
-> Most projects configure subemitters in the Inspector (drag the child node onto the `SubEmitterNode` slot of the `ParticleProcessMaterial`). The C# code above is only needed when building particle effects programmatically.
+> Most projects configure subemitters in the Inspector (assign the child node to the parent particles node's **Sub Emitter** property). The C# code above is only needed when building particle effects programmatically.
 
 ### Limitations
 
