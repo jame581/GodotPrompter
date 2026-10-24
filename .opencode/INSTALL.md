@@ -2,7 +2,7 @@
 
 ## Prerequisites
 
-- [OpenCode.ai](https://opencode.ai) installed
+- [OpenCode.ai](https://opencode.ai) installed — OpenCode 2.x, or OpenCode 1.x (1.18.20 and later tested)
 
 ## Installation
 
@@ -15,6 +15,9 @@ See [Opencode Docs](https://opencode.ai/docs/config/) for possible locations.
   "plugin": ["godot-prompter@git+https://github.com/jame581/GodotPrompter.git"]
 }
 ```
+
+OpenCode 2.x calls this key `plugins` and still accepts `plugin`, so the snippet above works on both
+major versions. The same entrypoint serves both plugin APIs.
 
 Restart OpenCode. That's it — the plugin auto-installs and registers all skills.
 
@@ -43,6 +46,14 @@ To pin (or upgrade to) a specific version:
 ```
 
 ## Troubleshooting
+
+### "Plugin must export a default definition with an id and an effect or setup function"
+
+OpenCode 2.x reports this for a GodotPrompter checkout older than the fix for
+[#38](https://github.com/jame581/GodotPrompter/issues/38), which only exported the OpenCode 1.x
+plugin. OpenCode caches git plugins, so restarting does not fetch the fix. Point the entry at a
+release newer than `v1.16.0`, or delete the cached copy under
+`~/.cache/opencode/npm/` and restart.
 
 ### Plugin not loading
 
