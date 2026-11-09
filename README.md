@@ -14,7 +14,7 @@ GodotPrompter is a plugin that provides **skills** — structured domain knowled
 
 **59 skills** covering project setup, architecture, gameplay systems, input handling, physics, 2D/3D systems, animation, shaders, audio, UI, multiplayer, web services, localization, procedural generation, XR/VR, native extensions, multithreading, mobile and web shipping, rendering pipeline, optimization, GDScript / C# patterns, a teaching mode, and third-party addons (LimboAI, Beehave, Popochiu, Dialogue Manager, Phantom Camera). All targeting Godot 4.3+ with both GDScript and C# examples — newer features from Godot 4.5, 4.6, and 4.7 (variadic functions, abstract classes, stencil buffers, AreaLight3D, VirtualJoystick, OpenXR Spatial Entities, and more) are included as annotated additive sections.
 
-**v1.16.0** adds three skills — `web-services` (HTTP and WebSocket backends), `rendering-pipeline` (renderer and graphics settings) and `web-export` (the browser target) — plus a C# compile check of every code block and a prose audit of the existing skills. See the [CHANGELOG](https://github.com/jame581/GodotPrompter/blob/v1.16.0/CHANGELOG.md).
+**v1.16.0** adds three skills — `web-services` (HTTP and WebSocket backends), `rendering-pipeline` (renderer and graphics settings) and `web-export` (the browser target) — plus a C# compile check of every code block and a prose audit of the existing skills. See the [CHANGELOG](https://github.com/jame581/GodotPrompter/blob/v1.16.1/CHANGELOG.md).
 
 ## Quick Start
 
@@ -54,7 +54,7 @@ grok plugin enable godot-prompter
 Pin to a release:
 
 ```bash
-grok plugin install jame581/GodotPrompter@v1.16.0 --trust
+grok plugin install jame581/GodotPrompter@v1.16.1 --trust
 grok plugin enable godot-prompter
 ```
 
@@ -71,7 +71,7 @@ copilot plugin marketplace add jame581/skillsmith
 copilot plugin install godot-prompter@skillsmith
 ```
 
-Detailed guide: [`docs/platforms/copilot-cli.md`](https://github.com/jame581/GodotPrompter/blob/v1.16.0/docs/platforms/copilot-cli.md)
+Detailed guide: [`docs/platforms/copilot-cli.md`](https://github.com/jame581/GodotPrompter/blob/v1.16.1/docs/platforms/copilot-cli.md)
 
 ### Cursor
 
@@ -81,7 +81,7 @@ Detailed guide: [`docs/platforms/copilot-cli.md`](https://github.com/jame581/God
 
 Or clone and place in your project — Cursor reads `.cursor-plugin/plugin.json`.
 
-Detailed guide: [`docs/platforms/cursor.md`](https://github.com/jame581/GodotPrompter/blob/v1.16.0/docs/platforms/cursor.md)
+Detailed guide: [`docs/platforms/cursor.md`](https://github.com/jame581/GodotPrompter/blob/v1.16.1/docs/platforms/cursor.md)
 
 ### Codex
 
@@ -192,14 +192,14 @@ GodotPrompter includes 9 specialized agents:
 | Platform | Install | SessionStart hook | Fresh-context path | Status | Docs |
 |----------|---------|-------------------|--------------------|--------|------|
 | Claude Code | `claude plugins marketplace add jame581/skillsmith` | Yes | `CLAUDE.md` / `.claude/CLAUDE.md` | Primary, verified | This README + `tests/agent-integration/TEST_PLAN.md` |
-| GitHub Copilot CLI | `copilot plugin marketplace add jame581/skillsmith` | Yes | `.github/copilot-instructions.md` or `AGENTS.md` | Verified | [`docs/platforms/copilot-cli.md`](https://github.com/jame581/GodotPrompter/blob/v1.16.0/docs/platforms/copilot-cli.md) |
-| Cursor | `/add-plugin godot-prompter` or clone with `.cursor-plugin/` | Registration ships | `.cursor/rules/` or `AGENTS.md` | End-to-end install still pending confirmation | [`docs/platforms/cursor.md`](https://github.com/jame581/GodotPrompter/blob/v1.16.0/docs/platforms/cursor.md) |
-| Codex | Clone + symlink | No | `AGENTS.md` | Documented | [`.codex/INSTALL.md`](https://github.com/jame581/GodotPrompter/blob/v1.16.0/.codex/INSTALL.md) |
+| GitHub Copilot CLI | `copilot plugin marketplace add jame581/skillsmith` | Yes | `.github/copilot-instructions.md` or `AGENTS.md` | Verified | [`docs/platforms/copilot-cli.md`](https://github.com/jame581/GodotPrompter/blob/v1.16.1/docs/platforms/copilot-cli.md) |
+| Cursor | `/add-plugin godot-prompter` or clone with `.cursor-plugin/` | Registration ships | `.cursor/rules/` or `AGENTS.md` | End-to-end install still pending confirmation | [`docs/platforms/cursor.md`](https://github.com/jame581/GodotPrompter/blob/v1.16.1/docs/platforms/cursor.md) |
+| Codex | Clone + symlink | No | `AGENTS.md` | Documented | [`.codex/INSTALL.md`](https://github.com/jame581/GodotPrompter/blob/v1.16.1/.codex/INSTALL.md) |
 | Antigravity | `agy plugin install https://github.com/jame581/GodotPrompter` | No | `GEMINI.md` | Documented | This README |
-| OpenCode | Add to `opencode.json` | No | `AGENTS.md` | Documented | [`.opencode/INSTALL.md`](https://github.com/jame581/GodotPrompter/blob/v1.16.0/.opencode/INSTALL.md) |
+| OpenCode | Add to `opencode.json` | No | `AGENTS.md` | Documented | [`.opencode/INSTALL.md`](https://github.com/jame581/GodotPrompter/blob/v1.16.1/.opencode/INSTALL.md) |
 | Grok Build | `grok plugin install jame581/GodotPrompter --trust` | Not documented | Not documented | Install path documented; smoke coverage still needed | This README |
 
-Machine-readable release smoke coverage lives in [`tests/agent-integration/host-smoke-matrix.json`](https://github.com/jame581/GodotPrompter/blob/v1.16.0/tests/agent-integration/host-smoke-matrix.json).
+Machine-readable release smoke coverage lives in [`tests/agent-integration/host-smoke-matrix.json`](https://github.com/jame581/GodotPrompter/blob/v1.16.1/tests/agent-integration/host-smoke-matrix.json).
 The generated machine-readable skill catalog lives in [`skills/index.json`](skills/index.json).
 
 > **Legacy marketplace:** The [`godot-prompter-marketplace`](https://github.com/jame581/godot-prompter-marketplace) repo remains online so existing installs keep receiving updates, but new users should install from [`skillsmith`](https://github.com/jame581/skillsmith).
@@ -368,19 +368,19 @@ npm ci --prefix scripts   # once: the tokenizers live in scripts/, not the plugi
 node scripts/count-tokens.mjs --tokenizer --markdown
 ```
 
-Produces a per-skill / per-agent table (bytes, KB, estimated tokens, Claude / GPT tokenizer counts, status) that lives between `<!-- BEGIN-TOKEN-TABLE -->` markers in [`docs/token-budget.md`](https://github.com/jame581/GodotPrompter/blob/v1.16.0/docs/token-budget.md).
+Produces a per-skill / per-agent table (bytes, KB, estimated tokens, Claude / GPT tokenizer counts, status) that lives between `<!-- BEGIN-TOKEN-TABLE -->` markers in [`docs/token-budget.md`](https://github.com/jame581/GodotPrompter/blob/v1.16.1/docs/token-budget.md).
 
 CI gate: `.github/workflows/release.yml` runs the version-consistency check, `node scripts/validate-skills.mjs`, the hook tests, the validator tests, the metadata tests, and the broken-fixture self-test on every `v*.*.*` push. The release is blocked if any of those fail or any of `package.json` / `.claude-plugin/plugin.json` / `.claude-plugin/marketplace.json` / `.cursor-plugin/plugin.json` / `plugin.json` drifts from the tag.
 
 **Current baseline:** 0 errors, 57 warnings on `node scripts/validate-skills.mjs` in this repository state. All 57 are intentional `csharp-parity-accepted` warnings for GDScript-only content. Every `SKILL.md` is **under** the 16 KB budget — since v1.12.0 that is a validator **error**, not a warning, so an over-budget skill fails the release.
 
-Behaviour is measured with `claude plugin eval` suites in [`evals/`](https://github.com/jame581/GodotPrompter/tree/v1.16.0/evals/) — mentor mode, `godot-grill`, the session card, and a set of domain skills — each run with and without the plugin; results are recorded in `evals/FOLLOWUPS.md`, `evals/GRILL.md` and `evals/SKILLS.md`. Since v1.15.1 every code example has also been parsed (GDScript) or compiled (C#) against Godot 4.7.2.
+Behaviour is measured with `claude plugin eval` suites in [`evals/`](https://github.com/jame581/GodotPrompter/tree/v1.16.1/evals/) — mentor mode, `godot-grill`, the session card, and a set of domain skills — each run with and without the plugin; results are recorded in `evals/FOLLOWUPS.md`, `evals/GRILL.md` and `evals/SKILLS.md`. Since v1.15.1 every code example has also been parsed (GDScript) or compiled (C#) against Godot 4.7.2.
 
-A manual agent-integration test plan covering full workflows (skill discovery, cross-reference navigation, end-to-end feature implementation) lives in [`tests/agent-integration/TEST_PLAN.md`](https://github.com/jame581/GodotPrompter/blob/v1.16.0/tests/agent-integration/TEST_PLAN.md) for spot-checks against new agent versions or platforms. Cross-host release smoke coverage is tracked in [`tests/agent-integration/host-smoke-matrix.json`](https://github.com/jame581/GodotPrompter/blob/v1.16.0/tests/agent-integration/host-smoke-matrix.json).
+A manual agent-integration test plan covering full workflows (skill discovery, cross-reference navigation, end-to-end feature implementation) lives in [`tests/agent-integration/TEST_PLAN.md`](https://github.com/jame581/GodotPrompter/blob/v1.16.1/tests/agent-integration/TEST_PLAN.md) for spot-checks against new agent versions or platforms. Cross-host release smoke coverage is tracked in [`tests/agent-integration/host-smoke-matrix.json`](https://github.com/jame581/GodotPrompter/blob/v1.16.1/tests/agent-integration/host-smoke-matrix.json).
 
 ## Contributing
 
-See [CONTRIBUTING.md](https://github.com/jame581/GodotPrompter/blob/v1.16.0/CONTRIBUTING.md) for how to add new skills, conventions, and testing requirements.
+See [CONTRIBUTING.md](https://github.com/jame581/GodotPrompter/blob/v1.16.1/CONTRIBUTING.md) for how to add new skills, conventions, and testing requirements.
 
 ## Acknowledgements
 
