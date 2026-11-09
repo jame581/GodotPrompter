@@ -6,6 +6,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased]
 
+## [1.16.1] - 2026-11-09
+
 ### Fixed
 
 - **The OpenCode plugin loads on OpenCode 2.x** ([#38](https://github.com/jame581/GodotPrompter/issues/38)).
@@ -15,6 +17,11 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
   and the bootstrap through the session `context` hook. It keeps the 1.x hooks as `server` and as
   the named export. Checked on OpenCode 2.1.4, 1.18.29 and 1.18.20, and `npm test` now covers both
   entrypoints.
+
+### Changed
+
+- **CI actions bumped** (#40): `hashgraph-online/ai-plugin-scanner-action` 1.2.718 → 1.2.811 and
+  `actions/setup-node` to v7.1.0, both still pinned to full commit SHAs.
 
 ## [1.16.0] - 2026-10-22
 
