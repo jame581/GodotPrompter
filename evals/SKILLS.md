@@ -205,3 +205,22 @@ last measured baseline stands (with 0.89, without 0.56, Δ +0.33).
 `beehave` moved to v2.9.3 (autoloads added on enable and removed on disable; a wrong
 `actor_node_path` leaves `actor` null). No eval re-run: no grader of `skill-06-beehave` measures
 autoloads or `actor_node_path` (grepped). The last measured baseline stands (with 1.00, without 1.00).
+
+## web-services routing — v1.17.0, 2026-11-10 (`results/2026-11-10T01-09-25-639Z`)
+
+Follow-ups §4: skill-16 fired 1/3 twice. The `web-services` description now names the concrete
+triggers (HTTPRequest, downloading a file or content pack, REST/JSON API, backend endpoints, auth
+tokens and headers, uploading, leaderboard/analytics calls, WebSocketPeer clients, timeouts) and
+points game networking to `multiplayer-basics` and browser export to `web-export`. The session card
+was not touched. One rewrite, one run, no second iteration needed.
+
+```
+claude plugin eval . --case "skill-16-web-services" -j 3 --ablation with-without --judge-model sonnet --no-publish
+```
+
+| Case | Skill | With | Without | Δ | Skill fired | Tag | What separated the arms |
+|---|---|---|---|---|---|---|---|
+| skill-16-web-services | `web-services` | 1.00 | 1.00 | 0.00 | **3/3** | ceiling | nothing: routing check only; fired 1/3 → 3/3 |
+
+"Skill fired" is the `trigger-skill` grader (`tool_used` Skill, `input_match: web-services`) passing
+in each with-arm run (3 of 3 in `aggregate-result.json`). Clean run, $1.70.
