@@ -141,3 +141,22 @@ invocations, one per case name. Clean runs, about $3.3 together, no errors or ti
 - skill-18 first run (`…069Z`, with 0.75 / without 1.00) was grader wording, not the model: the key grader demanded the full header names and the regex missed "Thread Support". Both now accept COOP/COEP and the UI label; re-run 1.00 in both arms.
 
 - **Re-run 2026-10-22 (`results/2026-10-21T23-30-37-310Z`):** skill-16 again 1.00 / 1.00, `web-services` fired 1/3. This case runs in an empty workspace, so the SessionStart card is not injected; the v1.16.0 card's new `web-services` row cannot affect it. The routing gap is in the skill's `description`.
+
+## Dialogue Manager 4 — v1.17.0, 2026-11-10 (`results/2026-11-10T00-31-57-887Z`)
+
+`dialogue-manager` was rewritten from v3.10.4 to v4.2.0, so skill-08 now asks for version 4 on
+Godot 4.7: a sample `.dialogue` with one key-gated choice, the walker (first *allowed* choice, the
+per-line voice key), the HUD notification, and what to configure for PO translations. Three graders
+were added — `dm-response-condition` (self-closing `[if cond /]`), `dm-allowed-response`
+(`is_allowed`), `dm-4x-api` (`static_id`, no `translation_source`, no title-era names) — and the
+case is retagged `discriminating`. Clean run, $2.81, 145 s.
+
+| Case | Skill | With | Without | Δ | Skill fired | Tag | What separated the arms |
+|---|---|---|---|---|---|---|---|
+| skill-08-dialogue-manager | `dialogue-manager` | 1.00 | 0.78 | **+0.22** | 3/3 | discriminating | `dm-response-condition` 3/3 vs **0/3**, `dm-4x-api` 3/3 vs **0/3** |
+
+- The bare model writes Dialogue Manager 3 on autopilot even when told "version 4": every
+  without-arm answer gated the choice with `[if GameState.has_key]` (which 4.x compiles without
+  error and never applies — checked headless against v4.2.0), read `translation_key` /
+  `TranslationKey`; `translation_source` also appears in the without-arm transcripts.
+- `dm-allowed-response` passed 3/3 in both arms: `is_allowed` predates 4.x.
