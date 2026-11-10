@@ -245,7 +245,7 @@ Image, form-encoded, and multipart recipes with C#: [references/downloads-and-up
 
 ## 8. WebSocket Client
 
-Use `WebSocketPeer` for a persistent, server-pushed event stream; use `HTTPRequest` for request/response. Nothing happens unless you call `poll()` every frame (`_process`). Never put long-lived tokens in the URL — URLs end up in logs.
+Use `WebSocketPeer` for a persistent, server-pushed event stream; use `HTTPRequest` for request/response. Nothing happens unless you call `poll()` every frame (`_process`). Never put long-lived tokens in the URL — URLs end up in logs. Use `wss://` with the server's real hostname (not an IP) so the certificate matches. `handshake_headers` is ignored on Web exports, so authenticate with the first message after connecting.
 
 > See [references/websocket-client.md](references/websocket-client.md) for the GDScript and C# client, `wss://`, auth, heartbeat, and reconnect rules.
 
