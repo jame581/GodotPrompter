@@ -42,7 +42,7 @@ public partial class Player : CharacterBody3D
     public void TakeDamage(int amount)
     {
         _health -= amount;
-        GetNode<AudioManager>("/root/AudioManager").PlaySfx("hurt");        // hard dependency
+        GetNode<AudioService>("/root/AudioManager").PlaySfx("hurt");        // hard dependency
         GetNode<UIManager>("/root/UIManager").UpdateHealthBar(_health);     // hard dependency
         if (_health <= 0)
             GetNode<GameState>("/root/GameState").RecordDeath();            // hard dependency
@@ -54,7 +54,7 @@ public partial class Enemy : CharacterBody3D
 {
     public void Attack()
     {
-        GetNode<AudioManager>("/root/AudioManager").PlaySfx("attack");      // same dependency again
+        GetNode<AudioService>("/root/AudioManager").PlaySfx("attack");      // same dependency again
     }
 }
 ```
@@ -84,7 +84,7 @@ public partial class Enemy : CharacterBody3D
 
 Register a script in **Project Settings → Globals → Autoload** for global access (`AudioManager.play_sfx(...)`, `GameState.score = 100`). Best for cross-cutting concerns: audio, save state, event bus, settings. Resist autoloading domain-specific systems (those should be scene-injected).
 
-> See [references/autoloads.md](references/autoloads.md) for the full AudioManager example (SFX + crossfade music) in GDScript + C#.
+> See [references/autoloads.md](references/autoloads.md) for the full AudioManager example (SFX + crossfade music) in GDScript + C#. The script's `class_name` (`AudioService`) must differ from the autoload name (`AudioManager`), or Godot reports `hides an autoload singleton`; type injected references as `AudioService`.
 
 ---
 

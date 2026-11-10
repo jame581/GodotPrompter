@@ -12,11 +12,12 @@ Injectable dependencies make tests trivial: swap the real service for a stub or 
 ### GDScript (using GUT)
 
 ```gdscript
-# stub_audio.gd — a lightweight stand-in for AudioManager.
-# It must extend AudioManager (the script that declares class_name AudioManager)
-# to fit the typed `@export var audio: AudioManager`; a plain Node is rejected.
+# stub_audio.gd — a lightweight stand-in for the AudioManager autoload.
+# It must extend AudioService (the script that declares class_name AudioService,
+# registered as autoload "AudioManager") to fit the typed `@export var audio: AudioService`;
+# a plain Node is rejected. The class_name cannot be AudioManager: that hides the autoload.
 class_name StubAudio
-extends AudioManager
+extends AudioService
 
 var last_sfx: String = ""
 var play_count: int = 0
@@ -75,9 +76,9 @@ The GdUnit4 *plugin* supports C# since v4.4 (the plugin's version, not Godot's).
 using GdUnit4;
 using static GdUnit4.Assertions;
 
-// StubAudio.cs — a lightweight stand-in for AudioManager.
-// It must be an AudioManager to fit the typed Audio property, so PlaySfx is virtual there.
-public partial class StubAudio : AudioManager
+// StubAudio.cs — a lightweight stand-in for the AudioManager autoload.
+// It must be an AudioService to fit the typed Audio property, so PlaySfx is virtual there.
+public partial class StubAudio : AudioService
 {
     public string LastSfx { get; private set; } = "";
     public int PlayCount { get; private set; } = 0;

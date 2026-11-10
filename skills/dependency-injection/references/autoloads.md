@@ -22,7 +22,10 @@ Autoloads are appropriate for services that are **genuinely global** and have **
 
 ### GDScript (`autoloads/audio_manager.gd`)
 
+The script's `class_name` must differ from the autoload name: Godot rejects `class_name AudioManager` on a script registered as autoload `AudioManager` (`Class "AudioManager" hides an autoload singleton`). Register it as autoload `AudioManager`; type injected references as `AudioService`.
+
 ```gdscript
+class_name AudioService
 extends Node
 
 ## Plays a one-shot sound effect by key.
@@ -55,16 +58,16 @@ func _load_sfx_library() -> void:
     pass
 ```
 
-### C# (`Autoloads/AudioManager.cs`)
+### C# (`Autoloads/AudioService.cs`)
 
 ```csharp
 using Godot;
 using System.Collections.Generic;
 
 /// <summary>
-/// Global audio service. Register as autoload named "AudioManager".
+/// Global audio service. Register as autoload named "AudioManager"; the class is named AudioService to match the GDScript twin.
 /// </summary>
-public partial class AudioManager : Node
+public partial class AudioService : Node
 {
     private readonly Dictionary<string, AudioStream> _sfxLibrary = new();
 
