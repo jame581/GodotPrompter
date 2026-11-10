@@ -404,3 +404,4 @@ godot --headless --path . \
 | 100  | One or more tests failed or errored |
 | 101  | Passed with warnings             |
 | 103  | Headless mode refused            |
+| 104  | Godot version not supported by the installed gdUnit4 |
