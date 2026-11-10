@@ -16,6 +16,9 @@ Client-side prediction lets the local player's input feel instant by applying it
 extends CharacterBody2D
 
 @export var speed: float = 200.0
+## Peer that controls this player. The node's multiplayer authority stays the
+## server (peer 1) so the "authority" correction RPC below is sent by the server.
+@export var owner_peer_id: int = 1
 
 # Ring buffer of unacknowledged inputs indexed by tick number.
 var _pending_inputs: Dictionary = {}
@@ -23,10 +26,14 @@ var _current_tick: int = 0
 
 # Last server-confirmed state.
 var _server_position: Vector2 = Vector2.ZERO
-var _server_tick: int = -1
 
 
 func _physics_process(delta: float) -> void:
+    # Only the controlling peer reads local input; every other instance
+    # (remote players, the server's copy of a client) is driven by RPCs.
+    if multiplayer.get_unique_id() != owner_peer_id:
+        return
+
     var input_dir: Vector2 = Input.get_vector("ui_left", "ui_right", "ui_up", "ui_down")
 
     # 1. Predict: apply input locally right now.
@@ -51,7 +58,6 @@ func _apply_input(dir: Vector2, delta: float) -> void:
 func _receive_server_correction(corrected_pos: Vector2, ack_tick: int) -> void:
     # Server has confirmed state up to ack_tick. Snap and replay.
     _server_position = corrected_pos
-    _server_tick     = ack_tick
 
     # Drop all inputs the server has already processed.
     for tick in _pending_inputs.keys():
@@ -68,9 +74,12 @@ func _receive_server_correction(corrected_pos: Vector2, ack_tick: int) -> void:
 @rpc("any_peer", "call_remote", "unreliable")
 func _send_input_to_server(dir: Vector2, tick: int) -> void:
     # Server receives client input, simulates, then confirms.
+    var sender: int = multiplayer.get_remote_sender_id()
+    if sender != owner_peer_id:
+        return  # ignore input from a peer that does not control this player
     _apply_input(dir, get_physics_process_delta_time())
     _receive_server_correction.rpc_id(
-        multiplayer.get_remote_sender_id(),
+        sender,
         global_position,
         tick
     )
@@ -88,16 +97,24 @@ public partial class PredictedPlayer : CharacterBody2D
 {
     [Export] public float Speed { get; set; } = 200.0f;
 
+    // Peer that controls this player. The node's multiplayer authority stays the
+    // server (peer 1) so the Authority correction RPC below is sent by the server.
+    [Export] public int OwnerPeerId { get; set; } = 1;
+
     // Ring buffer of unacknowledged inputs indexed by tick number.
     private readonly Dictionary<int, (Vector2 Dir, double Delta)> _pendingInputs = new();
     private int _currentTick;
 
     // Last server-confirmed state.
     private Vector2 _serverPosition = Vector2.Zero;
-    private int _serverTick = -1;
 
     public override void _PhysicsProcess(double delta)
     {
+        // Only the controlling peer reads local input; every other instance
+        // (remote players, the server's copy of a client) is driven by RPCs.
+        if (Multiplayer.GetUniqueId() != OwnerPeerId)
+            return;
+
         var inputDir = Input.GetVector("ui_left", "ui_right", "ui_up", "ui_down");
 
         // 1. Predict: apply input locally right now.
@@ -123,7 +140,6 @@ public partial class PredictedPlayer : CharacterBody2D
     private void ReceiveServerCorrection(Vector2 correctedPos, int ackTick)
     {
         _serverPosition = correctedPos;
-        _serverTick = ackTick;
 
         // Drop all inputs the server has already processed.
         foreach (var tick in _pendingInputs.Keys.Where(t => t <= ackTick).ToList())
@@ -142,9 +158,12 @@ public partial class PredictedPlayer : CharacterBody2D
     private void SendInputToServer(Vector2 dir, int tick)
     {
         // Server receives client input, simulates, then confirms.
+        int sender = Multiplayer.GetRemoteSenderId();
+        if (sender != OwnerPeerId)
+            return; // ignore input from a peer that does not control this player
         ApplyInput(dir, GetPhysicsProcessDeltaTime());
         RpcId(
-            Multiplayer.GetRemoteSenderId(),
+            sender,
             MethodName.ReceiveServerCorrection,
             GlobalPosition,
             tick);
@@ -153,6 +172,8 @@ public partial class PredictedPlayer : CharacterBody2D
 ```
 
 **Key points:**
+- Guard local input with the controlling peer id, not `is_multiplayer_authority()`: here the server stays the authority (the correction RPC is `authority`), so every spawned player instance would otherwise read the local keyboard.
+- The stored `delta` is what makes the replay in `_receive_server_correction` frame-rate independent; replay each pending input with the delta it was first applied with.
 - Keep `_pending_inputs` bounded — evict entries older than a reasonable window (e.g. 128 ticks).
 - Only reconcile if the corrected position differs from the predicted position by more than a threshold (e.g. 2 px / 0.05 m) to avoid jitter on micro-corrections.
 - Use `unreliable` channel for position corrections — timeliness matters more than ordering.
