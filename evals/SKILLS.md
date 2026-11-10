@@ -10,8 +10,15 @@ claude plugin eval . --case "skill-*" -j 3 --ablation with-without --judge-model
 ```
 
 Roughly $1.30-$3.40 a case (runs: 3), so a case per skill across the whole plugin would cost
-over $100 a run. Cases carry a tag: `--tag discriminating` selects the ones that separate the
-arms (the count changes — see the latest section), `--tag ceiling` the ones both arms pass, kept as routing checks.
+over $100 a run. Cases carry a tag. `--tag discriminating` selects the cases whose graders
+separate the arms (11 of the 17 `skill-*` cases at v1.17.0; the number moves as cases are added or
+retagged, so check `tags:` in each `prompt.md`), `--tag ceiling` the ones both arms pass, kept as
+routing checks. A full `--case "skill-*"` run is about $22-$58 at those per-case figures; a
+`discriminating`-only run is about $14-$37.
+
+`--case` takes an exact case name or a `*` glob. It has no bracket or brace support
+(`skill-1[678]-*` and `skill-1{6,7,8}-*` match nothing), so run several cases as separate
+invocations, one per exact name. That is a limitation of the `claude plugin eval` tool, not of the suite.
 
 ## Pilot — v1.15.0 + branch fixes, 2026-10-09 (`results/2026-10-09T18-30-04-722Z`)
 
@@ -238,3 +245,20 @@ Same command as above.
 | skill-16-web-services | `web-services` | 0.92 | 1.00 | -0.08 | **3/3** | ceiling | nothing: one with-arm run scored 0.75 on a grader vote split (noise, a ceiling case) |
 
 `trigger-skill` passed in all three with-arm runs (`aggregate-result.json`), with the general wording.
+
+## Grader wording changes after the last run — v1.17.0
+
+Three graders were edited in v1.17.0 and **not re-run**; the recorded results above were scored with
+the earlier wording.
+
+- `skill-17-rendering-pipeline/graders/upscaling-code-correct.md` now also accepts
+  `SCALING_3D_MODE_METALFX_SPATIAL` / `SCALING_3D_MODE_METALFX_TEMPORAL` (Godot 4.4+, `Viewport.xml`
+  at `4.4-stable`), which the old wording would have called invented.
+- `skill-18-web-export/graders/web-code-correct.md`: the garbled "HTML5 export preset naming only"
+  clause now reads "the `HTML5` platform or preset name". The platform is `Web` in Godot 4
+  (`OS_Web::get_name()` returns `"Web"` at `4.3-stable` and `4.7.2-stable`).
+- `skill-16-web-services/graders/names-download-file-or-part.md`: the regex gained word boundaries so
+  `.part` no longer matches `.particles` or `.partition`.
+- `skill-17-rendering-pipeline/graders/names-forward-plus.md` is unchanged and stays near-trivial by
+  design: it only checks that "Forward+" is mentioned at all, and the real check is
+  `fsr-forward-plus-only`. Read a pass on it as a routing signal, not as correctness.
