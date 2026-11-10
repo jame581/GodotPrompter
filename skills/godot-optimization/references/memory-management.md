@@ -66,7 +66,7 @@ func _ready() -> void:
     _stats.health = _stats.max_health  # safe to modify
 ```
 
-There is no eviction call and no garbage collector to wait for — drop every reference and the resource is freed. To get a fresh copy that bypasses the cache:
+There is no eviction call and no garbage collector to wait for (in GDScript) — drop every reference and the resource is freed. To get a fresh copy that bypasses the cache:
 
 ```gdscript
 # A new instance read from disk, not shared with other users of the path.
