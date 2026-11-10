@@ -35,9 +35,10 @@ their own.
 way.
 
 Enabling the plugin auto-registers a `PhantomCameraManager` autoload singleton; since v0.11.0.4 it no
-longer restarts the editor (older versions did). No manual autoload setup is needed. If the Phantom
-Camera panel reports a missing `PhantomCameraManager`, reload the project once. Six custom node types become available in the "Create New Node"
-dialog: `PhantomCamera2D`, `PhantomCamera3D`, `PhantomCameraHost`, `PhantomCameraNoiseEmitter2D`,
+longer restarts the editor (older versions did). No manual autoload setup is needed. A user reported
+on 4.8-beta1 (phantom-camera issue #694) that the plugin lost its enabled state after the old restart;
+if the panel reports a missing `PhantomCameraManager`, reloading the project once is the likely fix.
+Six custom node types become available in the "Create New Node" dialog: `PhantomCamera2D`, `PhantomCamera3D`, `PhantomCameraHost`, `PhantomCameraNoiseEmitter2D`,
 `PhantomCameraNoiseEmitter3D`, and `PhantomCameraTweenDirector`.
 
 **C# projects:** the addon ships its official wrapper as plain `.cs` source files under

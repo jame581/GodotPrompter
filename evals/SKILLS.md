@@ -22,7 +22,7 @@ Clean run (0 errors/timeouts), mean **Δ +0.07**.
 | skill-01-state-machine | `state-machine` | 0.80 | 0.67 | +0.13 | 3/3 | `fsm-choice` 1/3 vs 0/3; `fsm-correct` 2/3 vs 1/3 |
 | skill-02-save-load | `save-load` | 1.00 | 0.83 | +0.17 | 3/3 | `save-format` 3/3 vs 1/3; `save-versioned` 3/3 vs 2/3 |
 | skill-03-enemy-patrol-chase | `ai-navigation` | 1.00 | 1.00 | 0.00 | 2/3 | every grader 3/3 in both arms — at ceiling |
-| skill-04-code-review | `godot-code-review` | 1.00 | 1.00 | 0.00 | 3/3 | every grader 3/3 in both arms — at ceiling |
+| skill-04-code-review | `godot-code-review` | 1.00 | 1.00 | 0.00 | 1/3 | every grader 3/3 in both arms — at ceiling |
 
 - The base model is already strong on mainstream Godot 4, so the gain is smaller than mentor's
   or grill's and shows only where the skill carries a judgement: why this save format, the
@@ -190,6 +190,8 @@ an explicit `restart()`, and a pause that sets `active = false` then back to tru
 - First run after the grader change (`results/2026-11-10T00-40-33-629Z`): with 0.94, without 1.00.
   One with-arm answer paused the restart with `active = false` and then `active = true`; my first
   wording failed any `active = false`. The second wording above fixed it; the re-run is the table.
+- The fail clause was tightened after that last run (it also fails an answer claiming the tree must be
+  re-instantiated or reloaded to run again). Wording only, not re-run.
 
 ## Phantom Camera 0.11.0.4 — v1.17.0, 2026-11-10
 
