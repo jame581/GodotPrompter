@@ -236,6 +236,8 @@ When you want a custom widget for an exported property of a specific type, regis
 
 Add a custom dock to the editor by calling `add_control_to_dock(slot, control)` from your `EditorPlugin._enter_tree`. Free the control on `_exit_tree`. Useful for project-wide tooling UIs (level browser, asset summary, build dashboard).
 
+> **Godot 4.6+:** `add_control_to_dock` is deprecated; wrap your control in an `EditorDock` and call `add_dock(dock)`, then `remove_dock(dock)` on exit. `add_dock` does not exist in 4.3 to 4.5, where `add_control_to_dock` is the only option, so a plugin that supports both guards on the version (see [references/dock-panels.md](references/dock-panels.md)).
+
 > See [references/dock-panels.md](references/dock-panels.md) for the full GDScript and C# dock scaffold.
 
 ---
