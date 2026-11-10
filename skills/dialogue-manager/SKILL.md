@@ -157,6 +157,8 @@ func _manual_walk() -> void:
 			line = await DialogueManager.get_next_dialogue_line(dialogue_resource, line.next_id)
 		else:
 			var allowed: Array = line.responses.filter(func(r: DialogueResponse) -> bool: return r.is_allowed)
+			if allowed.is_empty():
+				break  # nothing selectable; end the walk
 			var chosen: DialogueResponse = allowed[0]  # replace with real UI selection
 			line = await DialogueManager.get_next_dialogue_line(dialogue_resource, chosen.next_id)
 ```
@@ -190,7 +192,8 @@ public partial class Npc : Node2D
             }
             else
             {
-                var chosen = line.Responses.First(r => r.IsAllowed); // replace with real UI selection
+                var chosen = line.Responses.FirstOrDefault(r => r.IsAllowed); // replace with real UI selection
+                if (chosen == null) break; // nothing selectable; end the walk
                 line = await DialogueManager.GetNextDialogueLine(DialogueResource, chosen.NextId);
             }
         }
@@ -198,7 +201,7 @@ public partial class Npc : Node2D
 }
 ```
 
-Other methods (the second parameter is `cue`): `show_dialogue_balloon_scene(balloon_scene, resource, cue)`,
+Other methods (the `cue` parameter; C# names it `key`): `show_dialogue_balloon_scene(balloon_scene, resource, cue)`,
 `show_example_dialogue_balloon(resource, cue)`, `set_default_balloon(scene)` (runtime override of Balloon
 Path), `create_resource_from_text(text)`. C#: `ShowDialogueBalloonScene`, `ShowExampleDialogueBalloon`,
 `SetDefaultBalloon`, `CreateResourceFromText`. `get_next_dialogue_line`'s `mutation_behaviour` is
@@ -218,6 +221,8 @@ ends. The picker adds the GDScript nodes — attach the C# scripts by hand to ge
 
 ```gdscript
 # player.gd
+extends CharacterBody2D
+
 func _unhandled_input(event: InputEvent) -> void:
 	if event.is_action_pressed("ui_accept"):
 		var nearest: DialogueActionable2D = DialogueActionable2D.get_nearest_actionable_to(global_position)
@@ -276,6 +281,7 @@ func load_line(data: String) -> DialogueLine:
 
 ```csharp
 using System.Threading.Tasks;
+using Godot;
 using DialogueManagerRuntime;
 
 public override void _Ready()

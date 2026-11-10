@@ -110,5 +110,5 @@ The lazy event bridge is unchanged: C# handlers fire only after something touche
   a `|`-separated return stack. Do not parse or store them as numbers.
 - **Indenting the line directly after a cue** is now a compile error ("Invalid indentation").
 - **Translation keys.** With **Use Static IDs as Translation Keys** (default on) a line's static ID is
-  the msgid and `"dialogue"` the context; previously the static ID was the context. Re-export your
+  the msgid and `"dialogue"` the context; previously, with PO files, the static ID was the context (with CSV it was the key). Re-export your
   templates after upgrading.
