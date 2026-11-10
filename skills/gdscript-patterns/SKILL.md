@@ -347,7 +347,7 @@ The recurring small patterns: ternary expressions (`value if cond else other`), 
 | Await never resumes | Signal never emitted, or this node was freed (coroutine dropped) | Check the condition before awaiting; race slow signals against a timer |
 | Lambda's change to a variable is lost | Locals are captured by value | Keep shared state in a member, `Array` or `Dictionary` |
 | `UNTYPED_DECLARATION` warnings flood | Warning enabled but codebase isn't typed | Type incrementally; use `@warning_ignore` for legacy code |
-| Typed array assignment fails | An untyped `Array` or an `Array[Subclass]` assigned to an `Array[Type]` variable (no covariance; subclass *elements* are accepted) | Declare it typed from the start, or `typed.assign(other)` |
+| Typed array assignment fails | A value that is a plain `Array` at runtime (a variable holding one, or the result of `map()` / `filter()`) or an `Array[Subclass]` assigned to an `Array[Type]` variable (no covariance; subclass *elements* are accepted) | Declare it typed from the start, or `typed.assign(other)` |
 | `@onready` is `null` | Accessed before `_ready()` runs | Never access `@onready` vars in `_init()` or variable declarations |
 | Match doesn't enter any branch | No matching pattern and no `_:` wildcard | Always add `_:` default branch |
 | `class_name` conflict | Two scripts with same `class_name` | Use unique names; check for duplicates in Project |

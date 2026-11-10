@@ -67,6 +67,9 @@ func _on_collision(other: Node) -> void:
 # From a worker thread, hand results to the main thread:
 func _on_thread_done(result: Variant) -> void:
     _apply_result.call_deferred(result)
+
+func _apply_result(result: Variant) -> void:
+    pass  # touch the scene tree here, on the main thread
 ```
 
 ## 5. Callable lifecycle pitfall

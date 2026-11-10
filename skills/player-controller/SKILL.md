@@ -17,10 +17,8 @@ All examples target Godot 4.3+ with no deprecated APIs. GDScript is shown first,
 
 | Body Type         | Use For                        | Physics Control | Notes                                                   |
 |-------------------|--------------------------------|-----------------|----------------------------------------------------------|
-| `CharacterBody2D/3D` | Player, enemies, NPCs       | Manual (full)   | You control velocity; `move_and_slide()` handles collisions |
-| `RigidBody2D/3D`  | Projectiles, props, debris     | Engine-driven   | Physics engine applies forces; harder to control precisely  |
-| `RigidBody2D/3D`  | Projectiles with bouncing      | Engine-driven   | Set `linear_velocity` once; let physics resolve bounces  |
-| `CharacterBody2D/3D` | Platformers, top-down, FPS | Manual (full)   | Reliable and predictable; best for responsive game feel  |
+| `CharacterBody2D/3D` | Player, enemies, NPCs, platformers, top-down, FPS | Manual (full) | You control velocity; `move_and_slide()` handles collisions; predictable, responsive game feel |
+| `RigidBody2D/3D`  | Projectiles, props, debris, bouncing objects | Engine-driven   | Physics engine applies forces; harder to control precisely. For a bouncing projectile set `linear_velocity` once and let physics resolve bounces |
 
 **Rule of thumb:** Use `CharacterBody` when you need tight, responsive control. Use `RigidBody` when you want realistic physics simulation.
 
