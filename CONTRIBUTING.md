@@ -80,7 +80,7 @@ Skills that document a community addon (`limboai`, `beehave`, `popochiu`, `dialo
    version — which may be higher than the repo's 4.3+ baseline:
 
    ```markdown
-   > **Addon:** Popochiu · version `v2.1.1` · Godot 4.6 · MIT · source: https://github.com/carenalgas/popochiu · pure GDScript.
+   > **Addon:** Popochiu · version `v2.2.1` · Godot 4.7 · MIT · source: https://github.com/carenalgas/popochiu · pure GDScript.
    ```
 
 2. **Research against the pinned tag, never the live docs site.** Addon docs sites track `main`/`develop`

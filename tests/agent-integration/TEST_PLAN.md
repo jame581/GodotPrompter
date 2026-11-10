@@ -310,7 +310,7 @@ sits next to) and answers with the addon's real API.
 **Expected skill:** `dialogue-manager`
 
 **Expected behavior:**
-- Valid `.dialogue` syntax: `~ title`, `- response` options, `=> jump` / `=> END`
+- Valid `.dialogue` syntax: `~ cue`, `- response` options, `=> jump` / `=> END`
 - C# runtime call using `DialogueManagerRuntime` namespace and `GetNextDialogueLine` / balloon API
 - End of dialogue treated as `null` (not an empty dictionary)
 

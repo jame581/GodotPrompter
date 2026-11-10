@@ -195,7 +195,7 @@ an explicit `restart()`, and a pause that sets `active = false` then back to tru
 | skill-05-limboai | `limboai` | 1.00 | 1.00 | 0.00 | 3/3 | ceiling | nothing, as in the last audit run |
 
 - First run after the grader change (`results/2026-11-10T00-40-33-629Z`): with 0.94, without 1.00.
-  One with-arm answer paused the restart with `active = false` and then `active = true`; my first
+  One with-arm answer paused the restart with `active = false` and then `active = true`; the first
   wording failed any `active = false`. The second wording above fixed it; the re-run is the table.
 - The fail clause was tightened after that last run (it also fails an answer claiming the tree must be
   re-instantiated or reloaded to run again). Wording only, not re-run.
@@ -237,7 +237,7 @@ in each with-arm run (3 of 3 in `aggregate-result.json`). Clean run, $1.70.
 The 3/3 row above used the sentence "Triggers on any HTTPRequest question, including a download that
 times out", which review judged eval-specific (it mirrors the skill-16 prompt) and unbounded. It was
 replaced with general wording: "over HTTP or WebSocket", plus "Not for real-time game networking and
-RPCs (`multiplayer-basics`) or browser export limits (`web-export`)". No phrase comes from the prompt.
+RPCs (`multiplayer-basics`) or browser export limits (`web-export`)". The eval-specific sentence was removed; "content packs" and "timeouts" remain in the trigger list and also appear in the prompt.
 Same command as above.
 
 | Case | Skill | With | Without | Δ | Skill fired | Tag | What separated the arms |
