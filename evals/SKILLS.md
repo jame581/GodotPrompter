@@ -173,3 +173,20 @@ measures a changed API, so no grader changed. Clean run, $1.14, 199 s.
 
 - An answer that writes `say("…", "emotion")` would still pass every grader while being broken in 2.2;
   the prompt asks for no emotion, so none was added.
+
+## LimboAI 1.8.1 — v1.17.0, 2026-11-10 (`results/2026-11-10T00-50-20-981Z`)
+
+`limboai` moved to v1.8.1, the version line now names the 4.4 to 4.5 lines (1.4.x to 1.6.x), the
+tree-finished wording says what the reader decides, and `references/hsm.md` gained a nested-HSM
+section. The `limbo-tree-finished` grader passed only answers that call `restart()`, which
+contradicts the skill (a tree that returned SUCCESS/FAILURE re-enters from the root on the next update
+by itself, `bt/bt_player.cpp`, `bt/tasks/bt_task.cpp:219-245`). It now accepts the automatic restart,
+an explicit `restart()`, and a pause that sets `active = false` then back to true.
+
+| Case | Skill | With | Without | Δ | Skill fired | Tag | What separated the arms |
+|---|---|---|---|---|---|---|---|
+| skill-05-limboai | `limboai` | 1.00 | 1.00 | 0.00 | 3/3 | ceiling | nothing, as in the last audit run |
+
+- First run after the grader change (`results/2026-11-10T00-40-33-629Z`): with 0.94, without 1.00.
+  One with-arm answer paused the restart with `active = false` and then `active = true`; my first
+  wording failed any `active = false`. The second wording above fixed it; the re-run is the table.

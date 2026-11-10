@@ -113,6 +113,44 @@ private void InitHsm()
 
 ---
 
+## Nested HSMs
+
+A `LimboHSM` that is a **direct child of another `LimboHSM`** is a sub-state: the parent drives it. A `LimboHSM` under a plain `LimboState` (or any non-HSM parent) is its own root — you call `initialize()` and `set_active(true)` on it yourself (works from v1.8.1; v1.8.0 failed with "initialize() must be called on the root HSM").
+
+### GDScript
+
+```gdscript
+var combat := LimboHSM.new()          # sub-state of the main HSM
+combat.add_child(LimboState.new().named("Melee"))
+hsm.add_child(combat)
+hsm.add_transition(idle, combat, &"enemy_seen")
+
+var wrapper := LimboState.new()       # plain state, so this HSM is a separate root
+var aim_hsm := LimboHSM.new()
+wrapper.add_child(aim_hsm)
+# ... add aim_hsm's states and transitions, then:
+aim_hsm.initialize(self)
+aim_hsm.set_active(true)
+```
+
+### C#
+
+```csharp
+var combat = new LimboHsm();          // sub-state of the main HSM
+combat.AddChild(new LimboState { Name = "Melee" });
+hsm.AddChild(combat);
+hsm.AddTransition(idle, combat, "enemy_seen");
+
+var wrapper = new LimboState();       // plain state, so this HSM is a separate root
+var aimHsm = new LimboHsm();
+wrapper.AddChild(aimHsm);
+// ... add aimHsm's states and transitions, then:
+aimHsm.Initialize(this);
+aimHsm.SetActive(true);
+```
+
+---
+
 ## BTState — bridging HSM and behavior trees
 
 `BTState` is a `LimboState` that runs a `BehaviorTree` resource. When the BT returns `SUCCESS` it dispatches `success_event`; on `FAILURE` it dispatches `failure_event`. Use it to embed a BT inside an HSM state slot:

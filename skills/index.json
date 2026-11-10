@@ -654,7 +654,7 @@
         "state-machine",
         "godot-brainstorming"
       ],
-      "addon": "LimboAI · version `v1.8.0` · Godot 4.6+ (GDExtension) · MIT · source: https://github.com/limbonaut/limboai · written in C++ (GDExtension; engine-module build also available). GDExtension exposes GDScript; **C# requires the module build** (not GDExtension in v1.8.0), and the v1.8.0 module build targets **Godot 4.7**.",
+      "addon": "LimboAI · version `v1.8.1` · Godot 4.6+ (GDExtension) · MIT · source: https://github.com/limbonaut/limboai · written in C++ (GDExtension; engine-module build also available). GDExtension exposes GDScript; **C# requires the module build** (not GDExtension in v1.8.1), and the v1.8.1 module build targets **Godot 4.7** (4.7.2-stable builds).",
       "references": [
         "skills/limboai/references/hsm.md"
       ],
