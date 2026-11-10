@@ -134,3 +134,13 @@ public override void _PhysicsProcess(double delta)
     }
 }
 ```
+
+---
+
+## Query Reference
+
+- **Space access:** get the space state via `get_world_2d().direct_space_state` (or `get_world_3d()`) and call `intersect_ray(query)` with `PhysicsRayQueryParameters2D/3D.create(from, to)`. Set `query.exclude = [get_rid()]` to skip self and `query.collision_mask` to filter layers.
+- **Query inside `_physics_process()`:** the space is locked while the physics step runs, and with physics on a separate thread it is only accessible there.
+- **Ray result:** the `intersect_ray` dictionary contains `position`, `normal`, `collider`, `collider_id`, `rid`, `shape`.
+- **Other queries:** `PhysicsDirectSpaceState` also supports `intersect_point` (overlapping shapes at a point), `intersect_shape` (area query), `cast_motion` (shape sweep), `collide_shape` (contact points), `get_rest_info` (resting collision info).
+- **3D mouse picking:** `Camera3D.project_ray_origin(screen_pos)` + `project_ray_normal(screen_pos)` builds the ray.

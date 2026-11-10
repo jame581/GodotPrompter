@@ -115,23 +115,9 @@ Name layers in **Project Settings → Layer Names → 2D Physics** (or 3D Physic
 
 ## 7. Raycasting and Physics Queries
 
-### RayCast2D/3D Nodes (Simple Per-Frame Rays)
+Two ways to cast: a `RayCast2D`/`RayCast3D` child node (casts every physics frame; read `is_colliding()`, `get_collider()`, `get_collision_point()`, `get_collision_normal()`), or an on-demand `intersect_ray(PhysicsRayQueryParameters2D/3D.create(from, to))` on `direct_space_state`. **Query inside `_physics_process()`** — the space is locked during the physics step. `PhysicsDirectSpaceState` also offers `intersect_point`, `intersect_shape`, `cast_motion`, `collide_shape`, `get_rest_info`.
 
-Add a `RayCast2D` / `RayCast3D` as a child node — it casts every physics frame automatically. Read with `is_colliding()` and `get_collider()` / `get_collision_point()` / `get_collision_normal()`.
-
-> See [references/raycasting-recipes.md](references/raycasting-recipes.md) for the GDScript + C# RayCast node example.
-
-### Code-Based Raycasting (PhysicsDirectSpaceState)
-
-For on-demand queries, access the space state via `get_world_2d().direct_space_state` (or `get_world_3d()`) and call `intersect_ray(query)` with `PhysicsRayQueryParameters2D/3D.create(from, to)`. Set `query.exclude = [get_rid()]` to skip self, `query.collision_mask` to filter layers. **Query inside `_physics_process()`** — the space is locked while the physics step runs, and with physics on a separate thread it is only accessible there.
-
-> See [references/raycasting-recipes.md](references/raycasting-recipes.md) for the full GDScript + C# code-based raycast example with self-exclusion and mask filtering, plus the 3D mouse-picking recipe.
-
-### Ray Result, Other Queries, 3D Mouse Picking
-
-The `intersect_ray` result dictionary contains `position`, `normal`, `collider`, `collider_id`, `rid`, `shape`. `PhysicsDirectSpaceState` also supports `intersect_point` (overlapping shapes at a point), `intersect_shape` (area query), `cast_motion` (shape sweep), `collide_shape` (contact points), `get_rest_info` (resting collision info). For 3D mouse picking, `Camera3D.project_ray_origin(screen_pos)` + `project_ray_normal(screen_pos)` builds the ray.
-
-> See [references/raycasting-recipes.md](references/raycasting-recipes.md) for the full mouse-picking recipe (GDScript + C#).
+> See [references/raycasting-recipes.md](references/raycasting-recipes.md) for the RayCast node and code-based raycast examples (GDScript + C#), the `intersect_ray` result keys, `query.exclude` / `collision_mask` filtering, and 3D mouse picking.
 
 ---
 
@@ -193,7 +179,7 @@ Godot 4.5+ adds `apply_central_impulse()` / `apply_central_force()` for `RigidBo
 
 ---
 
-## 13. Troubleshooting Physics Issues
+## 12. Troubleshooting Physics Issues
 
 Symptom → causes & fixes quick table covering tunneling, wobbly stacks, scaled shapes, tile collision bumps, unstable cylinders, the physics spiral of death, and float-precision issues far from origin.
 
@@ -201,7 +187,7 @@ Symptom → causes & fixes quick table covering tunneling, wobbly stacks, scaled
 
 ---
 
-## 14. Implementation Checklist
+## 13. Implementation Checklist
 
 - [ ] Dynamic bodies use primitive collision shapes; concave shapes only on StaticBodies
 - [ ] Collision layers named in Project Settings; layer/mask set correctly per body
