@@ -1076,7 +1076,7 @@
     {
       "name": "web-services",
       "title": "Web Services in Godot 4.3+",
-      "description": "Use when calling web APIs or backends from Godot — HTTPRequest, REST/JSON clients, auth headers, downloads, TLS, WebSocketPeer clients, retries, and keeping secrets out of the build",
+      "description": "Use when a Godot game talks to a web server — HTTPRequest, downloading a file or content pack, calling a REST or JSON API, backend or server endpoints, auth tokens and headers, uploading data, leaderboard or analytics calls, WebSocketPeer clients, TLS, timeouts, retries, and keeping secrets out of the build. Triggers on any HTTPRequest question, including a download that times out. Not for game networking (multiplayer-basics) or browser export (web-export)",
       "relatedSkills": [
         "multiplayer-basics",
         "save-load",
