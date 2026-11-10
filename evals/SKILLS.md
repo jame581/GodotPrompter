@@ -22,7 +22,7 @@ Clean run (0 errors/timeouts), mean **Δ +0.07**.
 | skill-01-state-machine | `state-machine` | 0.80 | 0.67 | +0.13 | 3/3 | `fsm-choice` 1/3 vs 0/3; `fsm-correct` 2/3 vs 1/3 |
 | skill-02-save-load | `save-load` | 1.00 | 0.83 | +0.17 | 3/3 | `save-format` 3/3 vs 1/3; `save-versioned` 3/3 vs 2/3 |
 | skill-03-enemy-patrol-chase | `ai-navigation` | 1.00 | 1.00 | 0.00 | 2/3 | every grader 3/3 in both arms — at ceiling |
-| skill-04-code-review | `godot-code-review` | 1.00 | 1.00 | 0.00 | 1/3 | every grader 3/3 in both arms — at ceiling |
+| skill-04-code-review | `godot-code-review` | 1.00 | 1.00 | 0.00 | 3/3 | every grader 3/3 in both arms — at ceiling |
 
 - The base model is already strong on mainstream Godot 4, so the gain is smaller than mentor's
   or grill's and shows only where the skill carries a judgement: why this save format, the
@@ -160,3 +160,16 @@ case is retagged `discriminating`. Clean run, $2.81, 145 s.
   error and never applies — checked headless against v4.2.0), read `translation_key` /
   `TranslationKey`; `translation_source` also appears in the without-arm transcripts.
 - `dm-allowed-response` passed 3/3 in both arms: `is_allowed` predates 4.x.
+
+## Popochiu 2.2.1 — v1.17.0, 2026-11-10 (`results/2026-11-10T00-39-35-055Z`)
+
+`popochiu` moved from v2.1.1 to v2.2.1 (breaking: `say()` no longer takes an emotion, `E.play_transition()`
+and item `discard()` removed). The case prompt now says "Popochiu addon (2.2) on Godot 4.7". No grader
+measures a changed API, so no grader changed. Clean run, $1.14, 199 s.
+
+| Case | Skill | With | Without | Δ | Skill fired | Tag | What separated the arms |
+|---|---|---|---|---|---|---|---|
+| skill-07-popochiu | `popochiu` | 1.00 | 1.00 | 0.00 | 3/3 | ceiling | nothing: the bare model scripts the door and dialog correctly |
+
+- An answer that writes `say("…", "emotion")` would still pass every grader while being broken in 2.2;
+  the prompt asks for no emotion, so none was added.

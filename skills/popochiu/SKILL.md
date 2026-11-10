@@ -7,7 +7,7 @@ description: Use when using the Popochiu addon — point-and-click adventure fra
 
 > **Related skills:** **dialogue-system** for hand-rolled dialogue data, **inventory-system** for generic inventory patterns, **save-load** for core-engine persistence.
 
-> **Addon:** Popochiu · version `v2.1.1` · Godot 4.6 · MIT · source: https://github.com/carenalgas/popochiu · pure GDScript (no C# API — GDScript-only skill).
+> **Addon:** Popochiu · version `v2.2.1` · Godot 4.7 (use 2.1.x on 4.6) · MIT · source: https://github.com/carenalgas/popochiu · pure GDScript (no C# API — GDScript-only skill).
 
 ---
 
@@ -18,14 +18,14 @@ description: Use when using the Popochiu addon — point-and-click adventure fra
 | Hand-rolled (`dialogue-system` + `inventory-system` + `state-machine`) | Custom genre, tight control over every system, no editor tooling needed |
 | **Popochiu** | Full point-and-click adventure (AGS/PowerQuest-style): rooms, walk-to-click, verb-based interaction, dialog trees, inventory, save/load — wired together with dock-generated scaffolding |
 
-Choose Popochiu when you're building a classic point-and-click adventure and want the room/character/prop/dialog/inventory pipeline pre-built, with a dock that scaffolds new objects and autoload registries that give autocomplete (`R.House`, `C.Popsy`, `I.Key`, `D.PopsyHouseChat`). Hand-roll with `dialogue-system` + `inventory-system` + `state-machine` when your genre isn't point-and-click, or you need full control over the interaction model. Popochiu requires **Godot 4.6** and is GDScript-only (no C# API).
+Choose Popochiu when you're building a classic point-and-click adventure and want the room/character/prop/dialog/inventory pipeline pre-built, with a dock that scaffolds new objects and autoload registries that give autocomplete (`R.House`, `C.Popsy`, `I.Key`, `D.PopsyHouseChat`). Hand-roll with `dialogue-system` + `inventory-system` + `state-machine` when your genre isn't point-and-click, or you need full control over the interaction model. Popochiu v2.2.1 targets **Godot 4.7** and is GDScript-only (no C# API).
 
 ---
 
 ## 2. Install & project setup
 
 1. Get Popochiu from [itch.io](https://carenalgas.itch.io/popochiu) or [GitHub Releases](https://github.com/carenalgas/popochiu/releases); copy `addons/popochiu/` into your project.
-2. **Project → Project Settings → Plugins** → enable **Popochiu**. Godot prompts a restart — **Project → Reload Current Project**.
+2. **Project → Project Settings → Plugins** → enable **Popochiu**. Godot prompts a restart — **Project → Reload Current Project**. Upgrading a 2.1.x project: open it in **2.2.0** first so its migrations rewrite your scripts, then move to 2.2.1, which removes the methods old scripts may still call. For touch devices keep **Emulate Mouse From Touch** on (Popochiu reads mouse events only).
 3. On first run, `PopochiuResources.init_file_structure()` scaffolds `res://game/` (layout below) plus `popochiu_data.cfg` (a `ConfigFile` registry of every room/character/item/dialog) and `popochiu_globals.gd` (an empty `Globals` autoload — add your own state here).
 4. The **setup wizard** pops up automatically (re-open via the dock's "Setup" button): pick a **game type** (Retro / Pixel Art or Modern / Hi-Res — sets the stretch aspect and pixel-art texture filtering; the custom-settings form offers Custom / Pixel Art / High Resolution), a **Resolution**, and a **GUI Template** (9 Verb, the Sierra-style "Action Bar", Simple Click, or Custom).
 5. Two companion plugins, **PopochiuImporters** (Aseprite import docks) and **PopochiuGizmo**, are enabled automatically along with Popochiu.
@@ -57,7 +57,7 @@ Game scripts talk to Popochiu almost entirely through short autoload singletons 
 | `C` | `PopochiuICharacter` | Character registry (`C.player`, `C.Popsy`) | `func walk_to_clicked(offset := Vector2.ZERO) -> void` |
 | `I` | `PopochiuIInventory` | Inventory registry & active item | `func set_active_item(item: PopochiuInventoryItem = null) -> void` |
 | `D` | `PopochiuIDialog` | Dialog registry & inline dialogs | `func show_inline_dialog(options: Array) -> PopochiuDialogOption` |
-| `G` | `PopochiuIGraphicInterface` | GUI control: block/unblock, show/hide, hover/system text | `func show_system_text(msg: String) -> void` |
+| `G` | `PopochiuIGraphicInterface` | GUI control: block/unblock, show/hide, hover/system text | `func show_system_text(msg: String, params: Variant = null) -> void` |
 | `A` | `PopochiuIAudio` | Audio cue registry (`A.sfx_boing`) | `func is_playing_cue(cue_name: String) -> bool` |
 
 `R`/`C`/`I`/`D` back onto **generated files** (`res://game/autoloads/*.gd`) rewritten every time you create an object in the dock — never hand-edit them; put custom logic in the object's own script instead. Two more singletons round out the surface: `T` (`PopochiuITransitionLayer`, screen transitions — §4) and `Cursor` (mouse cursor rendering).
@@ -90,7 +90,7 @@ func _on_room_transition_finished() -> void:
 
 String shorthand accepted by `queue()`/`cutscene()`: `"Name: text"` (says a line), `"Name(emotion): text"`, `"Name[N]: text"` (auto-continues after N seconds), `"."`/`".."`/`"..."` (0.25s/0.5s/1s pauses, doubling per dot), any other string shown via `G.show_system_text()`. `E.cutscene()` is additionally skippable via the `popochiu-skip` input action (default Esc).
 
-Room transitions go through `T` (new in 2.1) — not the deprecated `E.play_transition()`/`E.queue_play_transition()` (still present in 2.1.1 but print a runtime warning):
+Room transitions go through `T` — `E.play_transition()`/`E.queue_play_transition()` were removed in 2.2.1:
 
 ```gdscript
 await T.play_transition("fade", 0.5, T.PLAY_MODE.IN_OUT)
@@ -106,7 +106,7 @@ await T.play_transition("fade", 0.5, T.PLAY_MODE.IN_OUT)
 |---|---|---|
 | **Prop** | `PopochiuProp` (`Area2D`) | Visible/interactive scenery — sprite, optional `link_to_item`, can be a nav obstacle |
 | **Hotspot** | `PopochiuHotspot` (`Area2D`) | Invisible interaction zone (no sprite of its own — e.g. part of the background art) |
-| **Region** | `PopochiuRegion` (`Area2D`) | Trigger area that tints/scales a character on enter/exit; does **not** receive clicks |
+| **Region** | `PopochiuRegion` (`Area2D`) | Trigger area that tints/scales a character on enter/exit; does **not** receive clicks. `walkable = false` makes it block walking (`character_blocked` signal; a character opts out with `ignore_blocking_regions`) |
 
 Props, Hotspots, and Characters all extend `PopochiuClickable` and share one virtual lifecycle. Override these underscore-prefixed methods in generated scripts — the engine calls public wrappers (`on_click()`, etc.) that call these internally, so never override the public wrapper itself:
 
@@ -131,14 +131,16 @@ Full callback set: `_on_room_set`, `_on_click`, `_on_double_click`, `_on_right_c
 
 ## 6. Characters & dialog basics
 
-Create characters from the dock; the first one created becomes the Player Character. Say a line with an optional emotion:
+Create characters from the dock; the first one created becomes the Player Character. Say a line; the emotion comes from the character's `emotion` member:
 
 ```gdscript
 await C.player.walk_to_clicked()
-await C.player.say("What a mess.", "annoyed")
+C.player.emotion = "annoyed"
+await C.player.say("What a mess.")
+C.player.emotion = ""
 ```
 
-Emotions map to `voices` and `avatars` export arrays (emotion name → audio cue / GUI portrait); `say()` sets `emotion` for the duration of the line, then resets it to `""`.
+Emotions map to `voices` and `avatars` export arrays (emotion name → audio cue / GUI portrait); `say()` only reads the current `emotion`; its second argument is format data (`Array` for `%`, `Dictionary` for `String.format()`), not an emotion (2.2 breaking change). Only the queue shorthand `"Player(annoyed): What a mess."` sets the emotion and resets it after the line.
 
 Start a named dialog tree from a click handler:
 
@@ -162,7 +164,7 @@ Deep dives: [references/dialogs.md](references/dialogs.md), [references/inventor
 - [ ] Room navigation uses `R.goto_room()` — not a nonexistent `E.goto_room()`
 - [ ] Cutscene scripting uses `E.queue([...])`/`E.cutscene([...])`, not bare `queue_*()` calls (those are silent no-ops outside a queue)
 - [ ] Non-`queue_` action calls (`say()`, `walk_to()`, …) are `await`ed, or they run concurrently instead of sequentially
-- [ ] Room transitions use `T.play_transition()`, not the deprecated `E.play_transition()`
+- [ ] Room transitions use `T.play_transition()`, not the removed `E.play_transition()`
 - [ ] `res://game/autoloads/{r,c,i,d,a}.gd` are never hand-edited — they're dock-regenerated
 - [ ] Custom persisted fields live on the generated `*_state.gd` resource (JSON-safe types, or `_on_save`/`_on_load` overrides for complex ones)
 - [ ] `turn_on_options()`/`turn_off_options()`/`turn_off_forever_options()` are called with an `Array`, even for one id

@@ -44,4 +44,4 @@ func look_at() -> void:
 
 `E.current_command: int` is the active command id (settable — assigning it emits `command_selected`); `E.get_current_command_name() -> String` returns its display name; `E.get_command_name(id) -> String` looks up any registered command's name.
 
-**Docs-site drift warning:** the live tutorial page's inline example uses `E.active_command` and a global `Commands.LOOK_AT` enum (`match E.active_command: Commands.LOOK_AT: ...`). Neither exists in the v2.1.1 engine source — that snippet is stale. Use `E.current_command` / `E.get_current_command_name()` and a template-local `Commands` enum instead, as shown above.
+**Docs-site drift warning:** the live tutorial page's inline example uses `E.active_command` and a global `Commands.LOOK_AT` enum (`match E.active_command: Commands.LOOK_AT: ...`). Neither exists in the v2.2.1 engine source — that snippet is stale. Use `E.current_command` / `E.get_current_command_name()` and a template-local `Commands` enum instead, as shown above.

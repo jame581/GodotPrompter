@@ -317,7 +317,7 @@ The generated machine-readable skill catalog lives in [`skills/index.json`](skil
 
 ### Third-Party Addons (5 skills)
 
-These skills cover community addons with pinned versions — LimboAI v1.8.0, Beehave v2.9.2, Popochiu v2.1.1, Dialogue Manager v4.2.0, and Phantom Camera v0.11.0.2. They require the corresponding addon to be installed in your project.
+These skills cover community addons with pinned versions — LimboAI v1.8.0, Beehave v2.9.2, Popochiu v2.2.1, Dialogue Manager v4.2.0, and Phantom Camera v0.11.0.2. They require the corresponding addon to be installed in your project.
 
 | Skill | Description |
 |-------|-------------|

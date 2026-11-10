@@ -855,7 +855,7 @@
         "inventory-system",
         "save-load"
       ],
-      "addon": "Popochiu · version `v2.1.1` · Godot 4.6 · MIT · source: https://github.com/carenalgas/popochiu · pure GDScript (no C# API — GDScript-only skill).",
+      "addon": "Popochiu · version `v2.2.1` · Godot 4.7 (use 2.1.x on 4.6) · MIT · source: https://github.com/carenalgas/popochiu · pure GDScript (no C# API — GDScript-only skill).",
       "references": [
         "skills/popochiu/references/dialogs.md",
         "skills/popochiu/references/gui.md",
