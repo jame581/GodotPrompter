@@ -58,7 +58,7 @@ func _process(delta: float) -> void:
     # Health and other discrete values are not lerped — snap on change.
 ```
 
-> **Match the sender's interval.** `replication_interval` is read only on the sending peer (`MultiplayerSynchronizer::sync_interval_usec`, `multiplayer_synchronizer.cpp` and `scene_replication_interface.cpp:128` at `4.3-stable`) and is not replicated. The receiver's copy of the node must be configured with the same value, or `_sync.replication_interval` here gives the wrong blend window. Set it in the shared scene, not from code on one peer. Properties synced "On Change" follow `delta_interval` instead, so read that one for them.
+> **Match the sender's interval.** `replication_interval` is read only on the sending peer (`MultiplayerSynchronizer::sync_interval_usec`, `modules/multiplayer/multiplayer_synchronizer.cpp:128` at `4.3-stable`) and is not replicated. The receiver's copy of the node must be configured with the same value, or `_sync.replication_interval` here gives the wrong blend window. Set it in the shared scene, not from code on one peer. Properties synced "On Change" follow `delta_interval` instead, so read that one for them.
 
 ### Interpolation (C#)
 

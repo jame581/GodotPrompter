@@ -115,7 +115,7 @@ Name layers in **Project Settings → Layer Names → 2D Physics** (or 3D Physic
 
 ## 7. Raycasting and Physics Queries
 
-Two ways to cast: a `RayCast2D`/`RayCast3D` child node (casts every physics frame; read `is_colliding()`, `get_collider()`, `get_collision_point()`, `get_collision_normal()`), or an on-demand `intersect_ray(PhysicsRayQueryParameters2D/3D.create(from, to))` on `direct_space_state`. **Query inside `_physics_process()`** — the space is locked during the physics step. `PhysicsDirectSpaceState` also offers `intersect_point`, `intersect_shape`, `cast_motion`, `collide_shape`, `get_rest_info`.
+Two ways to cast: a `RayCast2D`/`RayCast3D` child node (casts every physics frame; read `is_colliding()`, `get_collider()`, `get_collision_point()`, `get_collision_normal()`), or an on-demand `intersect_ray(PhysicsRayQueryParameters2D/3D.create(from, to))` on `direct_space_state` (`query.exclude = [get_rid()]` to skip self). **Query inside `_physics_process()`** — the space is locked during the physics step. `PhysicsDirectSpaceState` also offers `intersect_point`, `intersect_shape`, `cast_motion`, `collide_shape`, `get_rest_info`.
 
 > See [references/raycasting-recipes.md](references/raycasting-recipes.md) for the RayCast node and code-based raycast examples (GDScript + C#), the `intersect_ray` result keys, `query.exclude` / `collision_mask` filtering, and 3D mouse picking.
 

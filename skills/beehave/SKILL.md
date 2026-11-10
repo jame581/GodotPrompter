@@ -7,7 +7,7 @@ description: Use when using the Beehave addon — pure-GDScript behavior trees w
 
 > **Related skills:** **ai-navigation** for the movement leaves drive, **state-machine** for core-engine FSM, **limboai** for a heavier C++ BT+HSM alternative, **godot-brainstorming** for choosing an AI approach.
 
-> **Addon:** Beehave · version `v2.9.3` · Godot 4.1+ (README: 2.9.x is the 4.1.x line; CI runs 4.5.1, 4.6.3 and 4.7) · MIT · source: https://github.com/bitbrain/beehave · written in GDScript (no official C# API — this skill is GDScript-only by design).
+> **Addon:** Beehave · version `v2.9.3` · Godot 4.1+ (README: 2.9.x is the 4.1.x line; CI runs 4.5.1, 4.6.3 and 4.7; 4.1–4.4 untested by CI) · MIT · source: https://github.com/bitbrain/beehave · written in GDScript (no official C# API — this skill is GDScript-only by design).
 
 ---
 

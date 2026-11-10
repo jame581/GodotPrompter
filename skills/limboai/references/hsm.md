@@ -127,6 +127,7 @@ hsm.add_transition(idle, combat, &"enemy_seen")
 
 var wrapper := LimboState.new()       # plain state, so this HSM is a separate root
 var aim_hsm := LimboHSM.new()
+hsm.add_child(wrapper)
 wrapper.add_child(aim_hsm)
 # ... add aim_hsm's states and transitions, then:
 aim_hsm.initialize(self)
@@ -143,6 +144,7 @@ hsm.AddTransition(idle, combat, "enemy_seen");
 
 var wrapper = new LimboState();       // plain state, so this HSM is a separate root
 var aimHsm = new LimboHsm();
+hsm.AddChild(wrapper);
 wrapper.AddChild(aimHsm);
 // ... add aimHsm's states and transitions, then:
 aimHsm.Initialize(this);

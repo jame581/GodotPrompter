@@ -55,6 +55,8 @@ func _release() -> void:
 ```
 
 ```csharp
+using Godot;
+
 public partial class XRGrabController : XRController3D
 {
     private RigidBody3D _heldObject = null;
