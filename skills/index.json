@@ -793,7 +793,7 @@
         "camera-system",
         "tween-animation"
       ],
-      "addon": "Phantom Camera · version `v0.11.0.2` · Godot 4.4+ · MIT · source: https://github.com/ramokz/phantom-camera · nodes are GDScript, plus an official C# wrapper API (`namespace PhantomCamera`) shipped as source `.cs` files in the addon. **Pre-1.0:** minor versions may break API.",
+      "addon": "Phantom Camera · version `v0.11.0.4` · Godot 4.4+ · MIT · source: https://github.com/ramokz/phantom-camera · nodes are GDScript, plus an official C# wrapper API (`namespace PhantomCamera`) shipped as source `.cs` files in the addon. **Pre-1.0:** minor versions may break API.",
       "references": [
         "skills/phantom-camera/references/follow-modes.md"
       ],

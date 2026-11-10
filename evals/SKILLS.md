@@ -190,3 +190,10 @@ an explicit `restart()`, and a pause that sets `active = false` then back to tru
 - First run after the grader change (`results/2026-11-10T00-40-33-629Z`): with 0.94, without 1.00.
   One with-arm answer paused the restart with `active = false` and then `active = true`; my first
   wording failed any `active = false`. The second wording above fixed it; the re-run is the table.
+
+## Phantom Camera 0.11.0.4 — v1.17.0, 2026-11-10
+
+`phantom-camera` moved to v0.11.0.4 (enabling the plugin no longer restarts the editor; the "shared
+follow options" blurb now says which options are 2D only). No eval re-run: no grader of
+`skill-09-phantom-camera` measures the editor restart or the follow-option wording (grepped). The
+last measured baseline stands (with 0.89, without 0.56, Δ +0.33).
