@@ -143,7 +143,7 @@ There is no dedicated method for weights, but each `Weights/<child_name>` proper
 
 ---
 
-## Known issues (v2.9.2)
+## Known issues (v2.9.3)
 
 - **`RepeaterDecorator.get_class_name()` bug:** The method returns an `Array[StringName]` whose last entry is `&"LimiterDecorator"` instead of `&"RepeaterDecorator"`, a copy-paste error in the source. The actual GDScript `class_name` is `RepeaterDecorator` (autocomplete and `is` checks work correctly); only `get_class_name()` returns the wrong value. Avoid `get_class_name()` for identity checks on this node.
 

@@ -197,3 +197,9 @@ an explicit `restart()`, and a pause that sets `active = false` then back to tru
 follow options" blurb now says which options are 2D only). No eval re-run: no grader of
 `skill-09-phantom-camera` measures the editor restart or the follow-option wording (grepped). The
 last measured baseline stands (with 0.89, without 0.56, Δ +0.33).
+
+## Beehave 2.9.3 — v1.17.0, 2026-11-10
+
+`beehave` moved to v2.9.3 (autoloads added on enable and removed on disable; a wrong
+`actor_node_path` leaves `actor` null). No eval re-run: no grader of `skill-06-beehave` measures
+autoloads or `actor_node_path` (grepped). The last measured baseline stands (with 1.00, without 1.00).

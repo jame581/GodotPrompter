@@ -188,7 +188,7 @@
         "limboai",
         "godot-brainstorming"
       ],
-      "addon": "Beehave · version `v2.9.2` · Godot 4.1+ · MIT · source: https://github.com/bitbrain/beehave · written in GDScript (no official C# API — this skill is GDScript-only by design).",
+      "addon": "Beehave · version `v2.9.3` · Godot 4.1+ (README: 2.9.x is the 4.1.x line; CI runs 4.5.1, 4.6.3 and 4.7) · MIT · source: https://github.com/bitbrain/beehave · written in GDScript (no official C# API — this skill is GDScript-only by design).",
       "references": [
         "skills/beehave/references/custom-nodes.md"
       ],

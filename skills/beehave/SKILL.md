@@ -7,7 +7,7 @@ description: Use when using the Beehave addon — pure-GDScript behavior trees w
 
 > **Related skills:** **ai-navigation** for the movement leaves drive, **state-machine** for core-engine FSM, **limboai** for a heavier C++ BT+HSM alternative, **godot-brainstorming** for choosing an AI approach.
 
-> **Addon:** Beehave · version `v2.9.2` · Godot 4.1+ · MIT · source: https://github.com/bitbrain/beehave · written in GDScript (no official C# API — this skill is GDScript-only by design).
+> **Addon:** Beehave · version `v2.9.3` · Godot 4.1+ (README: 2.9.x is the 4.1.x line; CI runs 4.5.1, 4.6.3 and 4.7) · MIT · source: https://github.com/bitbrain/beehave · written in GDScript (no official C# API — this skill is GDScript-only by design).
 
 ---
 
@@ -30,7 +30,7 @@ Choose Beehave when your project is GDScript-only, you want a behavior tree with
 1. **Godot AssetLib** → search "Beehave" → Download → Reload project.  
    Or copy the `addons/beehave/` folder from the [GitHub release](https://github.com/bitbrain/beehave/releases) into `res://addons/beehave/`.
 2. Enable the plugin: **Project → Project Settings → Plugins** → tick **Beehave**.  
-   Two autoloads are registered: `BeehaveGlobalMetrics` and `BeehaveGlobalDebugger`.
+   Two autoloads are registered on enable and removed again on disable: `BeehaveGlobalMetrics` and `BeehaveGlobalDebugger`.
 3. Optional — copy `script_templates/` from the addon into the project root for leaf scaffolding templates.
 
 ---
@@ -89,7 +89,7 @@ A Beehave tree is built from three kinds of nodes, all placed as regular scene-t
 # @export var tick_rate: int = 1          (1 = every frame; 3 = every 3 frames)
 # @export var process_thread: ProcessThread = PHYSICS
 # @export var blackboard: Blackboard      (auto-created if not set)
-# @export_node_path var actor_node_path   (defaults to parent node)
+# @export_node_path var actor_node_path   (empty = parent node; a wrong path leaves actor null)
 
 # Access the tree from code if you need manual control:
 @onready var bt: BeehaveTree = $BeehaveTree
