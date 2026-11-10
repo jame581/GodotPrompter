@@ -18,6 +18,8 @@ extends CharacterBody2D
 @export var speed: float = 200.0
 ## Peer that controls this player. The node's multiplayer authority stays the
 ## server (peer 1) so the "authority" correction RPC below is sent by the server.
+## Set it right after instancing, before add_child, to the same value on every peer
+## (by the spawner, or a MultiplayerSynchronizer).
 @export var owner_peer_id: int = 1
 
 # Ring buffer of unacknowledged inputs indexed by tick number.
@@ -99,6 +101,8 @@ public partial class PredictedPlayer : CharacterBody2D
 
     // Peer that controls this player. The node's multiplayer authority stays the
     // server (peer 1) so the Authority correction RPC below is sent by the server.
+    // Set it right after instancing, before AddChild, to the same value on every peer
+    // (by the spawner, or a MultiplayerSynchronizer).
     [Export] public int OwnerPeerId { get; set; } = 1;
 
     // Ring buffer of unacknowledged inputs indexed by tick number.

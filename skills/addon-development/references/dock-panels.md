@@ -87,7 +87,8 @@ func _enter_tree() -> void:
     if _use_editor_dock:
         var dock = ClassDB.instantiate("EditorDock")
         dock.title = "My Dock"
-        dock.default_slot = DOCK_SLOT_LEFT_UL
+        dock.default_slot = DOCK_SLOT_LEFT_UL  # EditorPlugin's constant, same value (0) as EditorDock.DOCK_SLOT_LEFT_UL;
+        # a literal `EditorDock.` reference would not parse on 4.3
         dock.add_child(content)
         call("add_dock", dock)
         _dock = dock
@@ -106,7 +107,7 @@ func _exit_tree() -> void:
         _dock = null
 ```
 
-In C# the bindings you compile against decide: a project on `Godot.NET.Sdk` 4.6 or newer has `EditorDock`, an older one does not, so ship the 4.6+ variant only when the plugin's minimum is 4.6.
+In C# the bindings you compile against decide: a project on `Godot.NET.Sdk` 4.6 or newer has `EditorDock`, an older one does not. On 4.3 to 4.5 bindings keep the `AddControlToDock` example above; ship the typed 4.6+ variant below only when the plugin's minimum is 4.6. To support both from one assembly, use the untyped cross-version variant after it.
 
 ```csharp
 #if TOOLS
@@ -133,6 +134,52 @@ public partial class MyPlugin : EditorPlugin
         if (_dock != null)
         {
             RemoveDock(_dock);
+            _dock.QueueFree();
+            _dock = null;
+        }
+    }
+}
+#endif
+```
+
+Cross-version C# (compiles against any bindings; `EditorDock` and `add_dock` are reached by name at runtime):
+
+```csharp
+#if TOOLS
+using Godot;
+
+[Tool]
+public partial class MyPlugin : EditorPlugin
+{
+    private Control _dock;
+    private bool _useEditorDock;
+
+    public override void _EnterTree()
+    {
+        var content = GD.Load<PackedScene>("res://addons/my_plugin/MyDock.tscn").Instantiate<Control>();
+        var v = Engine.GetVersionInfo();
+        _useEditorDock = (int)v["hex"] >= 0x040600;
+        if (_useEditorDock)
+        {
+            _dock = (Control)ClassDB.Instantiate("EditorDock").AsGodotObject();
+            _dock.Set("title", "My Dock");
+            _dock.Set("default_slot", 0); // EditorDock.DOCK_SLOT_LEFT_UL
+            _dock.AddChild(content);
+            Call("add_dock", _dock);
+        }
+        else
+        {
+            _dock = content;
+            AddControlToDock(DockSlot.LeftUl, _dock);
+        }
+    }
+
+    public override void _ExitTree()
+    {
+        if (_dock != null)
+        {
+            if (_useEditorDock) Call("remove_dock", _dock);
+            else RemoveControlFromDocks(_dock);
             _dock.QueueFree();
             _dock = null;
         }
