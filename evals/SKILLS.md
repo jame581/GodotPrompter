@@ -224,3 +224,17 @@ claude plugin eval . --case "skill-16-web-services" -j 3 --ablation with-without
 
 "Skill fired" is the `trigger-skill` grader (`tool_used` Skill, `input_match: web-services`) passing
 in each with-arm run (3 of 3 in `aggregate-result.json`). Clean run, $1.70.
+
+## web-services routing, fix round 1 — v1.17.0, 2026-11-10 (`results/2026-11-10T01-13-33-867Z`)
+
+The 3/3 row above used the sentence "Triggers on any HTTPRequest question, including a download that
+times out", which review judged eval-specific (it mirrors the skill-16 prompt) and unbounded. It was
+replaced with general wording: "over HTTP or WebSocket", plus "Not for real-time game networking and
+RPCs (`multiplayer-basics`) or browser export limits (`web-export`)". No phrase comes from the prompt.
+Same command as above.
+
+| Case | Skill | With | Without | Δ | Skill fired | Tag | What separated the arms |
+|---|---|---|---|---|---|---|---|
+| skill-16-web-services | `web-services` | 0.92 | 1.00 | -0.08 | **3/3** | ceiling | nothing: one with-arm run scored 0.75 on a grader vote split (noise, a ceiling case) |
+
+`trigger-skill` passed in all three with-arm runs (`aggregate-result.json`), with the general wording.
