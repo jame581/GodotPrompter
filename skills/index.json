@@ -302,14 +302,16 @@
     {
       "name": "dialogue-manager",
       "title": "Dialogue Manager",
-      "description": "Use when using the Dialogue Manager addon — .dialogue files with titles, responses, conditions and mutations, runtime balloons, and C# support",
+      "description": "Use when using the Dialogue Manager addon — .dialogue files with cues, responses, conditions and mutations, runtime balloons, actionable nodes, and C# support",
       "relatedSkills": [
         "dialogue-system",
         "localization",
         "popochiu"
       ],
-      "addon": "Dialogue Manager · version `v3.10.4` · Godot 4.6 · MIT · source: https://github.com/nathanhoad/godot_dialogue_manager · GDScript with official C# support.",
-      "references": [],
+      "addon": "Dialogue Manager · version `v4.2.0` · Godot 4.6+ (built for 4.7; Godot 4.4–4.5 → v3.10, 4.3 → v3.3, see §7) · MIT · source: https://github.com/nathanhoad/godot_dialogue_manager · GDScript with official C# support.",
+      "references": [
+        "skills/dialogue-manager/references/migrating-from-3.md"
+      ],
       "source": "skills/dialogue-manager/SKILL.md"
     },
     {

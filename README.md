@@ -317,14 +317,14 @@ The generated machine-readable skill catalog lives in [`skills/index.json`](skil
 
 ### Third-Party Addons (5 skills)
 
-These skills cover community addons with pinned versions — LimboAI v1.8.0, Beehave v2.9.2, Popochiu v2.1.1, Dialogue Manager v3.10.4, and Phantom Camera v0.11.0.2. They require the corresponding addon to be installed in your project.
+These skills cover community addons with pinned versions — LimboAI v1.8.0, Beehave v2.9.2, Popochiu v2.1.1, Dialogue Manager v4.2.0, and Phantom Camera v0.11.0.2. They require the corresponding addon to be installed in your project.
 
 | Skill | Description |
 |-------|-------------|
 | `limboai` | LimboAI addon — behavior trees + hierarchical state machines, visual editor, blackboard, BTTask subclassing (Godot 4.6+, C++ GDExtension) |
 | `beehave` | Beehave addon — pure-GDScript behavior trees, composites/decorators/leaves, blackboard, visual runtime debugger (GDScript-only) |
 | `popochiu` | Popochiu addon — point-and-click adventure framework: rooms, characters, inventory, dialogs, command GUI (Godot 4.6, GDScript-only) |
-| `dialogue-manager` | Dialogue Manager addon — .dialogue syntax, runtime balloons, conditions/mutations (Godot 4.6, GDScript + C#) |
+| `dialogue-manager` | Dialogue Manager addon — .dialogue syntax, cues, runtime balloons, conditions/mutations, actionable nodes (Godot 4.6+, GDScript + C#) |
 | `phantom-camera` | Phantom Camera addon — priority-based camera switching, follow/look-at modes, tweened transitions (Godot 4.4+, GDScript + C#, pre-1.0) |
 
 ## Validation
