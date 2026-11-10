@@ -12,12 +12,18 @@ Injectable dependencies make tests trivial: swap the real service for a stub or 
 ### GDScript (using GUT)
 
 ```gdscript
-# stub_audio.gd — a lightweight stand-in for AudioManager
+# stub_audio.gd — a lightweight stand-in for AudioManager.
+# It must extend AudioManager (the script that declares class_name AudioManager)
+# to fit the typed `@export var audio: AudioManager`; a plain Node is rejected.
 class_name StubAudio
-extends Node
+extends AudioManager
 
 var last_sfx: String = ""
 var play_count: int = 0
+
+func _ready() -> void:
+    pass  # skip loading the real sfx library
+
 
 func play_sfx(key: String) -> void:
     last_sfx = key
@@ -63,7 +69,7 @@ func test_died_signal_emitted_at_zero_health() -> void:
 
 ### C# (using GdUnit4)
 
-GdUnit4 supports C# since v4.4. Pin `gdUnit4.api` 4.3.x on Godot 4.3; 5.x needs Godot 4.4+, and these suites create nodes, so on 5.x mark them `[RequireGodotRuntime]`. Note: GdUnit4 signal assertions use `AssertSignal` rather than GUT's `watch_signals` / `assert_signal_emitted`. If a node emits a Godot signal from a C# `async Task` method, GDScript callers cannot `await` that task directly — emit a Godot signal at completion and `await` the signal instead.
+The GdUnit4 *plugin* supports C# since v4.4 (the plugin's version, not Godot's). Pin `gdUnit4.api` 4.3.x on Godot 4.3; 5.x needs Godot 4.4+, and these suites create nodes, so on 5.x mark them `[RequireGodotRuntime]`. Note: GdUnit4 signal assertions use `AssertSignal` rather than GUT's `watch_signals` / `assert_signal_emitted`. If a node emits a Godot signal from a C# `async Task` method, GDScript callers cannot `await` that task directly — emit a Godot signal at completion and `await` the signal instead.
 
 ```csharp
 using GdUnit4;
