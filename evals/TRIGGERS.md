@@ -123,3 +123,48 @@ Neg batches 2 x $3.3, grill-05 $8.85, grill-06 $0.86, grill-07 $1.39: $17.7 in a
   grill-05) with their F1 fire counts. Only grill-05 is re-baselined here (0/5); skill-* and
   grill-01/04 keep the baselines in SKILLS.md and GRILL.md.
 - Criterion 3 compares the byte baseline above.
+
+## Fix round 1 — 2026-11-11
+
+### Limits of this harness (read before the conclusion above)
+
+- **This harness measures Claude Code only.** `claude plugin eval` runs Claude Code with the
+  SessionStart card. The #18 `godot-brainstorming` complaint is Codex-specific: `AGENTS.md`
+  @-imports the 14.5 KB bootstrap into every Codex session. A Claude Code baseline cannot
+  reproduce it, and a clean result here says nothing about Codex or Antigravity. The byte
+  baseline above is the only Codex/Antigravity measure.
+- The scaffold's `CLAUDE.md` carries a `## GodotPrompter` section (to silence the hook's offer),
+  which is a second nudge to invoke a skill. Every with-arm result includes it.
+- **Regex widened after the baseline.** The neg-01..03 graders originally matched only the
+  namespaced form (`godot-prompter:<name>`). They now match `(godot-prompter:)?<name>`, and the
+  catch-all matches `godot-prompter:` or any of the 59 names in `skills/index.json`, each with
+  `(?<![\w-])` / `(?![\w-])` guards. The 2026-11-11 baseline rows above were produced by the old
+  regex and were not re-run. If the harness records a bare skill name, the old rows undercount
+  fires (the neg-04/05 rows below, which used the new regex, saw the same call counted by both
+  the per-skill and `skill-calls` graders).
+- grill-05 was run with `--runs 5` (override of the case's `runs: 3`), as follow-up §6 requires.
+- Card size: the validator's own method (`validateCard`: the text between the markers minus the
+  leading newline, UTF-8 bytes) gives **3,072 B**, exactly the cap. The 3,071 above was my
+  estimate and is wrong; 3,073 is the raw slice with that newline kept.
+
+### neg-04 and neg-05: extend an existing system (richer scaffold)
+
+Same flags as above with `--runs 5`. The scaffold adds `ItemData` (with `get_tooltip()`),
+`ItemDatabase`, an `InventorySlot` scene/script and an inventory grid, an `Ability` base class
+with cost, cooldown, range and four hooks, `Fireball`, and `StatusEffect`/`StatusEffectHost`/
+`BurnEffect`. neg-01..03 keep the simpler scaffold, so they stay comparable to each other.
+
+| Case | Prompt | With | Without | Fired (with arm, of 5) | Skill calls per run | Run dir | Cost |
+|---|---|---|---|---|---|---|---|
+| neg-04-extend-existing-inventory-in-project | add item rarity (common/rare/epic) and show it in the slot tooltip | 1.00 | 1.00 | `inventory-system` **5/5**; `resource-pattern` 0/5; `godot-brainstorming` 0/5; `godot-grill` 0/5 | 1, 1, 1, 1, 1 | `results/2026-11-11T00-09-31-525Z` | $3.83 |
+| neg-05-extend-existing-abilities-in-project | stun ability like Fireball, disables the target for 2 s | 1.00 | 1.00 | `ability-system` **5/5**; `godot-brainstorming` 0/5; `godot-grill` 0/5 | 1, 1, 1, 1, 1 | `results/2026-11-11T00-12-30-770Z` | $2.32 |
+
+- Both cases fail the F6 criterion at baseline (named domain skill at most 1 of 3), so unlike
+  neg-01..03 they can show an improvement. The llm grader passed every run in both arms: the
+  skill adds cost, not correctness, here. With-arm runs cost $0.26-$0.72 against $0.14-$0.29
+  without; neg-05 is $0.31-$0.35 against $0.14-$0.18.
+- `godot-brainstorming` and `godot-grill` never fired. The over-use reproduced under Claude Code
+  is the domain skill loaded on a task inside a system the project already has.
+- neg-01 (a bug fix in the same system) fired `inventory-system` 1 of 6 times, neg-03 0 of 6:
+  the trigger is "extend or add", not "touch".
+- Round cost $6.15; task total about $23.9.
