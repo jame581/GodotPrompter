@@ -262,3 +262,15 @@ in-project cases were re-run on the new card, then grill-05 on the old card as a
 - grill-06 and grill-07 behave as intended on the new card: no grill on a bug fix or when told to
   skip questions.
 - Open: re-baseline grill-05 with 5 runs per arm on both cards before the next card change.
+
+## v1.17.0 F1 re-baseline — 2026-11-11
+
+In-project cases on the v1.16.0 card at `912674f`, `--scaffold --ablation with-without
+--judge-model sonnet --no-publish -j 3`. Follow-up §6 of v1.16.0 (grill-05 at 5 runs per arm
+before any card edit) is met by the first row. Recorded with the neg-* cases in TRIGGERS.md.
+
+| Case | Runs per arm | With | Without | `trigger-grill` | Run dir | Cost |
+|---|---|---|---|---|---|---|
+| grill-05-plain-request-in-project | 5 | 0.33 | 0.33 | 0/5 | `results/2026-11-10T23-49-10-994Z` | $8.85 |
+| grill-06-neg-bugfix-in-project | 3 | 1.00 | 1.00 | 0/3 | `results/2026-11-10T23-59-21-513Z` | $0.86 |
+| grill-07-skip-questions-in-project | 3 | 1.00 | 0.78 | 0/3 | `results/2026-11-11T00-00-06-655Z` | $1.39 |
