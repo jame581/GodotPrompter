@@ -47,9 +47,9 @@ test('editor-recipes.md contains no code fences', () => {
   assert.doesNotMatch(read(RECIPES), /^```/m);
 });
 
-// Review Focus 1: a flagged step must cover 4.3-4.7 with no gap, or a learner on the
+// Review Focus 1: a flagged step must cover 4.3-4.8 with no gap, or a learner on the
 // uncovered version gets no instruction at all. A flag is a line starting "- **4.x".
-const VERSIONS = ['4.3', '4.4', '4.5', '4.6', '4.7'];
+const VERSIONS = ['4.3', '4.4', '4.5', '4.6', '4.7', '4.8'];
 function covered(flag) {
   const range = flag.match(/^(4\.\d)(?:\s*[-–]\s*(4\.\d)|(\+))?$/);
   assert.ok(range, `unparseable version flag "${flag}"`);
@@ -58,7 +58,7 @@ function covered(flag) {
   return VERSIONS.slice(from, to + 1);
 }
 const FLAG_LINE = /^ {0,6}- \*\*(4\.\d[^*:]*):\*\* \S.*$/;
-test('version-flagged alternatives cover 4.3 to 4.7 with no gap or overlap', () => {
+test('version-flagged alternatives cover 4.3 to 4.8 with no gap or overlap', () => {
   for (const { title, body } of recipeSections()) {
     // Consecutive flag lines form one group of alternatives; any other line ends the group.
     const groups = [];
@@ -71,7 +71,7 @@ test('version-flagged alternatives cover 4.3 to 4.7 with no gap or overlap', () 
     }
     for (const g of groups) {
       assert.deepEqual(g.flatMap(covered).sort(), VERSIONS,
-        `"${title}": flags ${JSON.stringify(g)} do not cover 4.3-4.7 exactly once`);
+        `"${title}": flags ${JSON.stringify(g)} do not cover 4.3-4.8 exactly once`);
     }
   }
 });

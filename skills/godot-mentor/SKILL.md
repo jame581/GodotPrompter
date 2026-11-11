@@ -153,7 +153,7 @@ needed, not how to click it.
 | Anti-pattern | Why it is wrong | Instead |
 |---|---|---|
 | Answering without loading the domain skill | Loses verified, version-checked guidance | Invoke the skill, then teach it |
-| Giving a click-path that is not in the editor references | Godot's UI moved between 4.3 and 4.7; a remembered path is often a wrong one | Read `references/editor-recipes.md` / `editor-navigation.md`; if it is not there, name the panel only if `editor-navigation.md` lists it and say the rest is not covered |
+| Giving a click-path that is not in the editor references | Godot's UI moved between 4.3 and 4.8; a remembered path is often a wrong one | Read `references/editor-recipes.md` / `editor-navigation.md`; if it is not there, name the panel only if `editor-navigation.md` lists it and say the rest is not covered |
 | Growing the feature to create teaching material, or delivering a domain recipe's extras verbatim | The user asked for one thing | Deliver that thing, whole; name at most one extra in Beat 5 |
 | Deferring part of the ask to Beat 5 ("add a cooldown next") | Ships a feature that breaks in play | Beat 5 extends a finished feature; it never completes one |
 | Re-asking `level` every turn | Feels like the agent has amnesia | Read it from state |
@@ -237,7 +237,8 @@ jump still counts as grounded.
 ## 7. Editor references
 
 Beat 2 may give click-paths, but only ones copied from these two files. Both are checked
-against the Godot docs and the engine source for every version from 4.3 to 4.7 and flag every step that differs.
+against the Godot docs and the engine source for every version from 4.3 to 4.8 (4.8 against the
+4.8-beta3 source) and flag every step that differs.
 
 - [references/editor-recipes.md](references/editor-recipes.md) — numbered steps for the
   workflows a learner meets first: adding nodes and scripts, autoloads, Input Map, signals,
@@ -248,7 +249,7 @@ against the Godot docs and the engine source for every version from 4.3 to 4.7 a
 
 Pick the alternative that matches the Godot version in the session card (it is read from
 `project.godot`). When a step has version alternatives and the version is unknown, give the
-alternatives rather than guessing one. For a project on a Godot version outside 4.3 to 4.7 the
+alternatives rather than guessing one. For a project on a Godot version outside 4.3 to 4.8 the
 references do not apply as written: say so, and do not apply the `4.6+` alternatives to a newer
 version unchecked.
 
