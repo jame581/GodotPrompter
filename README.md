@@ -105,6 +105,22 @@ Add to `opencode.json`:
 
 See `.opencode/INSTALL.md` for details.
 
+## Using fewer skills
+
+Skills load by description match, so each one costs a little context in every session. To drop one you never need (say `save-load`), use the host's own switch. The skill name is the folder name under `skills/`; the table was last checked against each host's docs on 2026-11-11.
+
+| Host | Mechanism | Example | Status |
+|---|---|---|---|
+| Claude Code | Deny the skill with a permission rule. Plugin skills are named `godot-prompter:<skill>`. `skillOverrides` does not apply to plugin skills ([docs](https://code.claude.com/docs/en/skills)) | `"permissions": {"deny": ["Skill(godot-prompter:save-load)"]}` in `.claude/settings.json` | Settings file loads; the block itself is documented, not tested (needs a logged-in model session). A deny rule hides nothing from `/` and does not stop you typing the command yourself |
+| Copilot CLI | `copilot skill disable` works on plugin skills ([docs](https://docs.github.com/en/copilot/how-tos/copilot-cli/customize-copilot/add-skills)) | `copilot skill disable save-load` (undo: `copilot skill enable save-load`) | Tested with Copilot CLI 1.0.108: the skill shows `(disabled)` and `disabledSkills` is written to `settings.json` |
+| Codex | Disable one skill in `config.toml` ([docs](https://learn.chatgpt.com/docs/build-skills)), or link only the skills you want instead of the whole folder | `[[skills.config]]` with `name = "save-load"` and `enabled = false`; or `ln -s ~/.codex/godot-prompter/skills/player-controller ~/.agents/skills/` per skill | Documented, not tested (Codex not installed) |
+| Cursor | No per-skill switch is documented. Closest: skip the plugin and link a subset into `.cursor/skills/` or `~/.cursor/skills/` ([docs](https://cursor.com/docs/context/skills)) | `ln -s /path/to/GodotPrompter/skills/player-controller ~/.cursor/skills/` | Documented, not tested |
+| OpenCode | Deny the skill with a permission rule; 1.x and 2.x spell it differently ([skills](https://opencode.ai/docs/skills/), [permissions](https://opencode.ai/docs/permissions/)) | 1.x: `"permission": {"skill": {"save-load": "deny"}}`. 2.x: `"permissions": [{"action": "skill", "resource": "save-load", "effect": "deny"}]` | 1.18.29: config accepted and resolved into a `skill` deny rule; an invalid value is rejected. 2.x: documented, not tested. Whether the model list hides the skill needs a model session |
+| Antigravity | Hide it with `exclude` in a `skills.json` manifest ([docs](https://antigravity.google/docs/customization-discovery/)), or symlink skills one by one (`ln -s skills/<name>`) instead of the whole folder | `.agents/skills.json`: `{"exclude": ["save-load"]}`. Does not apply to `~/.gemini/skills/` or `~/.gemini/antigravity-cli/skills/` in the CLI | Documented, not tested |
+| Grok Build | No per-skill switch is documented. Do not enable the plugin; link a subset into `~/.grok/skills/` ([docs](https://docs.x.ai/build/features/skills-plugins-marketplaces)) | Skip `grok plugin enable`, then `ln -s /path/to/GodotPrompter/skills/player-controller ~/.grok/skills/` | Documented, not tested |
+
+Disabling a skill does not edit the session card, which still routes by skill name; an agent that cannot load a disabled skill falls back to general knowledge.
+
 ## How It Works
 
 ### Automatic activation

@@ -53,3 +53,7 @@ Antigravity reads `name` (defaults to the directory name) and `description` (the
 | Claude Code, Copilot CLI, Cursor, Grok Build | `README.md` Installation; `docs/platforms/` |
 | Codex | `.codex/INSTALL.md` |
 | OpenCode | `.opencode/INSTALL.md` |
+
+## Using fewer skills
+
+To turn off or not install individual skills on any host, see [Using fewer skills](../../../README.md#using-fewer-skills) in the repository `README.md` (a per-host table of mechanisms, with what was tested).
