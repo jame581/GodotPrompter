@@ -288,3 +288,4 @@ unchanged). `--runs 3 --scaffold --ablation with-without --judge-model sonnet --
 
 - Same shape as F1: `bounded-or-builds` FAIL and `no-fact-questions` PASS in all six runs. No
   regression, and none detectable from a 0/5 baseline. The neg-04/05 rows are in TRIGGERS.md.
+- Correction: "no regression" over-claims; a 0 baseline cannot show one.

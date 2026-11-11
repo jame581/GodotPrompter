@@ -190,3 +190,23 @@ signal, not the F6 measurement.
   as before. The card change does not show a loss there, but a 0 baseline cannot show one either.
   The positive cases that do fire (skill-01..18, grill-01, grill-04) were not re-run; F6 does.
 - Round cost $9.25.
+- Note: the signal runs' aggregate (`report.html`/summary) shows `runsPerCase` 5, taken from the
+  neg-04/05 `case.yaml`, but each arm ran 3 (`--runs 3`). The per-run lines above are the record.
+
+## F3 signal run, card v2 — 2026-11-11
+
+Card at `b7dee46` (review round 1: "design settled by the user" row, separate bug-fix row, no-skill
+row limited to "No Godot content: docs, generic CI, repo tooling", red flags scoped to new
+systems, "Full index" line and "Teaching while building" row dropped; card 3,044 B; the hook now
+injects the absolute skill-index path). Same flags as v1. Each arm ran 3 (`--runs 3`).
+
+| Case | With | Without | Fired (with arm, of 3) | Skill calls per run (with) | Run dir | Cost |
+|---|---|---|---|---|---|---|
+| neg-04-extend-existing-inventory-in-project | 1.00 | 1.00 | `inventory-system` **0/3**; `resource-pattern` 0/3; `godot-brainstorming` 0/3; `godot-grill` 0/3 | 0, 0, 0 | `results/2026-11-11T00-38-25-288Z` | $2.60 |
+| neg-05-extend-existing-abilities-in-project | 1.00 | 1.00 | `ability-system` **0/3**; `godot-brainstorming` 0/3; `godot-grill` 0/3 | 0, 0, 0 | `results/2026-11-11T00-38-25-271Z` | $1.52 |
+
+- The skip holds on v2: 0 of 6 with-arm runs loaded any GodotPrompter skill (v1 0/6, F1 10/10).
+  With-arm runs cost $0.24-$0.61.
+- grill-05 was not re-run on v2. The v2 grill row ("design settled by the user") is narrower than
+  v1's "known design", which should not lower grill routing, but this is not measured; F6 does.
+- Round cost $4.12.
