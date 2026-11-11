@@ -1,20 +1,22 @@
-# Editor Navigation — where things are (Godot 4.3 to 4.7)
+# Editor Navigation — where things are (Godot 4.3 to 4.8)
 
 Reference for `skills/godot-mentor/SKILL.md` — the editor's main screens, docks, bottom panels,
 and Project Settings tabs, with the versions each location applies to.
 
 > ← Back to [SKILL.md](../SKILL.md)
 
-Unflagged entries are the same in every version from 4.3 to 4.7. Verified against the
+Unflagged entries are the same in every version from 4.3 to 4.8. Verified against the
 godot-docs branches and the engine source for each version; see
 `docs/superpowers/notes/2026-10-05-godot-editor-research.md` in the GodotPrompter repository.
+Godot 4.8 was checked against the engine source of 4.8-beta3 only
+(`docs/superpowers/notes/2026-11-11-godot-4.8-editor-check.md`); the 4.8 docs were not.
 
 ---
 
 How to read the tables:
 
-- An empty Versions cell means the row is the same on every version from 4.3 to 4.7. A flagged
-  row uses a range: 4.3-4.5 means 4.3, 4.4 and 4.5; 4.6+ means 4.6 and 4.7.
+- An empty Versions cell means the row is the same on every version from 4.3 to 4.8. A flagged
+  row uses a range: 4.3-4.5 means 4.3, 4.4 and 4.5; 4.6+ means 4.6, 4.7 and 4.8.
 - A cell holding only "—" means the research did not establish that fact. Say so to the learner
   rather than filling it in. In a row marked as not existing on that version, "—" means not
   applicable.
@@ -38,10 +40,16 @@ distraction-free mode.
 | **Game** | Does not exist | — | 4.3 |
 | **Game** | Where your project appears when you run it from the editor. Changes made here are not saved when the game stops running | Top centre, fourth main screen button | 4.4+ |
 | **AssetLib** (the docs call it "Asset Library") | The Asset Library inside the editor; add-ons are downloaded there with the **Download** button | Top centre, last main screen button | 4.3-4.6 |
-| **Asset Store** (the 4.7 docs still call it "Asset Library" and "AssetLib") | Same purpose as **AssetLib** | Top centre, last main screen button | 4.7 |
+| **Asset Store** (the 4.7 docs still call it "Asset Library" and "AssetLib") | Same purpose as **AssetLib** | Top centre, last main screen button | 4.7+ |
 
 Adding a 2D node type such as Label as a scene's first node changes the scene to the **2D**
 workspace.
+
+From 4.8 each main screen is a dock, and its button is a tab in the same place, with the same
+name and order. Right-clicking a main screen tab opens the dock popup described under Docks, with
+**Make Floating** and **Close** (**Game** cannot float). A closed main screen is reopened from
+**Editor > Editor Docks**, which lists the main screens on 4.8. A main screen cannot be moved into
+a side or bottom dock slot. Other ways of rearranging them were not researched.
 
 The playtest buttons in the top-right include **Run Project** (F5; Cmd + B on macOS) and
 **Run Current Scene** (F6; Cmd + R on macOS). Stop a running scene by closing its window or
@@ -54,7 +62,8 @@ once a learner has moved a dock.
 
 - **Reopen a closed dock:** open the **Editor** menu, then the **Editor Docks** submenu, and
   choose the dock's name. The dock opens where it last was and comes to the front. A closed
-  dock's icon in that submenu is drawn half-transparent.
+  dock's icon in that submenu is drawn half-transparent. On 4.8 the submenu also lists the main
+  screens (see Main screens).
 - **Close or move a dock:** click the "3 vertical dots" icon at the top of the dock. The popup
   that appears has a **Dock Position** label, **Make Floating** (which splits the dock into a
   separate window) and **Close**.
@@ -85,7 +94,7 @@ expands it vertically.
 - **Open a panel on 4.6+:** each panel is a tab at the bottom of the editor carrying the panel's
   name. Click the tab to show that panel; click the current tab again to fold it.
 - **On 4.6+ only**, **Output**, **Audio**, **Animation** and **Shader Editor** are also listed
-  under **Editor > Editor Docks**, and on 4.7 so is **Debugger**.
+  under **Editor > Editor Docks**, and on 4.7+ so is **Debugger**.
 - **Shortcuts:** bottom panels can be shown or hidden with the shortcuts defined in
   **Editor Settings > Shortcuts**, under the **Bottom Panels** category
   (**Editor > Editor Settings...** opens the Editor Settings).
@@ -99,7 +108,7 @@ of these has not lost it; they need to select the right node or resource first. 
 |---|---|---|---|
 | **Output** | Shows text printed by the running project (the docs from 4.4 add: and by the editor) | Click the **Output** button (4.3-4.5) or tab (4.6+) at the bottom of the editor; on 4.6+ also **Editor > Editor Docks > Output** | |
 | **Debugger** | Holds the tabs **Stack Trace**, **Errors**, **Profiler**, **Visual Profiler**, **Video RAM** and **Misc** (the docs also describe "Network Profiler" and "Monitors" tabs) | Click the **Debugger** button at the bottom of the editor | 4.3 |
-| **Debugger** | Same tabs as above, plus **Evaluator** | Click the **Debugger** button (4.4-4.5) or tab (4.6+) at the bottom of the editor; on 4.7 also **Editor > Editor Docks > Debugger** | 4.4+ |
+| **Debugger** | Same tabs as above, plus **Evaluator** | Click the **Debugger** button (4.4-4.5) or tab (4.6+) at the bottom of the editor; on 4.7+ also **Editor > Editor Docks > Debugger** | 4.4+ |
 | **Audio** | — | Click the **Audio** button (4.3-4.5) or tab (4.6+) at the bottom of the editor; on 4.6+ also **Editor > Editor Docks > Audio** | |
 | **Animation** | The animation editor for an AnimationPlayer node | Click the **Animation** button (4.3-4.5) or tab (4.6+) at the bottom of the editor; on 4.6+ also **Editor > Editor Docks > Animation**; clicking an AnimationPlayer node also opens it | |
 | **AnimationTree** | — | Context only; what brings it up was not researched | |
@@ -111,12 +120,13 @@ of these has not lost it; they need to select the right node or resource first. 
 | **TileSet** | Where a tilesheet image is dragged in to create the tiles of a TileSet | Context only: with the TileSet resource being edited, click **TileSet** at the bottom of the editor | |
 | **TileMap** | Where tiles are picked for painting onto a TileMapLayer node | Context only: select the TileMapLayer node, then click **TileMap** at the bottom of the editor | |
 | **ResourcePreloader** | — | Context only; what brings it up was not researched | |
-| **Search Results** | — | It appears when a find-in-files search is started, and its close button removes it again | |
+| **Search Results** | — | It appears when a find-in-files search is started, and its close button removes it again | 4.3-4.7 |
+| **Find in Files** (replaces **Search Results**) | Holds the find-in-files search fields and their results | It appears when **Project > Find in Files...** is chosen, and its close button removes it again | 4.8 |
 | **Version Control** | — | — | |
 | **Polygon** | Does not exist | — | 4.3 |
 | **Polygon** | — | Context only; what brings it up was not researched | 4.4+ |
 | **MeshLibrary** | Does not exist | — | 4.3-4.6 |
-| **MeshLibrary** | — | — | 4.7 |
+| **MeshLibrary** | — | — | 4.7+ |
 | **Replication** | — | Context only: select a MultiplayerSynchronizer node and the panel appears at the bottom of the editor | |
 | **GridMap** | Does not exist as a bottom panel | — | 4.3 |
 | **GridMap** | — | Context only: select a GridMap node and the panel appears at the bottom of the editor | 4.4+ |
@@ -141,11 +151,16 @@ the tab.
 | **Globals > Autoload** | Where a scene or script is set to autoload | First sub-tab of **Globals** | **Project > Project Settings... > Globals > Autoload** | |
 | **Globals > Shader Globals** | — | Second sub-tab of **Globals** | **Project > Project Settings... > Globals > Shader Globals** | |
 | **Globals > Groups** | Where global groups are managed | Third sub-tab of **Globals** | **Project > Project Settings... > Globals > Groups** | |
-| **Plugins** | Lists installed editor plugins under the heading **Installed Plugins:**; tick the checkbox in the **Enabled** column (the docs call it the "Enable" checkbox) to enable one | Fifth tab | **Project > Project Settings... > Plugins** | |
+| **Plugins** | Lists installed editor plugins under the heading **Installed Plugins:**; tick the checkbox in the **Enabled** column (the docs call it the "Enable" checkbox) to enable one | Fifth tab | **Project > Project Settings... > Plugins** | 4.3-4.7 |
+| **Addons** | Does not exist | — | — | 4.3-4.7 |
+| **Addons** | Holds two sub-tabs: **Plugins** and **GDExtension** | Fifth tab | **Project > Project Settings... > Addons** | 4.8 |
+| **Addons > Plugins** | Same as **Plugins** above | First sub-tab of **Addons** | **Project > Project Settings... > Addons > Plugins** | 4.8 |
 | **GDExtension** | Does not exist | — | — | 4.3-4.6 |
 | **GDExtension** | — | Sixth tab, between **Plugins** and **Import Defaults** | **Project > Project Settings... > GDExtension** | 4.7 |
+| **Addons > GDExtension** | — | Second sub-tab of **Addons** | **Project > Project Settings... > Addons > GDExtension** | 4.8 |
 | **Import Defaults** | Project-wide default import settings | Sixth tab, the last one | **Project > Project Settings... > Import Defaults** | 4.3-4.6 |
 | **Import Defaults** | Same as above | Seventh tab, the last one | **Project > Project Settings... > Import Defaults** | 4.7 |
+| **Import Defaults** | Same as above | Sixth tab, the last one | **Project > Project Settings... > Import Defaults** | 4.8 |
 
 ## Top menus
 
@@ -158,7 +173,8 @@ was not recorded.
 |---|---|---|---|
 | **Scene** | **New Scene**, **Save Scene**, **Save Scene As...**, **Open Scene...**, **New Inherited Scene...** | Top-left, first menu | |
 | **Project** | **Project Settings...**, **Export...**, **Install Android Build Template...**, **Open User Data Folder**, a **Tools** submenu, and **Quit to Project List** (Ctrl + Shift + Q; Ctrl + Option + Cmd + Q on macOS), which opens the Project Manager | Top-left, second menu | 4.3 |
-| **Project** | Same items as above, plus **Pack Project as ZIP...** | Top-left, second menu | 4.4+ |
+| **Project** | Same items as above, plus **Pack Project as ZIP...** | Top-left, second menu | 4.4-4.7 |
+| **Project** | Same items as on 4.4-4.7, except that **Setup Android Build...** replaces **Install Android Build Template...** | Top-left, second menu | 4.8 |
 | **Debug** | In order: **Deploy with Remote Debug**, **Small Deploy with Network Filesystem**, **Visible Collision Shapes**, **Visible Paths**, **Visible Navigation**, **Visible Avoidance**, **Debug CanvasItem Redraws**, **Synchronize Scene Changes**, **Synchronize Script Changes**, **Keep Debug Server Open**, **Customize Run Instances...** | Top-left, third menu | |
 | **Editor** | **Editor Settings...** (on macOS with the global menu it is in the application menu instead), **Manage Export Templates...**, the **Editor Docks** submenu (reopens docks; see Docks), and the **Editor Layout** submenu with **Save Layout...**, **Delete Layout...** and **Default** (the docs call the submenu "Editor Layouts" and its items "Save" and "Delete") | Top-left, fourth menu | |
 | **Help** | **Search Help...** opens the built-in help. So does pressing F1 anywhere in the editor (Opt + Space on macOS; Fn + F1 on laptops with an Fn key) | Top-left, fifth menu | |
@@ -179,6 +195,8 @@ version; these notes give the change, and say where the Godot docs lag the edito
   "Asset Library", so a learner on 4.7 following the docs will not find a button with that name.
 - The 4.7 docs add a page on game embedding. The embedding controls were not researched; do not
   describe them.
+- 4.8 made each main screen a dock (see Main screens). The buttons keep their names, order and
+  place; what changes is the right-click popup and the **Editor > Editor Docks** entries.
 - The docs gained sentences on their 4.4 branch about a Movie Maker Mode toggle in the top-right
   and about the "Project" menu being in the upper left corner. Whether anything changed in the
   editor at 4.4 was not checked.
@@ -205,12 +223,21 @@ version; these notes give the change, and say where the Godot docs lag the edito
   dock whose default slot is the bottom. 4.7 defines two bottom slots; how that looks by default
   was not established.
 - 4.4 added **Polygon** and made **GridMap** a bottom panel; 4.7 added **MeshLibrary**.
+- 4.8 renamed **Search Results** to **Find in Files**; the search fields moved into the panel.
 
 **Project Settings**
 
 - 4.7 added the **GDExtension** tab, which pushes **Import Defaults** from sixth to seventh.
+- 4.8 moved **Plugins** and **GDExtension** under a new **Addons** tab, so **Import Defaults** is
+  sixth again. A learner on 4.8 following "Project Settings > Plugins" finds no such tab.
 - 4.6 renamed the third **Localization** sub-tab from **POT Generation** to
   **Template Generation**.
 - **Localization > Translations** has not moved. Only the docs changed: they wrote
   "Project Settings > Localization" until 4.5 and name the **Translations** sub-tab from 4.6.
-- **Globals > Autoload** has not moved either; the docs and the editor agree on every version.
+- **Globals > Autoload** has not moved either; the docs and the editor agree on every version
+  up to 4.7 (the 4.8 docs were not checked).
+
+**Top menus**
+
+- 4.8 replaced **Project > Install Android Build Template...** with
+  **Project > Setup Android Build...**.

@@ -1,15 +1,16 @@
-# Editor Recipes — how to do it in the Godot editor (4.3 to 4.7)
+# Editor Recipes — how to do it in the Godot editor (4.3 to 4.8)
 
 Reference for `skills/godot-mentor/SKILL.md` — numbered click-paths for the editor workflows a
 learner meets first.
 
 > ← Back to [SKILL.md](../SKILL.md)
 
-Steps with no version flag are the same in every version from 4.3 to 4.7. Where the editor
+Steps with no version flag are the same in every version from 4.3 to 4.8. Where the editor
 changed, the step lists each version range. Verified against the godot-docs branches and the
 engine source for each version; see `docs/superpowers/notes/2026-10-05-godot-editor-research.md`
-in the GodotPrompter repository. For where a dock or panel is, see
-[editor-navigation.md](editor-navigation.md).
+in the GodotPrompter repository. Godot 4.8 was checked against the engine source of 4.8-beta3
+only (`docs/superpowers/notes/2026-11-11-godot-4.8-editor-check.md`); the 4.8 docs were not.
+For where a dock or panel is, see [editor-navigation.md](editor-navigation.md).
 
 ---
 
@@ -68,8 +69,10 @@ from it and used by a node.
 4. The research did not record what the editor asks after **Create** (naming and saving the
    file). Complete whatever the editor shows there without quoting labels for it.
 5. Double-click the resource file in the **FileSystem** dock to open it for editing, and set its
-   properties in the **Inspector**. To save, click the save icon at the top of the **Inspector**
-   (its tooltip reads **Save the currently edited resource.**) and choose **Save**.
+   properties in the **Inspector**. To save, click the save icon at the top of the **Inspector**;
+   its tooltip reads **Save the currently edited resource.**
+   - **4.3-4.7:** The icon opens a menu; choose **Save**.
+   - **4.8:** The icon saves at once, with no menu.
 6. Select the node that should use the resource, then drag and drop the resource file onto that
    property's slot in the **Inspector**. The research did not record the exact clicks on an
    exported property's slot beyond this.
@@ -111,7 +114,7 @@ connection icon in the left margin.
    **Global**, which makes the group visible project-wide and lets you give it a description.
 5. Confirm the dialog:
    - **4.3-4.6:** Press the dialog's confirm button. The docs call it "Ok"; the research did not read the button's literal text on these versions.
-   - **4.7:** Click **Create**. The docs for this version still say "press Ok".
+   - **4.7-4.8:** Click **Create**. The docs for 4.7 still say "press Ok".
 6. To put another node into a group that already exists, select that node and mark the checkbox
    on the left side of the group.
 
@@ -128,11 +131,12 @@ as a game-state or event-bus singleton.
 2. Add the script or scene:
    - **4.3-4.6:** In the **Path:** field, type the file's path (for example res://global.gd) or use the browse button. Set the name in the **Node Name:** field, then press **Add**.
    - **4.7:** Click **Select Script/Scene** and pick the file. It is added immediately, named after the file name converted to PascalCase (game_state.gd becomes GameState; a name that matches a built-in class gets Global appended, so timer.gd becomes TimerGlobal); there are no **Path:** or **Node Name:** fields and no **Add** button. The name column's tooltip reads **Name of the autoload. Double-click to rename.** The docs for this version still say "Press Add".
+   - **4.8:** Click **Select Script/Scene** and pick the file. It is added immediately, named after the file name converted to PascalCase (game_state.gd becomes GameState); there are no **Path:** or **Node Name:** fields and no **Add** button. If that name is not allowed, for example because it matches a built-in class (timer.gd), a dialog titled **Enter Autoload Name** asks for another name instead. The name column's tooltip reads **Name of the autoload. Double-click to rename.**
 3. Leave **Enable** checked in the **Global Variable** column (it is checked by default) so
    GDScript can reach the autoload by its name. That column has no effect in C# code.
 
-On Godot 4.7 the tab also has **Create Script** and **Create Scene** buttons; what they open was
-not researched, so do not walk a learner through them.
+On Godot 4.7 and 4.8 the tab also has **Create Script** and **Create Scene** buttons; what they
+open was not researched, so do not walk a learner through them.
 
 **You should see:** a new entry in the list, under the columns **Name**, **Path** and
 **Global Variable**. When the project runs, the autoloaded node appears in the running scene
@@ -388,15 +392,16 @@ translations are added and removed project-wide.
 
 1. Open the asset library inside the editor:
    - **4.3-4.6:** Click **AssetLib** at the top of the editor.
-   - **4.7:** Click **Asset Store** at the top of the editor. The docs for this version still say "AssetLib".
+   - **4.7-4.8:** Click **Asset Store** at the top of the editor. The docs for 4.7 still say "AssetLib".
 2. Find the add-on and use its **Download** button. The research did not record the install
    dialog that follows, so do not quote its options or its confirm button.
 3. If the add-on came as a ZIP instead: extract it and move the addons/ folder it contains into
    the project folder. If the project already has an addons/ folder, move the plugin's addons/
    folder into the project folder to merge the two.
 4. An add-on with a plugin.cfg file in its folder under addons/ is an editor plugin and must be
-   enabled; a scripts-only add-on needs no enabling. Open **Project > Project Settings...** and
-   click the **Plugins** tab.
+   enabled; a scripts-only add-on needs no enabling. Open **Project > Project Settings...**, then:
+   - **4.3-4.7:** Click the **Plugins** tab.
+   - **4.8:** Click the **Addons** tab, then its **Plugins** sub-tab (the first one).
 5. Find the plugin under **Installed Plugins:** and tick its checkbox in the **Enabled** column;
    the checkbox carries the text **On**. The docs call it the "Enable" checkbox.
 
@@ -419,7 +424,7 @@ immediately; there is no need to restart the editor.
    **Manage Export Templates** link. **Editor > Manage Export Templates...** opens the window
    titled **Export Template Manager**. Install the templates there:
    - **4.3-4.6:** Click **Download and Install**. There is also an **Install from File** button.
-   - **4.7:** Check the box for the platform and architecture you want, then click **Install Selected Templates**. With no box checked the same button reads **Install All Templates**.
+   - **4.7-4.8:** Check the box for the platform and architecture you want, then click **Install Selected Templates**. With no box checked the same button reads **Install All Templates**.
 5. The buttons at the bottom of the **Export** window are **Export All...**,
    **Export Project...**, **Export PCK/ZIP...** and **Close**. The research did not record the
    per-platform options, the export path field, or the dialog after **Export Project...**, so
