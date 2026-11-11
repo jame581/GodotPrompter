@@ -274,3 +274,17 @@ before any card edit) is met by the first row. Recorded with the neg-* cases in 
 | grill-05-plain-request-in-project | 5 | 0.33 | 0.33 | 0/5 | `results/2026-11-10T23-49-10-994Z` | $8.85 |
 | grill-06-neg-bugfix-in-project | 3 | 1.00 | 1.00 | 0/3 | `results/2026-11-10T23-59-21-513Z` | $0.86 |
 | grill-07-skip-questions-in-project | 3 | 1.00 | 0.78 | 0/3 | `results/2026-11-11T00-00-06-655Z` | $1.39 |
+
+## F3 signal run, card v1 — 2026-11-11
+
+Card at `7a2aaf0` (v1.17.0 skip rule: the "Known change, explicit ask, bug fix" row became "New
+system, known design, explicit ask", plus rows routing existing-system changes to the project's
+code and non-Godot files to no skill; the `godot-grill` row and the report sentence are
+unchanged). `--runs 3 --scaffold --ablation with-without --judge-model sonnet --no-publish -j 3`.
+
+| Case | Runs per arm | With | Without | `trigger-grill` | Run dir | Cost |
+|---|---|---|---|---|---|---|
+| grill-05-plain-request-in-project | 3 | 0.33 | 0.33 | 0/3 (F1: 0/5) | `results/2026-11-11T00-22-16-231Z` | $5.27 |
+
+- Same shape as F1: `bounded-or-builds` FAIL and `no-fact-questions` PASS in all six runs. No
+  regression, and none detectable from a 0/5 baseline. The neg-04/05 rows are in TRIGGERS.md.

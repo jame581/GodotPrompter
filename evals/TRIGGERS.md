@@ -170,3 +170,23 @@ with cost, cooldown, range and four hooks, `Fireball`, and `StatusEffect`/`Statu
 - neg-01 (a bug fix in the same system) fired `inventory-system` 1 of 6 times, neg-03 0 of 6:
   the trigger is "extend or add", not "touch".
 - Round cost $6.15; task total about $23.9.
+
+## F3 signal run, card v1 — 2026-11-11
+
+Card at `7a2aaf0` (skip rule added: changes to an existing system go to its code, non-Godot files
+need no skill; "two-line script" and "loaded a skill already" red flags dropped; card 3,071 B).
+`--runs 3 --scaffold --ablation with-without --judge-model sonnet --no-publish -j 3`. A quick
+signal, not the F6 measurement.
+
+| Case | With | Without | Fired (with arm, of 3) | Skill calls per run (with) | Run dir | Cost |
+|---|---|---|---|---|---|---|
+| neg-04-extend-existing-inventory-in-project | 1.00 | 1.00 | `inventory-system` **0/3** (baseline 5/5); `resource-pattern` 0/3; `godot-brainstorming` 0/3; `godot-grill` 0/3 | 0, 0, 0 | `results/2026-11-11T00-29-52-043Z` | $2.15 |
+| neg-05-extend-existing-abilities-in-project | 1.00 | 1.00 | `ability-system` **0/3** (baseline 5/5); `godot-brainstorming` 0/3; `godot-grill` 0/3 | 0, 0, 0 | `results/2026-11-11T00-29-52-167Z` | $1.83 |
+| grill-05-plain-request-in-project (positive control) | 0.33 | 0.33 | `godot-grill` 0/3 (baseline 0/5) | not recorded | `results/2026-11-11T00-22-16-231Z` | $5.27 |
+
+- No GodotPrompter skill fired in any of the six neg with-arm runs, against 10 of 10 at baseline,
+  and scores held at 1.00 in both arms. With-arm runs cost $0.24-$0.71.
+- grill-05 is unchanged: 0/3 against 0/5, `bounded-or-builds` failing in every run of both arms
+  as before. The card change does not show a loss there, but a 0 baseline cannot show one either.
+  The positive cases that do fire (skill-01..18, grill-01, grill-04) were not re-run; F6 does.
+- Round cost $9.25.
