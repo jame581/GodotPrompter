@@ -58,7 +58,7 @@
     {
       "name": "ability-system",
       "title": "Ability System",
-      "description": "Use when building character abilities — Resource-based abilities with cost/cooldown/cast, buffs/debuffs, stat modifiers, gameplay tags, and HUD binding",
+      "description": "Use when building or replacing an ability system — abilities with cost/cooldown, buffs/debuffs, stat modifiers, and gameplay tags. Not for extending an existing one",
       "relatedSkills": [
         "resource-pattern",
         "component-system",
@@ -283,7 +283,7 @@
     {
       "name": "dependency-injection",
       "title": "Dependency Injection in Godot 4.3+",
-      "description": "Use when managing dependencies between systems — autoloads, service locators, @export injection, and scene injection patterns",
+      "description": "Use when choosing how systems get their dependencies — autoloads, service locators, @export injection, and scene injection patterns",
       "relatedSkills": [
         "godot-testing",
         "event-bus",
@@ -317,7 +317,7 @@
     {
       "name": "dialogue-system",
       "title": "Dialogue Systems in Godot 4.3+",
-      "description": "Use when implementing dialogue — data structures for branching dialogue, conditions, and UI presentation",
+      "description": "Use when building or replacing a dialogue system without an addon — branching data, conditions, and UI presentation. Not for extending an existing one",
       "relatedSkills": [
         "resource-pattern",
         "godot-ui",
@@ -339,7 +339,7 @@
     {
       "name": "event-bus",
       "title": "Event Bus in Godot 4.3+",
-      "description": "Use when implementing decoupled communication between nodes — global EventBus autoload with typed signals",
+      "description": "Use when setting up decoupled node communication — a global EventBus autoload with typed signals. Not for adding signals to an existing bus",
       "relatedSkills": [
         "component-system",
         "csharp-signals",
@@ -629,7 +629,7 @@
     {
       "name": "inventory-system",
       "title": "Inventory Systems in Godot 4.3+",
-      "description": "Use when building inventory systems — Resource-based items, slot management, stacking, and UI binding",
+      "description": "Use when building or replacing an inventory system — Resource-based items, slots, stacking, and UI binding. Not for extending an existing one",
       "relatedSkills": [
         "resource-pattern",
         "save-load",
@@ -831,7 +831,7 @@
     {
       "name": "player-controller",
       "title": "Player Controllers in Godot 4.3+",
-      "description": "Use when implementing player movement — CharacterBody2D/3D patterns, input handling, physics, common movement recipes",
+      "description": "Use when building player movement — CharacterBody2D/3D patterns, movement physics, and common movement recipes",
       "relatedSkills": [
         "physics-system",
         "state-machine",
@@ -942,7 +942,7 @@
     {
       "name": "save-load",
       "title": "Save / Load Systems in Godot 4.3+",
-      "description": "Use when implementing save/load systems — ConfigFile, JSON, Resource serialization, save game architecture",
+      "description": "Use when building or replacing a save/load system — ConfigFile, JSON, Resource serialization, and save game architecture. Not for extending an existing one",
       "relatedSkills": [
         "resource-pattern",
         "inventory-system",
@@ -997,7 +997,7 @@
     {
       "name": "state-machine",
       "title": "State Machines in Godot 4.3+",
-      "description": "Use when implementing state machines in Godot — enum-based, node-based, and resource-based FSM patterns with trade-offs",
+      "description": "Use when building a state machine or refactoring logic into one — enum, node, and resource-based FSM patterns with trade-offs. Not for adding states to an existing one",
       "relatedSkills": [
         "player-controller",
         "ai-navigation",

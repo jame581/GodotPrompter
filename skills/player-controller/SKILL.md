@@ -1,6 +1,6 @@
 ---
 name: player-controller
-description: Use when implementing player movement — CharacterBody2D/3D patterns, input handling, physics, common movement recipes
+description: Use when building player movement — CharacterBody2D/3D patterns, movement physics, and common movement recipes
 ---
 
 # Player Controllers in Godot 4.3+

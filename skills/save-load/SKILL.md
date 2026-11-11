@@ -1,6 +1,6 @@
 ---
 name: save-load
-description: Use when implementing save/load systems — ConfigFile, JSON, Resource serialization, save game architecture
+description: Use when building or replacing a save/load system — ConfigFile, JSON, Resource serialization, and save game architecture. Not for extending an existing one
 ---
 
 # Save / Load Systems in Godot 4.3+
