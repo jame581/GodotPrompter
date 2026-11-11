@@ -47,7 +47,6 @@ When skills reference tools you don't have, substitute OpenCode equivalents:
 - \`TodoWrite\` → \`todowrite\`
 - \`Task\` tool with subagents → Use OpenCode's subagent system (@mention)
 - \`Skill\` tool → OpenCode's native \`skill\` tool
-- \`AskUserQuestion\` → \`question\` (primary agents only)
 - \`Read\`, \`Write\`, \`Edit\`, \`Bash\` → Your native tools
 
 Use OpenCode's native \`skill\` tool to list and load skills.`;
