@@ -1,0 +1,13 @@
+schema_version: "1.0"
+name: neg-03-tweak-existing-ability-in-project
+description: A cooldown value and tooltip text change in the project's existing Fireball ability, run in a scaffolded RPG project so the SessionStart card is injected. Baseline for discussion #18. The skill-fire graders use max 0, so a pass means the skill did NOT fire. Needs --scaffold.
+tags: [over-triggering]
+runs: 3
+context:
+  scaffold_script: scaffold.sh
+execution:
+  max_turns: 12
+  timeout_seconds: 300
+  allowed_tools: [Skill, Read, Glob, Grep]
+  prompt: |
+    The fireball cooldown is too long. Change it from 3 seconds to 2.5 and make the tooltip say the same. Show me the edit.

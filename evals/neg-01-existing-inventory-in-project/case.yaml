@@ -1,0 +1,13 @@
+schema_version: "1.0"
+name: neg-01-existing-inventory-in-project
+description: A small bug fix inside the project's existing inventory.gd, run in a scaffolded RPG project so the SessionStart card is injected. Baseline for discussion #18 (skills over-used in projects whose genre matches a skill). The skill-fire graders use max 0, so a pass means the skill did NOT fire. Needs --scaffold.
+tags: [over-triggering]
+runs: 3
+context:
+  scaffold_script: scaffold.sh
+execution:
+  max_turns: 12
+  timeout_seconds: 300
+  allowed_tools: [Skill, Read, Glob, Grep]
+  prompt: |
+    My inventory lets a stack go one over max_stack. I have max_stack at 16 and I picked up 20 of the same item and one slot ended up with 17. What's wrong in scripts/inventory/inventory.gd and what's the fix?
