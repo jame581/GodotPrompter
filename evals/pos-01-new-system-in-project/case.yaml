@@ -1,0 +1,13 @@
+schema_version: "1.0"
+name: pos-01-new-system-in-project
+description: Asks for a dialogue system the scaffolded RPG project does not have, with the design already given by the user. Run in the rich RPG scaffold so the SessionStart card is injected. Correct behaviour is to use the dialogue-system domain skill (the design is settled, so no grilling). The dialogue-system fire grader uses min 1, so a pass means the skill DID fire. Needs --scaffold.
+tags: [under-triggering]
+runs: 3
+context:
+  scaffold_script: scaffold.sh
+execution:
+  max_turns: 15
+  timeout_seconds: 300
+  allowed_tools: [Skill, Read, Glob, Grep]
+  prompt: |
+    I want villagers in Emberfall to talk to the player. Each NPC has a list of lines, pressing the interact key moves to the next line, and after the last line the box closes. Show a simple dialogue box at the bottom of the screen with the NPC name and the current line. Write the code for it.
