@@ -1,0 +1,13 @@
+schema_version: "1.0"
+name: neg-05-extend-existing-abilities-in-project
+description: Adds a new ability to the project's existing Ability base class and StatusEffectHost, run in a scaffolded RPG project so the SessionStart card is injected. Invites ability-system by genre and by wording; correct behaviour is to read Fireball and extend the existing classes. Skill-fire graders use max 0, so a pass means the skill did NOT fire. Richer scaffold than neg-01..03. Needs --scaffold.
+tags: [over-triggering]
+runs: 5
+context:
+  scaffold_script: scaffold.sh
+execution:
+  max_turns: 15
+  timeout_seconds: 300
+  allowed_tools: [Skill, Read, Glob, Grep]
+  prompt: |
+    Add a stun ability that works like Fireball but disables the target for 2 seconds instead of damaging it. Show me the code.
