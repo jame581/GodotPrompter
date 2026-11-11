@@ -21,7 +21,7 @@ GodotPrompter provides Godot 4.x domain-specific skills for AI coding agents. Sk
 
 **In Cursor:** Skills are loaded via custom instructions / rules system.
 
-**In Codex:** Skills load natively via the AGENTS.md re-export. Follow skill instructions directly; see `references/codex-tools.md` for tool mapping.
+**In Codex:** Skills load natively via the AGENTS.md re-export. Follow skill instructions directly; see `skills/using-godot-prompter/references/codex-tools.md` (path from the GodotPrompter plugin root) for tool mapping.
 
 **In OpenCode:** Skills are discovered from the installed plugin. Use the `/skills` command to browse or invoke skills directly. See `.opencode/INSTALL.md` for setup.
 
@@ -36,13 +36,14 @@ Install commands for every host: `README.md`, [`references/installation.md`](ref
 
 Workflow plugins decide *how you work*; GodotPrompter decides *what you build*. Both apply.
 
-**RULE: before implementing any Godot system, invoke the matching `godot-prompter:*` skill.**
-Applies to subagents writing Godot code too.
+**RULE: before building a new Godot system, invoke the matching `godot-prompter:*` skill.** Subagents too.
 
 | Situation | Start with |
 |---|---|
 | New system, or the requirements are unclear | `godot-grill` — settle decisions, then design and build |
-| Known change, explicit ask, bug fix | the domain skill below — build |
+| New system, known design, explicit ask | the domain skill below — build |
+| Change, extend or fix a system the project has | its code; no skill unless replacing it or asked for the pattern |
+| Non-Godot files: docs, CI, tooling | no skill |
 
 **Then report before you build:** name the pattern you picked, the alternative you rejected, and why. The choice is the developer's. A report states; it never ends on your own questions. A design decision needs the developer's answer or go-ahead first? Invoke `godot-grill`.
 
@@ -65,20 +66,27 @@ Applies to subagents writing Godot code too.
 | Teaching while building | `godot-mentor` |
 | Addons (if installed) | `limboai`, `beehave`, `popochiu`, `dialogue-manager`, `phantom-camera` |
 
-Full index: invoke `godot-prompter:using-godot-prompter`.
+Full index: `references/skill-index.md` of `using-godot-prompter`.
 
 **Red flags — you are rationalizing:**
 
 | Thought | Reality |
 |---|---|
 | "I know how CharacterBody2D works" | Knowing the class ≠ knowing the pattern. Invoke. |
-| "It's a two-line script" | Two-line scripts still pick node types. Invoke. |
 | "The plan says what to build" | The plan says what. The skill says how. Invoke. |
-| "I loaded a Godot skill already" | Different system, different skill. |
-| "The user wants a quick fix" | Quick fixes set architecture. Invoke — then say what you picked. |
+| "It's small, a quick fix" | A new system still sets architecture. Invoke — then say what you picked. |
 | "The skill shows one pattern, so it's settled" | Skills carry trade-offs. Surface them; don't decide alone. |
 | "I'll explain it once it works" | A choice reported after the code is a fait accompli, not a choice. |
 <!-- SESSION-CARD-END -->
+
+## When Not to Load a Skill
+
+Domain skills are for building a **new** system. Each load costs up to 16 KB, so skip it when:
+
+- **The project already has the system.** To change, extend or fix it (a new item field, one more ability, a bug), read and follow the project's code. Load the domain skill only to replace or redesign that system, or when the user asks for the pattern.
+- **The task is not Godot work.** Docs, CI, tooling and other non-Godot files need no skill, `godot-brainstorming` included.
+
+Mentor mode (`godot-mentor`) is the exception: it loads the matching skill on purpose, to teach.
 
 ## Workflow: From Idea to Working Game
 
@@ -93,7 +101,7 @@ Load `godot-prompter:godot-grill` first when design decisions are open — it se
 ### 2. Implementation Phase
 For each task in the plan, load the relevant domain skill:
 - Building a player? Load `godot-prompter:player-controller` and `godot-prompter:state-machine`
-- Adding inventory? Load `godot-prompter:inventory-system`
+- Adding an inventory the project does not have yet? Load `godot-prompter:inventory-system`
 - Need save/load? Load `godot-prompter:save-load`
 
 Each skill provides complete code examples, Godot best practices, and a checklist.
@@ -122,7 +130,7 @@ Every skill by category with a one-line description, and the nine agents (`godot
 
 ## Implementation Checklist
 
-- [ ] Identified the matching domain skill via the table above before writing any system code
+- [ ] Identified the matching domain skill via the table above before writing a new system (none for work inside an existing one)
 - [ ] Invoked the identified skill with the `Skill` tool (or platform equivalent) before implementation
 - [ ] When a workflow plugin is also active (Superpowers, etc.), still invoked the relevant godot-prompter domain skill during implementation — they are complementary, not exclusive
 - [ ] After implementation, ran `godot-prompter:godot-code-review` to validate against Godot best practices
