@@ -48,6 +48,8 @@ Injected into every session on hosts without the SessionStart hook:
 |---|---|---|
 | Codex (`AGENTS.md`) | `using-godot-prompter/SKILL.md` 14,560 + `references/copilot-tools.md` 712 | **15,272** |
 | Antigravity (`GEMINI.md`) | `using-godot-prompter/SKILL.md` 14,560 + `references/antigravity-tools.md` 4,504 | **19,064** |
+| Codex after F2 | `using-godot-prompter/SKILL.md` 8,273 (`copilot-tools.md` import dropped) | **8,273** (-45.8%) |
+| Antigravity after F2 | `using-godot-prompter/SKILL.md` 8,273 + `references/antigravity-tools.md` 1,494 | **9,767** (-48.8%) |
 
 - Session card (the `SESSION-CARD` region): 3,071 B (3,073 B measured with the marker-adjacent newlines).
 - Descriptions: 8,910 characters across the 59 `skills/*/SKILL.md` `description:` fields, loaded into every session on every host.
