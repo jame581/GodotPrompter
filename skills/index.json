@@ -436,7 +436,7 @@
     {
       "name": "godot-brainstorming",
       "title": "Godot Brainstorming",
-      "description": "Use when designing a new Godot feature or system — guides scene tree planning, node type selection, and architectural decisions",
+      "description": "Use when designing a new Godot feature or system — scene tree, node choice, and architecture decisions. Not for non-Godot work or changes to existing code",
       "relatedSkills": [
         "godot-grill",
         "scene-organization",
@@ -484,7 +484,7 @@
     {
       "name": "godot-grill",
       "title": "Godot Grill",
-      "description": "Use when a new Godot system or feature has open design decisions — interrogates them in batched rounds, scope first, each question with a recommended answer, and records the answers before any design or code. Triggers on \"grill me\", \"ask me first\", \"question me on the design\", \"what do I need to decide before building\". Not for choosing between nodes or APIs, and not for bug fixes.",
+      "description": "Use when a new Godot system or feature has open design decisions — asks them in batched rounds, each with a recommended answer, and records them before any design or code. Triggers on \"grill me\", \"ask me first\", \"question me on the design\", \"what do I need to decide before building\". Not for choosing nodes or APIs, bug fixes, or non-Godot work.",
       "relatedSkills": [
         "godot-brainstorming",
         "scene-organization",

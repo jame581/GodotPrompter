@@ -1,6 +1,6 @@
 ---
 name: godot-brainstorming
-description: Use when designing a new Godot feature or system — guides scene tree planning, node type selection, and architectural decisions
+description: Use when designing a new Godot feature or system — scene tree, node choice, and architecture decisions. Not for non-Godot work or changes to existing code
 ---
 
 # Godot Brainstorming
