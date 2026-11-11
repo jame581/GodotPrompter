@@ -80,7 +80,9 @@ In the tool, each question gets 2–4 options, every one a real answer to the de
 recommended answer is the **first** option, its label ending in "(Recommended)" and its one-clause
 reason in the description. Keep headers within 12 characters. Do not add an "Other" or "skip"
 option: the host supplies the custom answer, and a typed or custom answer is how the user
-overrules you or takes the off-ramp. Hosts whose limits are unverified get the same caps.
+overrules you or takes the off-ramp. Hosts whose limits are unverified get the same caps. If the
+tool takes one question per call, call it once per question in the round. Set `multiSelect` only
+when the decision allows several answers.
 
 **Text rounds** — no tool, a subagent, or a non-interactive run — number the questions in one
 message:
@@ -97,8 +99,8 @@ worth asking gets a number and a ➡️; anything else waits for the next round.
 own built-in `/grill-me` command; this skill's text rounds apply there.
 
 **After each round's answers**, on either path, print a compact **Decided so far** table —
-decision → answer → (recommended | custom) — then derive the next frontier. The table never ends
-on a question; the next round asks them.
+decision → answer → (recommended | alternative | custom) — then derive the next frontier. The
+table never ends on a question; the next round asks them.
 
 **Round 1 is small and settles scope first** — scope prunes the most tree. A "throwaway slice"
 answer commonly ends the session at round 2.
@@ -157,7 +159,7 @@ message instead.
 | An "Other" or "skip" option in the question tool | Wastes a slot; the host already offers a custom answer | Every option a real answer, recommended first |
 | Asking a fact | Spends the user's attention on the model's job | Look it up, decide, record |
 | A question with no recommendation | The user answers in a vacuum; rounds slow down | Every question gets ➡️, or a first option marked "(Recommended)" |
-| A trailing question outside the numbered list | It has no recommendation and is easy to miss when answering by number | Number it, or hold it for the next round |
+| A trailing question outside the numbered list | It has no recommendation and is easy to miss when answering by number | Number it or put it in the tool call, or hold it for the next round |
 | Grilling a bug fix or an explicit ask | The over-correction this skill must not become | Route to the domain skill |
 | Re-asking a recorded decision | Feels like amnesia; wastes the record | Read where the project keeps decision records first |
 | Coding after the last answer | Skips the shared-understanding check | Confirm, then hand off |
