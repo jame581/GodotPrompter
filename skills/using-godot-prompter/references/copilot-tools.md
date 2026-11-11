@@ -14,4 +14,5 @@ Skills use Claude Code tool names. When you encounter these in a skill, use your
 | `WebFetch` | `web_fetch` |
 | `Task` tool (dispatch subagent) | `task` |
 | `TodoWrite` (task tracking) | `sql` with built-in `todos` table |
+| `AskUserQuestion` (ask the user) | `ask_user`, when listed (unverified; `--no-ask-user` removes it) |
 | `WebSearch` | No equivalent — use `web_fetch` with a search engine URL |

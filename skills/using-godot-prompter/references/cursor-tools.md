@@ -11,6 +11,7 @@ Skills use Claude Code tool names. When you encounter these in a skill, use your
 | `Grep` (search file content) | `search_files` |
 | `Glob` (search files by name) | `list_files` |
 | `WebSearch` | `web_search` |
+| `AskUserQuestion` (ask the user) | Ask questions tool, when listed (unverified; auto-skipped in `cursor-agent -p`) |
 | `Task` tool (dispatch subagent) | No equivalent — single-session execution |
 
 ## Setup
