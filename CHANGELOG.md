@@ -6,6 +6,21 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased]
 
+### Changed
+
+- **Skills load for new systems, not for work inside existing ones** ([discussion #18](https://github.com/jame581/GodotPrompter/discussions/18)).
+  The session card and the bootstrap now say when *not* to load a skill: to change or extend a
+  system the project already has, follow the project's code; a bug fix starts there too; docs,
+  generic CI and repo tooling with no Godot content need no skill. The SessionStart hook also names
+  the skill index by its absolute path.
+
+  **If you added a `## GodotPrompter` section to your agent instructions file earlier**, its line
+  still carries the old blanket rule. Replace it with:
+
+  ```
+  Invoke the matching `godot-prompter:*` skill before building a new Godot system; to change or extend an existing one, follow the project's code.
+  ```
+
 ## [1.16.1] - 2026-11-09
 
 ### Fixed

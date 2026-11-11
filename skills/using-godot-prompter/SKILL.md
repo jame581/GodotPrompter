@@ -21,7 +21,7 @@ GodotPrompter provides Godot 4.x domain-specific skills for AI coding agents. Sk
 
 **In Cursor:** Skills are loaded via custom instructions / rules system.
 
-**In Codex:** Skills load natively via the AGENTS.md re-export. Follow skill instructions directly; see `skills/using-godot-prompter/references/codex-tools.md` (path from the GodotPrompter plugin root) for tool mapping.
+**In Codex:** Skills load natively via the AGENTS.md re-export. Follow skill instructions directly; tool mapping is in `references/codex-tools.md`, beside this SKILL.md.
 
 **In OpenCode:** Skills are discovered from the installed plugin. Use the `/skills` command to browse or invoke skills directly. See `.opencode/INSTALL.md` for setup.
 
@@ -34,16 +34,17 @@ Install commands for every host: `README.md`, [`references/installation.md`](ref
 <!-- SESSION-CARD-START -->
 **GodotPrompter is active in this Godot project.**
 
-Workflow plugins decide *how you work*; GodotPrompter decides *what you build*. Both apply.
+Workflow plugins decide *how*; GodotPrompter decides *what*. Both apply.
 
 **RULE: before building a new Godot system, invoke the matching `godot-prompter:*` skill.** Subagents too.
 
 | Situation | Start with |
 |---|---|
 | New system, or the requirements are unclear | `godot-grill` — settle decisions, then design and build |
-| New system, known design, explicit ask | the domain skill below — build |
-| Change, extend or fix a system the project has | its code; no skill unless replacing it or asked for the pattern |
-| Non-Godot files: docs, CI, tooling | no skill |
+| New system, design settled by the user | the domain skill below — build |
+| Change or extend a system the project has | its code; no skill unless replacing it or asked for the pattern |
+| Bug fix | its code; `godot-debugging` or the domain skill for engine pitfalls |
+| No Godot content: docs, generic CI, repo tooling | no skill |
 
 **Then report before you build:** name the pattern you picked, the alternative you rejected, and why. The choice is the developer's. A report states; it never ends on your own questions. A design decision needs the developer's answer or go-ahead first? Invoke `godot-grill`.
 
@@ -63,12 +64,9 @@ Workflow plugins decide *how you work*; GodotPrompter decides *what you build*. 
 | GDScript / C# idioms | `gdscript-patterns`, `gdscript-advanced`, `csharp-godot`, `csharp-signals` |
 | Test, debug, profile, review | `godot-testing`, `godot-debugging`, `godot-optimization`, `godot-code-review` |
 | Setup, design, export | `godot-project-setup`, `godot-grill`, `godot-brainstorming`, `export-pipeline`, `web-export` |
-| Teaching while building | `godot-mentor` |
 | Addons (if installed) | `limboai`, `beehave`, `popochiu`, `dialogue-manager`, `phantom-camera` |
 
-Full index: `references/skill-index.md` of `using-godot-prompter`.
-
-**Red flags — you are rationalizing:**
+**Red flags (new systems) — you are rationalizing:**
 
 | Thought | Reality |
 |---|---|
@@ -81,10 +79,11 @@ Full index: `references/skill-index.md` of `using-godot-prompter`.
 
 ## When Not to Load a Skill
 
-Domain skills are for building a **new** system. Each load costs up to 16 KB, so skip it when:
+Domain skills are for building a **new** system; each load costs up to 16 KB. Otherwise:
 
-- **The project already has the system.** To change, extend or fix it (a new item field, one more ability, a bug), read and follow the project's code. Load the domain skill only to replace or redesign that system, or when the user asks for the pattern.
-- **The task is not Godot work.** Docs, CI, tooling and other non-Godot files need no skill, `godot-brainstorming` included.
+- **The project already has the system.** To change or extend it (a new item field, one more ability), read and follow the project's code. Load the domain skill only to replace or redesign that system, or when the user asks for the pattern.
+- **A bug fix** starts from the project's code too; load `godot-debugging`, or the domain skill when the cause is an engine pitfall.
+- **The task has no Godot content.** Docs, generic CI and repo tooling with no Godot content need no skill, `godot-brainstorming` included (Godot export CI is `export-pipeline`'s, editor tooling `addon-development`'s).
 
 Mentor mode (`godot-mentor`) is the exception: it loads the matching skill on purpose, to teach.
 
@@ -103,8 +102,6 @@ For each task in the plan, load the relevant domain skill:
 - Building a player? Load `godot-prompter:player-controller` and `godot-prompter:state-machine`
 - Adding an inventory the project does not have yet? Load `godot-prompter:inventory-system`
 - Need save/load? Load `godot-prompter:save-load`
-
-Each skill provides complete code examples, Godot best practices, and a checklist.
 
 ### 3. Review Phase
 Load `godot-prompter:godot-code-review` to review the code against Godot-specific checklists.

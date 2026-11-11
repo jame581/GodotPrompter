@@ -133,6 +133,10 @@ bootstrap through `AGENTS.md` / `GEMINI.md`.
 > `CLAUDE.md` it does not want. It never adds the section silently, and a refusal is remembered in
 > `~/.godot-prompter/state/` so you are asked once, not at every session start. Changed your mind?
 > Just ask the agent to add the section; nothing has to be un-set by hand.
+>
+> A section along these lines works: "Invoke the matching `godot-prompter:*` skill before building
+> a new Godot system; to change or extend an existing one, follow the project's code." A section
+> added before v1.17.0 says "before implementing any Godot system"; update it to this wording.
 
 ### Mentor mode
 

@@ -172,6 +172,18 @@ if [ -n "${HOME:-}" ]; then
   fi
 fi
 
+# --- 4b. Skill index path --------------------------------------------------------------------
+# The card has no plugin path to give, and on Claude Code a skill's base directory is shown only
+# after the skill is invoked — so name the index file absolutely here, in one read. PLUGIN_ROOT is
+# this script's own install root on every host; canonical_path turns Git Bash's /c/... into C:/...
+# so non-bash tools can open it. Without the file, fall back to the two-step route.
+SKILL_INDEX="${PLUGIN_ROOT}/skills/using-godot-prompter/references/skill-index.md"
+if [ -f "$SKILL_INDEX" ]; then
+  INDEX_LINE="Skill index (every skill and agent, one line each): \`$(canonical_path "$SKILL_INDEX")\`"
+else
+  INDEX_LINE="Skill index: invoke \`godot-prompter:using-godot-prompter\`, then read its \`references/skill-index.md\`."
+fi
+
 # --- 5. Subagent reach: offer the instructions section once per project ------------------------
 # Every file a supported host loads as project instructions counts as wired, not CLAUDE.md alone:
 # a repo that keeps its instructions in AGENTS.md (Codex, Copilot, Cursor, OpenCode) or GEMINI.md
@@ -280,6 +292,7 @@ escape_for_json() {
 
 payload="${SESSION_CARD}"
 [ -n "$VERSION_LINE" ]    && payload="${payload}"$'\n\n'"${VERSION_LINE}"
+payload="${payload}"$'\n\n'"${INDEX_LINE}"
 [ -n "$MENTOR_CARD" ]     && payload="${payload}"$'\n\n'"${MENTOR_CARD}"
 [ -n "$OFFER_LINE" ]      && payload="${payload}"$'\n\n'"${OFFER_LINE}"
 
