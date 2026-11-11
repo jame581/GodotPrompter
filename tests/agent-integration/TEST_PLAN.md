@@ -517,7 +517,7 @@ model); round 1 starts at equipment-specific decisions.
 **Expected:** a direct diagnosis — `move_and_slide()` takes no arguments in Godot 4 — with no
 questioning round.
 
-**Pass criteria:** the card's "Known change, explicit ask, bug fix" row wins; `godot-grill` is
+**Pass criteria:** the card's "Bug fix" row wins; `godot-grill` is
 not invoked.
 
 ---
@@ -534,8 +534,9 @@ existing decision record.
 
 **Pass criteria:** the grill is invoked without the user naming it or asking to be grilled. Eval
 case `grill-05-plain-request-in-project` now exercises this path by scaffolding a `project.godot`
-(run with `--scaffold`); it fired in about 4 of 5 runs, so repeat this test before concluding it
-fails.
+(run with `--scaffold`); it fired 4/5 (2026-10-12), 0/5 at F1 (2026-11-11) and 2/5 at F6 (card v2), so repeat
+this test before concluding it fails. The complementary case where the design is already given
+(`pos-01-new-system-in-project`) should route to the domain skill, not grill.
 
 ---
 
