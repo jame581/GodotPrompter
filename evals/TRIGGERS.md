@@ -283,3 +283,36 @@ cost $0.23-$0.59 each and are all 0-Skill-call runs, so the remaining cost is th
   re-run after the reset. neg-01..03 from that pass completed normally and are used.
 - Cost: valid runs $50.68 (neg $10.81, grill $12.27, skills $27.60), invalid $3.46: $54.1 in all,
   over the $40 budget. The skill-* pass alone was $27.60 for 102 runs.
+
+## Corrections after the final review of Phases C and F (2026-11-11)
+
+Appended; the sections above are unchanged.
+
+- **Criterion 3 used pre-F3 bytes.** At HEAD `skills/using-godot-prompter/SKILL.md` is 9,061 B (wc -c), so
+  Codex injects 9,061 B (-40.7% against 15,272) and Antigravity 9,061 + 1,494 = 10,555 B (-44.6%
+  against 19,064). Still **PASS**, but Codex has only 102 B under the 9,163 B target. Any bootstrap
+  growth in Phase D or E breaks criterion 3.
+- **Criterion 2 wording (grill-05).** The F6 verdict compared grill-05 with F1 (0/5). The v1.16 card
+  shipped at 4/5 on 2026-10-12 and 2/3 on 2026-10-21, so F6's 2/5 is below the pre-Phase-F level, and
+  "not a loss" above overstates it. The same correction is appended to GRILL.md.
+- **"No recorded fire count" caveat was inaccurate.** Only skill-03 lacks a recorded fire count, and
+  that case was dropped. skill-16's 0.75 run is the run where the skill did not fire. skill-17's
+  with-arm rise (0.92 to 1.00) is the MetalFX grader fix. The neg-04 without-arm cost range low end
+  is $0.15, not $0.14. The post-F4 description total is 8,897 chars (baseline 8,910).
+- **Cost.** Phase F evals totalled about $87 (F1 about $23.9, F3 rounds about $9.4, F6 about $54.1
+  including the $3.46 invalid pass), against a planned $35-50.
+
+## Positive in-project routing (card v2) — 2026-11-11
+
+New case `pos-01-new-system-in-project` (rich RPG scaffold shared with neg-04/05; the project has no
+dialogue system; the prompt gives the full design: per-NPC lines, interact key advances, box closes
+after the last line, simple box at the bottom). Run on card v2 with
+`claude plugin eval . --case "pos-01*" --scaffold --ablation with-without --judge-model sonnet --no-publish`.
+
+| Case | Runs per arm | With | Without | Fired (with arm) | Run dir | Cost |
+|---|---|---|---|---|---|---|
+| pos-01-new-system-in-project | 3 | 1.00 | 1.00 | `dialogue-system` **3/3**, any GodotPrompter skill 3/3, `godot-grill` 0/3 (indicator, unscored) | `results/2026-11-11T14-13-23-902Z` | $2.02 |
+
+With the design settled by the user, card v2 still routes to the domain skill (3/3, threshold was
+2/3), and does not grill. The answer-quality score is 1.00 in both arms, so the case measures routing
+only, not a quality lift. The card was not changed.

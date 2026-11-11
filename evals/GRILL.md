@@ -310,3 +310,9 @@ the neg-* cases in TRIGGERS.md.
   correctly do not grill. grill-07's with-arm 0.67 is `assumptions-stated` FAIL, as before.
 - An earlier pass of these cases (`…T00-58-37-837Z` to `…T00-59-02-234Z`) hit the usage limit with
   zero scores and is not a result.
+
+### Correction (2026-11-11, final review of Phases C and F)
+
+The F6 bullet "No positive case lost a fire" overstates grill-05. 2/5 is better than F1 (0/5) but
+below the pre-Phase-F level: the shipped v1.16 card scored 4/5 on 2026-10-12 and 2/3 on 2026-10-21.
+It is not a recovery, and "not a loss" should not be read as parity with v1.16.
