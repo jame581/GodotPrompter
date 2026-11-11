@@ -1052,7 +1052,9 @@
         "skills/using-godot-prompter/references/codex-tools.md",
         "skills/using-godot-prompter/references/copilot-tools.md",
         "skills/using-godot-prompter/references/cursor-tools.md",
-        "skills/using-godot-prompter/references/gemini-tools.md"
+        "skills/using-godot-prompter/references/gemini-tools.md",
+        "skills/using-godot-prompter/references/installation.md",
+        "skills/using-godot-prompter/references/skill-index.md"
       ],
       "source": "skills/using-godot-prompter/SKILL.md"
     },
