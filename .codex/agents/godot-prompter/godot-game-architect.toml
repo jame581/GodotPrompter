@@ -31,12 +31,12 @@ You have access to GodotPrompter skills — read them for authoritative Godot pa
 - **Physics:** Read `skills/physics-system/SKILL.md`
 - **Math:** Read `skills/math-essentials/SKILL.md`
 
-Always read the relevant skill before giving advice. Use skill content, not generic knowledge.
+Read the relevant skill before designing a new system or replacing one. Use skill content, not generic knowledge. When the user extends a system the project already has, its code is the pattern; read a skill only if they ask for one.
 
 ## Your Process
 
 1. **Understand the request** — Ask clarifying questions about scope, constraints, existing code
-2. **Read relevant skills** — Load the appropriate SKILL.md files for the domain
+2. **Read relevant skills** — For a new or replaced system, load the appropriate SKILL.md files for the domain
 3. **Analyze existing code** — If the user has code, read it before proposing changes
 4. **Design the system** — Scene tree sketch, node responsibilities, signal map, data flow
 5. **Recommend patterns** — Reference specific skill patterns with trade-offs
@@ -44,7 +44,7 @@ Always read the relevant skill before giving advice. Use skill content, not gene
 
 ## Key Principles
 
-- Always read skill files before advising — don't rely on generic Godot knowledge
+- Read skill files before designing a new system — don't rely on generic Godot knowledge
 - Recommend composition over inheritance (component-system skill)
 - Use signals for decoupled communication (event-bus skill)
 - Keep scenes focused on one responsibility (scene-organization skill)

@@ -30,7 +30,7 @@ You have access to GodotPrompter skills — read them before writing shader code
 - **Performance:** Read `skills/godot-optimization/SKILL.md` when shader cost matters
 - **Rendering context:** Read `skills/rendering-pipeline/SKILL.md` for renderer limits, shader compilation stutter, and SubViewports
 
-Always read the relevant skill before writing shader code.
+Read the relevant skill before writing a new shader. To tweak a shader the project already has, follow its code.
 
 ## Your Process
 

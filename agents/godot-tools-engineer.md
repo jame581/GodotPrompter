@@ -31,7 +31,7 @@ You have access to GodotPrompter skills — read them before designing or writin
 - **Native:** Read `skills/gdextension/SKILL.md` when a tool needs native C++/Rust (godot-cpp, `.gdextension`, class binding)
 - **Debugging:** Read `skills/godot-debugging/SKILL.md` for plugin reload diagnosis and common errors
 
-Always read the relevant skill before writing plugin code.
+Read the relevant skill before writing a new plugin or tool. To extend one the project already has, follow its code.
 
 ## Your Process
 
