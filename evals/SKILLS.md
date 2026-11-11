@@ -262,3 +262,39 @@ the earlier wording.
 - `skill-17-rendering-pipeline/graders/names-forward-plus.md` is unchanged and stays near-trivial by
   design: it only checks that "Forward+" is mentioned at all, and the real check is
   `fsr-forward-plus-only`. Read a pass on it as a routing signal, not as correctness.
+
+## F6 after Phase F (card v2) — v1.17.0, 2026-11-11 (`results/2026-11-11T13-30-33-023Z`)
+
+All 17 `skill-*` cases (there is no skill-03 directory) on `27553b9` after the F2 bootstrap slim, F3
+card v2 and F4 description rewrites. They run in an empty workspace, so this is description-only
+routing and the card is not injected. **skill-05, skill-16, skill-17 and skill-18 re-measure graders
+changed in Phases A and B** (the "Grader wording changes after the last run" section above).
+
+```
+claude plugin eval . --case "skill-*" --ablation with-without --judge-model sonnet --no-publish -j 3
+```
+
+| Case | Skill | With | Without | Δ | Skill fired | Note |
+|---|---|---|---|---|---|---|
+| skill-01-state-machine | `state-machine` | 1.00 | 0.80 | +0.20 | 3/3 | |
+| skill-02-save-load | `save-load` | 1.00 | 0.83 | +0.17 | 3/3 | |
+| skill-04-code-review | `godot-code-review` | 1.00 | 1.00 | 0.00 | 3/3 | ceiling |
+| skill-05-limboai | `limboai` | 1.00 | 1.00 | 0.00 | 3/3 | grader re-measured |
+| skill-06-beehave | `beehave` | 0.90 | 1.00 | -0.10 | 3/3 | `beehave-blackboard-api` split FAIL PASS FAIL in the aggregate; ceiling case |
+| skill-07-popochiu | `popochiu` | 1.00 | 1.00 | 0.00 | 3/3 | ceiling |
+| skill-08-dialogue-manager | `dialogue-manager` | 1.00 | 0.78 | +0.22 | 3/3 | |
+| skill-09-phantom-camera | `phantom-camera` | 1.00 | 0.83 | +0.17 | 3/3 | |
+| skill-10-godot-47-changes | `audio-system` | 1.00 | 0.86 | +0.14 | 3/3 | |
+| skill-11-csharp-signals | `csharp-signals` | 1.00 | 1.00 | 0.00 | 3/3 | was 1/3 on 2026-10-10 |
+| skill-12-input-device-ids | `input-handling` | 1.00 | 0.60 | +0.40 | 3/3 | |
+| skill-13-blendspace-sync-mode | `animation-system` | 1.00 | 0.33 | +0.67 | 3/3 | |
+| skill-14-richtext-image-unit | `godot-ui` | 1.00 | 0.33 | +0.67 | 3/3 | |
+| skill-15-volumetric-fog-blending | `3d-essentials` | 1.00 | 0.00 | +1.00 | 3/3 | |
+| skill-16-web-services | `web-services` | 0.92 | 1.00 | -0.08 | **2/3** | grader re-measured; was 3/3 before the F4 rewrite (dropped "timeouts", "content packs", upload, leaderboard, analytics); one run 0.75 on a `download-code-correct` FAIL |
+| skill-17-rendering-pipeline | `rendering-pipeline` | 1.00 | 0.42 | +0.58 | 3/3 | grader re-measured |
+| skill-18-web-export | `web-export` | 1.00 | 1.00 | 0.00 | 3/3 | grader re-measured |
+
+"Skill fired" is the `trigger-skill` grader in the with arm (16 of 17 cases 3/3, 50 of 51 runs).
+Scores match the 2026-10-11 pre-release regression within noise. Cost $27.60. A first pass
+(`…T00-55-22-593Z`) hit the 5-hour usage limit and is not a result; the table above is the re-run.
+See TRIGGERS.md for the criteria verdicts.

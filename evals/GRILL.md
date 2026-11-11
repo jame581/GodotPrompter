@@ -289,3 +289,24 @@ unchanged). `--runs 3 --scaffold --ablation with-without --judge-model sonnet --
 - Same shape as F1: `bounded-or-builds` FAIL and `no-fact-questions` PASS in all six runs. No
   regression, and none detectable from a 0/5 baseline. The neg-04/05 rows are in TRIGGERS.md.
 - Correction: "no regression" over-claims; a 0 baseline cannot show one.
+
+## F6 after Phase F (card v2) — 2026-11-11
+
+Card v2 (`b7dee46`) at `27553b9`, `--ablation with-without --judge-model sonnet --no-publish -j 3`;
+grill-05/06/07 with `--scaffold`, grill-01/04 without (description-only, as before). Recorded with
+the neg-* cases in TRIGGERS.md.
+
+| Case | Runs per arm | With | Without | `trigger-grill` | Run dir | Cost |
+|---|---|---|---|---|---|---|
+| grill-01-new-system | 3 | 1.00 | 0.25 | 3/3 | `results/2026-11-11T13-51-35-567Z` | $1.07 |
+| grill-04-plain-request | 3 | 0.56 | 0.33 | 0/3 | `results/2026-11-11T13-52-42-979Z` | $0.87 |
+| grill-05-plain-request-in-project | 5 | 0.47 | 0.33 | **2/5** (F1 0/5) | `results/2026-11-11T13-39-01-116Z` | $8.14 |
+| grill-06-neg-bugfix-in-project | 3 | 1.00 | 1.00 | 0/3 (correct) | `results/2026-11-11T13-48-46-856Z` | $0.82 |
+| grill-07-skip-questions-in-project | 3 | 0.89 | 0.78 | 0/3 (correct) | `results/2026-11-11T13-49-31-760Z` | $1.37 |
+
+- No positive case lost a fire: grill-01 3/3 as before, grill-04 0/3 as before, grill-05 2/5 against
+  0/5 at F1. grill-05's `bounded-or-builds` still failed in 9 of 10 runs (the 0.47 is the two fired
+  runs, one of which scored 1.00), so the grader failure is unchanged. grill-06 and grill-07 still
+  correctly do not grill. grill-07's with-arm 0.67 is `assumptions-stated` FAIL, as before.
+- An earlier pass of these cases (`…T00-58-37-837Z` to `…T00-59-02-234Z`) hit the usage limit with
+  zero scores and is not a result.

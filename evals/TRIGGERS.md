@@ -210,3 +210,76 @@ injects the absolute skill-index path). Same flags as v1. Each arm ran 3 (`--run
 - grill-05 was not re-run on v2. The v2 grill row ("design settled by the user") is narrower than
   v1's "known design", which should not lower grill routing, but this is not measured; F6 does.
 - Round cost $4.12.
+
+## F6 after Phase F (card v2, 2026-11-11)
+
+Branch `release/v1.17.0` at `27553b9` (F2 slim bootstrap, F3 card v2, F4 rewritten descriptions),
+plugin 1.16.1, Claude Code 2.1.322, judge `sonnet`. Every run uses `--ablation with-without
+--judge-model sonnet --no-publish -j 3`; neg and in-project grill cases add `--scaffold`.
+"Fired" is the with-arm count of runs in which the skill was called.
+
+```
+claude plugin eval . --case "neg-0N*" --runs 3|5 --scaffold --ablation with-without --judge-model sonnet --no-publish -j 3
+```
+
+### Per-case table
+
+| Case | Runs per arm | With | Without | Fired (with arm) | Skill calls per run (with) | Run dir | Cost |
+|---|---|---|---|---|---|---|---|
+| neg-01-existing-inventory-in-project | 3 | 1.00 | 1.00 | `inventory-system` **0/3**, `ability-system` 0/3, `godot-brainstorming` 0/3, `godot-grill` 0/3, any 0/3 | 0, 0, 0 | `results/2026-11-11T00-55-17-296Z` | $0.79 |
+| neg-02-non-godot-task-in-project | 3 | 1.00 | 1.00 | any GodotPrompter 0/3 | 0, 0, 0 | `results/2026-11-11T00-55-57-428Z` | $0.72 |
+| neg-03-tweak-existing-ability-in-project | 3 | 1.00 | 1.00 | `ability-system` 0/3, `godot-brainstorming` 0/3, any 0/3 | 0, 0, 0 | `results/2026-11-11T00-56-31-374Z` | $1.53 |
+| neg-04-extend-existing-inventory-in-project | 5 | 1.00 | 1.00 | `inventory-system` **0/5** (F1 5/5), `resource-pattern` 0/5, `godot-brainstorming` 0/5, `godot-grill` 0/5, any 0/5 | 0, 0, 0, 0, 0 | `results/2026-11-11T13-30-32-000Z` | $4.24 |
+| neg-05-extend-existing-abilities-in-project | 5 | 1.00 | 1.00 | `ability-system` **0/5** (F1 5/5), `godot-brainstorming` 0/5, `godot-grill` 0/5, any 0/5 | 0, 0, 0, 0, 0 | `results/2026-11-11T13-34-58-611Z` | $3.53 |
+| grill-05-plain-request-in-project | 5 | 0.47 | 0.33 | `godot-grill` **2/5** (F1 0/5) | not recorded | `results/2026-11-11T13-39-01-116Z` | $8.14 |
+| grill-06-neg-bugfix-in-project | 3 | 1.00 | 1.00 | `godot-grill` 0/3 (correct) | not recorded | `results/2026-11-11T13-48-46-856Z` | $0.82 |
+| grill-07-skip-questions-in-project | 3 | 0.89 | 0.78 | `godot-grill` 0/3 (correct) | not recorded | `results/2026-11-11T13-49-31-760Z` | $1.37 |
+| grill-01-new-system (no scaffold) | 3 | 1.00 | 0.25 | `godot-grill` 3/3 | not recorded | `results/2026-11-11T13-51-35-567Z` | $1.07 |
+| grill-04-plain-request (no scaffold) | 3 | 0.56 | 0.33 | `godot-grill` 0/3 | not recorded | `results/2026-11-11T13-52-42-979Z` | $0.87 |
+| skill-01 to skill-18 (17 cases, 3 runs per arm) | 3 | see SKILLS.md | | `trigger-skill` 3/3 in 16 cases, `web-services` 2/3 | trigger grader only | `results/2026-11-11T13-30-33-023Z` | $27.60 |
+
+neg-01..03 ran before the usage limit hit and are valid (no errors, no zeros). Their with-arm runs
+cost $0.15-$0.42, against $0.24-$0.59 for the F1 runs of neg-04/05. neg-04/05 with-arm runs now
+cost $0.23-$0.59 each and are all 0-Skill-call runs, so the remaining cost is the answer itself.
+
+### Comparison with the success criteria
+
+1. **Neg cases: named domain skill at most 1 of 3, `godot-brainstorming` 0.** For the 5-run cases
+   neg-04 and neg-05 the threshold used is at most 1 of 5 (the 3-run 1/3 scaled down). **PASS.**
+   The named domain skill fired 0/3 in neg-01, neg-03, 0/5 in neg-04 and neg-05, and
+   `godot-brainstorming` fired 0 in every neg case. F1: neg-01 1/3, neg-04 5/5, neg-05 5/5. No
+   GodotPrompter skill fired in any of the 19 with-arm neg runs (F1: 11 of 28).
+2. **No positive case loses more than one fire of three against its previous recorded count.**
+   **PASS.** Previous counts: skill-16 3/3 (SKILLS.md, `…T01-13-33-867Z`); grill-01 3/3
+   (GRILL.md, green re-measure); grill-04 0/3; grill-05 0/5 (F1; 4/5 on 2026-10-09). Now: skill-16
+   2/3 (-1, within the allowance), grill-01 3/3, grill-04 0/3, grill-05 2/5 (up from 0/5). The
+   other 16 skill cases fired 3/3, so none can have lost a fire from a prior count of at most 3.
+   Not every skill-0x row has a recorded fire count in SKILLS.md; where none is recorded, 3/3 is
+   the ceiling and is reported as is.
+3. **Injected bytes down at least 40%.** **PASS** (from the byte baseline above, not re-measured):
+   Codex 15,272 to 8,273 B (-45.8%), Antigravity 19,064 to 9,767 B (-48.8%). Targets were
+   at or below 9,163 B and 11,438 B.
+
+### Notes
+
+- skill-05, skill-16, skill-17 and skill-18 are **re-measurements of graders changed in Phases A and
+  B** (METALFX scaling modes in `upscaling-code-correct`, the `Web` platform name in
+  `web-code-correct`, the word-boundary regex in `names-download-file-or-part`), which had not been
+  re-run. Scores: skill-05 1.00 / 1.00, skill-16 0.92 / 1.00, skill-17 1.00 / 0.42, skill-18 1.00 /
+  1.00. They behave as before; skill-16's one 0.75 run is a `download-code-correct` unanimous FAIL
+  (the same kind of split as the earlier 0.92).
+- **The eval scaffolds still carry the pre-1.17 CLAUDE.md line "before implementing any Godot
+  system", deliberately.** That is the worst case for existing users, whose project instructions
+  keep nudging a skill after upgrading. The skip held anyway.
+- **This harness is Claude Code only.** It cannot reproduce the Codex `godot-brainstorming`
+  complaint in #18; the byte rows above are the only Codex/Antigravity measure.
+- grill-05 fired 2/5 on card v2 (0/5 at F1). The score is 0.47 / 0.33: `bounded-or-builds` still
+  failed in 9 of 10 runs, so only the fire rate moved. Two fires of five is inside the noise
+  noted in GRILL.md, but it is not a loss.
+- Rate limit: the first F6 pass hit the 5-hour usage limit partway. The invalid dirs are
+  `…T00-55-22-593Z` (skill-*, 16 of 17 cases zero-scored, $2.61), `…T00-57-58-099Z` (neg-04, $0.85),
+  and the zero-cost dirs `…T00-58-28-670Z`, `…T00-58-37-837Z`, `…T00-58-46-694Z`, `…T00-58-51-761Z`,
+  `…T00-58-56-976Z`, `…T00-59-02-234Z`. They are not recorded as results; all of those cases were
+  re-run after the reset. neg-01..03 from that pass completed normally and are used.
+- Cost: valid runs $50.68 (neg $10.81, grill $12.27, skills $27.60), invalid $3.46: $54.1 in all,
+  over the $40 budget. The skill-* pass alone was $27.60 for 102 runs.
