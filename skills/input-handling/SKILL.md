@@ -208,6 +208,8 @@ Buffer discrete actions so a press made shortly before it can take effect (jump 
 
 > See [references/gamepad.md](references/gamepad.md) for the GDScript and C# recipes (controller detection, deadzone analog reading, vibration via `start_joy_vibration`, motion sensors, detecting last-input-device for UI prompt swapping).
 
+> **Changed in Godot 4.8:** Projects **newly created** in 4.8 set `input_devices/joypads/ignore_joypad_on_unfocused_application = true`: joypad input (including motion sensors) and LED changes are ignored, and vibration is stopped, while the window is unfocused. The class default stays `false`, so older and upgraded projects are unchanged. If a gamepad seems dead while testing with another window focused, or in a second-window local-multiplayer setup, check this setting.
+
 > **Godot 4.7+:** Joypad motion sensors — `Input.get_joy_accelerometer(device)` / `get_joy_gyroscope(device)` (both `Vector3`), guarded by `has_joy_motion_sensors()` and enabled with `set_joy_motion_sensors_enabled()`; recipe in [references/gamepad.md](references/gamepad.md). Vibration is now queryable — `Input.has_joy_vibration(device)` plus `get_joy_vibration_strength/duration/remaining_duration()`. `JoyButton` gains `JOY_BUTTON_MISC2` (`21`) through `JOY_BUTTON_MISC6` (`25`) (C#: `JoyButton.Misc2`…). New project setting `input_devices/joypads/ignore_joypad_on_unfocused_application` (default `false`) ignores joypad input (including motion sensors) and LED changes and stops vibration while the app is unfocused.
 
 ---
@@ -250,6 +252,7 @@ Input propagates in **reverse scene tree order** (the node lowest in the Scene d
 | Touch input doesn't work on desktop | "Emulate Touch From Mouse" is disabled | Enable in Project Settings > Input Devices > Pointing |
 | Pause menu ignores input while paused | Node `process_mode` is `INHERIT` (pauses with parent) | Set pause menu to `PROCESS_MODE_ALWAYS` |
 | Action triggers twice per press | Same action checked in both `_input` and `_unhandled_input` | Pick one callback per action |
+| Alt+Enter toggles fullscreen twice (Godot 4.8+) | 4.8 adds the built-in `ui_toggle_fullscreen` action (Alt+Enter; Ctrl+Cmd+F on macOS), enabled by `display/window/size/enable_toggle_fullscreen_shortcut` (default `true`) in every project | Remove the duplicate binding, or turn the setting off if your game handles fullscreen itself |
 
 > ⚠️ **Changed in Godot 4.7:** Mouse and keyboard device IDs changed from `0` to `InputEvent.DEVICE_ID_MOUSE` (`32`) and `InputEvent.DEVICE_ID_KEYBOARD` (`16`), because some joypads use `0` as their device ID. Code checking `event.device == 0` to detect keyboard/mouse input silently breaks — compare against the constants or check the event type (`event is InputEventKey`) instead. See the [4.7 migration guide](https://docs.godotengine.org/en/latest/tutorials/migrating/upgrading_to_godot_4.7.html).
 
