@@ -349,3 +349,18 @@ Total $14.81.
 - The result files hold no traces, so tool calls are not recorded. `AskUserQuestion` and `ToolSearch`
   appear in no grader explanation or answer text; `ToolSearch` is not in `allowed_tools` either.
   The cases cannot exercise the interactive path, and no interactive-path grader was added.
+
+### Correction (2026-11-12)
+
+The Phase G section above is corrected as follows; nothing above is edited.
+
+- Graders actually present: grill-01 has `no-code-yet`, `no-fact-questions`, `numbered-recommended`,
+  `scope-first` and `trigger-grill`; grill-05 has `bounded-or-builds`, `no-fact-questions` and
+  `trigger-grill`. grill-02/03/04/06/07 grade other things (assumptions, no questions, bugfix).
+- "No regression from the 4-question cap" therefore rests on grill-01's 3 runs (with grill-05's fired
+  runs on `no-fact-questions` and `bounded-or-builds` only). `numbered-recommended` and `scope-first`
+  exist only in grill-01.
+- Neither the 4-question cap nor the "Decided so far" table is graded: all cases are single-turn, and
+  the table appears only after a round's answers.
+- The grill-02 and grill-03 priors come from the 2026-10-11 section, not from F6.
+- `--scaffold` was used for the `*-in-project` cases (05, 06, 07).
