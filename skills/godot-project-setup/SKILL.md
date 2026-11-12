@@ -387,14 +387,13 @@ EventBus.player_died.emit()
 
 ### .csproj
 
-When you enable C# support Godot generates a `.csproj`. Keep it minimal and set the target framework to `net8.0` (Godot 4.3 to 4.7; Godot 4.8 needs `net10.0`, see the callout below):
+When you enable C# support Godot generates a `.csproj`. Keep it minimal and set the target framework as below (Godot 4.5 to 4.7: `net8.0`, `net9.0` for Android; 4.4 has no Android override; 4.3 generated `net6.0`, `net7.0` for Android and `net8.0` for iOS). Godot 4.8 needs `net10.0` everywhere, see the callout below:
 
 ```xml
 <Project Sdk="Godot.NET.Sdk/4.3.0">
   <PropertyGroup>
     <TargetFramework>net8.0</TargetFramework>
-    <TargetFramework Condition=" '$(GodotTargetPlatform)' == 'android' ">net8.0</TargetFramework>
-    <TargetFramework Condition=" '$(GodotTargetPlatform)' == 'ios' ">net8.0</TargetFramework>
+    <TargetFramework Condition=" '$(GodotTargetPlatform)' == 'android' ">net9.0</TargetFramework>
     <Nullable>enable</Nullable>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
     <RootNamespace>MyGame</RootNamespace>
@@ -404,7 +403,7 @@ When you enable C# support Godot generates a `.csproj`. Keep it minimal and set 
 
 Replace `MyGame` with your project name. Namespaces are free-form; what Godot needs is a class whose name matches its file name (`Player.cs` → `class Player`).
 
-> **Changed in Godot 4.8:** The minimum target framework is **.NET 10**. A new 4.8 C# project gets `net10.0` for every platform, Android included (4.7 wrote `net9.0` for Android). On 4.8 replace each `net8.0` above with `net10.0`; the 4.8 editor also raises an older `TargetFramework` when it opens the project.
+> **Changed in Godot 4.8:** The minimum target framework is **.NET 10**. A new 4.8 C# project gets `net10.0` for every platform, Android included (4.5 to 4.7 wrote `net9.0` for Android). On 4.8 replace each `net8.0` above with `net10.0`; the 4.8 editor also raises an older `TargetFramework` when it opens the project.
 
 ### partial class Requirement
 
@@ -459,7 +458,7 @@ Use this checklist after scaffolding a new project to verify everything is in pl
 - [ ] Autoloads registered: `GameManager`, `EventBus`, `AudioManager`, `SaveManager`
 - [ ] Autoload scripts created under `autoloads/` (or `scripts/autoloads/`)
 - [ ] Autoloads are process mode `Always` if they must run while paused
-- [ ] For C# projects: `.csproj` targets `net8.0` (Godot 4.3 to 4.7) or `net10.0` (Godot 4.8), `RootNamespace` set, `Nullable` enabled
+- [ ] For C# projects: `.csproj` targets `net8.0` (Godot 4.4 to 4.7; Android `net9.0` from 4.5) or `net10.0` (Godot 4.8), `RootNamespace` set, `Nullable` enabled
 - [ ] For C# projects: all node scripts use `partial class`
 - [ ] Initial commit on `main` branch before adding game content
 - [ ] The project's agent instructions file (`CLAUDE.md`, or `AGENTS.md` / `GEMINI.md` if that is what the repo maintains) contains a `## GodotPrompter` section with the skill invocation rule (see `godot-prompter:godot-brainstorming` for content)

@@ -256,7 +256,7 @@ public override void _Ready()
 }
 ```
 
-> **Changed in Godot 4.8:** The `orientation` parameter is now typed as the new `DisplayServer.SensorOrientation` enum (`SENSOR_ORIENTATION_UNDEFINED` 0, `_PORTRAIT` 1, `_LANDSCAPE` 2) and the docs say *screen* orientation. The values are unchanged, so the handlers above keep working. Code that uses the generated C# `OrientationChanged` event may need updating, since its delegate type changes.
+> **Changed in Godot 4.8:** The `orientation` parameter is now typed as the new `DisplayServer.SensorOrientation` enum (`SENSOR_ORIENTATION_UNDEFINED` 0, `_PORTRAIT` 1, `_LANDSCAPE` 2) and the docs say *screen* orientation. The values are unchanged, so the handlers above keep working. Code that uses the generated C# `OrientationChanged` event may need updating, since its delegate type changes (per the draft 4.8 migration guide; unconfirmed).
 
 ---
 
