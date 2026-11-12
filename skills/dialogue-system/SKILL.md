@@ -1,6 +1,6 @@
 ---
 name: dialogue-system
-description: Use when implementing dialogue — data structures for branching dialogue, conditions, and UI presentation
+description: Use when building or replacing a dialogue system without an addon — branching data, conditions, and UI presentation. Not for extending an existing one
 ---
 
 # Dialogue Systems in Godot 4.3+

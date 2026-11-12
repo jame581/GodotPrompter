@@ -23,7 +23,7 @@ Preset fields: **Release / Release User / Release Password** (keystore and key p
 
 **iOS:** macOS + Xcode. Export needs an **App Store Team ID** + a reverse-DNS bundle **Identifier**; Godot generates an `.xcodeproj` you build from Xcode. Test on the iOS **simulator with the Compatibility renderer** — Forward+/Mobile support there depends on the simulator's Metal.
 
-A **custom Gradle build** (*Project → Install the Gradle Build template*) is **required for v2 plugins and IAP** (Godot 4.2+). Since Godot 4.7 the **Use Gradle Build** export option is no longer marked experimental ([GH-119172](https://github.com/godotengine/godot/pull/119172)) — treat it as the standard path when you need plugins or IAP.
+A **custom Gradle build** (*Project → Install Android Build Template...*; 4.8: *Project → Setup Android Build...*) is **required for v2 plugins and IAP** (Godot 4.2+). Since Godot 4.7 the **Use Gradle Build** export option is no longer marked experimental ([GH-119172](https://github.com/godotengine/godot/pull/119172)) — treat it as the standard path when you need plugins or IAP.
 
 > ⚠️ **Changed in Godot 4.7:** Deprecated Google Play OBB expansion-file support (the `apk_expansion/*` export options) was removed from the Android export. Projects still relying on APK expansion files should move to Android App Bundles with Play Asset Delivery, or install the separate [Godot OBB plugin](https://github.com/m4gr3d/godot-obb-plugin) that now holds the old logic. See [GH-118283](https://github.com/godotengine/godot/pull/118283).
 
@@ -256,6 +256,8 @@ public override void _Ready()
 }
 ```
 
+> **Changed in Godot 4.8:** The `orientation` parameter is now typed as the new `DisplayServer.SensorOrientation` enum (`SENSOR_ORIENTATION_UNDEFINED` 0, `_PORTRAIT` 1, `_LANDSCAPE` 2) and the docs say *screen* orientation. The values are unchanged, so the handlers above keep working. Code that uses the generated C# `OrientationChanged` event may need updating, since its delegate type changes (per the draft 4.8 migration guide; unconfirmed).
+
 ---
 
 ## 6. Mobile performance & renderer
@@ -267,6 +269,8 @@ Use the **Mobile** (or **Compatibility**) renderer; prefer Compatibility on the 
 ## 7. C# on mobile
 
 C# Android/iOS export is **Godot 4.2+ but experimental**. **Android C# export requires .NET 9+** (with Godot 4.5); iOS export only from macOS (the export also builds arm64 + x86_64 simulator assemblies). **C# cannot export to Web.** Test the C# export pipeline early — it is the riskiest part of a C# mobile project.
+
+> **Changed in Godot 4.8:** Every C# project, not only Android, needs **.NET 10** (`net10.0`); 4.8 writes `net10.0` for Android too. The ".NET 9+" above applies to Godot 4.5 to 4.7.
 
 > **Deeper:** [Plugins (Android v2 / iOS)](references/plugins.md) · [In-app purchases & ads](references/iap-and-ads.md) · [Crash debugging](references/crash-debugging.md)
 
@@ -281,6 +285,6 @@ C# Android/iOS export is **Godot 4.2+ but experimental**. **Android C# export re
 - [ ] JavaClassWrapper usage labeled Godot 4.4+; fallbacks for 4.3 if needed
 - [ ] UI anchored inside `get_display_safe_area()`; notch/cutout handled
 - [ ] Mobile/Compatibility renderer + ETC2/ASTC compression enabled
-- [ ] C# projects: verified .NET 9+ for Android export
+- [ ] C# projects: verified .NET 9+ for Android export (Godot 4.8: .NET 10)
 - [ ] Play OBB/APK expansion files moved to App Bundles with Play Asset Delivery, or the Godot OBB plugin installed (built-in support removed in Godot 4.7)
 - [ ] PiP (Android): aspect ratio + auto-enter configured; HUD reacts to the PIP_MODE notifications (Godot 4.7+)

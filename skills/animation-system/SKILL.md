@@ -101,6 +101,8 @@ public partial class Character : CharacterBody2D
 
 > Calling `play()` with the same animation name while it's already playing does nothing (no restart). This is safe to call every frame.
 
+> **Godot 4.8+:** `Animation.INTERPOLATION_MAKIMA` (and `INTERPOLATION_MAKIMA_ANGLE`, shortest-path rotation) is a smooth interpolation like cubic that overshoots less and stays flat across three or more equal adjacent keys; it reads two keys per side, so it costs slightly more. Set it with `track_set_interpolation_type()`. `AnimationPlayer.clear_cache_on_stop` (default `true`) can be set to `false` to keep the track cache when animations start and stop often.
+
 ### Playback Control
 
 ```gdscript

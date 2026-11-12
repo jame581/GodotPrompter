@@ -58,7 +58,7 @@
     {
       "name": "ability-system",
       "title": "Ability System",
-      "description": "Use when building character abilities — Resource-based abilities with cost/cooldown/cast, buffs/debuffs, stat modifiers, gameplay tags, and HUD binding",
+      "description": "Use when building or replacing an ability system — abilities with cost/cooldown, buffs/debuffs, stat modifiers, and gameplay tags. Not for extending an existing one",
       "relatedSkills": [
         "resource-pattern",
         "component-system",
@@ -156,6 +156,7 @@
       ],
       "addon": null,
       "references": [
+        "skills/assets-pipeline/references/animation-import.md",
         "skills/assets-pipeline/references/runtime-resource-loading.md"
       ],
       "source": "skills/assets-pipeline/SKILL.md"
@@ -188,7 +189,7 @@
         "limboai",
         "godot-brainstorming"
       ],
-      "addon": "Beehave · version `v2.9.2` · Godot 4.1+ · MIT · source: https://github.com/bitbrain/beehave · written in GDScript (no official C# API — this skill is GDScript-only by design).",
+      "addon": "Beehave · version `v2.9.3` · Godot 4.1+ (README: 2.9.x is the 4.1.x line; CI runs 4.5.1, 4.6.3 and 4.7; 4.1–4.4 untested by CI) · MIT · source: https://github.com/bitbrain/beehave · written in GDScript (no official C# API — this skill is GDScript-only by design).",
       "references": [
         "skills/beehave/references/custom-nodes.md"
       ],
@@ -251,7 +252,7 @@
     {
       "name": "csharp-signals",
       "title": "Signals in C# (Godot 4.x)",
-      "description": "Use when implementing signals in C# — [Signal] delegates, EmitSignal patterns, async signal awaiting, and event-driven architecture. Triggers on declaring, emitting, connecting, or awaiting a signal from a C# script, and on a signal crossing between C# and GDScript in either direction.",
+      "description": "Use when implementing signals in C# — [Signal] delegates, EmitSignal patterns, and async signal awaiting. Triggers on declaring, emitting, connecting, or awaiting a signal from a C# script, and on a signal crossing between C# and GDScript in either direction.",
       "relatedSkills": [
         "csharp-godot",
         "event-bus",
@@ -283,7 +284,7 @@
     {
       "name": "dependency-injection",
       "title": "Dependency Injection in Godot 4.3+",
-      "description": "Use when managing dependencies between systems — autoloads, service locators, @export injection, and scene injection patterns",
+      "description": "Use when choosing how systems get their dependencies — autoloads, service locators, @export injection, and scene injection patterns",
       "relatedSkills": [
         "godot-testing",
         "event-bus",
@@ -302,20 +303,22 @@
     {
       "name": "dialogue-manager",
       "title": "Dialogue Manager",
-      "description": "Use when using the Dialogue Manager addon — .dialogue files with titles, responses, conditions and mutations, runtime balloons, and C# support",
+      "description": "Use when using the Dialogue Manager addon — .dialogue files with cues, responses, conditions and mutations, runtime balloons, actionable nodes, and C# support",
       "relatedSkills": [
         "dialogue-system",
         "localization",
         "popochiu"
       ],
-      "addon": "Dialogue Manager · version `v3.10.4` · Godot 4.6 · MIT · source: https://github.com/nathanhoad/godot_dialogue_manager · GDScript with official C# support.",
-      "references": [],
+      "addon": "Dialogue Manager · version `v4.2.0` · Godot 4.6+ (built for 4.7; Godot 4.4–4.5 → v3.10, 4.3 → v3.3, see §7) · MIT · source: https://github.com/nathanhoad/godot_dialogue_manager · GDScript with official C# support.",
+      "references": [
+        "skills/dialogue-manager/references/migrating-from-3.md"
+      ],
       "source": "skills/dialogue-manager/SKILL.md"
     },
     {
       "name": "dialogue-system",
       "title": "Dialogue Systems in Godot 4.3+",
-      "description": "Use when implementing dialogue — data structures for branching dialogue, conditions, and UI presentation",
+      "description": "Use when building or replacing a dialogue system without an addon — branching data, conditions, and UI presentation. Not for extending an existing one",
       "relatedSkills": [
         "resource-pattern",
         "godot-ui",
@@ -337,7 +340,7 @@
     {
       "name": "event-bus",
       "title": "Event Bus in Godot 4.3+",
-      "description": "Use when implementing decoupled communication between nodes — global EventBus autoload with typed signals",
+      "description": "Use when setting up decoupled node communication — a global EventBus autoload with typed signals. Not for adding signals to an existing bus",
       "relatedSkills": [
         "component-system",
         "csharp-signals",
@@ -368,7 +371,8 @@
         "skills/export-pipeline/references/ci-cd-github-actions.md",
         "skills/export-pipeline/references/distribution-itch-steam.md",
         "skills/export-pipeline/references/steam-release-planning.md",
-        "skills/export-pipeline/references/versioning.md"
+        "skills/export-pipeline/references/versioning.md",
+        "skills/export-pipeline/references/windows-resource-editing.md"
       ],
       "source": "skills/export-pipeline/SKILL.md"
     },
@@ -393,7 +397,7 @@
     {
       "name": "gdscript-advanced",
       "title": "GDScript Advanced",
-      "description": "Use when writing production-grade GDScript — performance idioms, metaprogramming, @tool lifecycle, async pitfalls, signal/Callable trade-offs, profiler-driven idioms, and common pitfalls",
+      "description": "Use when writing production-grade GDScript — performance idioms, metaprogramming, @tool lifecycle, async pitfalls, and signal/Callable trade-offs",
       "relatedSkills": [
         "gdscript-patterns",
         "godot-optimization",
@@ -433,7 +437,7 @@
     {
       "name": "godot-brainstorming",
       "title": "Godot Brainstorming",
-      "description": "Use when designing a new Godot feature or system — guides scene tree planning, node type selection, and architectural decisions",
+      "description": "Use when designing a new Godot feature or system — scene tree, node choice, and architecture decisions. Not for non-Godot work or changes to existing code",
       "relatedSkills": [
         "godot-grill",
         "scene-organization",
@@ -481,7 +485,7 @@
     {
       "name": "godot-grill",
       "title": "Godot Grill",
-      "description": "Use when a new Godot system or feature has open design decisions — interrogates them in batched rounds, scope first, each question with a recommended answer, and records the answers before any design or code. Triggers on \"grill me\", \"ask me first\", \"question me on the design\", \"what do I need to decide before building\". Not for choosing between nodes or APIs, and not for bug fixes.",
+      "description": "Use when a new Godot system or feature has open design decisions — asks them in batched rounds, each with a recommended answer, and records them before any design or code. Triggers on \"grill me\", \"ask me first\", \"question me on the design\", \"what do I need to decide before building\". Not for choosing nodes or APIs, bug fixes, or non-Godot work.",
       "relatedSkills": [
         "godot-brainstorming",
         "scene-organization",
@@ -626,7 +630,7 @@
     {
       "name": "inventory-system",
       "title": "Inventory Systems in Godot 4.3+",
-      "description": "Use when building inventory systems — Resource-based items, slot management, stacking, and UI binding",
+      "description": "Use when building or replacing an inventory system — Resource-based items, slots, stacking, and UI binding. Not for extending an existing one",
       "relatedSkills": [
         "resource-pattern",
         "save-load",
@@ -652,7 +656,7 @@
         "state-machine",
         "godot-brainstorming"
       ],
-      "addon": "LimboAI · version `v1.8.0` · Godot 4.6+ (GDExtension) · MIT · source: https://github.com/limbonaut/limboai · written in C++ (GDExtension; engine-module build also available). GDExtension exposes GDScript; **C# requires the module build** (not GDExtension in v1.8.0), and the v1.8.0 module build targets **Godot 4.7**.",
+      "addon": "LimboAI · version `v1.8.1` · Godot 4.6+ (GDExtension) · MIT · source: https://github.com/limbonaut/limboai · written in C++ (GDExtension; engine-module build also available). GDExtension exposes GDScript; **C# requires the module build** (not GDExtension in v1.8.1), and the v1.8.1 module build targets **Godot 4.7** (4.7.2-stable builds).",
       "references": [
         "skills/limboai/references/hsm.md"
       ],
@@ -791,7 +795,7 @@
         "camera-system",
         "tween-animation"
       ],
-      "addon": "Phantom Camera · version `v0.11.0.2` · Godot 4.4+ · MIT · source: https://github.com/ramokz/phantom-camera · nodes are GDScript, plus an official C# wrapper API (`namespace PhantomCamera`) shipped as source `.cs` files in the addon. **Pre-1.0:** minor versions may break API.",
+      "addon": "Phantom Camera · version `v0.11.0.4` · Godot 4.4+ · MIT · source: https://github.com/ramokz/phantom-camera · nodes are GDScript, plus an official C# wrapper API (`namespace PhantomCamera`) shipped as source `.cs` files in the addon. **Pre-1.0:** minor versions may break API.",
       "references": [
         "skills/phantom-camera/references/follow-modes.md"
       ],
@@ -828,7 +832,7 @@
     {
       "name": "player-controller",
       "title": "Player Controllers in Godot 4.3+",
-      "description": "Use when implementing player movement — CharacterBody2D/3D patterns, input handling, physics, common movement recipes",
+      "description": "Use when building player movement — CharacterBody2D/3D patterns, movement physics, and common movement recipes",
       "relatedSkills": [
         "physics-system",
         "state-machine",
@@ -853,7 +857,7 @@
         "inventory-system",
         "save-load"
       ],
-      "addon": "Popochiu · version `v2.1.1` · Godot 4.6 · MIT · source: https://github.com/carenalgas/popochiu · pure GDScript (no C# API — GDScript-only skill).",
+      "addon": "Popochiu · version `v2.2.1` · Godot 4.7 (use 2.1.x on 4.6) · MIT · source: https://github.com/carenalgas/popochiu · pure GDScript (no C# API — GDScript-only skill).",
       "references": [
         "skills/popochiu/references/dialogs.md",
         "skills/popochiu/references/gui.md",
@@ -939,7 +943,7 @@
     {
       "name": "save-load",
       "title": "Save / Load Systems in Godot 4.3+",
-      "description": "Use when implementing save/load systems — ConfigFile, JSON, Resource serialization, save game architecture",
+      "description": "Use when building or replacing a save/load system — ConfigFile, JSON, Resource serialization, and save game architecture",
       "relatedSkills": [
         "resource-pattern",
         "inventory-system",
@@ -994,7 +998,7 @@
     {
       "name": "state-machine",
       "title": "State Machines in Godot 4.3+",
-      "description": "Use when implementing state machines in Godot — enum-based, node-based, and resource-based FSM patterns with trade-offs",
+      "description": "Use when building a state machine or refactoring logic into one — enum, node, and resource-based FSM patterns with trade-offs. Not for adding states to an existing one",
       "relatedSkills": [
         "player-controller",
         "ai-navigation",
@@ -1049,7 +1053,9 @@
         "skills/using-godot-prompter/references/codex-tools.md",
         "skills/using-godot-prompter/references/copilot-tools.md",
         "skills/using-godot-prompter/references/cursor-tools.md",
-        "skills/using-godot-prompter/references/gemini-tools.md"
+        "skills/using-godot-prompter/references/gemini-tools.md",
+        "skills/using-godot-prompter/references/installation.md",
+        "skills/using-godot-prompter/references/skill-index.md"
       ],
       "source": "skills/using-godot-prompter/SKILL.md"
     },
@@ -1074,7 +1080,7 @@
     {
       "name": "web-services",
       "title": "Web Services in Godot 4.3+",
-      "description": "Use when calling web APIs or backends from Godot — HTTPRequest, REST/JSON clients, auth headers, downloads, TLS, WebSocketPeer clients, retries, and keeping secrets out of the build",
+      "description": "Use when a Godot game calls a web server — HTTPRequest, downloads, REST/JSON APIs, auth headers, WebSocketPeer clients, TLS, retries, and keeping secrets out of the build. Not for game networking/RPCs (multiplayer-basics) or browser export (web-export)",
       "relatedSkills": [
         "multiplayer-basics",
         "save-load",

@@ -134,3 +134,49 @@ public override void _PhysicsProcess(double delta)
     }
 }
 ```
+
+---
+
+## Allocation-Free Queries (Godot 4.8+)
+
+`intersect_ray()` builds a `Dictionary` on every call. The `*_into` variants (`intersect_ray_into`, `intersect_point_into`, `intersect_shape_into`, `cast_motion_into`, `collide_shape_into`, `get_rest_info_into`) fill a reusable result object and return `bool`: `false` means nothing was hit. For rays the object is `PhysicsIntersectRayResult2D/3D` (`position`, `normal`, `collider`, `collider_id`, `collider_rid`, `collider_shape`). Keep one result per query site and reuse it every frame; the shape queries have matching `Physics*Result2D/3D` classes.
+
+```gdscript
+var _ray := PhysicsRayQueryParameters3D.new()
+var _hit := PhysicsIntersectRayResult3D.new()  # reused every call
+
+func _physics_process(_delta: float) -> void:
+    var space: PhysicsDirectSpaceState3D = get_world_3d().direct_space_state
+    _ray.from = global_position
+    _ray.to = global_position + Vector3.DOWN * 2.0
+    _ray.exclude = [get_rid()]
+    if space.intersect_ray_into(_ray, _hit):
+        print(_hit.position, _hit.normal, _hit.collider)
+```
+
+```csharp
+private readonly PhysicsRayQueryParameters3D _ray = new();
+private readonly PhysicsIntersectRayResult3D _hit = new(); // reused every call
+
+public override void _PhysicsProcess(double delta)
+{
+    var space = GetWorld3D().DirectSpaceState;
+    _ray.From = GlobalPosition;
+    _ray.To = GlobalPosition + Vector3.Down * 2.0f;
+    _ray.Exclude = new Godot.Collections.Array<Rid> { GetRid() };
+    if (space.IntersectRayInto(_ray, _hit))
+        GD.Print(_hit.Position, _hit.Normal, _hit.Collider);
+}
+```
+
+**Godot 4.8+:** `RigidBody2D/3D.get_velocity_at_position(global_point)` returns a body's velocity at a world point (`get_velocity_at_local_position()` takes a point relative to the body), which suits impact and grind effects.
+
+---
+
+## Query Reference
+
+- **Space access:** get the space state via `get_world_2d().direct_space_state` (or `get_world_3d()`) and call `intersect_ray(query)` with `PhysicsRayQueryParameters2D/3D.create(from, to)`. Set `query.exclude = [get_rid()]` to skip self and `query.collision_mask` to filter layers.
+- **Query inside `_physics_process()`:** the space is locked while the physics step runs, and with physics on a separate thread it is only accessible there.
+- **Ray result:** the `intersect_ray` dictionary contains `position`, `normal`, `collider`, `collider_id`, `rid`, `shape`.
+- **Other queries:** `PhysicsDirectSpaceState` also supports `intersect_point` (overlapping shapes at a point), `intersect_shape` (area query), `cast_motion` (shape sweep), `collide_shape` (contact points), `get_rest_info` (resting collision info).
+- **3D mouse picking:** `Camera3D.project_ray_origin(screen_pos)` + `project_ray_normal(screen_pos)` builds the ray.

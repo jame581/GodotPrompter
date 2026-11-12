@@ -164,7 +164,7 @@ Lower scales blur textures; on Forward+ and Mobile, Godot lowers the mipmap bias
 
 ## 5. SubViewports and Render Targets
 
-Each active `SubViewport` is another full render. Set `render_target_update_mode`: `UPDATE_WHEN_VISIBLE` (live views), `UPDATE_ONCE` (snapshots), `UPDATE_DISABLED` (pause), `UPDATE_ALWAYS`.
+Each active `SubViewport` is another full render. Set `render_target_update_mode`: `UPDATE_WHEN_VISIBLE` (default; live views), `UPDATE_ONCE` (snapshots), `UPDATE_DISABLED` (pause), `UPDATE_ALWAYS`.
 
 > See [references/subviewports.md](references/subviewports.md) for UI display, per-viewport settings, and icon capture.
 

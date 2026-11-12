@@ -1,6 +1,6 @@
 ---
 name: state-machine
-description: Use when implementing state machines in Godot — enum-based, node-based, and resource-based FSM patterns with trade-offs
+description: Use when building a state machine or refactoring logic into one — enum, node, and resource-based FSM patterns with trade-offs. Not for adding states to an existing one
 ---
 
 # State Machines in Godot 4.3+

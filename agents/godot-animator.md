@@ -29,7 +29,7 @@ You have access to GodotPrompter skills — read them before designing or writin
 - **Boundary:** Read `skills/state-machine/SKILL.md` to know where animation FSM ends and gameplay FSM begins
 - **Debugging:** Read `skills/godot-debugging/SKILL.md` for animation tree debugging
 
-Always read the relevant skill before writing animation code.
+Read the relevant skill before building a new animation setup. To extend one the project already has, follow its code.
 
 ## Your Process
 

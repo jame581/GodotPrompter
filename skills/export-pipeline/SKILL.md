@@ -100,6 +100,8 @@ ssh_remote_deploy/cleanup_script="#!/usr/bin/env bash\nkill $(pgrep -x -f \"{tem
 | **Android** | Requires a keystore for release signing. Set `keystore/release` to the `.keystore` path and supply `keystore/release_user` + `keystore/release_password` via env vars. Declare permissions in the preset under `permissions/*`. Set `package/unique_name` to a reverse-DNS string (e.g., `com.studio.mygame`). |
 | **iOS**     | Requires a valid Apple provisioning profile (`.mobileprovision`). Set `application/bundle_identifier`, `application/code_sign_identity_release`, and `application/provisioning_profile_uuid_release`. Distribution builds require an App Store distribution certificate. |
 
+> **Godot 4.8+:** Windows, Linux and macOS presets gain `debug/export_debug_symbols`, which ships a `.debugsymbols` file (`.dSYM` on macOS) beside the executable; it needs a same-named symbols file next to the export template. Android gains `gradle_build/minification` (R8, release builds).
+
 ---
 
 ## 3. Export from CLI
@@ -220,27 +222,9 @@ godot --headless --export-release "Windows Desktop" build/windows/MyGame.exe
 
 ## 8. Windows Export — Native Resource Editing (Godot 4.5+)
 
-Before Godot 4.5, modifying `.exe` metadata (version info, icon, copyright, company name) on Windows required the external `rcedit` tool. Godot 4.5 handles all of this natively at export time — no `rcedit` download or configuration needed.
+Godot 4.5+ writes `.exe` metadata (version, icon, copyright, company) natively from the preset's `application/*` fields — no external `rcedit` download, so drop any CI `rcedit` step. Earlier versions need `rcedit`.
 
-### What is Edited Natively
-
-| Export Preset Field | Effect on .exe |
-|---------------------|---------------|
-| `application/file_version` | File version shown in Properties → Details |
-| `application/product_version` | Product version |
-| `application/company_name` | Company name |
-| `application/product_name` | Product name |
-| `application/file_description` | Description |
-| `application/copyright` | Legal copyright |
-| `application/icon` | Icon image (ICO, PNG, WebP or SVG) converted and embedded as the executable icon |
-
-### Setup
-
-1. Open **Project → Export** → Windows Desktop preset.
-2. Fill in the `application/*` fields under **Application** in the preset options.
-3. Export normally — Godot writes the metadata into the `.exe` directly.
-
-> **Removing rcedit from CI:** If your project previously downloaded `rcedit` in CI and called it as a post-export step, you can remove that step. The fields in the export preset replace it entirely for Godot 4.5+.
+> See [references/windows-resource-editing.md](references/windows-resource-editing.md) for the field table, icon formats and setup.
 
 ---
 

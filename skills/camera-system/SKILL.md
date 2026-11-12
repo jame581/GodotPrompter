@@ -156,7 +156,7 @@ var _noise_time: float = 0.0
 @export var noise_speed: float = 60.0
 
 func _ready() -> void:
-    ignore_rotation = false  # Camera2D ignores its own rotation by default — the roll needs it
+    ignore_rotation = false  # default is true (rotation ignored); the roll needs false, which also makes the view follow a rotating parent
     _noise = FastNoiseLite.new()
     _noise.noise_type = FastNoiseLite.TYPE_SIMPLEX
     _noise.seed = randi()
@@ -216,7 +216,7 @@ public partial class ScreenShakeCamera : Camera2D
 
     public override void _Ready()
     {
-        IgnoreRotation = false; // Camera2D ignores its own rotation by default — the roll needs it
+        IgnoreRotation = false; // default is true (rotation ignored); the roll needs false, which also makes the view follow a rotating parent
         _noise = new FastNoiseLite();
         _noise.NoiseType = FastNoiseLite.NoiseTypeEnum.Simplex;
         _noise.Seed = (int)GD.Randi();

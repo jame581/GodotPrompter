@@ -16,6 +16,7 @@ Subemitters are child particle systems that spawn in response to parent particle
 | `Constant`     | At regular intervals per particle    | `frequency` (per second)|
 | `At End`       | When a parent particle dies          | `amount_at_end`         |
 | `At Collision` | When a particle hits a collision node| `amount_at_collision`   |
+| `At Start` (Godot 4.4+) | When a parent particle spawns | `amount_at_start`       |
 
 ### Setup
 
@@ -64,6 +65,7 @@ public partial class Explosion : GpuParticles3D
 - `explosiveness` has no effect on subemitters
 - A system cannot be its own subemitter
 - Subemitters can chain (sub-sub-emitters) but watch performance
+- The Compatibility renderer supports neither sub-emitters nor manual emission (`emit_particle()`); it only logs a warning (`particles_storage.cpp` at `4.3-stable` and `4.7.2-stable`). Use Forward+ or Mobile
 
 ---
 

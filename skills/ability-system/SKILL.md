@@ -1,6 +1,6 @@
 ---
 name: ability-system
-description: Use when building character abilities — Resource-based abilities with cost/cooldown/cast, buffs/debuffs, stat modifiers, gameplay tags, and HUD binding
+description: Use when building or replacing an ability system — abilities with cost/cooldown, buffs/debuffs, stat modifiers, and gameplay tags. Not for extending an existing one
 ---
 
 # Ability System

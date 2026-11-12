@@ -239,3 +239,14 @@ public override void _Ready()
     _mesh.SetSurfaceOverrideMaterial(0, mat);
 }
 ```
+
+---
+
+## Contact Shadows (Godot 4.8+)
+
+Screen-space contact shadows (Forward+ only, not Mobile or Compatibility) catch small-scale shadows that shadow maps miss: foliage, crevices, the points where objects meet surfaces. They also come from objects whose `cast_shadow` is off.
+
+- Enable `rendering/lights_and_shadows/contact_shadow/enabled` (default `false`).
+- Only shadow-enabled `DirectionalLight3D`s get them, and the light needs `shadow_contact_shadows_allow` (default `true`). `shadow_contact_shadows_blur` (default `1.0`) softens the edges: `0.0` is sharp, higher values add noise.
+- Only geometry visible on screen casts them. Objects off screen, occluded, or set to shadows-only do not.
+- Related: `LightmapGI.specular_intensity` (default `0.0`, effective only with `directional` on) adds an approximated specular lobe to baked lightmaps, which helps `BAKE_STATIC` lights match real-time lighting.

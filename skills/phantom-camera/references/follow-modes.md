@@ -1,6 +1,6 @@
 # Follow modes
 
-Reference for `skills/phantom-camera/SKILL.md` — the `FollowMode` enum, per-mode properties, GDScript and C# setup, group auto-reframe, and shared follow options.
+Reference for `skills/phantom-camera/SKILL.md` — the `FollowMode` enum, per-mode properties, GDScript and C# setup, group auto-reframe, and follow options (axis lock on both nodes; rotate-with-target and look-ahead are 2D only).
 
 > ← Back to [SKILL.md](../SKILL.md)
 

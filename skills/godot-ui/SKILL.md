@@ -63,6 +63,8 @@ Place UI nodes inside a `CanvasLayer` so they render on top of the 3D/2D world, 
 
 > ⚠️ **Changed in Godot 4.7:** `TabContainer.all_tabs_in_front` is deprecated — it does nothing now, since tabs are always in front. Remove code that sets it. See [GH-118623](https://github.com/godotengine/godot/pull/118623).
 
+> **Godot 4.8+:** `TabBar` / `TabContainer.tab_sizing` (`TAB_SIZING_*`), `BoxContainer.reverse_sort`, `BaseButton.press()` (no visual-state change, no focus grab) and `SpinBox.format` (deprecates `prefix` / `suffix`).
+
 ---
 
 ## 3. Anchors & Margins
@@ -104,11 +106,15 @@ A `Theme` resource centralizes fonts, colors, and `StyleBox`es. Apply at the roo
 
 > **Godot 4.7+:** `GradientTexture2D`'s `Fill` enum gains `FILL_CONIC` — colors interpolated in a cone (angular) pattern; radial progress/cooldown indicators without a shader (C#: `FillEnum.Conic`).
 
+> **Godot 4.8+:** Themes carry sounds: `Theme.set_sound()` items such as `BaseButton`'s `pressed_sound` / `hover_sound` replace per-button `AudioStreamPlayer` wiring and play on the `audio/buses/gui_theme_bus` bus. Recipe: [references/theme-system.md](references/theme-system.md#theme-sounds-godot-48).
+
 ---
 
 ## 5. Focus & Navigation
 
 Focus modes (`FOCUS_NONE`, `FOCUS_CLICK`, `FOCUS_ALL`) gate keyboard/gamepad navigation. Wire chains with `focus_neighbor_top` / `_bottom` / `_left` / `_right`, or rely on automatic spatial detection. Call `grab_focus()` on the first interactive element when a menu opens.
+
+> **Changed in Godot 4.8:** `gui/common/auto_focus_strategy` picks how automatic neighbors are inferred: `Legacy` (class default, the 4.7 behavior) or `Balloon` (closest and most aligned Control in the input direction). New 4.8 projects get `Balloon`, so automatic navigation can differ from an upgraded project; set neighbors explicitly where it matters.
 
 > See [references/focus-and-navigation.md](references/focus-and-navigation.md) for focus mode details, `focus_neighbor` chain examples, gamepad/keyboard input handling, and grab_focus patterns.
 
@@ -119,6 +125,8 @@ Focus modes (`FOCUS_NONE`, `FOCUS_CLICK`, `FOCUS_ALL`) gate keyboard/gamepad nav
 Three canonical scenes: a **main menu** (centered VBoxContainer with title + button list), a **settings screen with tabs** (`TabContainer` + child panels per category), and a **pause menu overlay** (full-rect `ColorRect` background + centered options panel, paused via `get_tree().paused = true`).
 
 > See [references/ui-patterns.md](references/ui-patterns.md) for the full scene-tree fragments and GDScript wiring for each pattern.
+
+> **Godot 4.8+:** `Label` / `RichTextLabel.resize_font_to_fit = true` picks the largest size between `minimum_font_size` and `maximum_font_size` that does not truncate (`get_rendered_font_size()` reads it), so no hand-rolled shrink loops.
 
 > **Godot 4.7+:** `offset_transform_*` — visual-only UI-juice transform (shake/pulse) that never re-triggers container layout; `_get_cursor_shape(at_position)` — per-position cursor shapes; `PopupMenu` search bar (`search_bar_enabled`, fuzzy by default) plus `set_item_index()` for reordering; `TextureRect` `STRETCH_TILE` now tiles `AtlasTexture`s (only non-zero `margin` unsupported). Code: [references/ui-patterns.md](references/ui-patterns.md#godot-47-additions).
 

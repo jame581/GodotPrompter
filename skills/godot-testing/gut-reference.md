@@ -11,7 +11,7 @@ GUT (Godot Unit Testing) is a GDScript-first testing framework for Godot 4.x. Al
 1. Open the Godot editor, go to **AssetLib**
 2. Search for "GUT"
 3. Download and install — this creates `addons/gut/`
-4. Enable in **Project > Project Settings > Plugins**
+4. Enable in **Project > Project Settings > Plugins** (**Project Settings > Addons > Plugins** on 4.8)
 
 **Option B — git submodule**
 
@@ -19,7 +19,7 @@ GUT (Godot Unit Testing) is a GDScript-first testing framework for Godot 4.x. Al
 git submodule add https://github.com/bitwes/Gut.git addons/gut
 ```
 
-Then enable in **Project > Project Settings > Plugins**.
+Then enable in **Project > Project Settings > Plugins** (**Project Settings > Addons > Plugins** on 4.8).
 
 ---
 

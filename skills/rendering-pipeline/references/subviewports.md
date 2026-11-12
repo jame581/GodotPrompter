@@ -13,7 +13,7 @@ A `SubViewport` renders its own scene (or a second camera on the same world) int
 | `UPDATE_DISABLED` | Pause an off-screen view entirely |
 | `UPDATE_ALWAYS` | Feeds a material even when its container is hidden |
 
-Show it in UI with a `SubViewportContainer` (`stretch = true` sizes the viewport to the container; `stretch_shrink = 3` renders at a third of the size for a chunky pixel look), or use `sub_viewport.get_texture()` as a `ViewportTexture` on any material. SubViewports have their own `msaa_3d`, `scaling_3d_*`, and `use_taa` — they do **not** inherit the root viewport's settings.
+Show it in UI with a `SubViewportContainer` (`stretch = true` sizes the viewport to the container; `stretch_shrink = 3` renders at a third of the size for a chunky pixel look), or use `sub_viewport.get_texture()` as a `ViewportTexture` on any material. SubViewports have their own `msaa_3d`, `scaling_3d_*`, and `use_taa` — they do **not** inherit the root viewport's settings (see §4 of the skill for the `scaling_3d_*` modes and scales; they apply per viewport).
 
 ```gdscript
 # Render a 3D model to a texture once, e.g. for an inventory icon.

@@ -189,6 +189,8 @@ For pixel-art projects use `stretch/mode = viewport` and `texture_filter = neare
 
 > **Godot 4.7+:** Projects **newly created** in Godot 4.7 already default `display/window/stretch/mode` to `canvas_items` and `display/window/stretch/aspect` to `expand` (previously `disabled` / `keep`), so only `aspect` needs changing if you want `keep`'s letterboxing. Projects created on older versions keep their existing values — set both explicitly when upgrading.
 
+> **Changed in Godot 4.8:** Projects **newly created** in Godot 4.8 keep those two entries and add three more defaults: `gui/common/auto_focus_strategy = Balloon` (class default `Legacy`), `input_devices/joypads/ignore_joypad_on_unfocused_application = true` (class default `false`), and `rendering/lights_and_shadows/multi_bounce_occlusion/enabled = true`. Upgraded projects keep their existing behavior, so set them explicitly if you want the new-project values.
+
 ### Input Map
 
 Define actions in `Project > Project Settings > Input Map` rather than hard-coding key constants. This lets players rebind controls at runtime.
@@ -385,14 +387,13 @@ EventBus.player_died.emit()
 
 ### .csproj
 
-When you enable C# support Godot generates a `.csproj`. Keep it minimal and set the target framework to `net8.0`:
+When you enable C# support Godot generates a `.csproj`. Keep it minimal and set the target framework as below (Godot 4.5 to 4.7: `net8.0`, `net9.0` for Android; 4.4 has no Android override; 4.3 generated `net6.0`, `net7.0` for Android and `net8.0` for iOS). Godot 4.8 needs `net10.0` everywhere, see the callout below:
 
 ```xml
 <Project Sdk="Godot.NET.Sdk/4.3.0">
   <PropertyGroup>
     <TargetFramework>net8.0</TargetFramework>
-    <TargetFramework Condition=" '$(GodotTargetPlatform)' == 'android' ">net8.0</TargetFramework>
-    <TargetFramework Condition=" '$(GodotTargetPlatform)' == 'ios' ">net8.0</TargetFramework>
+    <TargetFramework Condition=" '$(GodotTargetPlatform)' == 'android' ">net9.0</TargetFramework>
     <Nullable>enable</Nullable>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
     <RootNamespace>MyGame</RootNamespace>
@@ -401,6 +402,8 @@ When you enable C# support Godot generates a `.csproj`. Keep it minimal and set 
 ```
 
 Replace `MyGame` with your project name. Namespaces are free-form; what Godot needs is a class whose name matches its file name (`Player.cs` → `class Player`).
+
+> **Changed in Godot 4.8:** The minimum target framework is **.NET 10**. A new 4.8 C# project gets `net10.0` for every platform, Android included (4.5 to 4.7 wrote `net9.0` for Android). On 4.8 replace each `net8.0` above with `net10.0`; the 4.8 editor also raises an older `TargetFramework` when it opens the project.
 
 ### partial class Requirement
 
@@ -455,8 +458,8 @@ Use this checklist after scaffolding a new project to verify everything is in pl
 - [ ] Autoloads registered: `GameManager`, `EventBus`, `AudioManager`, `SaveManager`
 - [ ] Autoload scripts created under `autoloads/` (or `scripts/autoloads/`)
 - [ ] Autoloads are process mode `Always` if they must run while paused
-- [ ] For C# projects: `.csproj` targets `net8.0`, `RootNamespace` set, `Nullable` enabled
+- [ ] For C# projects: `.csproj` targets `net8.0` (Godot 4.4 to 4.7; Android `net9.0` from 4.5) or `net10.0` (Godot 4.8), `RootNamespace` set, `Nullable` enabled
 - [ ] For C# projects: all node scripts use `partial class`
 - [ ] Initial commit on `main` branch before adding game content
-- [ ] The project's agent instructions file (`CLAUDE.md`, or `AGENTS.md` / `GEMINI.md` if that is what the repo maintains) contains a `## GodotPrompter` section with the skill invocation rule (see `godot-prompter:godot-brainstorming` for content)
+- [ ] The project's agent instructions file (`CLAUDE.md`, or `AGENTS.md` / `GEMINI.md` if that is what the repo maintains) contains a `## GodotPrompter` section with the skill invocation rule — a skill for a new system, the project's code for an existing one (see `godot-prompter:godot-brainstorming` for content)
 - [ ] CI pipeline (optional but recommended): runs `godot --headless --check-only` on GDScript files

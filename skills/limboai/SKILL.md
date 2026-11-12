@@ -7,7 +7,9 @@ description: Use when using the LimboAI addon — behavior trees and hierarchica
 
 > **Related skills:** **ai-navigation** for movement the tasks drive, **state-machine** for core-engine FSM (when you don't need an addon), **godot-brainstorming** for choosing an AI approach.
 
-> **Addon:** LimboAI · version `v1.8.0` · Godot 4.6+ (GDExtension) · MIT · source: https://github.com/limbonaut/limboai · written in C++ (GDExtension; engine-module build also available). GDExtension exposes GDScript; **C# requires the module build** (not GDExtension in v1.8.0), and the v1.8.0 module build targets **Godot 4.7**.
+> **Addon:** LimboAI · version `v1.8.1` · Godot 4.6+ (GDExtension) · MIT · source: https://github.com/limbonaut/limboai · written in C++ (GDExtension; engine-module build also available). GDExtension exposes GDScript; **C# requires the module build** (not GDExtension in v1.8.1), and the v1.8.1 module build targets **Godot 4.7** (4.7.2-stable builds).
+
+> **Godot 4.8:** not yet confirmed by the addon. Issue [#477](https://github.com/limbonaut/limboai/issues/477) (open) reports that v1.8 does not work with 4.8's new dock system and leaves the editor unusable; the open draft PR [#474](https://github.com/limbonaut/limboai/pull/474) "Support Godot 4.8" targets it. Keep LimboAI projects on 4.7 until a release states 4.8 support (checked 2026-11-12).
 
 ---
 
@@ -19,7 +21,7 @@ description: Use when using the LimboAI addon — behavior trees and hierarchica
 | **Beehave** (GDScript addon) | Lightweight BT, GDScript-only projects |
 | **LimboAI** | BT **and** HSM together, visual editor, C++ performance, C# support (module build) |
 
-Choose LimboAI when you need a behavior tree with a polished visual debugger, want to combine it with a hierarchical state machine (`BTState` bridges them), or need C++ task execution speed. Note: LimboAI v1.8.0 requires **Godot 4.6+**; on 4.3 the matching line is 1.2.0–1.3.x, whose API this skill does not cover. For a simpler GDScript-only behavior tree, Beehave is a lighter alternative. For plain state machines without a BT, use the built-in `state-machine` skill instead.
+Choose LimboAI when you need a behavior tree with a polished visual debugger, want to combine it with a hierarchical state machine (`BTState` bridges them), or need C++ task execution speed. Note: LimboAI v1.8.x requires **Godot 4.6+**. On 4.4–4.5 the matching lines are 1.4.x–1.6.x, and on 4.3 it is 1.2.0–1.3.x; this skill covers neither. For a simpler GDScript-only behavior tree, Beehave is a lighter alternative. For plain state machines without a BT, use the built-in `state-machine` skill instead.
 
 ---
 
@@ -47,11 +49,11 @@ macos.release          = "res://addons/limboai/bin/liblimboai.macos.template_rel
 # ... (additional platform entries for linux arm64/rv64, android, iOS, web)
 ```
 
-**GDExtension limitations:** the LimboAI task palette shows no documentation tooltips (module-only in v1.8.0). The `BBParam` property editor was ported to GDExtension in 2025, although the docs still list it as missing. C# needs the module build (below).
+**GDExtension limitations:** the LimboAI task palette shows no documentation tooltips (module-only in v1.8.1). The `BBParam` property editor was ported to GDExtension in 2025, although the docs still list it as missing. C# needs the module build (below).
 
 ### Module version (C# or full editor integration)
 
-Download pre-compiled editor + export templates from [GitHub Releases](https://github.com/limbonaut/limboai/releases). Requires the custom engine for export. v1.8.0 module builds are based on **Godot 4.7** (GDExtension supports 4.6+). The module build ships a NuGet package for C#:
+Download pre-compiled editor + export templates from [GitHub Releases](https://github.com/limbonaut/limboai/releases). Requires the custom engine for export. v1.8.1 module builds are based on **Godot 4.7** (4.7.2-stable) (GDExtension supports 4.6+). The module build ships a NuGet package for C#:
 
 ```ini
 # Add local NuGet source to your project:
@@ -74,12 +76,14 @@ extends CharacterBody2D
 
 func _ready() -> void:
     # BTPlayer starts executing automatically (active = true by default).
-    # updated(status) fires after every tree update, not only when it finishes.
+    # updated(status) fires after every update, not only when the tree finishes.
     bt_player.updated.connect(_on_bt_updated)
 
 func _on_bt_updated(status: int) -> void:
     if status == BT.SUCCESS:
-        # A finished tree starts over on the next update by itself; stop it instead.
+        # A tree that returned SUCCESS/FAILURE re-enters from the root on the next
+        # update, so it loops on its own; stopping it here makes it run once.
+        # (restart() is for aborting a tree that is still running.)
         bt_player.active = false
 ```
 
@@ -101,7 +105,7 @@ public partial class EnemyAI : CharacterBody2D
     private void OnBtUpdated(long status) // int signal args are long in C#
     {
         if (status == (long)BT.Status.Success)
-            _btPlayer.Active = false; // a finished tree starts over on its own
+            _btPlayer.Active = false; // without this the finished tree loops on its own; Restart() aborts a running one
     }
 }
 ```

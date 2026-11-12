@@ -1,6 +1,8 @@
-> ← Back to [SKILL.md](../SKILL.md)
-
 # Runtime Resource Loading
+
+Reference for `skills/assets-pipeline/SKILL.md` — `preload()` vs `load()` for scenes, and threaded loading with `ResourceLoader.load_threaded_request()` for a loading screen. GDScript + C#.
+
+> ← Back to [SKILL.md](../SKILL.md)
 
 ## Runtime Scene Loading
 

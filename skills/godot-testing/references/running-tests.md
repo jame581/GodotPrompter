@@ -44,7 +44,7 @@ godot --headless --path . -s -d res://addons/gdUnit4/bin/GdUnitCmdTool.gd -a res
 godot --headless --path . -s -d res://addons/gdUnit4/bin/GdUnitCmdTool.gd -a res://tests -rd ./reports --ignoreHeadlessMode
 ```
 
-Exit codes: `0` all passed, `100` failures or errors, `101` passed with warnings, `103` headless mode refused.
+Exit codes: `0` all passed, `100` failures or errors, `101` passed with warnings, `103` headless mode refused, `104` the Godot version is not supported by the installed gdUnit4 (upgrade or downgrade the addon to match the engine).
 
 ### GitHub Actions CI
 

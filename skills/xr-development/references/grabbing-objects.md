@@ -9,7 +9,7 @@ Reference for `skills/xr-development/SKILL.md` — physics-based grabbing patter
 
 ### Physics-Based Grabbing
 
-Freeze the body and reparent it to the controller while held; on release, restore the parent, unfreeze it, and hand it the controller's velocity. (A joint from the controller does not work: `XRController3D` is not a `PhysicsBody3D`, so the joint reports "Node A must be a PhysicsBody3D" and is never created.)
+Freeze the body and reparent it to the controller while held; on release, restore the parent, unfreeze it, and hand it the controller's velocity. (`FREEZE_MODE_STATIC`, the default, would let the carried body pass through other bodies, so `KINEMATIC` is set. A joint from the controller does not work: `XRController3D` is not a `PhysicsBody3D`, so the joint reports "Node A must be a PhysicsBody3D" and is never created.)
 
 ```gdscript
 extends XRController3D
@@ -36,6 +36,7 @@ func _try_grab() -> void:
         if body is RigidBody3D:
             _held_object = body
             _held_parent = body.get_parent()
+            _held_object.freeze_mode = RigidBody3D.FREEZE_MODE_KINEMATIC  # the carried body still pushes other bodies
             _held_object.freeze = true      # stop the simulation while held
             _held_object.reparent(self)     # keeps its global transform
             break
@@ -45,13 +46,17 @@ func _release() -> void:
     _held_object.freeze = false
     var pose := get_pose()
     if pose:
-        # Apply controller velocity to the thrown object
-        _held_object.linear_velocity = pose.linear_velocity
-        _held_object.angular_velocity = pose.angular_velocity
+        # Pose velocities are in tracking space (relative to the XROrigin3D), so rotate them
+        # by the origin's basis; without this a throw goes the wrong way after a snap turn.
+        var to_world: Basis = get_parent_node_3d().global_basis
+        _held_object.linear_velocity = to_world * pose.linear_velocity
+        _held_object.angular_velocity = to_world * pose.angular_velocity
     _held_object = null
 ```
 
 ```csharp
+using Godot;
+
 public partial class XRGrabController : XRController3D
 {
     private RigidBody3D _heldObject = null;
@@ -85,6 +90,7 @@ public partial class XRGrabController : XRController3D
             {
                 _heldObject = rigidBody;
                 _heldParent = rigidBody.GetParent();
+                _heldObject.FreezeMode = RigidBody3D.FreezeModeEnum.Kinematic; // the carried body still pushes other bodies
                 _heldObject.Freeze = true;   // stop the simulation while held
                 _heldObject.Reparent(this);  // keeps its global transform
                 break;
@@ -99,9 +105,11 @@ public partial class XRGrabController : XRController3D
         var pose = GetPose();
         if (pose != null)
         {
-            // Apply controller velocity to the thrown object
-            _heldObject.LinearVelocity = pose.LinearVelocity;
-            _heldObject.AngularVelocity = pose.AngularVelocity;
+            // Pose velocities are in tracking space (relative to the XROrigin3D), so rotate them
+            // by the origin's basis; without this a throw goes the wrong way after a snap turn.
+            Basis toWorld = GetParentNode3D().GlobalBasis;
+            _heldObject.LinearVelocity = toWorld * pose.LinearVelocity;
+            _heldObject.AngularVelocity = toWorld * pose.AngularVelocity;
         }
         _heldObject = null;
     }

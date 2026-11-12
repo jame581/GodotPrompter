@@ -109,3 +109,40 @@ GetNode<Button>("Button").RemoveThemeStyleboxOverride("normal");
 
 ---
 
+---
+
+## Theme Sounds (Godot 4.8+)
+
+A `Theme` can store `AudioStream` items next to colors and styleboxes (`Theme.DATA_TYPE_SOUND`). `BaseButton` declares `pressed_sound`, `hover_sound` (mouse hover), `focus_sound` (keyboard or gamepad focus only) and `pressed_disabled_sound`; `Slider`, `LineEdit`, `TabBar`, `ItemList`, `PopupMenu` and `Tree` declare their own. Sounds play non-positionally on the bus named by `audio/buses/gui_theme_bus` (default `Master`; a missing bus falls back to `Master`), so a dedicated `UI` bus gives a separate volume slider.
+
+```gdscript
+var ui_theme := Theme.new()
+ui_theme.set_sound(&"pressed_sound", &"Button", preload("res://audio/ui_click.ogg"))
+ui_theme.set_sound(&"hover_sound", &"Button", preload("res://audio/ui_hover.ogg"))
+$Menu.theme = ui_theme  # every Button below $Menu gets both sounds
+
+# One-off override on a single control
+$Menu/QuitButton.add_theme_sound_override(&"pressed_sound", preload("res://audio/ui_back.ogg"))
+
+# A custom Control plays a theme sound itself
+func _on_my_widget_activated() -> void:
+    play_theme_sound(get_theme_sound(&"pressed_sound", &"Button"))
+```
+
+```csharp
+var uiTheme = new Theme();
+uiTheme.SetSound("pressed_sound", "Button", GD.Load<AudioStream>("res://audio/ui_click.ogg"));
+uiTheme.SetSound("hover_sound", "Button", GD.Load<AudioStream>("res://audio/ui_hover.ogg"));
+GetNode<Control>("Menu").Theme = uiTheme;
+
+// One-off override on a single control
+GetNode<Button>("Menu/QuitButton").AddThemeSoundOverride("pressed_sound", GD.Load<AudioStream>("res://audio/ui_back.ogg"));
+
+// A custom Control plays a theme sound itself
+private void OnMyWidgetActivated()
+{
+    PlayThemeSound(GetThemeSound("pressed_sound", "Button"));
+}
+```
+
+`play_theme_sound()` is for UI sounds only; it offers no volume or pitch control, so use `AudioStreamPlayer` for game audio. `ThemeDB.fallback_sound` supplies a sound to every control that has no theme value.

@@ -119,6 +119,8 @@ public static class ItemDatabaseLoader
 }
 ```
 
+**Godot 4.4+:** `ResourceLoader.list_directory(path)` (C#: `ResourceLoader.ListDirectory(path)`) returns the original file names with the `.remap`, `.import` and `.uid` suffixes already stripped and sub-directories ending in `/`, so the manual `.remap` handling above is only needed on 4.3.
+
 > Use `Godot.Collections.Array<T>` (not `System.Collections.Generic.List<T>`) for `[Export]` — only the Godot collection is editor-serializable.
 
 ---

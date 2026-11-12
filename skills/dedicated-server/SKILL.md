@@ -248,27 +248,6 @@ public partial class World : Node
 
 ---
 
-## 7. Checklist
-
-- [ ] Export preset is exported as a dedicated server (`dedicated_server` feature is set automatically)
-- [ ] Client-only assets (shaders, audio, high-res textures) are excluded from the server PCK
-- [ ] Boot script checks `OS.has_feature("dedicated_server")` or `DisplayServer.get_name() == "headless"` to branch server vs client startup
-- [ ] `RenderingServer.set_render_loop_enabled(false)` called on the server to prevent any render work
-- [ ] Server-only nodes use `PROCESS_MODE_DISABLED` on clients; client-only nodes use `PROCESS_MODE_DISABLED` on the server
-- [ ] `Engine.is_editor_hint()` guard at the top of `_ready()` in every script that has side effects
-- [ ] `ServerConfig` parses `--port`, `--max-players`, `--tick-rate` from CLI args before `_ready()` of other autoloads
-- [ ] Config file loading falls back gracefully when `server.cfg` does not exist
-- [ ] Environment variables (`SERVER_PORT`, `SERVER_MAX_PLAYERS`, `SERVER_TICK_RATE`) are applied after config file, before CLI args
-- [ ] `LobbyManager.player_list` size is checked against `max_players` before accepting a new peer
-- [ ] Peer is kicked via RPC before closing if the lobby is full
-- [ ] Ready states are reset when `MatchState` returns to `LOBBY` so players must re-confirm each round
-- [ ] `MatchManager` only runs `_physics_process` on the server (`SetPhysicsProcess(false)` on clients)
-- [ ] Countdown and results timers are driven by `_physics_process` delta, not `Timer` nodes (avoids scene dependency)
-- [ ] Dockerfile copies the binary and the `.pck` file (plus the `data_<project>_<platform>_<arch>` folder for C#) to the image
-- [ ] UDP port is opened in the VPS firewall before the first test run
-- [ ] systemd service has `Restart=on-failure` so the server recovers from crashes automatically
-- [ ] Logs are routed to the systemd journal and inspectable with `journalctl -u <service> -f`
-
 ## 3. Lobby System
 
 A per-player state dictionary keyed by `peer_id` is the canonical pattern. Server holds the authoritative dict; clients receive updates via RPC. Implement a `--max-players` CLI cap and a ready-toggle RPC so all peers can confirm before starting.
@@ -306,8 +285,24 @@ A Linux VPS with a `Dockerfile` and `systemd` service file is the standard produ
 - [ ] Headless export preset created and `dedicated_server` feature tag added
 - [ ] `RenderingServer.set_render_loop_enabled(false)` (and audio bus muted) when `OS.has_feature("dedicated_server")` is true
 - [ ] Server-side autoloads check `multiplayer.is_server()` before initializing systems
-- [ ] CLI args parsed at startup for port, max-players, tick-rate, log-level
+- [ ] CLI args parsed at startup for port, max-players, tick-rate, log-level; `ServerConfig` parses them from CLI args before `_ready()` of other autoloads
 - [ ] Lobby state lives only on the server; clients receive updates via RPC
 - [ ] Match-flow state machine has explicit transitions and a single source of truth (server)
 - [ ] Production deployment uses systemd or Docker for auto-restart and log rotation
 - [ ] Headless build is exported with **Export with Debug** off in production presets
+- [ ] Export preset is exported as a dedicated server (`dedicated_server` feature is set automatically)
+- [ ] Client-only assets (shaders, audio, high-res textures) are excluded from the server PCK
+- [ ] Boot script checks `OS.has_feature("dedicated_server")` or `DisplayServer.get_name() == "headless"` to branch server vs client startup
+- [ ] Server-only nodes use `PROCESS_MODE_DISABLED` on clients; client-only nodes use `PROCESS_MODE_DISABLED` on the server
+- [ ] `Engine.is_editor_hint()` guard at the top of `_ready()` in every script that has side effects
+- [ ] Config file loading falls back gracefully when `server.cfg` does not exist
+- [ ] Environment variables (`SERVER_PORT`, `SERVER_MAX_PLAYERS`, `SERVER_TICK_RATE`) are applied after config file, before CLI args
+- [ ] `LobbyManager.player_list` size is checked against `max_players` before accepting a new peer
+- [ ] Peer is kicked via RPC before closing if the lobby is full
+- [ ] Ready states are reset when `MatchState` returns to `LOBBY` so players must re-confirm each round
+- [ ] `MatchManager` only runs `_physics_process` on the server (`SetPhysicsProcess(false)` on clients)
+- [ ] Countdown and results timers are driven by `_physics_process` delta, not `Timer` nodes (avoids scene dependency)
+- [ ] Dockerfile copies the binary and the `.pck` file (plus the `data_<project>_<platform>_<arch>` folder for C#) to the image
+- [ ] UDP port is opened in the VPS firewall before the first test run
+- [ ] systemd service has `Restart=on-failure` so the server recovers from crashes automatically
+- [ ] Logs are routed to the systemd journal and inspectable with `journalctl -u <service> -f`
