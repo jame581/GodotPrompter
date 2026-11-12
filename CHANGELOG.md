@@ -13,8 +13,9 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
   `request_user_input`, Cursor or Grok when the tool is in the tool list. Each round asks at most 4
   questions with the recommended answer first, and prints a "Decided so far" table afterwards
   (recommended, alternative or custom). Elsewhere, in subagents and in non-interactive runs, it
-  falls back to numbered text rounds. Only Claude Code's limits and OpenCode's behaviour are
-  verified; the other hosts' tool names and limits come from third-party sources.
+  falls back to numbered text rounds. Claude Code's limits (docs and a non-interactive run) and
+  OpenCode's schema (from its binary) are checked; the interactive path has not been run live; other
+  hosts' facts are third-party.
 
 ### Changed
 

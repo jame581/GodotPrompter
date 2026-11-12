@@ -67,7 +67,7 @@ When skills reference Claude Code tools:
 - `TodoWrite` → `todowrite`
 - `Task` with subagents → `@mention` syntax
 - `Skill` tool → OpenCode's native `skill` tool
-- `AskUserQuestion` → `question` (primary agents only; subagents are denied it by default)
+- `AskUserQuestion` → `question` (the built-in build and plan agents only by default; subagents are denied it by default)
 - File operations → your native tools
 
 ## Getting Help

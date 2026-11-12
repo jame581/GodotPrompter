@@ -14,7 +14,7 @@ Skills use Claude Code tool names. When you encounter these in a skill, use your
 | `WebFetch` | `ReadURL()` |
 | `Task` tool (dispatch subagent) | `Subagent()` / delegate via natural language (unconfirmed — verify in-app) |
 | `Skill` tool (invoke a skill) | No tool call — skills activate via `description` frontmatter matching |
-| `AskUserQuestion` (ask the user) | No tool — ask in plain text; `/grill-me` is a separate built-in |
+| `AskUserQuestion` (ask the user) | None documented — ask in plain text; `/grill-me` is a separate built-in |
 
 ## Skill Discovery
 
