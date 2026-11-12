@@ -181,6 +181,8 @@ Set `trail_enabled = true` on `GPUParticles2D/3D` and assign a `Mesh` (`RibbonTr
 
 > See [references/trails.md](references/trails.md) for the setup and trail-mesh-type comparison.
 
+> **Godot 4.8+:** `Trail3D` (inherits `LineBase3D`) draws a flat line behind a moving object without particles, such as a sword swing or a projectile. Size it with `width` / `width_curve`, and limit it by `lifetime` (default 0.2 s) or `max_length` through `limit_mode`; `mesh_alignment` picks a 3D line or a billboard. `color` / `color_gradient` only show when the material uses vertex color as albedo.
+
 ---
 
 ## 6. Subemitters
