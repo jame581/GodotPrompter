@@ -112,7 +112,7 @@ For headsets that support it (Quest 2+, Pico 4), set the interface's `environmen
 ### Setup
 
 1. Install the Android build template: **Project → Install Android Build Template...** (4.8: **Project → Setup Android Build...**)
-2. Install OpenXR Vendors plugin: **Project → Project Settings → Plugins** (**Addons → Plugins** on 4.8) → enable `Godot OpenXR Vendors` (or install from AssetLib)
+2. Install OpenXR Vendors plugin: **Project → Project Settings → Plugins** (**Project Settings → Addons → Plugins** on 4.8) → enable `Godot OpenXR Vendors` (or install from AssetLib)
 3. **Export → Add → Android**
 4. In the Android export preset:
    - **XR Features → XR Mode** → `OpenXR`

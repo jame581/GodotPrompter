@@ -31,7 +31,7 @@ their own.
 ## 2. Install & setup
 
 **Asset Library (recommended):** Godot AssetLib → search "Phantom Camera" → Download (select only the
-`phantom_camera` directory) → **Project → Project Settings → Plugins** (**Addons → Plugins** on 4.8) → enable it.
+`phantom_camera` directory) → **Project → Project Settings → Plugins** (**Project Settings → Addons → Plugins** on 4.8) → enable it.
 
 **GitHub zip:** extract `addons/phantom_camera/` into the project root, then enable the plugin the same
 way.

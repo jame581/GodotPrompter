@@ -155,7 +155,7 @@ message instead.
 
 | Anti-pattern | Why it is wrong | Instead |
 |---|---|---|
-| One question at a time | Order fixed in advance; questions arrive before their prerequisites; more turns | Ask the frontier, up to 4 per round |
+| One question per round | Order fixed in advance; questions arrive before their prerequisites; more turns | Ask the frontier, up to 4 per round; a tool that takes one question per call asks the round as consecutive calls |
 | An "Other" or "skip" option in the question tool | Wastes a slot; the host already offers a custom answer | Every option a real answer, recommended first |
 | Asking a fact | Spends the user's attention on the model's job | Look it up, decide, record |
 | A question with no recommendation | The user answers in a vacuum; rounds slow down | Every question gets ➡️, or a first option marked "(Recommended)" |

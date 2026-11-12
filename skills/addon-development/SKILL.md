@@ -29,7 +29,7 @@ res://
 
 `plugin.cfg` is a plain INI file. Godot reads it when scanning `addons/`. The `script` key must point to the main plugin script relative to the plugin folder.
 
-Enable the plugin: **Project → Project Settings → Plugins** (**Addons → Plugins** on 4.8) → tick the checkbox next to your plugin name.
+Enable the plugin: **Project → Project Settings → Plugins** (**Project Settings → Addons → Plugins** on 4.8) → tick the checkbox next to your plugin name.
 
 ---
 
@@ -266,7 +266,7 @@ Add a custom dock to the editor by calling `add_control_to_dock(slot, control)` 
 
 ## 8. Testing Plugins
 
-Toggle the plugin off and on in **Project Settings → Plugins** (**Addons → Plugins** on 4.8) to reload it; saving a `@tool` script hot-reloads automatically, but new class registrations and dock changes need the full cycle. `print()` / `push_warning()` / `push_error()` go to the Output panel. **C# plugins must recompile first** — "Unable to load addon script from path … This might be due to a code error in that script" usually means the assembly failed to build, so check the MSBuild panel before anything else.
+Toggle the plugin off and on in **Project Settings → Plugins** (**Project Settings → Addons → Plugins** on 4.8) to reload it; saving a `@tool` script hot-reloads automatically, but new class registrations and dock changes need the full cycle. `print()` / `push_warning()` / `push_error()` go to the Output panel. **C# plugins must recompile first** — "Unable to load addon script from path … This might be due to a code error in that script" usually means the assembly failed to build, so check the MSBuild panel before anything else.
 
 Reload recipes (GDScript + C# `PluginReloader`), console launch flags, and the lifecycle-gotcha table (orphaned docks, stale custom types, double-registered inspector plugins): [references/testing-plugins.md](references/testing-plugins.md)
 
@@ -290,8 +290,8 @@ script="plugin.gd"
 
 | Key | Type | Description |
 |---|---|---|
-| `name` | String | Display name shown in Project Settings → Plugins (Addons → Plugins on 4.8) |
-| `description` | String | Short summary shown in the Plugins panel |
+| `name` | String | Display name shown in the Plugins list (**Project Settings → Plugins**; **Project Settings → Addons → Plugins** on 4.8) |
+| `description` | String | Short summary shown in the Plugins list |
 | `author` | String | Author name or organisation |
 | `version` | String | Semantic version string (e.g. `"1.2.0"`) |
 | `script` | String | Path to the main `EditorPlugin` script, **relative to the plugin folder** |

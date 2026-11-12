@@ -32,7 +32,7 @@ templates for free. If you need dialogue as strongly-typed Resources you fully o
 
 1. Godot AssetLib → search "Dialogue Manager" → Download. Or copy `addons/dialogue_manager/` from the
    [GitHub repo](https://github.com/nathanhoad/godot_dialogue_manager) into `res://addons/dialogue_manager/`.
-2. **Project → Project Settings → Plugins** (**Addons → Plugins** on 4.8) → enable "Dialogue Manager". This adds a **Dialogue** main-screen
+2. **Project → Project Settings → Plugins** (**Project Settings → Addons → Plugins** on 4.8) → enable "Dialogue Manager". This adds a **Dialogue** main-screen
    tab and registers the `DialogueManager` autoload automatically — no manual autoload step.
 3. `addons/dialogue_manager/plugin.cfg`:
 
@@ -245,6 +245,9 @@ public override void _UnhandledInput(InputEvent @event)
 }
 ```
 
+Both languages scan the shared `dialogue_actionables` group; the GDScript `get_nearest_actionable_to()` uses a
+typed loop, so it errors in a mixed project where C# actionables are in that group too.
+
 ---
 
 ## 6. Signals, typed access, saving
@@ -311,7 +314,8 @@ assignments. Also new: `waiting_for_input` / `waited_for_input`.
 > touches `Instance`, so the handlers never fire — add `_ = DialogueManager.Instance;` first.
 
 The C# `DialogueResponsesMenu` script exposes `ResponseSelected` as a C# event. The GDScript node from
-the picker does not — connect it with `Connect("response_selected", Callable.From((DialogueResponse r) => { }))`.
+the picker does not, and its argument is the GDScript `RefCounted`, not the C# wrapper — connect with
+`Connect("response_selected", Callable.From((RefCounted r) => { var response = new DialogueResponse(r); }))`.
 
 **Translations.** Text goes through `tr()`. With **Use Static IDs as Translation Keys** (default on), a
 line's static ID (`Nathan: Hi! [ID:HI_IM_NATHAN]`) is the key and `"dialogue"` the context; `##` comments

@@ -239,7 +239,7 @@ public partial class EmbeddedInspectorPanel : VBoxContainer
 | `CONTEXT_SLOT_2D_EDITOR` | `&"hovered_nodes"`: `Array[CanvasItem]`, `&"mouse_position"`: `Vector2` |
 | `CONTEXT_SLOT_INSPECTOR_PROPERTY` (4.7+) | `&"property"`: `EditorProperty`, `&"object"`: `Object`, `&"property_name"`: `StringName` |
 
-On 4.8 the editor calls **both** methods, so a plugin that implements both would add every item twice. A plugin that must also load on 4.7 or earlier (where only `_popup_menu` exists, and `EditorContextMenuPlugin` is not in 4.3) keeps both and returns early from `_popup_menu` on 4.8, as below. Register it with `add_context_menu_plugin(EditorContextMenuPlugin.CONTEXT_SLOT_INSPECTOR_PROPERTY, plugin)` and remove it with `remove_context_menu_plugin(plugin)`.
+On 4.8 the editor calls **both** methods, so a plugin that implements both shows items with different names twice, and a duplicate name fails with "Context menu item already registered." A plugin that must also load on 4.7 or earlier (where only `_popup_menu` exists, and `EditorContextMenuPlugin` is not in 4.3) keeps both and returns early from `_popup_menu` on 4.8, as below. Register it with `add_context_menu_plugin(EditorContextMenuPlugin.CONTEXT_SLOT_INSPECTOR_PROPERTY, plugin)` and remove it with `remove_context_menu_plugin(plugin)`.
 
 ```gdscript
 # copy_property_menu.gd: "Copy Property Name" in the inspector's right-click menu

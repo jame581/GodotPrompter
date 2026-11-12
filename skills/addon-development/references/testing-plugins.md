@@ -6,7 +6,7 @@
 
 The fastest way to reload plugin code without restarting Godot:
 
-1. **Project → Project Settings → Plugins** (**Addons → Plugins** on 4.8) → untick the plugin → tick it again.
+1. **Project → Project Settings → Plugins** (**Project Settings → Addons → Plugins** on 4.8) → untick the plugin → tick it again.
 2. Alternatively, run this `EditorScript` from the script editor (**File → Run**, Ctrl+Shift+X; the script must be a `@tool` script that extends `EditorScript`):
 
 ```gdscript

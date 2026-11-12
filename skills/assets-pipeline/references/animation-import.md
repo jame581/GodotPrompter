@@ -1,6 +1,8 @@
-> ← Back to [SKILL.md](../SKILL.md)
-
 # Animation Import
+
+Reference for `skills/assets-pipeline/SKILL.md` — splitting animations from one imported file, retargeting with a BoneMap, and the animation import settings table.
+
+> ← Back to [SKILL.md](../SKILL.md)
 
 ## Splitting Animations
 

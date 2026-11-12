@@ -943,7 +943,7 @@
     {
       "name": "save-load",
       "title": "Save / Load Systems in Godot 4.3+",
-      "description": "Use when building or replacing a save/load system — ConfigFile, JSON, Resource serialization, and save game architecture. Not for extending an existing one",
+      "description": "Use when building or replacing a save/load system — ConfigFile, JSON, Resource serialization, and save game architecture",
       "relatedSkills": [
         "resource-pattern",
         "inventory-system",

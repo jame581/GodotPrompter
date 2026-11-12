@@ -169,7 +169,7 @@ public override void _PhysicsProcess(double delta)
 }
 ```
 
-`RigidBody2D/3D.get_velocity_at_position(global_point)` returns a body's velocity at a world point (`get_velocity_at_local_position()` takes a point relative to the body), which suits impact and grind effects.
+**Godot 4.8+:** `RigidBody2D/3D.get_velocity_at_position(global_point)` returns a body's velocity at a world point (`get_velocity_at_local_position()` takes a point relative to the body), which suits impact and grind effects.
 
 ---
 

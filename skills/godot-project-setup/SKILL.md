@@ -461,5 +461,5 @@ Use this checklist after scaffolding a new project to verify everything is in pl
 - [ ] For C# projects: `.csproj` targets `net8.0` (Godot 4.4 to 4.7; Android `net9.0` from 4.5) or `net10.0` (Godot 4.8), `RootNamespace` set, `Nullable` enabled
 - [ ] For C# projects: all node scripts use `partial class`
 - [ ] Initial commit on `main` branch before adding game content
-- [ ] The project's agent instructions file (`CLAUDE.md`, or `AGENTS.md` / `GEMINI.md` if that is what the repo maintains) contains a `## GodotPrompter` section with the skill invocation rule (see `godot-prompter:godot-brainstorming` for content)
+- [ ] The project's agent instructions file (`CLAUDE.md`, or `AGENTS.md` / `GEMINI.md` if that is what the repo maintains) contains a `## GodotPrompter` section with the skill invocation rule — a skill for a new system, the project's code for an existing one (see `godot-prompter:godot-brainstorming` for content)
 - [ ] CI pipeline (optional but recommended): runs `godot --headless --check-only` on GDScript files
