@@ -6,6 +6,11 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased]
 
+Refreshes the Dialogue Manager addon skill to 4.x and adds Godot 4.8 coverage, checked against
+4.8-beta3 and re-verified at 4.8-stable in v1.17.1. Skills now load only when a new system is being
+built, not when an existing one is extended (#18), and `godot-grill` asks its questions interactively
+where the host has a question tool.
+
 ### Added
 
 - **`godot-grill` asks its questions interactively where the host has a question tool.**
@@ -16,7 +21,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
   falls back to numbered text rounds. Claude Code's limits (docs and a non-interactive run) and
   OpenCode's schema (from its binary) are checked; the interactive path has not been run live; other
   hosts' facts are third-party.
-- **Godot 4.8 callouts, checked against 4.8-beta3** (re-verified at 4.8-stable before release).
+- **Godot 4.8 callouts, checked against 4.8-beta3** (re-verified at 4.8-stable in v1.17.1).
   - Editor and addons: `EditorContextMenuPlugin._get_menu_options()` replaces `_popup_menu()`, main
     screens become docks, **Project Settings → Addons → Plugins**, and **Setup Android Build...**,
     each with a 4.3–4.7 path kept.

@@ -14,7 +14,7 @@ GodotPrompter is a plugin that provides **skills** — structured domain knowled
 
 **59 skills** covering project setup, architecture, gameplay systems, input handling, physics, 2D/3D systems, animation, shaders, audio, UI, multiplayer, web services, localization, procedural generation, XR/VR, native extensions, multithreading, mobile and web shipping, rendering pipeline, optimization, GDScript / C# patterns, a teaching mode, and third-party addons (LimboAI, Beehave, Popochiu, Dialogue Manager, Phantom Camera). All targeting Godot 4.3+ with both GDScript and C# examples — newer features from Godot 4.5, 4.6, and 4.7 (variadic functions, abstract classes, stencil buffers, AreaLight3D, VirtualJoystick, OpenXR Spatial Entities, and more) are included as annotated additive sections.
 
-**v1.16.0** adds three skills — `web-services` (HTTP and WebSocket backends), `rendering-pipeline` (renderer and graphics settings) and `web-export` (the browser target) — plus a C# compile check of every code block and a prose audit of the existing skills. See the [CHANGELOG](CHANGELOG.md).
+**v1.17.0** refreshes the Dialogue Manager addon skill to 4.x, adds Godot 4.8 callouts (checked against 4.8-beta3, re-verified at stable in v1.17.1), loads skills only when you build a new system rather than extend an existing one, and lets `godot-grill` ask its questions interactively. See the [CHANGELOG](CHANGELOG.md).
 
 ## Quick Start
 

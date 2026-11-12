@@ -20,7 +20,7 @@ My test harness only runs Claude Code, so I did not measure Codex. What I can sa
 Invoke the matching `godot-prompter:*` skill before building a new Godot system; to change or extend an existing one, follow the project's code.
 ```
 
-This ships in v1.17.0, which waits on Godot 4.8-stable for its 4.8 pass, so there's no date yet.
+This fix is in v1.17.0, now released. Its Godot 4.8 content was checked against 4.8-beta3 and will be re-checked at 4.8-stable in a follow-up release.
 
 ## Discussion #20: Odd install instructions for Codex?
 
