@@ -316,3 +316,27 @@ after the last line, simple box at the bottom). Run on card v2 with
 With the design settled by the user, card v2 still routes to the domain skill (3/3, threshold was
 2/3), and does not grill. The answer-quality score is 1.00 in both arms, so the case measures routing
 only, not a quality lift. The card was not changed.
+
+## Second corrections (2026-11-12, whole-release review)
+
+Appended; the sections above are unchanged.
+
+- **grill-05 baseline (criterion 2).** The correction above said the v1.16 card shipped at 4/5 on
+  2026-10-12 and 2/3 on 2026-10-21. The shipped v1.16.0 card measured grill-05 **0/3** on 2026-10-22
+  (`results/2026-10-21T23-30-31-845Z`; old-card control 1/3). The 4/5 (2026-10-12) was the earlier
+  scoped card wording; the 2/3 was the 2026-10-11 pre-release run. Sequence: 4/5 (2026-10-12) → 0/3
+  (v1.16.0) → 0/5 (F1) → 2/5 (F6) → 3/5 (Phase G, GRILL.md). F6 and Phase G are not below the
+  shipped level, so the original F6 reading "not a loss" stands against v1.16.0.
+- **neg-03 baseline row.** For neg-03 the baseline is the first row (`results/2026-11-11T00-02-12-871Z`,
+  the re-run after the grader rewording), not the second as the note under the neg-03 table says.
+- **Cost-range convention.** Per-run ranges above mix conventions. Excluding the judge
+  (`costUsd` per run), the F1 with-arm runs of neg-01..03 cost $0.17–$0.51 across both batches,
+  and the F1 with-arm runs of neg-04/05 $0.25–$0.70. The earlier "$0.18-$0.42" and "$0.26-$0.72"
+  figures include the judge and cover one batch or one case only.
+- **Phase F cost total.** F1 $23.78 + F3 $13.37 + F6 $54.14 ≈ **$91.3**; $93.3 including pos-01
+  ($2.02). The plan's budget was $35–50 for F1 + F6. The "about $87" above is superseded.
+- **Bytes at the end of the release work.** After Phase G (question-tool rows in
+  `antigravity-tools.md`, now 1,607 B) Antigravity injected 9,061 + 1,607 = 10,668 B (−44.0%).
+  After the release-fix wave (skill-index location note, +22 B), `using-godot-prompter/SKILL.md` is
+  9,083 B: Codex **9,083 B (−40.5%** against 15,272; target ≤ 9,163) and Antigravity
+  **10,690 B (−43.9%** against 19,064; target ≤ 11,438). Criterion 3 still **PASS**.

@@ -313,3 +313,19 @@ claude plugin eval . --case "skill-19-godot-48-changes" -j 3 --ablation with-wit
 - A first pass (`…T01-11-19-145Z`, with 0.83 / without 0.22) carried a `has-csharp` grader that required a ```` ```csharp ```` fence; the answer is a `.csproj` (xml fence), so it failed in both arms. Removed; the table is the re-run. Cost $1.13 (first pass $1.16).
 
 Correction (fix round 1): the explanation above is wrong. `names-net10` passed in all three without-arm runs, so only `net10-target` and `no-old-tfm-in-csproj` separate the arms. The without-arm 0.40 is `names-net10` (1) plus `sdk-version` (1) out of a total weight of 5, not `sdk-version` alone. After the recorded run, `names-net10` was tightened to match `net10.0` inside a `<TargetFramework>` tag; that change has not been re-run.
+
+## Corrections (2026-11-12, whole-release review)
+
+Appended; nothing above is edited.
+
+- **skill-16 fix round 1** ("one with-arm run scored 0.75 on a grader vote split"): it was not a split.
+  The 0.75 run is a unanimous FAIL (FAIL FAIL FAIL) on `download-code-correct`
+  (`results/2026-11-10T01-13-33-867Z`).
+- **skill-06 in F6** (`results/2026-11-11T13-30-33-023Z`): two of the three with-arm runs failed
+  `beehave-blackboard-api` (FAIL PASS FAIL and FAIL FAIL PASS), not one split vote in the aggregate.
+- **Intro count.** With skill-19, 12 of the 18 `skill-*` cases are tagged `discriminating`, not 11 of 17.
+- **skill-19 ground truth is 4.8-beta3**: `GodotMinimumRequiredTfm => "net10.0"` at `c51ff06e`
+  (`modules/mono/editor/GodotTools/GodotTools.ProjectEditor/ProjectGenerator.cs:15`). Re-check it and
+  re-run the case at 4.8-stable.
+- **`names-download-file-or-part`** (skill-16) misses `set_download_file(`: `\bdownload_file\b` has no
+  word boundary after `set_`. Not changed here (existing grader); note it when the case is next edited.

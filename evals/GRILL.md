@@ -364,3 +364,17 @@ The Phase G section above is corrected as follows; nothing above is edited.
   the table appears only after a round's answers.
 - The grill-02 and grill-03 priors come from the 2026-10-11 section, not from F6.
 - `--scaffold` was used for the `*-in-project` cases (05, 06, 07).
+
+### Second correction (2026-11-12, whole-release review)
+
+Appended; nothing above is edited. Both earlier corrections are themselves partly wrong.
+
+- **grill-05 baseline for the shipped card.** The first correction above said the shipped v1.16 card
+  scored 4/5 on 2026-10-12 and 2/3 on 2026-10-21. It did not. The 4/5 (2026-10-12) is the earlier
+  scoped card wording, and the 2/3 is the 2026-10-11 pre-release run. The shipped v1.16.0 card
+  measured grill-05 **0/3** on 2026-10-22 (`results/2026-10-21T23-30-31-845Z`; old-card control 1/3).
+  The sequence is 4/5 (2026-10-12) → 0/3 (v1.16.0, 2026-10-22) → 0/5 (F1) → 2/5 (F6) → 3/5
+  (Phase G). F6 and Phase G are not below the shipped level.
+- **grill-04 graders.** The Phase G correction said grill-04 "grades other things". It has the same
+  graders as grill-05: `bounded-or-builds`, `no-fact-questions` and `trigger-grill`. grill-04 fired
+  0/3, so it adds no fired run to the "no regression" evidence.
