@@ -156,6 +156,7 @@
       ],
       "addon": null,
       "references": [
+        "skills/assets-pipeline/references/animation-import.md",
         "skills/assets-pipeline/references/runtime-resource-loading.md"
       ],
       "source": "skills/assets-pipeline/SKILL.md"
