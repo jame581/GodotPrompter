@@ -100,6 +100,8 @@ ssh_remote_deploy/cleanup_script="#!/usr/bin/env bash\nkill $(pgrep -x -f \"{tem
 | **Android** | Requires a keystore for release signing. Set `keystore/release` to the `.keystore` path and supply `keystore/release_user` + `keystore/release_password` via env vars. Declare permissions in the preset under `permissions/*`. Set `package/unique_name` to a reverse-DNS string (e.g., `com.studio.mygame`). |
 | **iOS**     | Requires a valid Apple provisioning profile (`.mobileprovision`). Set `application/bundle_identifier`, `application/code_sign_identity_release`, and `application/provisioning_profile_uuid_release`. Distribution builds require an App Store distribution certificate. |
 
+> **Godot 4.8+:** Windows, Linux and macOS presets gain `debug/export_debug_symbols`, which ships a `.debugsymbols` file (`.dSYM` on macOS) beside the executable; it needs a same-named symbols file next to the export template. Android gains `gradle_build/minification` (R8, release builds).
+
 ---
 
 ## 3. Export from CLI

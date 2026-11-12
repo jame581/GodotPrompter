@@ -93,6 +93,8 @@ Mipmaps prevent shimmering on textures viewed at an angle or from a distance. Re
 - **2D sprites:** Usually off (unless you use Camera2D zoom)
 - **UI textures:** Off (rendered at fixed scale)
 
+> **Godot 4.8+:** `mipmaps/preserve_alpha_test_coverage` (plus `mipmaps/alpha_test_threshold`, default `0.5`) keeps alpha-tested foliage from thinning out at distance. `compress/high_quality_mode` sets the ASTC block size (4×4, 6×6, 8×8) when High Quality is on.
+
 > **Godot 4.7+:** DDS import supports the R8 and R8G8 texture formats. ([GH-116307](https://github.com/godotengine/godot/pull/116307))
 
 ---
