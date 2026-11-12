@@ -230,6 +230,8 @@ When you want a custom widget for an exported property of a specific type, regis
 
 > **Godot 4.7+:** the static `EditorInspector.create_default_inspector(filter_line_edit: LineEdit = null)` returns an inspector with the same configuration as the editor's Inspector dock, ready to embed in plugin UIs — pass a `LineEdit` for live property filtering (see [references/inspector-plugins.md](references/inspector-plugins.md)). `EditorContextMenuPlugin` also gains `CONTEXT_SLOT_INSPECTOR_PROPERTY` in `ContextMenuSlot`, so context-menu plugins can extend the inspector property right-click menu: `_popup_menu()` receives `[object ID, property name]` and the option callback receives the `EditorProperty` directly.
 
+> **Changed in Godot 4.8:** `_popup_menu()` is deprecated; override `_get_menu_options(data: Dictionary[StringName, Variant])`, whose item callbacks receive the same dictionary. For the inspector slot it holds `&"property"` (the `EditorProperty`), `&"object"` (the edited object) and `&"property_name"`. 4.8 calls both methods, so a plugin that also supports 4.7 returns early from `_popup_menu` on 4.8 (keys for every slot and the cross-version scaffold: [references/inspector-plugins.md](references/inspector-plugins.md)).
+
 ---
 
 ## 5. Custom Dock Panel
@@ -237,6 +239,8 @@ When you want a custom widget for an exported property of a specific type, regis
 Add a custom dock to the editor by calling `add_control_to_dock(slot, control)` from your `EditorPlugin._enter_tree`. Free the control on `_exit_tree`. Useful for project-wide tooling UIs (level browser, asset summary, build dashboard).
 
 > **Godot 4.6+:** `add_control_to_dock` is deprecated; wrap your control in an `EditorDock` and call `add_dock(dock)`, then `remove_dock(dock)` on exit. `add_dock` does not exist in 4.3 to 4.5, where `add_control_to_dock` is the only option, so a plugin that supports both guards on the version (see [references/dock-panels.md](references/dock-panels.md)).
+
+> **Changed in Godot 4.8:** main screens are docks. `_has_main_screen()` and `_get_plugin_icon()` are deprecated: add an `EditorDock` (still experimental) with `default_slot = EditorDock.DOCK_SLOT_MAIN_SCREEN`. `EditorInterface.get_editor_main_screen()` no longer returns the real main screen; a legacy main-screen plugin works only if it adds its panel there from `_enter_tree()`. Scaffold for 4.3 to 4.8 in [references/dock-panels.md](references/dock-panels.md).
 
 > See [references/dock-panels.md](references/dock-panels.md) for the full GDScript and C# dock scaffold.
 

@@ -224,6 +224,76 @@ public partial class EmbeddedInspectorPanel : VBoxContainer
 #endif
 ```
 
+### Context-Menu Data: `_get_menu_options` (Changed in Godot 4.8)
+
+`EditorContextMenuPlugin._popup_menu(paths: PackedStringArray)` is **deprecated in Godot 4.8** ("Use `_get_menu_options` instead"). The replacement, `_get_menu_options(data: Dictionary[StringName, Variant])`, receives a dictionary whose keys depend on the slot, and the callback of every item you add from it receives **the same dictionary**. `_popup_menu` still works on 4.8, with its old arguments, and makes the plugin's shortcut callbacks receive the legacy data too.
+
+| Slot | Keys in `data` (Godot 4.8) |
+|---|---|
+| `CONTEXT_SLOT_SCENE_TREE` | `&"selected_nodes"`: `Array[Node]` |
+| `CONTEXT_SLOT_FILESYSTEM` | `&"selected_files"`: `PackedStringArray` |
+| `CONTEXT_SLOT_SCRIPT_EDITOR` | `&"selected_resource"`: `Resource` (`null` on a help page), `&"path"`: `String` (`help:` prefix on a help page) |
+| `CONTEXT_SLOT_FILESYSTEM_CREATE` | `&"base_directory"`: `String`, `&"needs_prefix"`: `bool` |
+| `CONTEXT_SLOT_SCRIPT_EDITOR_CODE` | `&"code_edit"`: `CodeEdit`, `&"file_path"`: `String` |
+| `CONTEXT_SLOT_SCENE_TABS` | `&"selected_scene"`: `String` (empty on empty space) |
+| `CONTEXT_SLOT_2D_EDITOR` | `&"hovered_nodes"`: `Array[CanvasItem]`, `&"mouse_position"`: `Vector2` |
+| `CONTEXT_SLOT_INSPECTOR_PROPERTY` (4.7+) | `&"property"`: `EditorProperty`, `&"object"`: `Object`, `&"property_name"`: `StringName` |
+
+On 4.8 the editor calls **both** methods, so a plugin that implements both would add every item twice. A plugin that must also load on 4.7 or earlier (where only `_popup_menu` exists, and `EditorContextMenuPlugin` is not in 4.3) keeps both and returns early from `_popup_menu` on 4.8, as below. Register it with `add_context_menu_plugin(EditorContextMenuPlugin.CONTEXT_SLOT_INSPECTOR_PROPERTY, plugin)` and remove it with `remove_context_menu_plugin(plugin)`.
+
+```gdscript
+# copy_property_menu.gd: "Copy Property Name" in the inspector's right-click menu
+@tool
+extends EditorContextMenuPlugin
+
+const _IS_48 := 0x040800
+
+
+func _get_menu_options(data: Dictionary[StringName, Variant]) -> void:  # Godot 4.8+
+    add_context_menu_item("Copy Property Name", _copy_name)
+
+
+func _copy_name(data: Dictionary) -> void:
+    var property_name: StringName = data[&"property_name"]
+    DisplayServer.clipboard_set(String(property_name))
+
+
+func _popup_menu(paths: PackedStringArray) -> void:  # 4.7 and earlier
+    if Engine.get_version_info().hex >= _IS_48:
+        return  # 4.8 calls _get_menu_options as well
+    # On 4.7 paths is [object ID, property name]; the callback gets the EditorProperty.
+    add_context_menu_item("Copy Property Name", _copy_name_legacy)
+
+
+func _copy_name_legacy(property: EditorProperty) -> void:
+    DisplayServer.clipboard_set(String(property.get_edited_property()))
+```
+
+In C# the bindings decide: `_GetMenuOptions` exists only on `Godot.NET.Sdk` 4.8 or newer, so a plugin built against 4.8 targets 4.8+ only. Plugins whose minimum is 4.7 or earlier override `_PopupMenu` alone; it still works on 4.8, and compiling it against 4.8 bindings gives CS0672 and CS0618 deprecation warnings.
+
+```csharp
+// res://addons/my_plugin/CopyPropertyMenu.cs (Godot.NET.Sdk 4.8+)
+#if TOOLS
+using Godot;
+using Godot.Collections;
+
+[Tool]
+public partial class CopyPropertyMenu : EditorContextMenuPlugin
+{
+    public override void _GetMenuOptions(Dictionary<StringName, Variant> data)
+    {
+        AddContextMenuItem("Copy Property Name", Callable.From<Dictionary>(CopyName));
+    }
+
+    private void CopyName(Dictionary data)
+    {
+        StringName propertyName = data["property_name"].AsStringName();
+        DisplayServer.ClipboardSet(propertyName);
+    }
+}
+#endif
+```
+
 ---
 
 ## 6. Custom Resource Editors
