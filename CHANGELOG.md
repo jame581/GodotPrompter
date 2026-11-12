@@ -6,8 +6,10 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased]
 
+## [1.17.0] - 2026-11-12
+
 Refreshes the Dialogue Manager addon skill to 4.x and adds Godot 4.8 coverage, checked against
-4.8-beta3 and re-verified at 4.8-stable in v1.17.1. Skills now load only when a new system is being
+4.8-beta3 and to be re-verified at 4.8-stable in v1.17.1. Skills now load only when a new system is being
 built, not when an existing one is extended (#18), and `godot-grill` asks its questions interactively
 where the host has a question tool.
 
