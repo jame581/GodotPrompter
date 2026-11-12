@@ -256,6 +256,8 @@ public override void _Ready()
 }
 ```
 
+> **Changed in Godot 4.8:** The `orientation` parameter is now typed as the new `DisplayServer.SensorOrientation` enum (`SENSOR_ORIENTATION_UNDEFINED` 0, `_PORTRAIT` 1, `_LANDSCAPE` 2) and the docs say *screen* orientation. The values are unchanged, so the handlers above keep working. Code that uses the generated C# `OrientationChanged` event may need updating, since its delegate type changes.
+
 ---
 
 ## 6. Mobile performance & renderer
@@ -267,6 +269,8 @@ Use the **Mobile** (or **Compatibility**) renderer; prefer Compatibility on the 
 ## 7. C# on mobile
 
 C# Android/iOS export is **Godot 4.2+ but experimental**. **Android C# export requires .NET 9+** (with Godot 4.5); iOS export only from macOS (the export also builds arm64 + x86_64 simulator assemblies). **C# cannot export to Web.** Test the C# export pipeline early — it is the riskiest part of a C# mobile project.
+
+> **Changed in Godot 4.8:** Every C# project, not only Android, needs **.NET 10** (`net10.0`); 4.8 writes `net10.0` for Android too. The ".NET 9+" above applies to Godot 4.5 to 4.7.
 
 > **Deeper:** [Plugins (Android v2 / iOS)](references/plugins.md) · [In-app purchases & ads](references/iap-and-ads.md) · [Crash debugging](references/crash-debugging.md)
 
@@ -281,6 +285,6 @@ C# Android/iOS export is **Godot 4.2+ but experimental**. **Android C# export re
 - [ ] JavaClassWrapper usage labeled Godot 4.4+; fallbacks for 4.3 if needed
 - [ ] UI anchored inside `get_display_safe_area()`; notch/cutout handled
 - [ ] Mobile/Compatibility renderer + ETC2/ASTC compression enabled
-- [ ] C# projects: verified .NET 9+ for Android export
+- [ ] C# projects: verified .NET 9+ for Android export (Godot 4.8: .NET 10)
 - [ ] Play OBB/APK expansion files moved to App Bundles with Play Asset Delivery, or the Godot OBB plugin installed (built-in support removed in Godot 4.7)
 - [ ] PiP (Android): aspect ratio + auto-enter configured; HUD reacts to the PIP_MODE notifications (Godot 4.7+)
