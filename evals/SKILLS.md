@@ -311,3 +311,5 @@ claude plugin eval . --case "skill-19-godot-48-changes" -j 3 --ablation with-wit
 
 - `sdk-version` passes in both arms because the prompt says "Godot 4.8"; it is a sanity check, not a separator. The without-arm 0.40 is that grader alone.
 - A first pass (`…T01-11-19-145Z`, with 0.83 / without 0.22) carried a `has-csharp` grader that required a ```` ```csharp ```` fence; the answer is a `.csproj` (xml fence), so it failed in both arms. Removed; the table is the re-run. Cost $1.13 (first pass $1.16).
+
+Correction (fix round 1): the explanation above is wrong. `names-net10` passed in all three without-arm runs, so only `net10-target` and `no-old-tfm-in-csproj` separate the arms. The without-arm 0.40 is `names-net10` (1) plus `sdk-version` (1) out of a total weight of 5, not `sdk-version` alone. After the recorded run, `names-net10` was tightened to match `net10.0` inside a `<TargetFramework>` tag; that change has not been re-run.
