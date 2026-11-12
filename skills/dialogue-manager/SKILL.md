@@ -32,7 +32,7 @@ templates for free. If you need dialogue as strongly-typed Resources you fully o
 
 1. Godot AssetLib → search "Dialogue Manager" → Download. Or copy `addons/dialogue_manager/` from the
    [GitHub repo](https://github.com/nathanhoad/godot_dialogue_manager) into `res://addons/dialogue_manager/`.
-2. **Project → Project Settings → Plugins** → enable "Dialogue Manager". This adds a **Dialogue** main-screen
+2. **Project → Project Settings → Plugins** (**Addons → Plugins** on 4.8) → enable "Dialogue Manager". This adds a **Dialogue** main-screen
    tab and registers the `DialogueManager` autoload automatically — no manual autoload step.
 3. `addons/dialogue_manager/plugin.cfg`:
 

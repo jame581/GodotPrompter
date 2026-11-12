@@ -111,8 +111,8 @@ For headsets that support it (Quest 2+, Pico 4), set the interface's `environmen
 
 ### Setup
 
-1. Install Android Build Template: **Project → Install Android Build Template**
-2. Install OpenXR Vendors plugin: **Project → Project Settings → Plugins → Enable `Godot OpenXR Vendors`** (or install from AssetLib)
+1. Install the Android build template: **Project → Install Android Build Template...** (4.8: **Project → Setup Android Build...**)
+2. Install OpenXR Vendors plugin: **Project → Project Settings → Plugins** (**Addons → Plugins** on 4.8) → enable `Godot OpenXR Vendors` (or install from AssetLib)
 3. **Export → Add → Android**
 4. In the Android export preset:
    - **XR Features → XR Mode** → `OpenXR`
@@ -179,7 +179,7 @@ Godot 4.7 adds the OpenXR user presence extension: `OpenXRInterface.user_presenc
 | Motion sickness from locomotion | Smooth rotation | Use snap turning (30° increments) or add a vignette during movement |
 | UI unreadable in VR | Panel too far away or too small | Place UI at 1–2m distance, use SubViewport at 1024+ resolution |
 | Hand tracking jittery | Raw joint data used directly | Apply smoothing (lerp toward new position each frame) |
-| Export fails on Quest | Missing Android build template or wrong architecture | Install Android Build Template; enable arm64; set API level 29+ |
+| Export fails on Quest | Missing Android build template or wrong architecture | Install the Android build template (4.8: **Setup Android Build...**); enable arm64; set API level 29+ |
 
 ---
 

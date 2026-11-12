@@ -23,7 +23,7 @@ Preset fields: **Release / Release User / Release Password** (keystore and key p
 
 **iOS:** macOS + Xcode. Export needs an **App Store Team ID** + a reverse-DNS bundle **Identifier**; Godot generates an `.xcodeproj` you build from Xcode. Test on the iOS **simulator with the Compatibility renderer** — Forward+/Mobile support there depends on the simulator's Metal.
 
-A **custom Gradle build** (*Project → Install the Gradle Build template*) is **required for v2 plugins and IAP** (Godot 4.2+). Since Godot 4.7 the **Use Gradle Build** export option is no longer marked experimental ([GH-119172](https://github.com/godotengine/godot/pull/119172)) — treat it as the standard path when you need plugins or IAP.
+A **custom Gradle build** (*Project → Install Android Build Template...*; 4.8: *Project → Setup Android Build...*) is **required for v2 plugins and IAP** (Godot 4.2+). Since Godot 4.7 the **Use Gradle Build** export option is no longer marked experimental ([GH-119172](https://github.com/godotengine/godot/pull/119172)) — treat it as the standard path when you need plugins or IAP.
 
 > ⚠️ **Changed in Godot 4.7:** Deprecated Google Play OBB expansion-file support (the `apk_expansion/*` export options) was removed from the Android export. Projects still relying on APK expansion files should move to Android App Bundles with Play Asset Delivery, or install the separate [Godot OBB plugin](https://github.com/m4gr3d/godot-obb-plugin) that now holds the old logic. See [GH-118283](https://github.com/godotengine/godot/pull/118283).
 

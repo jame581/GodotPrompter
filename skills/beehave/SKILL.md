@@ -31,7 +31,7 @@ Choose Beehave when your project is GDScript-only, you want a behavior tree with
 
 1. **Godot AssetLib** → search "Beehave" → Download → Reload project.  
    Or copy the `addons/beehave/` folder from the [GitHub release](https://github.com/bitbrain/beehave/releases) into `res://addons/beehave/`.
-2. Enable the plugin: **Project → Project Settings → Plugins** → tick **Beehave**.  
+2. Enable the plugin: **Project → Project Settings → Plugins** (**Addons → Plugins** on 4.8) → tick **Beehave**.  
    Two autoloads are registered on enable and removed again on disable: `BeehaveGlobalMetrics` and `BeehaveGlobalDebugger`.
 3. Optional — copy `script_templates/` from the addon into the project root for leaf scaffolding templates.
 
@@ -216,7 +216,7 @@ For a walkthrough of writing custom decorators and conditions, see [references/c
 
 ## Implementation checklist
 
-- [ ] `addons/beehave/` copied into project; plugin enabled in **Project Settings → Plugins**
+- [ ] `addons/beehave/` copied into project; plugin enabled in **Project Settings → Plugins** (**Addons → Plugins** on 4.8)
 - [ ] `BeehaveTree` added as a child of the actor; `actor_node_path` set (or left blank to default to parent)
 - [ ] `process_thread` matches actor's loop: `PHYSICS` for `_physics_process`, `IDLE` for `_process`
 - [ ] `tick_rate` tuned — increase for background NPCs (e.g., `3`) to reduce per-frame cost

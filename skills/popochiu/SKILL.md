@@ -27,7 +27,7 @@ Choose Popochiu when you're building a classic point-and-click adventure and wan
 ## 2. Install & project setup
 
 1. Get Popochiu from [itch.io](https://carenalgas.itch.io/popochiu) or [GitHub Releases](https://github.com/carenalgas/popochiu/releases); copy `addons/popochiu/` into your project.
-2. **Project → Project Settings → Plugins** → enable **Popochiu**. Godot prompts a restart — **Project → Reload Current Project**. Upgrading a 2.1.x project: open it in **2.2.0** first so its migrations rewrite your scripts, then move to 2.2.1, which removes the methods old scripts may still call. For touch devices keep **Emulate Mouse From Touch** on (Popochiu reads mouse events only).
+2. **Project → Project Settings → Plugins** (**Addons → Plugins** on 4.8) → enable **Popochiu**. Godot prompts a restart — **Project → Reload Current Project**. Upgrading a 2.1.x project: open it in **2.2.0** first so its migrations rewrite your scripts, then move to 2.2.1, which removes the methods old scripts may still call. For touch devices keep **Emulate Mouse From Touch** on (Popochiu reads mouse events only).
 3. On first run, `PopochiuResources.init_file_structure()` scaffolds `res://game/` (layout below) plus `popochiu_data.cfg` (a `ConfigFile` registry of every room/character/item/dialog) and `popochiu_globals.gd` (an empty `Globals` autoload — add your own state here).
 4. The **setup wizard** pops up automatically (re-open via the dock's "Setup" button): pick a **game type** (Retro / Pixel Art or Modern / Hi-Res — sets the stretch aspect and pixel-art texture filtering; the custom-settings form offers Custom / Pixel Art / High Resolution), a **Resolution**, and a **GUI Template** (9 Verb, the Sierra-style "Action Bar", Simple Click, or Custom).
 5. Two companion plugins, **PopochiuImporters** (Aseprite import docks) and **PopochiuGizmo**, are enabled automatically along with Popochiu.
@@ -160,7 +160,7 @@ Deep dives: [references/dialogs.md](references/dialogs.md), [references/inventor
 
 ## Implementation checklist
 
-- [ ] Popochiu enabled in **Project Settings → Plugins**; project reloaded after enabling
+- [ ] Popochiu enabled in **Project Settings → Plugins** (**Addons → Plugins** on 4.8); project reloaded after enabling
 - [ ] Setup wizard run once (Game Type, Resolution, GUI Template) before authoring rooms
 - [ ] Every room has at least one enabled Walkable Area, or characters won't path on click
 - [ ] Room navigation uses `R.goto_room()` — not a nonexistent `E.goto_room()`
