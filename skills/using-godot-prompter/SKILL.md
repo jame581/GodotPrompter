@@ -121,7 +121,7 @@ Skills use Claude Code tool names as the canonical reference. Non-Claude platfor
 
 ## Skill and Agent Index
 
-Every skill by category with a one-line description, and the nine agents (`godot-game-architect`, `godot-game-dev`, `godot-code-reviewer`, and six specialists): [`references/skill-index.md`](references/skill-index.md). Read it when the table above does not name the skill you need.
+Every skill by category with a one-line description, and the nine agents (`godot-game-architect`, `godot-game-dev`, `godot-code-reviewer`, and six specialists): [`references/skill-index.md`](references/skill-index.md), beside this SKILL.md. Read it when the table above does not name the skill you need.
 
 ---
 

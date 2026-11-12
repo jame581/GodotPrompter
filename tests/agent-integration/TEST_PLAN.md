@@ -534,7 +534,8 @@ existing decision record.
 
 **Pass criteria:** the grill is invoked without the user naming it or asking to be grilled. Eval
 case `grill-05-plain-request-in-project` now exercises this path by scaffolding a `project.godot`
-(run with `--scaffold`); it fired 4/5 (2026-10-12), 0/5 at F1 (2026-11-11) and 2/5 at F6 (card v2), so repeat
+(run with `--scaffold`); it fired 4/5 (2026-10-12, an earlier scoped wording), 0/3 on the shipped v1.16.0 card (2026-10-22),
+0/5 at F1 (2026-11-11), 2/5 at F6 (card v2) and 3/5 after Phase G, so repeat
 this test before concluding it fails. The complementary case where the design is already given
 (`pos-01-new-system-in-project`) should route to the domain skill, not grill.
 

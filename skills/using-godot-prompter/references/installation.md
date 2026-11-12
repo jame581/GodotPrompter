@@ -4,7 +4,7 @@ Reference for `skills/using-godot-prompter/SKILL.md` — Antigravity install pat
 
 > ← Back to [SKILL.md](../SKILL.md)
 
-Canonical install commands for every host are in the repository `README.md` (Installation) and the per-host guides: `.codex/INSTALL.md`, `.opencode/INSTALL.md`, `docs/platforms/`. Only the Antigravity manual paths live here, because no other file carries them.
+Canonical install commands for every host are in the repository `README.md` (Quick Start) and the per-host guides: `.codex/INSTALL.md`, `.opencode/INSTALL.md`, `docs/platforms/`. Only the Antigravity manual paths live here, because no other file carries them.
 
 ## Antigravity (2.0 desktop, IDE, CLI)
 
@@ -50,7 +50,7 @@ Antigravity reads `name` (defaults to the directory name) and `description` (the
 
 | Host | Where |
 |---|---|
-| Claude Code, Copilot CLI, Cursor, Grok Build | `README.md` Installation; `docs/platforms/` |
+| Claude Code, Copilot CLI, Cursor, Grok Build | `README.md` Quick Start; `docs/platforms/` |
 | Codex | `.codex/INSTALL.md` |
 | OpenCode | `.opencode/INSTALL.md` |
 
