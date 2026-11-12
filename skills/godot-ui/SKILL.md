@@ -110,6 +110,8 @@ A `Theme` resource centralizes fonts, colors, and `StyleBox`es. Apply at the roo
 
 Focus modes (`FOCUS_NONE`, `FOCUS_CLICK`, `FOCUS_ALL`) gate keyboard/gamepad navigation. Wire chains with `focus_neighbor_top` / `_bottom` / `_left` / `_right`, or rely on automatic spatial detection. Call `grab_focus()` on the first interactive element when a menu opens.
 
+> **Changed in Godot 4.8:** `gui/common/auto_focus_strategy` picks how automatic neighbors are inferred: `Legacy` (class default, the 4.7 behavior) or `Balloon` (closest and most aligned Control in the input direction). New 4.8 projects get `Balloon`, so automatic navigation can differ from an upgraded project; set neighbors explicitly where it matters.
+
 > See [references/focus-and-navigation.md](references/focus-and-navigation.md) for focus mode details, `focus_neighbor` chain examples, gamepad/keyboard input handling, and grab_focus patterns.
 
 ---
