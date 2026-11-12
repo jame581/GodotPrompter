@@ -316,3 +316,36 @@ the neg-* cases in TRIGGERS.md.
 The F6 bullet "No positive case lost a fire" overstates grill-05. 2/5 is better than F1 (0/5) but
 below the pre-Phase-F level: the shipped v1.16 card scored 4/5 on 2026-10-12 and 2/3 on 2026-10-21.
 It is not a recovery, and "not a loss" should not be read as parity with v1.16.
+
+## Phase G: interactive grill (text path), 2026-11-12
+
+`godot-grill` §3 now asks rounds through a host question tool when one is in the tool list and the
+agent is the main agent in a normal chat; otherwise the numbered `❓`/`➡️` text. Both paths cap a
+round at 4 questions and print a "Decided so far" table after each round. The eval cases allow only
+`[Skill, Read, Glob, Grep]`, so no run can reach `AskUserQuestion`; every fired run takes the text
+path. Run with `--ablation with-without --judge-model sonnet --no-publish -j 3` (`--scaffold` for
+grill-05/06/07). Compared against F6 (01, 04, 05, 06, 07) and the latest earlier rows (02, 03; the
+`1.00 / 0.78` and `1.00 / 1.00` rows above).
+
+| Case | Runs per arm | With | Without | `trigger-grill` | Prior (with / without, fired) | Run dir | Cost |
+|---|---|---|---|---|---|---|---|
+| grill-01-new-system | 3 | 1.00 | 0.33 | 3/3 | F6 1.00 / 0.25, 3/3 | `results/2026-11-12T00-13-06-926Z` | $1.06 |
+| grill-02-skip-questions | 3 | 0.89 | 0.78 | 0/3 | 1.00 / 0.78, 0/3 | `results/2026-11-12T00-14-04-825Z` | $1.34 |
+| grill-03-neg-bugfix | 3 | 1.00 | 1.00 | 0/3 | 1.00 / 1.00, 0/3 | `results/2026-11-12T00-15-51-752Z` | $0.76 |
+| grill-04-plain-request | 3 | 0.56 | 0.33 | 0/3 | F6 0.56 / 0.33, 0/3 | `results/2026-11-12T00-16-28-696Z` | $0.89 |
+| grill-05-plain-request-in-project | 5 | 0.73 | 0.33 | **3/5** | F6 0.47 / 0.33, 2/5 | `results/2026-11-11T23-58-22-095Z` | $8.66 |
+| grill-06-neg-bugfix-in-project | 3 | 1.00 | 1.00 | 0/3 (correct) | F6 1.00 / 1.00, 0/3 | `results/2026-11-12T00-17-24-529Z` | $0.77 |
+| grill-07-skip-questions-in-project | 3 | 1.00 | 0.89 | 0/3 (correct) | F6 0.89 / 0.78, 0/3 | `results/2026-11-12T00-18-02-413Z` | $1.33 |
+
+Total $14.81.
+
+- No regression from the 4-question cap or the table: every grill-01 and fired grill-05 run passes
+  `numbered-recommended`, `scope-first`, `no-fact-questions` and `bounded-or-builds`. No grader newly
+  fails, and no grader looks wrong for the new skill text.
+- grill-05 fired 3/5 (F6 2/5; the three fired runs scored 1.00, the two unfired 0.33, as does the
+  whole without arm). Five runs per arm cannot separate 3/5 from 2/5; read it as unchanged.
+- grill-02's with-arm 0.89 is one `assumptions-stated` FAIL in run 1; the without arm failed the same
+  grader in runs 1 and 3. The skill never fires on grill-02 (0/3), so this is the known noise.
+- The result files hold no traces, so tool calls are not recorded. `AskUserQuestion` and `ToolSearch`
+  appear in no grader explanation or answer text; `ToolSearch` is not in `allowed_tools` either.
+  The cases cannot exercise the interactive path, and no interactive-path grader was added.
