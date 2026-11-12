@@ -189,6 +189,8 @@ For pixel-art projects use `stretch/mode = viewport` and `texture_filter = neare
 
 > **Godot 4.7+:** Projects **newly created** in Godot 4.7 already default `display/window/stretch/mode` to `canvas_items` and `display/window/stretch/aspect` to `expand` (previously `disabled` / `keep`), so only `aspect` needs changing if you want `keep`'s letterboxing. Projects created on older versions keep their existing values — set both explicitly when upgrading.
 
+> **Changed in Godot 4.8:** Projects **newly created** in Godot 4.8 keep those two entries and add three more defaults: `gui/common/auto_focus_strategy = Balloon` (class default `Legacy`), `input_devices/joypads/ignore_joypad_on_unfocused_application = true` (class default `false`), and `rendering/lights_and_shadows/multi_bounce_occlusion/enabled = true`. Upgraded projects keep their existing behavior, so set them explicitly if you want the new-project values.
+
 ### Input Map
 
 Define actions in `Project > Project Settings > Input Map` rather than hard-coding key constants. This lets players rebind controls at runtime.
@@ -385,7 +387,7 @@ EventBus.player_died.emit()
 
 ### .csproj
 
-When you enable C# support Godot generates a `.csproj`. Keep it minimal and set the target framework to `net8.0`:
+When you enable C# support Godot generates a `.csproj`. Keep it minimal and set the target framework to `net8.0` (Godot 4.3 to 4.7; Godot 4.8 needs `net10.0`, see the callout below):
 
 ```xml
 <Project Sdk="Godot.NET.Sdk/4.3.0">
@@ -401,6 +403,8 @@ When you enable C# support Godot generates a `.csproj`. Keep it minimal and set 
 ```
 
 Replace `MyGame` with your project name. Namespaces are free-form; what Godot needs is a class whose name matches its file name (`Player.cs` → `class Player`).
+
+> **Changed in Godot 4.8:** The minimum target framework is **.NET 10**. A new 4.8 C# project gets `net10.0` for every platform, Android included (4.7 wrote `net9.0` for Android). On 4.8 replace each `net8.0` above with `net10.0`; the 4.8 editor also raises an older `TargetFramework` when it opens the project.
 
 ### partial class Requirement
 
@@ -455,7 +459,7 @@ Use this checklist after scaffolding a new project to verify everything is in pl
 - [ ] Autoloads registered: `GameManager`, `EventBus`, `AudioManager`, `SaveManager`
 - [ ] Autoload scripts created under `autoloads/` (or `scripts/autoloads/`)
 - [ ] Autoloads are process mode `Always` if they must run while paused
-- [ ] For C# projects: `.csproj` targets `net8.0`, `RootNamespace` set, `Nullable` enabled
+- [ ] For C# projects: `.csproj` targets `net8.0` (Godot 4.3 to 4.7) or `net10.0` (Godot 4.8), `RootNamespace` set, `Nullable` enabled
 - [ ] For C# projects: all node scripts use `partial class`
 - [ ] Initial commit on `main` branch before adding game content
 - [ ] The project's agent instructions file (`CLAUDE.md`, or `AGENTS.md` / `GEMINI.md` if that is what the repo maintains) contains a `## GodotPrompter` section with the skill invocation rule (see `godot-prompter:godot-brainstorming` for content)

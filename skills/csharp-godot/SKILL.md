@@ -69,6 +69,8 @@ Add packages in `MyProject.csproj` inside `<ItemGroup>`:
 
 Run `dotnet restore` or let the IDE restore automatically after editing.
 
+> **Changed in Godot 4.8:** The minimum target framework is **.NET 10** (`net10.0`). Godot 4.3 to 4.7 projects use `net8.0` as shown above; on 4.8 set `<TargetFramework>net10.0</TargetFramework>` (and a 4.8 `Godot.NET.Sdk` version). When the 4.8 editor opens a project with an older `TargetFramework` it raises it to `net10.0`. Visual Studio 2022 users will need a newer Visual Studio for .NET 10.
+
 ### Godot.NET Preview Bindings (Godot 4.7+)
 
 Godot 4.7's `Godot.NET.Sdk` accepts an opt-in MSBuild property that switches the project from the classic GodotSharp bindings to the preview Godot.NET bindings (the `Godot.Bindings` assembly instead of `GodotSharp`):
