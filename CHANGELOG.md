@@ -31,7 +31,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
     debug-symbol export, new texture import options and resumable HTTP downloads.
   - `godot-mentor`'s editor references now span Godot 4.3 to 4.8.
 - **Question-tool rows** in every tool-mapping file (`AskUserQuestion` → each host's tool, unverified
-  hosts marked) and in OpenCode's bootstrap mapping.
+  hosts marked) and in OpenCode's INSTALL.md.
 - **README "Using fewer skills"**: a per-host table of ways to turn off or not install one skill.
 - **Evals:** `neg-01`..`neg-05` (over-triggering inside an existing project), `pos-01` (a new system
   with the design given routes to the domain skill), `skill-19-godot-48-changes`, and
