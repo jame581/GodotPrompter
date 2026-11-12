@@ -250,3 +250,16 @@ Risks to watch:
 - Codex limits per call and subagent behaviour: read the `openai/codex` tool spec.
 - OpenCode 2.x and `opencode run`: run with a provider in an isolated HOME.
 - Grok Build and Antigravity tool names and limits: no vendor page found.
+
+## Corrections after review (2026-11-12)
+
+The sections above are left as written; these points supersede them.
+
+- Per-host limits for Codex, Copilot, Cursor and Grok are third-party and unverified. Only Claude
+  Code (docs plus a `claude -p` run) and OpenCode (binary inspection) are firm.
+- The heuristic "an immediate skip means no user" was rejected. An agent cannot detect timing, and a
+  real user can skip. The skill instead uses three conditions (the tool is in the tool list, the
+  agent is not delegated, the chat is normal) and falls back to text on an error, skip or cancel.
+- "A person is attached" is not observable by an agent. Condition (a), the tool list, is the
+  decidable one.
+- The Copilot live test was blocked by the permission layer and was not worked around.
