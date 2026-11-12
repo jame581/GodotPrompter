@@ -165,7 +165,7 @@ Your preference is remembered per project in `~/.godot-prompter/state/` — noth
 your game repository. Say "just give me the code" to turn it off.
 
 ### 1. Design Phase
-Ask the agent to brainstorm a feature. When design decisions are open it loads `godot-grill` first, which asks them in numbered rounds with a recommended answer each and records your choices. Then `godot-brainstorming` walks you through:
+Ask the agent to brainstorm a feature. When design decisions are open it loads `godot-grill` first, which asks them in numbered rounds with a recommended answer each and records your choices. Where your host has a question tool (Claude Code, OpenCode, Copilot, Codex, Cursor, Grok) the rounds are asked interactively, up to 4 questions at a time with the recommended answer first, followed by a "Decided so far" table; elsewhere, and in subagents, they stay numbered text. Antigravity has its own built-in `/grill-me` command, which is separate from this skill; the skill still runs there in text rounds. Then `godot-brainstorming` walks you through:
 - Architectural approaches with trade-offs
 - Scene tree design, signal maps, and data flow
 - An implementation plan with ordered tasks

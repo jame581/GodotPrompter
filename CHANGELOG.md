@@ -6,6 +6,16 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased]
 
+### Added
+
+- **`godot-grill` asks its questions interactively where the host has a question tool.**
+  Rounds go through Claude Code `AskUserQuestion`, OpenCode `question`, Copilot `ask_user`, Codex
+  `request_user_input`, Cursor or Grok when the tool is in the tool list. Each round asks at most 4
+  questions with the recommended answer first, and prints a "Decided so far" table afterwards
+  (recommended, alternative or custom). Elsewhere, in subagents and in non-interactive runs, it
+  falls back to numbered text rounds. Only Claude Code's limits and OpenCode's behaviour are
+  verified; the other hosts' tool names and limits come from third-party sources.
+
 ### Changed
 
 - **Skills load for new systems, not for work inside existing ones** ([discussion #18](https://github.com/jame581/GodotPrompter/discussions/18)).
