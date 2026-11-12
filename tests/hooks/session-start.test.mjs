@@ -488,6 +488,67 @@ test('names the file to write in a canonical path spelling', () => {
   rmSync(base, { recursive: true, force: true });
 });
 
+// v1.17.0 (discussion #18): the rule the offer proposes is scoped to new systems, so a section
+// added from it does not send subagents to a domain skill for work inside an existing system.
+test('offer proposes the new-system rule, not the old blanket one', () => {
+  const { base, cwd } = makeProject();
+  const ctx = ctxOf(runHook(cwd));
+  const offerLine = ctx.split('\n').find(l => OFFER.test(l));
+  assert.ok(offerLine, 'expected an offer line');
+  assert.match(offerLine, /before building a new Godot system/);
+  assert.doesNotMatch(ctx, /before implementing any Godot system/);
+  rmSync(base, { recursive: true, force: true });
+});
+
+// --- skill index path ---------------------------------------------------------------------------
+// The card cannot know where the plugin is installed, and Claude Code shows a skill's base
+// directory only once the skill is invoked. The hook names the index absolutely so it is one read.
+
+const INDEX_REL = 'skills/using-godot-prompter/references/skill-index.md';
+
+test('names the skill index by its absolute, canonical path on every host', () => {
+  const expected = `${canonicalPath(ROOT)}/${INDEX_REL}`;
+  assert.ok(existsSync(join(ROOT, ...INDEX_REL.split('/'))), 'skill-index.md must exist in the repo');
+  for (const [host, env] of [['Claude Code', {}], ['Cursor', { CURSOR_PLUGIN_ROOT: ROOT }],
+                             ['Copilot CLI', { COPILOT_CLI: '1' }]]) {
+    const { base, cwd } = makeProject();
+    const parsed = JSON.parse(runHook(cwd, env));
+    const ctx = parsed.hookSpecificOutput?.additionalContext ?? parsed.additional_context ?? parsed.additionalContext;
+    const line = ctx.split('\n').find(l => l.startsWith('Skill index'));
+    assert.ok(line, `${host}: expected a skill index line`);
+    assert.ok(line.includes(`\`${expected}\``), `${host}: expected ${expected} in: ${line}`);
+    rmSync(base, { recursive: true, force: true });
+  }
+});
+
+test('the skill index line sits outside the card, after the version line', () => {
+  const { base, cwd } = makeProject();
+  const ctx = ctxOf(runHook(cwd));
+  const card = ctx.indexOf('Red flags');
+  const version = ctx.indexOf('This project targets');
+  const index = ctx.indexOf('Skill index');
+  assert.ok(card !== -1 && version > card && index > version, 'order: card, version line, index line');
+  rmSync(base, { recursive: true, force: true });
+});
+
+test('falls back to the two-step route when the index file is missing', () => {
+  const plugin = mkdtempSync(join(tmpdir(), 'gp-plugin-'));
+  mkdirSync(join(plugin, 'hooks'));
+  mkdirSync(join(plugin, 'skills', 'using-godot-prompter'), { recursive: true });
+  writeFileSync(join(plugin, 'hooks', 'session-start'), readFileSync(HOOK));
+  writeFileSync(join(plugin, 'skills', 'using-godot-prompter', 'SKILL.md'),
+    readFileSync(join(ROOT, 'skills', 'using-godot-prompter', 'SKILL.md')));
+  const { base, cwd } = makeProject();
+  const env = { ...process.env, CLAUDE_PLUGIN_ROOT: plugin };
+  for (const k of ['CURSOR_PLUGIN_ROOT', 'COPILOT_CLI', 'CLAUDE_PROJECT_DIR', 'COPILOT_PROJECT_DIR']) delete env[k];
+  const out = execFileSync(BASH, [join(plugin, 'hooks', 'session-start')], { cwd, env, encoding: 'utf8' });
+  const ctx = ctxOf(out);
+  assert.match(ctx, /GodotPrompter is active/);
+  assert.match(ctx, /Skill index: invoke `godot-prompter:using-godot-prompter`, then read its `references\/skill-index\.md`/);
+  rmSync(base, { recursive: true, force: true });
+  rmSync(plugin, { recursive: true, force: true });
+});
+
 // The #15 shape as it actually arrives on Windows: the host hands back a native path and the
 // instructions live at the session root, above the nested project.
 test('honours a session-root AGENTS.md given a native host project dir', () => {

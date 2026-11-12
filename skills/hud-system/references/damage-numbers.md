@@ -27,6 +27,9 @@ extends Label
 @export var normal_color: Color   = Color(1.0, 1.0, 1.0)
 
 
+var _tween: Tween
+
+
 func show_damage(amount: int, is_critical: bool = false) -> void:
     text           = str(amount) if not is_critical else "!" + str(amount)
     modulate.a     = 1.0
@@ -36,7 +39,11 @@ func show_damage(amount: int, is_critical: bool = false) -> void:
 
 
 func _play_animation() -> void:
+    # A recycled label may still be running its previous tween, which would hide it early.
+    if _tween and _tween.is_valid():
+        _tween.kill()
     var tween := create_tween()
+    _tween = tween
     tween.set_parallel(true)
 
     # Rise upward
@@ -65,6 +72,8 @@ public partial class DamageNumber : Label
     [Export] public Color CriticalColor { get; set; } = new(1.0f, 0.3f, 0.1f);
     [Export] public Color NormalColor { get; set; } = new(1.0f, 1.0f, 1.0f);
 
+    private Tween _tween;
+
     public void ShowDamage(int amount, bool isCritical = false)
     {
         Text = isCritical ? $"!{amount}" : amount.ToString();
@@ -76,7 +85,11 @@ public partial class DamageNumber : Label
 
     private void PlayAnimation()
     {
+        // A recycled label may still be running its previous tween, which would hide it early.
+        if (_tween != null && _tween.IsValid())
+            _tween.Kill();
         var tween = CreateTween();
+        _tween = tween;
         tween.SetParallel(true);
 
         // Rise upward

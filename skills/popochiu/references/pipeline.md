@@ -25,7 +25,7 @@ Every cue's `play`/`fade`/`stop` has a `queue_*` `Callable`-returning twin for u
 
 ## Room transitions (`T`)
 
-`T` (`PopochiuITransitionLayer`) is a **new singleton as of 2.1** and supersedes the deprecated `E.play_transition()`:
+`T` (`PopochiuITransitionLayer`) is the transitions singleton (new in 2.1) and replaced the removed `E.play_transition()`:
 
 ```gdscript
 func play_transition(anim_name := "", duration := -1.0, mode := -1, color := Color(-1, -1, -1, -1)) -> void   # queue_play_transition() twin
@@ -53,7 +53,7 @@ func load_game(slot := 1) -> void                        # emits game_load_start
 Up to 4 slots by default, written as flat JSON to `user://save_N.json`.
 
 **Persistence model:**
-- **Auto-persisted built-ins**: props, hotspots, regions and walkable areas store their script variables of the basic types listed below, minus per-type ignore lists (`baseline`, `clickable`, `link_to_item`, … for props). Characters in a room store position, facing, `visible`, `modulate`/`self_modulate`, `light_mask`, `baseline`, `walk_to_point`/`look_at_point`/`dialog_pos`, face/follow settings. Rooms track `visited`/`visited_first_time`/`visited_times`.
+- **Auto-persisted built-ins**: props (only those with `clickable` on — a non-clickable prop's state is not saved), hotspots, regions and walkable areas store their script variables of the basic types listed below, minus per-type ignore lists (`baseline`, `clickable`, `link_to_item`, … for props). Characters in a room store position, facing, `visible`, `modulate`/`self_modulate`, `light_mask`, `baseline`, `walk_to_point`/`look_at_point`/`dialog_pos`, face/follow settings. Rooms store `visited_times`; `visited` and `visited_first_time` are read-only values derived from it (never assign them).
 - **Custom state**: add fields to the generated `*_state.gd` (extends `PopochiuRoomData` / `PopochiuCharacterData` / `PopochiuInventoryItemData`) — auto-saved only if their type is `bool`/`int`/`float`/`String`, `Array`, or a packed string/int/float array — a `Dictionary` is skipped.
 - **Complex types**: override `_on_save() -> Dictionary` / `_on_load(data: Dictionary) -> void` on the data resource (stubbed in every generated `*_state.gd`, and in dialog scripts too) to flatten/rebuild `Vector2`, `Color`, custom inner classes, etc.
 - **`Globals` persistence**: safe-typed properties on `Globals` auto-persist; complex data needs **public** (no-underscore) `on_save()`/`on_load()` methods added manually to `res://game/popochiu_globals.gd` — these are not stubbed by default, unlike the underscore-prefixed virtuals on data resources.

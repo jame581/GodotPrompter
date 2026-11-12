@@ -43,6 +43,8 @@ Enable in **Project > Project Settings > Input Devices > Pointing > Emulate Touc
 
 The reverse (**Emulate Mouse From Touch**) is enabled by default — touchscreen taps generate mouse events so UI controls work on mobile without changes.
 
+> **Godot 4.8+:** `InputEventScreenTouch.long_press` (default `false`) is `true` when the touch is a long press (Android and iOS only). It replaces the deprecated `input_devices/pointing/android/enable_long_press_as_right_click` setting, which turned long presses into right-click events that some controls ignore. Test `event.long_press` (C#: `touch.LongPress`) inside the `InputEventScreenTouch` branch above.
+
 ### VirtualJoystick (Godot 4.7+)
 
 Godot 4.7 adds a built-in `VirtualJoystick` Control node for on-screen touch joysticks. Add it to a `CanvasLayer`, point its `action_up/down/left/right` properties (`StringName`, defaults `&"ui_up"` etc.) at your movement actions, and it triggers those actions like a physical stick.

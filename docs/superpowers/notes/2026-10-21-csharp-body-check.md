@@ -88,3 +88,7 @@ were also compiled against `Godot.NET.Sdk/4.3.0` with `gdUnit4.api` 4.3.1 (5.0.0
   GDScript `StubAudio extends Node` assigned to a typed `AudioManager` export were not checked here.
 - `hud-system` still reads `GameState.Score`, and `godot-ui` `GameManager.Instance`, as static
   members of types those skills never define (counted as (b)).
+- `dialogue-system` `references/variable-interpolation.md:50-60` reads `GameState.Instance`
+  (`PlayerName`, `Gold`, `QuestStage`) and `mobile-development` SKILL.md:57 calls
+  `SaveManager.SaveGame()`: both are autoload-style types the skills never define (counted as (b),
+  like the two above). Added to this list in v1.17.0; the snippets are unchanged.

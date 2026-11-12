@@ -1,0 +1,13 @@
+schema_version: "1.0"
+name: neg-04-extend-existing-inventory-in-project
+description: Extends the project's existing ItemData-based inventory and slot UI (item rarity plus tooltip), run in a scaffolded RPG project so the SessionStart card is injected. Invites inventory-system and resource-pattern by genre and by wording; correct behaviour is to read and extend the existing code. Skill-fire graders use max 0, so a pass means the skill did NOT fire. Richer scaffold than neg-01..03. Needs --scaffold.
+tags: [over-triggering]
+runs: 5
+context:
+  scaffold_script: scaffold.sh
+execution:
+  max_turns: 15
+  timeout_seconds: 300
+  allowed_tools: [Skill, Read, Glob, Grep]
+  prompt: |
+    Add item rarity (common, rare, epic) to my inventory and show it in the slot tooltip. Show me the changes.

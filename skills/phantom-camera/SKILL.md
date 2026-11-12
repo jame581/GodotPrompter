@@ -7,7 +7,9 @@ description: Use when using the Phantom Camera addon — PhantomCamera2D/3D with
 
 > **Related skills:** **camera-system** for hand-rolled camera patterns, **tween-animation** for the easing concepts the transitions build on.
 
-> **Addon:** Phantom Camera · version `v0.11.0.2` · Godot 4.4+ · MIT · source: https://github.com/ramokz/phantom-camera · nodes are GDScript, plus an official C# wrapper API (`namespace PhantomCamera`) shipped as source `.cs` files in the addon. **Pre-1.0:** minor versions may break API.
+> **Addon:** Phantom Camera · version `v0.11.0.4` · Godot 4.4+ · MIT · source: https://github.com/ramokz/phantom-camera · nodes are GDScript, plus an official C# wrapper API (`namespace PhantomCamera`) shipped as source `.cs` files in the addon. **Pre-1.0:** minor versions may break API.
+
+> **Godot 4.8:** not yet confirmed by the addon. Issue [#694](https://github.com/ramokz/phantom-camera/issues/694) (open) reports the plugin not loading on 4.8-beta1; v0.11.0.4 shipped a fix for it, after which the maintainer could not reproduce the failure (checked 2026-11-12).
 
 ---
 
@@ -29,15 +31,15 @@ their own.
 ## 2. Install & setup
 
 **Asset Library (recommended):** Godot AssetLib → search "Phantom Camera" → Download (select only the
-`phantom_camera` directory) → **Project → Project Settings → Plugins** → enable it.
+`phantom_camera` directory) → **Project → Project Settings → Plugins** (**Project Settings → Addons → Plugins** on 4.8) → enable it.
 
 **GitHub zip:** extract `addons/phantom_camera/` into the project root, then enable the plugin the same
 way.
 
-Enabling the plugin auto-registers a `PhantomCameraManager` autoload singleton and **restarts the
-editor every time `_enable_plugin()` runs** (not just the first time) — expected behavior, not a bug.
-No manual autoload setup is needed. Six custom node types become available in the "Create New Node"
-dialog: `PhantomCamera2D`, `PhantomCamera3D`, `PhantomCameraHost`, `PhantomCameraNoiseEmitter2D`,
+Enabling the plugin auto-registers a `PhantomCameraManager` autoload singleton; since v0.11.0.4 it no
+longer restarts the editor (older versions did). No manual autoload setup is needed. If an older
+version reports a missing `PhantomCameraManager` after enabling, update to v0.11.0.4 (the #694 fix).
+Six custom node types become available in the "Create New Node" dialog: `PhantomCamera2D`, `PhantomCamera3D`, `PhantomCameraHost`, `PhantomCameraNoiseEmitter2D`,
 `PhantomCameraNoiseEmitter3D`, and `PhantomCameraTweenDirector`.
 
 **C# projects:** the addon ships its official wrapper as plain `.cs` source files under
@@ -165,7 +167,7 @@ touching `priority`; it's disabled automatically in exported builds — don't us
 
 `PhantomCamera2D`/`PhantomCamera3D` follow a target through the `FollowMode` enum: `GLUED`, `SIMPLE`, `GROUP`, `PATH`, `FRAMED`, and `THIRD_PERSON` (3D only). The reference covers each mode's properties, GDScript and C# setup, `GROUP` auto-reframe, and the follow options `follow_axis_lock`, `rotate_with_target` and `lookahead` (both 2D only), plus `is_following()` and `teleport_position()`.
 
-> See [references/follow-modes.md](references/follow-modes.md) for the mode table, setup examples, and shared follow options.
+> See [references/follow-modes.md](references/follow-modes.md) for the mode table, setup examples, and the follow options.
 
 ---
 

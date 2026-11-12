@@ -121,6 +121,8 @@ Prefer `shadow_normal_bias` over `shadow_bias` against acne; keep `directional_s
 
 > See [references/materials-and-lighting-recipes.md](references/materials-and-lighting-recipes.md#shadow-configuration-tips) for the shadow-tuning table and the bake-modes table.
 
+> **Godot 4.8+:** Screen-space contact shadows (Forward+ only; `rendering/lights_and_shadows/contact_shadow/enabled`, default `false`) add the small shadows shadow maps miss. Light properties and `LightmapGI.specular_intensity`: [references/materials-and-lighting-recipes.md](references/materials-and-lighting-recipes.md#contact-shadows-godot-48).
+
 ---
 
 ## 4. Environment & Post-Processing
@@ -130,6 +132,8 @@ Configure global rendering — sky background, tonemapping, glow, SSR, SSAO/SSIL
 > See [references/environment-and-post.md](references/environment-and-post.md) for the full setup recipes (sky options, tonemap modes, all post-processing effects, the 4.6+ glow blend and default changes, AgX `tonemap_agx_white` / `tonemap_agx_contrast` controls, and the 4.6+ SSR quality upgrade).
 
 > **Godot 4.7+:** `display/window/hdr/request_hdr_output` requests HDR display output (read at startup; toggle `Window.hdr_output_requested` at runtime). ⚠️ The `rendering/reflections/sky_reflections/roughness_layers` default is `8` again after `7` in 4.6.0–4.6.1. Details in [references/environment-and-post.md](references/environment-and-post.md#hdr-output-and-sky-reflection-layers-godot-47).
+
+> **Changed in Godot 4.8:** New projects enable `rendering/lights_and_shadows/multi_bounce_occlusion/enabled` (Forward+ only; class default `false`), which approximates multi-bounce GI in ambient occlusion from albedo. SSAO and AO maps look different from an upgraded project.
 
 ## 5. Global Illumination
 

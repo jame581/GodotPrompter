@@ -1,6 +1,6 @@
 ---
 name: godot-grill
-description: Use when a new Godot system or feature has open design decisions — interrogates them in batched rounds, scope first, each question with a recommended answer, and records the answers before any design or code. Triggers on "grill me", "ask me first", "question me on the design", "what do I need to decide before building". Not for choosing between nodes or APIs, and not for bug fixes.
+description: Use when a new Godot system or feature has open design decisions — asks them in batched rounds, each with a recommended answer, and records them before any design or code. Triggers on "grill me", "ask me first", "question me on the design", "what do I need to decide before building". Not for choosing nodes or APIs, bug fixes, or non-Godot work.
 ---
 
 # Godot Grill
@@ -63,8 +63,30 @@ instructions or the project's agent instructions file (`CLAUDE.md`, `AGENTS.md`,
 existing decisions or ADR directory. A recorded decision is a settled prerequisite: never re-ask
 it; start the frontier past it.
 
-The **frontier** is every open decision whose prerequisites are settled. Ask the whole frontier
-in one message, numbered, each with a recommended answer:
+The **frontier** is every open decision whose prerequisites are settled. Ask **at most 4** of
+them per round, the ones that prune the most first; the rest move to the next round. Every
+question has a recommended answer.
+
+**Interactive rounds.** Ask a round with your question tool only if all of these hold:
+(a) a tool whose job is to ask the user a multiple-choice question (Claude Code `AskUserQuestion`,
+OpenCode `question`, Codex `request_user_input`, Copilot `ask_user`, Cursor "Ask questions", Grok
+`ask_user_question`) is in the tool list you were given this turn (a tool your host lists only by name, a deferred
+tool, counts as listed: load it the way the host loads deferred tools; that is not searching); (b) you were not launched by
+another agent or given this task as a delegated brief; (c) this is a normal chat with the person,
+not a one-shot or scripted run. Do not search for the tool or call it to test it. If it is not in
+your tool list, or a call returns an error, a skip or a cancel, print this round as numbered text
+(unless the reply answers it or takes the off-ramp, §4) and keep using text for the rest of the grill.
+
+In the tool, each question gets 2–4 options, every one a real answer to the decision. The
+recommended answer is the **first** option, its label ending in "(Recommended)" and its one-clause
+reason in the description. Keep headers within 12 characters. Do not add an "Other" or "skip"
+option: the host supplies the custom answer, and a typed or custom answer is how the user
+overrules you or takes the off-ramp. Hosts whose limits are unverified get the same caps. If the
+tool takes one question per call, call it once per question in the round. Set `multiSelect` only
+when the decision allows several answers.
+
+**Text rounds** — no tool, a subagent, or a non-interactive run — number the questions in one
+message:
 
 ```text
 ❓ **Q1** — **<title>**: <the question, with its options>
@@ -75,6 +97,10 @@ in one message, numbered, each with a recommended answer:
 Then stop and wait. A question whose prerequisite is still open belongs to a later round.
 Everything you ask is in the numbered list: no closing "also, what genre…?" after it. Anything
 worth asking gets a number and a ➡️; anything else waits for the next round.
+
+**After each round's answers**, on either path, print a compact **Decided so far** table —
+decision → answer → (recommended | alternative | custom) — then derive the next frontier. The
+table never ends on a question; the next round asks them.
 
 **Round 1 is small and settles scope first** — scope prunes the most tree. A "throwaway slice"
 answer commonly ends the session at round 2.
@@ -129,10 +155,11 @@ message instead.
 
 | Anti-pattern | Why it is wrong | Instead |
 |---|---|---|
-| One question at a time | Order fixed in advance; questions arrive before their prerequisites; more turns | Ask the whole frontier |
+| One question per round | Order fixed in advance; questions arrive before their prerequisites; more turns | Ask the frontier, up to 4 per round; a tool that takes one question per call asks the round as consecutive calls |
+| An "Other" or "skip" option in the question tool | Wastes a slot; the host already offers a custom answer | Every option a real answer, recommended first |
 | Asking a fact | Spends the user's attention on the model's job | Look it up, decide, record |
-| A question with no recommendation | The user answers in a vacuum; rounds slow down | Every question gets ➡️ |
-| A trailing question outside the numbered list | It has no recommendation and is easy to miss when answering by number | Number it, or hold it for the next round |
+| A question with no recommendation | The user answers in a vacuum; rounds slow down | Every question gets ➡️, or a first option marked "(Recommended)" |
+| A trailing question outside the numbered list | It has no recommendation and is easy to miss when answering by number | Number it or put it in the tool call, or hold it for the next round |
 | Grilling a bug fix or an explicit ask | The over-correction this skill must not become | Route to the domain skill |
 | Re-asking a recorded decision | Feels like amnesia; wastes the record | Read where the project keeps decision records first |
 | Coding after the last answer | Skips the shared-understanding check | Confirm, then hand off |
@@ -141,8 +168,9 @@ message instead.
 
 - [ ] Read existing decision records before round 1
 - [ ] Round 1 settled scope first
-- [ ] Every question is a decision — numbered, with a recommended answer
-- [ ] Whole frontier per round; waited after each
+- [ ] Every question is a decision, with a recommended answer (numbered, or first option "(Recommended)")
+- [ ] Frontier asked up to 4 per round (question tool when listed, else numbered text); waited after each
+- [ ] "Decided so far" table printed after each round
 - [ ] Off-ramp taken → assumptions listed
 - [ ] Record written (or in the final message when files cannot be written)
 - [ ] Frontier emptied → user confirmed before design or code; off-ramp → no gates, built on the listed assumptions

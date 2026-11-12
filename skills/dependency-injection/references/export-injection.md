@@ -18,7 +18,7 @@ This is preferred over `get_node("../../SomeNode")` hard-coded paths, which fail
 class_name HealthComponent
 extends Node
 
-@export var audio: AudioManager          ## Set in the Inspector or by parent
+@export var audio: AudioService          ## Set in the Inspector or by parent
 @export var max_health: int = 100
 
 var current_health: int
@@ -59,7 +59,7 @@ using Godot;
 /// </summary>
 public partial class HealthComponent : Node
 {
-    [Export] public AudioManager Audio { get; set; }   // Set in Inspector or by parent
+    [Export] public AudioService Audio { get; set; }   // Set in Inspector or by parent
     [Export] public int MaxHealth { get; set; } = 100;
 
     [Signal] public delegate void HealthChangedEventHandler(int current, int maximum);

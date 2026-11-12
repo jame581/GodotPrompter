@@ -1,6 +1,6 @@
 # Split Screen (Local Multiplayer)
 
-Reference for `skills/camera-system/SKILL.md` — SubViewport-based split-screen with multiple Camera3D nodes.
+Reference for `skills/camera-system/SKILL.md` — SubViewport-based split-screen with multiple cameras (the example is 2D with `Camera2D`; a 3D version uses `Camera3D` in each viewport).
 
 > ← Back to [SKILL.md](../SKILL.md)
 
@@ -14,15 +14,14 @@ Every `Viewport` creates its own `World2D`, so two 2D SubViewports start as two 
 ### Scene Tree
 
 ```
-HBoxContainer  (fills the screen — add two children for vertical split)
-├── SubViewportContainer  (player 1 side — stretch_shrink = 1)
-│   └── SubViewport
-│       ├── Player1  (CharacterBody2D)
-│       └── Camera2D  (child of Player1)
-└── SubViewportContainer  (player 2 side)
-    └── SubViewport
-        ├── Player2  (CharacterBody2D)
-        └── Camera2D  (child of Player2)
+SplitScreenSetup  (Node, the script below)
+└── HBoxContainer  (fills the screen — use VBoxContainer for a horizontal split)
+    ├── P1Container  (SubViewportContainer, player 1 side)
+    │   └── P1Viewport  (SubViewport)
+    │       └── Player  (instantiated by the script: CharacterBody2D with a Camera2D child)
+    └── P2Container  (SubViewportContainer, player 2 side)
+        └── P2Viewport  (SubViewport; world_2d shared with P1Viewport)
+            └── Player  (instantiated by the script: CharacterBody2D with a Camera2D child)
 ```
 
 ### GDScript

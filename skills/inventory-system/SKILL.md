@@ -1,6 +1,6 @@
 ---
 name: inventory-system
-description: Use when building inventory systems — Resource-based items, slot management, stacking, and UI binding
+description: Use when building or replacing an inventory system — Resource-based items, slots, stacking, and UI binding. Not for extending an existing one
 ---
 
 # Inventory Systems in Godot 4.3+

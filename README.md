@@ -12,9 +12,9 @@ Inspired by and built on top of the [Superpowers](https://github.com/obra/superp
 
 GodotPrompter is a plugin that provides **skills** — structured domain knowledge that AI agents load on demand. When you ask your agent to "add a state machine" or "set up multiplayer", it loads the relevant GodotPrompter skill and follows Godot-specific best practices instead of relying on generic knowledge.
 
-**59 skills** covering project setup, architecture, gameplay systems, input handling, physics, 2D/3D systems, animation, shaders, audio, UI, multiplayer, web services, localization, procedural generation, XR/VR, native extensions, multithreading, mobile and web shipping, rendering pipeline, optimization, GDScript / C# patterns, a teaching mode, and third-party addons (LimboAI, Beehave, Popochiu, Dialogue Manager, Phantom Camera). All targeting Godot 4.3+ with both GDScript and C# examples — newer features from Godot 4.5, 4.6, and 4.7 (variadic functions, abstract classes, stencil buffers, AreaLight3D, VirtualJoystick, OpenXR Spatial Entities, and more) are included as annotated additive sections.
+**59 skills** covering project setup, architecture, gameplay systems, input handling, physics, 2D/3D systems, animation, shaders, audio, UI, multiplayer, web services, localization, procedural generation, XR/VR, native extensions, multithreading, mobile and web shipping, rendering pipeline, optimization, GDScript / C# patterns, a teaching mode, and third-party addons (LimboAI, Beehave, Popochiu, Dialogue Manager, Phantom Camera). All targeting Godot 4.3+ with both GDScript and C# examples — newer features from Godot 4.5 to 4.8 (variadic functions, abstract classes, stencil buffers, AreaLight3D, VirtualJoystick, OpenXR Spatial Entities, and in 4.8 theme sounds, auto-fit labels and the .NET 10 minimum) are included as annotated additive sections. The 4.8 content is checked against 4.8-beta3 and re-checked at 4.8-stable in v1.17.1.
 
-**v1.16.0** adds three skills — `web-services` (HTTP and WebSocket backends), `rendering-pipeline` (renderer and graphics settings) and `web-export` (the browser target) — plus a C# compile check of every code block and a prose audit of the existing skills. See the [CHANGELOG](CHANGELOG.md).
+**v1.17.0** refreshes the Dialogue Manager addon skill to 4.x, adds Godot 4.8 callouts (checked against 4.8-beta3, re-verified at stable in v1.17.1), loads skills only when you build a new system rather than extend an existing one, and lets `godot-grill` ask its questions interactively. See the [CHANGELOG](CHANGELOG.md).
 
 ## Quick Start
 
@@ -54,7 +54,7 @@ grok plugin enable godot-prompter
 Pin to a release:
 
 ```bash
-grok plugin install jame581/GodotPrompter@v1.16.1 --trust
+grok plugin install jame581/GodotPrompter@v1.17.0 --trust
 grok plugin enable godot-prompter
 ```
 
@@ -105,6 +105,22 @@ Add to `opencode.json`:
 
 See `.opencode/INSTALL.md` for details.
 
+## Using fewer skills
+
+Skills load by description match, so each one costs a little context in every session. To drop one you never need (say `save-load`), use the host's own switch. The skill name is the folder name under `skills/`; the table was last checked against each host's docs on 2026-11-11.
+
+| Host | Mechanism | Example | Status |
+|---|---|---|---|
+| Claude Code | Deny the skill with a permission rule. Plugin skills are named `godot-prompter:<skill>`. `skillOverrides` does not apply to plugin skills ([docs](https://code.claude.com/docs/en/skills)) | `"permissions": {"deny": ["Skill(godot-prompter:save-load)"]}` in `.claude/settings.json` | Tested on Claude Code 2.1.322 (deny run: denied; control: loaded). A deny rule hides nothing from `/` and does not stop you typing the command yourself |
+| Copilot CLI | `copilot skill disable` works on plugin skills ([docs](https://docs.github.com/en/copilot/how-tos/copilot-cli/customize-copilot/add-skills)) | `copilot skill disable save-load` (undo: `copilot skill enable save-load`) | Tested with Copilot CLI 1.0.108: the skill shows `(disabled)` and `disabledSkills` is written to `settings.json` |
+| Codex | Disable one skill in `config.toml` ([docs](https://learn.chatgpt.com/docs/build-skills)), or link only the skills you want instead of the whole folder | `[[skills.config]]` with `name = "save-load"` and `enabled = false`; or `ln -s ~/.codex/godot-prompter/skills/player-controller ~/.agents/skills/` per skill | Documented, not tested (Codex not installed) |
+| Cursor | No per-skill switch is documented. Closest: skip the plugin and link a subset into `.cursor/skills/` or `~/.cursor/skills/` ([docs](https://cursor.com/docs/context/skills)) | `ln -s /path/to/GodotPrompter/skills/player-controller ~/.cursor/skills/` | Documented, not tested |
+| OpenCode | Deny the skill with a permission rule; 1.x and 2.x spell it differently ([skills](https://opencode.ai/docs/skills/), [permissions](https://opencode.ai/docs/permissions/)) | 1.x: `"permission": {"skill": {"save-load": "deny"}}`. 2.x: `"permissions": [{"action": "skill", "resource": "save-load", "effect": "deny"}]` | 1.18.29: config accepted and resolved into a `skill` deny rule; an invalid value is rejected. 2.x: documented, not tested. Whether the model list hides the skill needs a model session |
+| Antigravity | Hide it with `exclude` in a `skills.json` manifest ([docs](https://antigravity.google/docs/customization-discovery/)), or symlink skills one by one (`ln -s skills/<name>`) instead of the whole folder | `.agents/skills.json`: `{"exclude": ["save-load"]}`. Does not apply to `~/.gemini/skills/` or `~/.gemini/antigravity-cli/skills/` in the CLI | Documented, not tested |
+| Grok Build | No per-skill switch is documented. Do not enable the plugin; link a subset into `~/.grok/skills/` ([docs](https://docs.x.ai/build/features/skills-plugins-marketplaces)) | Skip `grok plugin enable`, then `ln -s /path/to/GodotPrompter/skills/player-controller ~/.grok/skills/` | Documented, not tested |
+
+Disabling a skill does not edit the session card, which still routes by skill name; an agent that cannot load a disabled skill falls back to general knowledge.
+
 ## How It Works
 
 ### Automatic activation
@@ -133,6 +149,10 @@ bootstrap through `AGENTS.md` / `GEMINI.md`.
 > `CLAUDE.md` it does not want. It never adds the section silently, and a refusal is remembered in
 > `~/.godot-prompter/state/` so you are asked once, not at every session start. Changed your mind?
 > Just ask the agent to add the section; nothing has to be un-set by hand.
+>
+> A section along these lines works: "Invoke the matching `godot-prompter:*` skill before building
+> a new Godot system; to change or extend an existing one, follow the project's code." A section
+> added before v1.17.0 says "before implementing any Godot system"; update it to this wording.
 
 ### Mentor mode
 
@@ -145,7 +165,7 @@ Your preference is remembered per project in `~/.godot-prompter/state/` — noth
 your game repository. Say "just give me the code" to turn it off.
 
 ### 1. Design Phase
-Ask the agent to brainstorm a feature. When design decisions are open it loads `godot-grill` first, which asks them in numbered rounds with a recommended answer each and records your choices. Then `godot-brainstorming` walks you through:
+Ask the agent to brainstorm a feature. When design decisions are open it loads `godot-grill` first, which asks them in rounds of up to 4 questions, each with a recommended answer, and records your choices. Where your host offers a question tool in the session (Claude Code, OpenCode, Copilot, Codex, Cursor, Grok), the rounds are asked interactively with the recommended answer first. Elsewhere, and in subagents, they are numbered text. Either way a "Decided so far" table is printed after each round. Antigravity has its own built-in `/grill-me` command, which is separate from this skill; the skill still runs there in text rounds. Then `godot-brainstorming` walks you through:
 - Architectural approaches with trade-offs
 - Scene tree design, signal maps, and data flow
 - An implementation plan with ordered tasks
@@ -317,14 +337,14 @@ The generated machine-readable skill catalog lives in [`skills/index.json`](skil
 
 ### Third-Party Addons (5 skills)
 
-These skills cover community addons with pinned versions — LimboAI v1.8.0, Beehave v2.9.2, Popochiu v2.1.1, Dialogue Manager v3.10.4, and Phantom Camera v0.11.0.2. They require the corresponding addon to be installed in your project.
+These skills cover community addons with pinned versions — LimboAI v1.8.1, Beehave v2.9.3, Popochiu v2.2.1, Dialogue Manager v4.2.0, and Phantom Camera v0.11.0.4. They require the corresponding addon to be installed in your project.
 
 | Skill | Description |
 |-------|-------------|
 | `limboai` | LimboAI addon — behavior trees + hierarchical state machines, visual editor, blackboard, BTTask subclassing (Godot 4.6+, C++ GDExtension) |
 | `beehave` | Beehave addon — pure-GDScript behavior trees, composites/decorators/leaves, blackboard, visual runtime debugger (GDScript-only) |
-| `popochiu` | Popochiu addon — point-and-click adventure framework: rooms, characters, inventory, dialogs, command GUI (Godot 4.6, GDScript-only) |
-| `dialogue-manager` | Dialogue Manager addon — .dialogue syntax, runtime balloons, conditions/mutations (Godot 4.6, GDScript + C#) |
+| `popochiu` | Popochiu addon — point-and-click adventure framework: rooms, characters, inventory, dialogs, command GUI (Godot 4.7; 2.1.x on 4.6, GDScript-only) |
+| `dialogue-manager` | Dialogue Manager addon — .dialogue syntax, cues, runtime balloons, conditions/mutations, actionable nodes (Godot 4.6+, GDScript + C#) |
 | `phantom-camera` | Phantom Camera addon — priority-based camera switching, follow/look-at modes, tweened transitions (Godot 4.4+, GDScript + C#, pre-1.0) |
 
 ## Validation
@@ -374,7 +394,7 @@ CI gate: `.github/workflows/release.yml` runs the version-consistency check, `no
 
 **Current baseline:** 0 errors, 57 warnings on `node scripts/validate-skills.mjs` in this repository state. All 57 are intentional `csharp-parity-accepted` warnings for GDScript-only content. Every `SKILL.md` is **under** the 16 KB budget — since v1.12.0 that is a validator **error**, not a warning, so an over-budget skill fails the release.
 
-Behaviour is measured with `claude plugin eval` suites in [`evals/`](evals/) — mentor mode, `godot-grill`, the session card, and a set of domain skills — each run with and without the plugin; results are recorded in `evals/FOLLOWUPS.md`, `evals/GRILL.md` and `evals/SKILLS.md`. Since v1.15.1 every code example has also been parsed (GDScript) or compiled (C#) against Godot 4.7.2.
+Behaviour is measured with `claude plugin eval` suites in [`evals/`](evals/) — mentor mode, `godot-grill`, the session card, and a set of domain skills — each run with and without the plugin; results are recorded in `evals/FOLLOWUPS.md`, `evals/GRILL.md` and `evals/SKILLS.md`, and skill routing (when a skill should and should not load) in `evals/TRIGGERS.md`. Since v1.15.1 every code example has also been parsed (GDScript) or compiled (C#) against Godot 4.7.2; the 4.8 examples added in v1.17.0 against 4.8-beta3 and `Godot.NET.Sdk` 4.8.0-beta.3 (.NET 10).
 
 A manual agent-integration test plan covering full workflows (skill discovery, cross-reference navigation, end-to-end feature implementation) lives in [`tests/agent-integration/TEST_PLAN.md`](tests/agent-integration/TEST_PLAN.md) for spot-checks against new agent versions or platforms. Cross-host release smoke coverage is tracked in [`tests/agent-integration/host-smoke-matrix.json`](tests/agent-integration/host-smoke-matrix.json).
 

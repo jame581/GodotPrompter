@@ -165,7 +165,7 @@ Spatial-shader recipes: **toon/cel shading** (banded NdotL), **rim lighting / Fr
 
 Visual shaders are a node-based graph editor (New ShaderMaterial → New VisualShader). Use them for quick prototypes, artist-tweakable values, and simple effects; use code for complex math, branching, or loops. Both compile to the same GPU code, so performance is identical.
 
-> See [references/visual-shaders.md](references/visual-shaders.md) for the choice table, steps, key nodes, and 4.7 node changes.
+> See [references/visual-shaders.md](references/visual-shaders.md) for the choice table, steps, key nodes, and 4.7 node changes. In Godot 4.7 the `LinearToSRGB` node no longer clamps to `[0, 1]` on Forward+/Mobile; add a `Clamp` node if a graph relied on it.
 
 ---
 

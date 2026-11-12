@@ -1,0 +1,13 @@
+schema_version: "1.0"
+name: neg-02-non-godot-task-in-project
+description: A README-only change in a scaffolded Godot project, so the SessionStart card is injected but the task touches no Godot code. Baseline for discussion #18 (godot-brainstorming and others fired on non-Godot work). The skill-fire grader uses max 0, so a pass means no GodotPrompter skill fired. Needs --scaffold.
+tags: [over-triggering]
+runs: 3
+context:
+  scaffold_script: scaffold.sh
+execution:
+  max_turns: 12
+  timeout_seconds: 300
+  allowed_tools: [Skill, Read, Glob, Grep]
+  prompt: |
+    Can you write a "Contributing" section for the README? Branch names like feature/short-name, commit messages in the imperative mood ("Add", not "Added"), and a short checklist to tick before opening a PR: the game still starts, the CI build is green, the README is updated if the project layout changed. Show me the exact text to paste in.

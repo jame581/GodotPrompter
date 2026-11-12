@@ -94,6 +94,41 @@ public partial class Downloader : Node
 
 From Godot 4.7, cancelling also deletes the partial file; on 4.3–4.6 it stays behind, which is why the recipe downloads to a `.part` name. Downloaded `.pck` content packs can then be mounted with `ProjectSettings.load_resource_pack()`.
 
+### Resuming a Download (Godot 4.8+)
+
+By default a failed or cancelled request deletes the partial `download_file`. Set `keep_partial_download = true` to keep it, and `append_to_download_file = true` so a `206 Partial Content` reply is appended to the file instead of replacing it. A `200 OK` (the server ignored `Range`) overwrites the file as usual.
+
+```gdscript
+@onready var _http: HTTPRequest = $HTTPRequest
+
+func resume_download(url: String, part_path: String) -> void:
+    var have: int = 0
+    if FileAccess.file_exists(part_path):
+        have = FileAccess.open(part_path, FileAccess.READ).get_length()
+    _http.download_file = part_path
+    _http.keep_partial_download = true
+    _http.append_to_download_file = true
+    _http.request(url, ["Range: bytes=%d-" % have])
+```
+
+```csharp
+private HttpRequest _http;
+
+public void ResumeDownload(string url, string partPath)
+{
+    long have = 0;
+    if (FileAccess.FileExists(partPath))
+    {
+        using var file = FileAccess.Open(partPath, FileAccess.ModeFlags.Read);
+        have = (long)file.GetLength();
+    }
+    _http.DownloadFile = partPath;
+    _http.KeepPartialDownload = true;
+    _http.AppendToDownloadFile = true;
+    _http.Request(url, new[] { $"Range: bytes={have}-" });
+}
+```
+
 ---
 
 ## Loading a Remote Image

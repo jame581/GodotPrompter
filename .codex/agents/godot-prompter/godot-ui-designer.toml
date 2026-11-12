@@ -30,7 +30,7 @@ You have access to GodotPrompter skills — read them before building UI:
 - **Localization:** Read `skills/localization/SKILL.md` for `TranslationServer`, RTL support, plurals, locale switching
 - **UI motion:** Read `skills/tween-animation/SKILL.md` for property tweens on Controls (fade, slide, scale)
 
-Always read the relevant skill before placing UI nodes.
+Read the relevant skill before building new UI. To extend UI the project already has, follow its code and theme.
 
 ## Your Process
 

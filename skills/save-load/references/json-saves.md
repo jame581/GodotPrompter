@@ -212,12 +212,12 @@ public partial class SaveManager : Node
     private Godot.Collections.Dictionary SerializePlayer(Node player)
     {
         var p = (CharacterBody2D)player;
-        // "CurrentHealth": Get/Set take the C# member name ("current_health" only for a GDScript component).
-        var health = p.GetNode<Node>("HealthComponent");
+        // Get/Set take the C# member name ("Health", "Inventory"); a GDScript player uses "health", "inventory".
         return new Godot.Collections.Dictionary
         {
             ["position"]  = new Godot.Collections.Dictionary { ["x"] = p.GlobalPosition.X, ["y"] = p.GlobalPosition.Y },
-            ["health"]    = health.Get("CurrentHealth"),
+            ["health"]    = p.Get("Health"),
+            ["inventory"] = p.Get("Inventory").AsGodotArray().Duplicate(),
         };
     }
 
@@ -227,12 +227,11 @@ public partial class SaveManager : Node
         foreach (Node enemy in GetTree().GetNodesInGroup("enemies"))
         {
             var e = (Node2D)enemy;
-            var health = e.GetNode<Node>("HealthComponent");
             enemies.Add(new Godot.Collections.Dictionary
             {
                 ["scene_path"] = enemy.SceneFilePath,
                 ["position"]   = new Godot.Collections.Dictionary { ["x"] = e.GlobalPosition.X, ["y"] = e.GlobalPosition.Y },
-                ["health"]     = health.Get("CurrentHealth"),
+                ["health"]     = e.Get("Health"),
             });
         }
         return new Godot.Collections.Dictionary { ["enemies"] = enemies };
@@ -279,8 +278,8 @@ public partial class SaveManager : Node
         var p = (CharacterBody2D)player;
         var pos = data["position"].AsGodotDictionary();
         p.GlobalPosition = new Vector2(pos["x"].As<float>(), pos["y"].As<float>());
-        var health = p.GetNode<Node>("HealthComponent");
-        health.Set("CurrentHealth", data["health"].As<int>());
+        p.Set("Health", data["health"].As<int>());
+        p.Set("Inventory", data["inventory"].AsGodotArray().Duplicate());
     }
 
     private void DeserializeWorld(Node world, Godot.Collections.Dictionary data)
@@ -302,8 +301,7 @@ public partial class SaveManager : Node
             var pos    = e["position"].AsGodotDictionary();
             var node   = (Node2D)enemy;
             node.GlobalPosition = new Vector2(pos["x"].As<float>(), pos["y"].As<float>());
-            var health = enemy.GetNode<Node>("HealthComponent");
-            health.Set("CurrentHealth", e["health"].As<int>());
+            node.Set("Health", e["health"].As<int>());
         }
     }
 

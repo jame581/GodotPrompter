@@ -39,6 +39,8 @@ Visual shaders provide a node-based graph editor — no code required.
 
 > Visual shaders compile to the same GPU code as written shaders. There is no performance difference.
 
+> **Godot 4.8+:** A `VisualShaderGroup` resource is a reusable subgraph, like a function: it defines its own input and output ports, and a `VisualShaderNodeGroup` (its `group` property) instances it inside a `VisualShader` or another group. Each group has automatic `VisualShaderNodeGroupInput` / `VisualShaderNodeGroupOutput` nodes for its ports. A group can use only global built-ins, so Parameter and Varying nodes are not allowed, and nodes that do not fit the shader's context (particle nodes in a spatial shader) fall back to default outputs.
+
 > **Godot 4.7+:** Two new spatial `Input` nodes — `in_shadow_pass` (vertex/fragment; maps to the `IN_SHADOW_PASS` built-in, `true` when the shader is being rendered in a shadow mapping pass — render objects differently in shadow maps than in the regular pass) and `specular_amount` (`light()`; maps to `SPECULAR_AMOUNT` — `2.0` × `light_specular` for OmniLight3D/SpotLight3D, `1.0` for DirectionalLight3D).
 
 > ⚠️ **Changed in Godot 4.7:** The `LinearToSRGB` visual shader node no longer clamps its output to `[0.0, 1.0]` when using the Forward+ or Mobile renderer — HDR values above `1.0` now pass through. Graphs that relied on the implicit clamp produce different output; add an explicit `Clamp` node to restore the old behavior. See the [4.7 migration guide](https://docs.godotengine.org/en/latest/tutorials/migrating/upgrading_to_godot_4.7.html).

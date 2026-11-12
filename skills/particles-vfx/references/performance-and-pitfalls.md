@@ -65,7 +65,7 @@ public void SetParticleQuality(float level)
 | Particles emit in wrong direction    | `direction` or `gravity` misconfigured          | In 2D, Y is inverted — upward is `Vector3(0, -1, 0)`            |
 | Particles don't follow the node      | `local_coords` is `false`                       | Set `local_coords = true` for attached effects                   |
 | Particles pop in (no pre-warming)    | No `preprocess` time set                        | Set `preprocess` to 1–2x `lifetime` for ambient effects          |
-| Color ramp has no effect             | Base `color` multiplies the ramp; a dark or transparent `color` hides it | Set the base `color` to white when using `color_ramp`  |
+| Color ramp has no effect             | Base `color` multiplies the ramp; a dark or transparent `color` hides it | Set the base `color` to white when using `color_ramp`; for 3D, also enable `vertex_color_use_as_albedo` on the draw-pass material |
 | Trails not rendering                 | Missing trail material setup or wrong renderer   | Enable "Use Particle Trails" on material; use Forward+ or Mobile |
 | Attractors have no effect            | `attractor_interaction_enabled` turned off (default `true`) | Re-enable on the ParticleProcessMaterial          |
 | Subemitter not spawning              | Child `amount` is too low to accommodate spawns  | Increase child system's `amount`                                 |

@@ -94,6 +94,8 @@ OptionsScreen (Control — anchor: Full Rect)
         └── CloseButton (Button — text: "Close")
 ```
 
+> **Godot 4.8+:** Every project gets a built-in `ui_toggle_fullscreen` shortcut (Alt+Enter) by default, so the window mode can change outside this menu. The recipe re-reads the window mode in `_ready()` so the checkbox starts in sync.
+
 **GDScript:**
 
 ```gdscript
@@ -104,6 +106,11 @@ func _ready() -> void:
     var master_bus := AudioServer.get_bus_index("Master")
     $PanelContainer/VBoxContainer/TabContainer/AudioTab/HBoxContainer/MasterSlider.value = \
         db_to_linear(AudioServer.get_bus_volume_db(master_bus))
+    # Re-read the window mode: Godot 4.8 adds an Alt+Enter toggle outside this menu.
+    var mode := DisplayServer.window_get_mode()
+    $PanelContainer/VBoxContainer/TabContainer/VideoTab/HBoxContainer/FullscreenCheck.set_pressed_no_signal(
+        mode == DisplayServer.WINDOW_MODE_FULLSCREEN
+        or mode == DisplayServer.WINDOW_MODE_EXCLUSIVE_FULLSCREEN)
 
 func _on_master_slider_value_changed(value: float) -> void:
     AudioServer.set_bus_volume_db(
@@ -135,6 +142,11 @@ public partial class OptionsScreen : Control
         var slider = GetNode<HSlider>(
             "PanelContainer/VBoxContainer/TabContainer/AudioTab/HBoxContainer/MasterSlider");
         slider.Value = Mathf.DbToLinear(AudioServer.GetBusVolumeDb(masterBus));
+        // Re-read the window mode: Godot 4.8 adds an Alt+Enter toggle outside this menu.
+        var mode = DisplayServer.WindowGetMode();
+        GetNode<CheckButton>("PanelContainer/VBoxContainer/TabContainer/VideoTab/HBoxContainer/FullscreenCheck")
+            .SetPressedNoSignal(mode == DisplayServer.WindowMode.Fullscreen
+                || mode == DisplayServer.WindowMode.ExclusiveFullscreen);
     }
 
     private void OnMasterSliderValueChanged(float value)

@@ -1,6 +1,6 @@
 ---
 name: csharp-signals
-description: Use when implementing signals in C# — [Signal] delegates, EmitSignal patterns, async signal awaiting, and event-driven architecture. Triggers on declaring, emitting, connecting, or awaiting a signal from a C# script, and on a signal crossing between C# and GDScript in either direction.
+description: Use when implementing signals in C# — [Signal] delegates, EmitSignal patterns, and async signal awaiting. Triggers on declaring, emitting, connecting, or awaiting a signal from a C# script, and on a signal crossing between C# and GDScript in either direction.
 ---
 
 # Signals in C# (Godot 4.x)

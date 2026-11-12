@@ -27,17 +27,17 @@ func _on_start() -> void
 # must await something — the engine awaits this before showing options
 
 func _option_selected(opt: PopochiuDialogOption) -> void
-# called for every picked option, before any _on_option_<snake_case_id> method
+# called for every picked option; not awaited, see below
 
 func _on_save() -> Dictionary
 func _on_load(data: Dictionary) -> void
 ```
 
-Instead of one big `match` in `_option_selected`, Popochiu also calls a method named `_on_option_<snake_case(option.id)>` if it exists — option id `BYE2` calls `_on_option_bye_2(opt)` — and shows the options again after it returns. `_option_selected` still runs first for every option, so use one style per tree, not both for the same option.
+Instead of one big `match` in `_option_selected`, Popochiu also calls a method named `_on_option_<snake_case(option.id)>` if it exists — option id `BYE2` calls `_on_option_bye_2(opt)` — and shows the options again after it returns. `_option_selected` is called first but **not awaited**, so an `_on_option_<id>()` method starts as soon as `_option_selected()` reaches its first `await` and the two run interleaved. Use one style per tree, not both for the same option.
 
 ## Branching / condition pattern
 
-Verified tutorial example (`docs/src/how-to-develop-a-game/script-your-first-dialogue.md`, v2.1.1):
+Verified tutorial example (`docs/src/how-to-develop-a-game/script-your-first-dialogue.md`, v2.2.1):
 
 ```gdscript
 func _option_selected(opt: PopochiuDialogOption) -> void:

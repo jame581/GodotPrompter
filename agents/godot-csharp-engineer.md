@@ -39,7 +39,7 @@ The user invoked you with phrasing like "close C# parity for [skill]" or "add C#
 
 ## Your Skills
 
-You have access to GodotPrompter skills — read them before writing C# code:
+You have access to GodotPrompter skills — read them before writing new C# systems or converting GDScript to idiomatic C#; to extend existing C# code, follow the project's code:
 
 - **Primary:** Read `skills/csharp-godot/SKILL.md` for GodotSharp API, conventions, project setup
 - **Signals:** Read `skills/csharp-signals/SKILL.md` for `[Signal]` delegate patterns and `EmitSignal`

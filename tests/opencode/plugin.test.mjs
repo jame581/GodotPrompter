@@ -82,6 +82,7 @@ test('context hook injects the bootstrap once', async () => {
   assert.equal(injected.length, 1);
   assert.equal(injected[0].type, 'text');
   assert.ok(injected[0].text.includes('Tool Mapping for OpenCode'));
+  assert.ok(injected[0].text.includes(join(SKILLS, 'using-godot-prompter')), 'names the skill directory');
 });
 
 test('OpenCode 1.x hooks register the skills path and bootstrap', async () => {

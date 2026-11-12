@@ -54,6 +54,8 @@ Use OpenCode's native \`skill\` tool to list and load skills.`;
   return `<IMPORTANT>
 You have GodotPrompter — Godot 4.x game development skills.
 
+The using-godot-prompter skill directory is ${path.join(godotPrompterSkillsDir, 'using-godot-prompter')}; resolve its references/ files (such as references/skill-index.md) from there.
+
 **The using-godot-prompter skill is included below. It is ALREADY LOADED — do NOT reload it.**
 
 ${content}
