@@ -16,6 +16,26 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
   falls back to numbered text rounds. Claude Code's limits (docs and a non-interactive run) and
   OpenCode's schema (from its binary) are checked; the interactive path has not been run live; other
   hosts' facts are third-party.
+- **Godot 4.8 callouts, checked against 4.8-beta3** (re-verified at 4.8-stable before release).
+  - Editor and addons: `EditorContextMenuPlugin._get_menu_options()` replaces `_popup_menu()`, main
+    screens become docks, **Project Settings → Addons → Plugins**, and **Setup Android Build...**,
+    each with a 4.3–4.7 path kept.
+  - .NET 10 is the minimum target framework for 4.8 projects; `csharp-godot`, `godot-project-setup`
+    and `mobile-development` list the TFM per Godot version.
+  - Behaviour warnings in `input-handling`, `godot-ui`, `mobile-development` and `gdscript-patterns`
+    (joypad input while unfocused, focus and fullscreen defaults, `SensorOrientation`,
+    `ONREADY_WITH_CAST`).
+  - New APIs, each labelled `(Godot 4.8+)`: allocation-free space queries and
+    `get_velocity_at_position()`, Makima interpolation, contact shadows, multi-bounce AO, `Trail3D`,
+    `VisualShaderGroup`, theme sounds, `resize_font_to_fit`, touch long-press, preferred locales,
+    debug-symbol export, new texture import options and resumable HTTP downloads.
+  - `godot-mentor`'s editor references now span Godot 4.3 to 4.8.
+- **Question-tool rows** in every tool-mapping file (`AskUserQuestion` → each host's tool, unverified
+  hosts marked) and in OpenCode's bootstrap mapping.
+- **README "Using fewer skills"**: a per-host table of ways to turn off or not install one skill.
+- **Evals:** `neg-01`..`neg-05` (over-triggering inside an existing project), `pos-01` (a new system
+  with the design given routes to the domain skill), `skill-19-godot-48-changes`, and
+  `evals/TRIGGERS.md` for their results.
 
 ### Changed
 
@@ -31,6 +51,37 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
   ```
   Invoke the matching `godot-prompter:*` skill before building a new Godot system; to change or extend an existing one, follow the project's code.
   ```
+
+  The hook's offer to add that section, and `godot-brainstorming`'s template for it, use the new
+  wording.
+- **Addons refreshed:** Dialogue Manager 3.x → **4.2.0** (a rewrite of the skill, with a migration
+  reference for 3.x projects), Popochiu **2.2.1**, Phantom Camera **0.11.0.4**, LimboAI **1.8.1** and
+  Beehave **2.9.3**. Each addon skill states its Godot 4.8 status; none of the five confirms 4.8 yet,
+  and LimboAI 1.8 is reported broken on 4.8.
+- **Slimmer bootstrap for Codex and Antigravity.** Host install notes and the skill index move from
+  `using-godot-prompter` to its `references/`, and `AGENTS.md` no longer imports `copilot-tools.md`.
+  Always-loaded bytes: Codex 15,272 → 9,083 B (−40.5%), Antigravity 19,064 → 10,690 B (−43.9%).
+- **Descriptions and agents narrowed to new systems.** Gameplay, architecture, brainstorming and
+  grill descriptions and the agent definitions now point at building or replacing a system, not
+  extending one. Overlong descriptions were trimmed, but the total is 8,862 characters, up from 8,660
+  in v1.16.1, because `web-services` and others gained concrete trigger words.
+- **`web-services` description** names its triggers (HTTPRequest, downloads, REST/JSON, WebSocketPeer
+  clients) and points game networking and browser export at their own skills.
+- **Pattern X moves:** `export-pipeline` (Windows resource editing), `physics-system` (query detail)
+  and `assets-pipeline` (animation import) move a section each to `references/`.
+- **OpenCode bootstrap** names the `using-godot-prompter` directory, so its `references/` resolve.
+
+### Fixed
+
+- **Correctness:** `multiplayer-sync` client prediction guards input by the controlling peer, does not
+  store host inputs, and no longer claims stored `delta` makes replay frame-rate independent;
+  `save-load` C# JSON saves the same fields as GDScript; `dependency-injection`'s `StubAudio` type
+  error; `addon-development` dock API version-guarded; a duplicate `dedicated-server` checklist.
+- **Click-paths:** animation retargeting, plugin testing (Build button, Execute Script).
+- **Deferred minors** from the v1.16.0 follow-ups across particles, 3D, rendering, shaders, web,
+  scripting, camera, HUD, XR and testing skills.
+- **Dialogue Manager C#:** connecting the GDScript responses menu now wraps the `RefCounted` argument
+  in `DialogueResponse` instead of casting it, which threw at runtime.
 
 ## [1.16.1] - 2026-11-09
 
