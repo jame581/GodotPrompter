@@ -9,6 +9,8 @@ description: Use when using the Phantom Camera addon — PhantomCamera2D/3D with
 
 > **Addon:** Phantom Camera · version `v0.11.0.4` · Godot 4.4+ · MIT · source: https://github.com/ramokz/phantom-camera · nodes are GDScript, plus an official C# wrapper API (`namespace PhantomCamera`) shipped as source `.cs` files in the addon. **Pre-1.0:** minor versions may break API.
 
+> **Godot 4.8:** not yet confirmed by the addon. Issue [#694](https://github.com/ramokz/phantom-camera/issues/694) (open) reports the plugin not loading on 4.8-beta1; v0.11.0.4 shipped a fix for it, after which the maintainer could not reproduce the failure (checked 2026-11-12).
+
 ---
 
 ## 1. When to use Phantom Camera vs. `camera-system`
@@ -35,9 +37,8 @@ their own.
 way.
 
 Enabling the plugin auto-registers a `PhantomCameraManager` autoload singleton; since v0.11.0.4 it no
-longer restarts the editor (older versions did). No manual autoload setup is needed. A user reported
-on 4.8-beta1 (phantom-camera issue #694) that the plugin lost its enabled state after the old restart;
-if the panel reports a missing `PhantomCameraManager`, reloading the project once is the likely fix.
+longer restarts the editor (older versions did). No manual autoload setup is needed. If an older
+version reports a missing `PhantomCameraManager` after enabling, update to v0.11.0.4 (the #694 fix).
 Six custom node types become available in the "Create New Node" dialog: `PhantomCamera2D`, `PhantomCamera3D`, `PhantomCameraHost`, `PhantomCameraNoiseEmitter2D`,
 `PhantomCameraNoiseEmitter3D`, and `PhantomCameraTweenDirector`.
 

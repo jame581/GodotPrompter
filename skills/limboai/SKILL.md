@@ -9,6 +9,8 @@ description: Use when using the LimboAI addon — behavior trees and hierarchica
 
 > **Addon:** LimboAI · version `v1.8.1` · Godot 4.6+ (GDExtension) · MIT · source: https://github.com/limbonaut/limboai · written in C++ (GDExtension; engine-module build also available). GDExtension exposes GDScript; **C# requires the module build** (not GDExtension in v1.8.1), and the v1.8.1 module build targets **Godot 4.7** (4.7.2-stable builds).
 
+> **Godot 4.8:** not yet confirmed by the addon. Issue [#477](https://github.com/limbonaut/limboai/issues/477) (open) reports that v1.8 does not work with 4.8's new dock system and leaves the editor unusable; the open draft PR [#474](https://github.com/limbonaut/limboai/pull/474) "Support Godot 4.8" targets it. Keep LimboAI projects on 4.7 until a release states 4.8 support (checked 2026-11-12).
+
 ---
 
 ## 1. When to use LimboAI

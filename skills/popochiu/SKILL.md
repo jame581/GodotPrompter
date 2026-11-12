@@ -9,6 +9,8 @@ description: Use when using the Popochiu addon — point-and-click adventure fra
 
 > **Addon:** Popochiu · version `v2.2.1` · Godot 4.7 (use 2.1.x on 4.6) · MIT · source: https://github.com/carenalgas/popochiu · pure GDScript (no C# API — GDScript-only skill).
 
+> **Godot 4.8:** not yet confirmed by the addon. The README says 2.2.1 targets Godot 4.7, and no open issue mentions 4.8 (checked 2026-11-12).
+
 ---
 
 ## 1. When to use Popochiu

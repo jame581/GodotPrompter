@@ -9,6 +9,8 @@ description: Use when using the Dialogue Manager addon — .dialogue files with 
 
 > **Addon:** Dialogue Manager · version `v4.2.0` · Godot 4.6+ (built for 4.7; Godot 4.4–4.5 → v3.10, 4.3 → v3.3, see §7) · MIT · source: https://github.com/nathanhoad/godot_dialogue_manager · GDScript with official C# support.
 
+> **Godot 4.8:** not yet confirmed by the addon. v4.2.0 is released "for Godot 4.7", and no open issue mentions 4.8 (checked 2026-11-12).
+
 ---
 
 ## 1. When to use Dialogue Manager
