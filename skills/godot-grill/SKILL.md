@@ -70,11 +70,12 @@ question has a recommended answer.
 **Interactive rounds.** Ask a round with your question tool only if all of these hold:
 (a) a tool whose job is to ask the user a multiple-choice question (Claude Code `AskUserQuestion`,
 OpenCode `question`, Codex `request_user_input`, Copilot `ask_user`, Cursor "Ask questions", Grok
-`ask_user_question`) is in the tool list you were given this turn; (b) you were not launched by
+`ask_user_question`) is in the tool list you were given this turn (a tool your host lists only by name, a deferred
+tool, counts as listed: load it the way the host loads deferred tools; that is not searching); (b) you were not launched by
 another agent or given this task as a delegated brief; (c) this is a normal chat with the person,
 not a one-shot or scripted run. Do not search for the tool or call it to test it. If it is not in
 your tool list, or a call returns an error, a skip or a cancel, print this round as numbered text
-and keep using text for the rest of the grill.
+(unless the reply answers it or takes the off-ramp, §4) and keep using text for the rest of the grill.
 
 In the tool, each question gets 2–4 options, every one a real answer to the decision. The
 recommended answer is the **first** option, its label ending in "(Recommended)" and its one-clause
@@ -95,8 +96,7 @@ message:
 
 Then stop and wait. A question whose prerequisite is still open belongs to a later round.
 Everything you ask is in the numbered list: no closing "also, what genre…?" after it. Anything
-worth asking gets a number and a ➡️; anything else waits for the next round. Antigravity has its
-own built-in `/grill-me` command; this skill's text rounds apply there.
+worth asking gets a number and a ➡️; anything else waits for the next round.
 
 **After each round's answers**, on either path, print a compact **Decided so far** table —
 decision → answer → (recommended | alternative | custom) — then derive the next frontier. The
