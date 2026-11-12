@@ -89,6 +89,7 @@ In **Project > Project Settings > Debug > GDScript**:
 | `INFERRED_DECLARATION` | Warns on `:=` (prefers explicit types) |
 | `UNSAFE_CAST` | Warns when an untyped (`Variant`) value is cast to a type |
 | `UNSAFE_CALL_ARGUMENT` | Warns when an argument's type is a supertype of the parameter's (`Node` into a `Node2D` parameter) |
+| `ONREADY_WITH_CAST` (Godot 4.8+) | Warns when an `@onready` initializer casts a `$Node` literal (`$Label as Label`), which may assign `null` |
 
 > Set warnings to **Error** for strict enforcement in team projects.
 
