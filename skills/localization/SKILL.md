@@ -218,6 +218,8 @@ public void SetLanguage(string localeCode)
 string current = TranslationServer.GetLocale();
 ```
 
+> **Godot 4.8+:** `OS.get_preferred_locales()` (C#: `OS.GetPreferredLocales()`) returns the user's locales in order of preference, each in the form `language_Script_COUNTRY_VARIANT@extra`. For a first-run default, walk it and take the first entry that matches a locale you ship (`TranslationServer.compare_locales()` scores a match), rather than trusting `OS.get_locale()` alone.
+
 ### Language Selection Menu
 
 ```gdscript
