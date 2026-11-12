@@ -298,3 +298,16 @@ claude plugin eval . --case "skill-*" --ablation with-without --judge-model sonn
 Scores match the 2026-10-11 pre-release regression within noise. Cost $27.60. A first pass
 (`…T00-55-22-593Z`) hit the 5-hour usage limit and is not a result; the table above is the re-run.
 See TRIGGERS.md for the criteria verdicts.
+
+## Godot 4.8 case — v1.17.0, 2026-11-12 (`results/2026-11-12T01-12-22-162Z`)
+
+```
+claude plugin eval . --case "skill-19-godot-48-changes" -j 3 --ablation with-without --judge-model sonnet --no-publish
+```
+
+| Case | Skill | With | Without | Δ | Skill fired | Tag | What separated the arms |
+|---|---|---|---|---|---|---|---|
+| skill-19-godot-48-changes | `csharp-godot` | 1.00 | 0.40 | **+0.60** | 3/3 | discriminating | `net10-target` 3/3 vs **0/3**, `no-old-tfm-in-csproj` and `names-net10` too: the bare model writes `net8.0` and asks for the .NET 8 SDK for a 4.8 project |
+
+- `sdk-version` passes in both arms because the prompt says "Godot 4.8"; it is a sanity check, not a separator. The without-arm 0.40 is that grader alone.
+- A first pass (`…T01-11-19-145Z`, with 0.83 / without 0.22) carried a `has-csharp` grader that required a ```` ```csharp ```` fence; the answer is a `.csproj` (xml fence), so it failed in both arms. Removed; the table is the re-run. Cost $1.13 (first pass $1.16).
